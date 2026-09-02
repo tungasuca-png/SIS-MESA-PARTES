@@ -1,0 +1,25 @@
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Go
+*.exe
+*.test
+*.out
+vendor/
+
+# Logs
+*.log
+logs/
+
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.temp

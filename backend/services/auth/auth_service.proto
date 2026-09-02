@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package auth;
+option go_package="./auth";
+
+message Request {
+  string ping = 1;
+}
+
+message Response {
+  string pong = 1;
+}
+
+service Auth {
+  rpc Ping(Request) returns(Response);
+}
