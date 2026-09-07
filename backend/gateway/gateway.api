@@ -1,0 +1,251 @@
+syntax = "v1"
+
+info (
+	title:   "Mesa de Partes API Gateway"
+	desc:    "API Gateway del sistema Mesa de Partes"
+	version: "1.0"
+)
+
+type RegisterRequest {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role,optional"`
+}
+
+type RegisterResponse {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	Message  string `json:"message"`
+}
+
+type LoginRequest {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginResponse {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int64  `json:"expires_in"`
+	UserId       string `json:"user_id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	Role         string `json:"role"`
+}
+
+type RefreshTokenRequest {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshTokenResponse {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int64  `json:"expires_in"`
+}
+
+type LogoutRequest {
+	Authorization string `header:"Authorization,optional"`
+	RefreshToken  string `json:"refresh_token"`
+}
+
+type LogoutResponse {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+type ValidateTokenRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ValidateTokenResponse {
+	Valid    bool   `json:"valid"`
+	UserId   string `json:"user_id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
+
+type ExpedienteDTO {
+	Id                 string `json:"id"`
+	Codigo             string `json:"codigo"`
+	Tipo               string `json:"tipo"`
+	Asunto             string `json:"asunto"`
+	Descripcion        string `json:"descripcion"`
+	SolicitanteId      string `json:"solicitante_id"`
+	Estado             string `json:"estado"`
+	Prioridad          string `json:"prioridad"`
+	FechaRegistro      string `json:"fecha_registro"`
+	FechaActualizacion string `json:"fecha_actualizacion"`
+	Activo             bool   `json:"activo"`
+}
+
+type CreateExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Tipo          string `json:"tipo,optional"`
+	Asunto        string `json:"asunto"`
+	Descripcion   string `json:"descripcion,optional"`
+	Prioridad     string `json:"prioridad,optional"`
+}
+
+type CreateExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type GetExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type ListExpedientesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListExpedientesResponse {
+	Expedientes []ExpedienteDTO `json:"expedientes"`
+	Total       int32           `json:"total"`
+}
+
+type UpdateExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Asunto        string `json:"asunto"`
+	Descripcion   string `json:"descripcion,optional"`
+	Prioridad     string `json:"prioridad,optional"`
+}
+
+type UpdateExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type ChangeEstadoRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	NuevoEstado   string `json:"nuevo_estado"`
+}
+
+type ChangeEstadoResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+service gateway-api {
+	@handler Register
+	post /api/auth/register (RegisterRequest) returns (RegisterResponse)
+
+	@handler Login
+	post /api/auth/login (LoginRequest) returns (LoginResponse)
+
+	@handler RefreshToken
+	post /api/auth/refresh (RefreshTokenRequest) returns (RefreshTokenResponse)
+
+	@handler Logout
+	post /api/auth/logout (LogoutRequest) returns (LogoutResponse)
+
+	@handler ValidateToken
+	get /api/auth/validate (ValidateTokenRequest) returns (ValidateTokenResponse)
+}
+
+type UsuarioDTO {
+	Id          string `json:"id"`
+	Nombres     string `json:"nombres"`
+	Apellidos   string `json:"apellidos"`
+	Dni         string `json:"dni"`
+	Telefono    string `json:"telefono"`
+	Correo      string `json:"correo"`
+	Direccion   string `json:"direccion"`
+	TipoUsuario string `json:"tipo_usuario"`
+	Activo      bool   `json:"activo"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+type UsuarioBasicDTO {
+	Id             string `json:"id"`
+	Nombres        string `json:"nombres"`
+	Apellidos      string `json:"apellidos"`
+	NombreCompleto string `json:"nombre_completo"`
+	TipoUsuario    string `json:"tipo_usuario"`
+	Dni            string `json:"dni"`
+}
+
+type GetUsuarioRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetUsuarioResponse {
+	Usuario UsuarioDTO `json:"usuario"`
+}
+
+type GetUsuarioBasicRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetUsuarioBasicResponse {
+	Usuario UsuarioBasicDTO `json:"usuario"`
+}
+
+type GetUsuariosBasicRequest {
+	Authorization string   `header:"Authorization,optional"`
+	Ids           []string `json:"ids"`
+}
+
+type GetUsuariosBasicResponse {
+	Usuarios []UsuarioBasicDTO `json:"usuarios"`
+}
+
+type ListUsuariosRequest {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `form:"q,optional"`
+	TipoUsuario   string `form:"tipo_usuario,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListUsuariosResponse {
+	Usuarios []UsuarioDTO `json:"usuarios"`
+	Total    int32        `json:"total"`
+}
+
+service gateway-api {
+	@handler ListUsuarios
+	get /api/usuarios (ListUsuariosRequest) returns (ListUsuariosResponse)
+
+	@handler GetUsuariosBasic
+	post /api/usuarios/basic-batch (GetUsuariosBasicRequest) returns (GetUsuariosBasicResponse)
+
+	@handler GetUsuario
+	get /api/usuarios/:id (GetUsuarioRequest) returns (GetUsuarioResponse)
+
+	@handler GetUsuarioBasic
+	get /api/usuarios/:id/basic (GetUsuarioBasicRequest) returns (GetUsuarioBasicResponse)
+}
+
+service gateway-api {
+	@handler CreateExpediente
+	post /api/expedientes (CreateExpedienteRequest) returns (CreateExpedienteResponse)
+
+	@handler ListExpedientes
+	get /api/expedientes (ListExpedientesRequest) returns (ListExpedientesResponse)
+
+	@handler GetExpediente
+	get /api/expedientes/:id (GetExpedienteRequest) returns (GetExpedienteResponse)
+
+	@handler UpdateExpediente
+	put /api/expedientes/:id (UpdateExpedienteRequest) returns (UpdateExpedienteResponse)
+
+	@handler ChangeEstado
+	patch /api/expedientes/:id/estado (ChangeEstadoRequest) returns (ChangeEstadoResponse)
+}
+

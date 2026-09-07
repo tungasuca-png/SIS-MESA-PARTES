@@ -1,0 +1,12 @@
+Name: gateway-api
+Host: 0.0.0.0
+Port: 8888
+
+AuthRpc:
+  Target: 127.0.0.1:8080
+
+ExpedientesRpc:
+  Target: 127.0.0.1:8082
+
+UsuariosRpc:
+  Target: 127.0.0.1:8083
