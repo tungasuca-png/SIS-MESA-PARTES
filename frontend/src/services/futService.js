@@ -32,12 +32,75 @@ function buildDescripcion({ nombres, dni, telefono, domicilio, distrito, correo,
     return lineas.join("\n");
 }
 
-// Genera una imagen (PNG, canvas nativo, sin librerías) con el mismo
-// contenido que el "Cargo digital" en pantalla. Se sube como documento del
-// propio expediente para que quede descargable después de enviar la
+// Convierte un array de bytes a un PDF de una sola página que solo contiene
+// esa imagen a tamaño completo, escrito a mano (sin librerías: nada de
+// jsPDF/pdf-lib). La imagen se embebe tal cual como JPEG (filtro
+// /DCTDecode), que es el único formato para el que un visor de PDF puede
+// leer los bytes crudos del canvas sin necesidad de decodificarlos primero.
+function bytesToBinaryString(bytes) {
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return binary;
+}
+
+function buildImagePdf({ jpegBase64, width, height }) {
+    const jpegBinary = bytesToBinaryString(
+        Uint8Array.from(atob(jpegBase64), (char) => char.charCodeAt(0))
+    );
+
+    const parts = [];
+    const offsets = {};
+    let pos = 0;
+    const push = (text) => {
+        parts.push(text);
+        pos += text.length;
+    };
+
+    push("%PDF-1.4\n");
+
+    offsets[1] = pos;
+    push("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+
+    offsets[2] = pos;
+    push("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
+
+    offsets[3] = pos;
+    push(
+        `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] ` +
+            `/Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`
+    );
+
+    offsets[4] = pos;
+    push(
+        `4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} ` +
+            `/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBinary.length} >>\nstream\n`
+    );
+    push(jpegBinary);
+    push("\nendstream\nendobj\n");
+
+    const contenido = `q\n${width} 0 0 ${height} 0 0 cm\n/Im0 Do\nQ`;
+    offsets[5] = pos;
+    push(`5 0 obj\n<< /Length ${contenido.length} >>\nstream\n${contenido}\nendstream\nendobj\n`);
+
+    const xrefOffset = pos;
+    push("xref\n0 6\n0000000000 65535 f \n");
+    for (let i = 1; i <= 5; i += 1) {
+        push(`${String(offsets[i]).padStart(10, "0")} 00000 n \n`);
+    }
+    push(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+    return btoa(parts.join(""));
+}
+
+// Genera un PDF (canvas nativo + armado manual del PDF, sin librerías) con el
+// mismo contenido que el "Cargo digital" en pantalla. Se sube como documento
+// del propio expediente para que quede descargable después de enviar la
 // solicitud — no solo para el solicitante en el momento, también para
 // Secretaría/personal interno cuando revisen el expediente más adelante.
-function renderCargoPng({ nombres, sumilla, codigo, folios }) {
+function renderCargoPdf({ nombres, sumilla, codigo, folios }) {
     const canvas = document.createElement("canvas");
     canvas.width = 800;
     canvas.height = 420;
@@ -104,7 +167,8 @@ function renderCargoPng({ nombres, sumilla, codigo, folios }) {
         ctx.fillText(valor, x + 6, y + 11, anchoColumna - 12);
     });
 
-    return canvas.toDataURL("image/png").split(",")[1];
+    const jpegBase64 = canvas.toDataURL("image/jpeg", 0.92).split(",")[1];
+    return buildImagePdf({ jpegBase64, width: canvas.width, height: canvas.height });
 }
 
 export async function submitFut(fut) {
@@ -127,10 +191,10 @@ export async function submitFut(fut) {
     uploads.push(
         uploadDocumento({
             expedienteId: expediente.id,
-            nombre: `FUT-${expediente.codigo}.png`,
+            nombre: `FUT-${expediente.codigo}.pdf`,
             tipoDocumento: "ADJUNTO",
-            extension: "png",
-            contenidoBase64: renderCargoPng({
+            extension: "pdf",
+            contenidoBase64: renderCargoPdf({
                 nombres: fut.nombres,
                 sumilla: fut.sumilla,
                 codigo: expediente.codigo,
