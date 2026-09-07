@@ -6,6 +6,7 @@ import (
 
 	"auth/auth"
 	"auth/internal/config"
+	"auth/internal/interceptor"
 	"auth/internal/server"
 	"auth/internal/svc"
 
@@ -22,7 +23,7 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
@@ -32,6 +33,11 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	policies := interceptor.DefaultMethodPolicies()
+	s.AddUnaryInterceptors(
+		interceptor.AuthenticationInterceptor(ctx.JWTManager, policies),
+		interceptor.AuthorizationInterceptor(ctx.AuthorizationService, policies),
+	)
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

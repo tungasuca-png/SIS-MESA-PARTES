@@ -14,11 +14,26 @@ import (
 )
 
 type (
-	Request  = auth.Request
-	Response = auth.Response
+	LoginRequest          = auth.LoginRequest
+	LoginResponse         = auth.LoginResponse
+	LogoutRequest         = auth.LogoutRequest
+	LogoutResponse        = auth.LogoutResponse
+	RefreshTokenRequest   = auth.RefreshTokenRequest
+	RefreshTokenResponse  = auth.RefreshTokenResponse
+	RegisterRequest       = auth.RegisterRequest
+	RegisterResponse      = auth.RegisterResponse
+	Request               = auth.Request
+	Response              = auth.Response
+	ValidateTokenRequest  = auth.ValidateTokenRequest
+	ValidateTokenResponse = auth.ValidateTokenResponse
 
 	Auth interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+		Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+		RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+		Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+		ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error)
 	}
 
 	defaultAuth struct {
@@ -35,4 +50,29 @@ func NewAuth(cli zrpc.Client) Auth {
 func (m *defaultAuth) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.Ping(ctx, in, opts...)
+}
+
+func (m *defaultAuth) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.Register(ctx, in, opts...)
+}
+
+func (m *defaultAuth) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.Login(ctx, in, opts...)
+}
+
+func (m *defaultAuth) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.RefreshToken(ctx, in, opts...)
+}
+
+func (m *defaultAuth) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.Logout(ctx, in, opts...)
+}
+
+func (m *defaultAuth) ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.ValidateToken(ctx, in, opts...)
 }

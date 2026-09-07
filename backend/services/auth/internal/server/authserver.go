@@ -27,3 +27,28 @@ func (s *AuthServer) Ping(ctx context.Context, in *auth.Request) (*auth.Response
 	l := logic.NewPingLogic(ctx, s.svcCtx)
 	return l.Ping(in)
 }
+
+func (s *AuthServer) Register(ctx context.Context, in *auth.RegisterRequest) (*auth.RegisterResponse, error) {
+	l := logic.NewRegisterLogic(ctx, s.svcCtx)
+	return l.Register(in)
+}
+
+func (s *AuthServer) Login(ctx context.Context, in *auth.LoginRequest) (*auth.LoginResponse, error) {
+	l := logic.NewLoginLogic(ctx, s.svcCtx)
+	return l.Login(in)
+}
+
+func (s *AuthServer) RefreshToken(ctx context.Context, in *auth.RefreshTokenRequest) (*auth.RefreshTokenResponse, error) {
+	l := logic.NewRefreshTokenLogic(ctx, s.svcCtx)
+	return l.RefreshToken(in)
+}
+
+func (s *AuthServer) Logout(ctx context.Context, in *auth.LogoutRequest) (*auth.LogoutResponse, error) {
+	l := logic.NewLogoutLogic(ctx, s.svcCtx)
+	return l.Logout(in)
+}
+
+func (s *AuthServer) ValidateToken(ctx context.Context, in *auth.ValidateTokenRequest) (*auth.ValidateTokenResponse, error) {
+	l := logic.NewValidateTokenLogic(ctx, s.svcCtx)
+	return l.ValidateToken(in)
+}

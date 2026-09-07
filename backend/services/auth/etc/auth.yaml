@@ -1,6 +1,27 @@
 Name: auth.rpc
 ListenOn: 0.0.0.0:8080
+Mode: dev
+
 Etcd:
   Hosts:
-  - 127.0.0.1:2379
+    - 127.0.0.1:2379
   Key: auth.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: auth_user
+  Password: auth_password
+  Database: auth_db
+  SSLMode: disable
+
+JWTSecret: ${JWT_SECRET}
+AccessTokenDuration: 15m
+RefreshTokenDuration: 168h
+
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /auth.Auth/Register
+      - /auth.Auth/Login
+      - /auth.Auth/RefreshToken
