@@ -18,6 +18,13 @@ export function formatDateTime(isoString) {
     });
 }
 
+export function formatBytes(bytes) {
+    if (!bytes && bytes !== 0) return "-";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 // El backend solo entrega el UUID del solicitante (no un nombre resuelto:
 // no existe todavía un servicio de Usuarios). Se muestra acortado para no
 // inventar un nombre que la API no entrega.

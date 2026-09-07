@@ -7,6 +7,12 @@
 // real de ese microservicio, donde solo el personal interno puede editar o
 // cambiar el estado de un expediente (ver authorization.go de Expedientes
 // Service). El backend sigue siendo quien realmente lo hace cumplir.
+//
+// "documentos.view/create/delete" se alinearon con Documentos Service: TODO
+// el personal interno puede ver/subir/eliminar cualquier tipo de documento;
+// SOLICITANTE puede ver y subir (el backend restringe su subida a tipo
+// ADJUNTO — el frontend no distingue por tipo, solo el backend lo hace
+// cumplir).
 export const ROLE_PERMISSIONS = {
     ADMIN: [
         "dashboard.view",
@@ -16,6 +22,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.change_estado",
         "documentos.view",
         "documentos.create",
+        "documentos.delete",
         "derivaciones.view",
         "seguimiento.view",
         "reportes.view",
@@ -28,6 +35,8 @@ export const ROLE_PERMISSIONS = {
         "expedientes.update",
         "expedientes.change_estado",
         "documentos.view",
+        "documentos.create",
+        "documentos.delete",
         "derivaciones.view",
         "seguimiento.view",
         "reportes.view",
@@ -38,6 +47,8 @@ export const ROLE_PERMISSIONS = {
         "expedientes.update",
         "expedientes.change_estado",
         "documentos.view",
+        "documentos.create",
+        "documentos.delete",
         "derivaciones.view",
         "seguimiento.view",
         "reportes.view",
@@ -50,6 +61,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.change_estado",
         "documentos.view",
         "documentos.create",
+        "documentos.delete",
         "derivaciones.view",
         "seguimiento.view",
     ],
@@ -58,6 +70,9 @@ export const ROLE_PERMISSIONS = {
         "expedientes.view",
         "expedientes.update",
         "expedientes.change_estado",
+        "documentos.view",
+        "documentos.create",
+        "documentos.delete",
         "seguimiento.view",
     ],
     AUXILIAR: [
@@ -66,12 +81,16 @@ export const ROLE_PERMISSIONS = {
         "expedientes.update",
         "expedientes.change_estado",
         "documentos.view",
+        "documentos.create",
+        "documentos.delete",
         "seguimiento.view",
     ],
     SOLICITANTE: [
         "dashboard.view",
         "solicitudes.create",
         "expedientes.view_own",
+        "documentos.view",
+        "documentos.create",
         "seguimiento.view_own",
     ],
 };

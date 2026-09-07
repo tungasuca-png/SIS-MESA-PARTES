@@ -79,3 +79,7 @@
         grid-template-columns: 1fr;
     }
 }
+
+.dp-detail-full-width {
+    grid-column: 1 / -1;
+}
