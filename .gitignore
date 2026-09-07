@@ -23,3 +23,11 @@ Thumbs.db
 # Archivos temporales
 *.tmp
 *.temp
+# Dependencias sueltas en la raíz (no pertenecen a ninguna app; el frontend
+# tiene su propio package.json/node_modules en frontend/)
+/node_modules/
+/package.json
+/package-lock.json
+
+# Configuración local de Claude Code (personal, no se comparte)
+.claude/settings.local.json
