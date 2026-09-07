@@ -1,0 +1,18 @@
+Name: usuarios.rpc
+ListenOn: 0.0.0.0:8083
+Mode: dev
+
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: usuarios.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: usuarios_user
+  Password: usuarios_password
+  Database: usuarios_db
+  SSLMode: disable
+
+JWTSecret: ${JWT_SECRET}

@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package usuarios;
+option go_package="./usuarios";
+
+// Perfil completo. Contiene datos personales: solo debe entregarse a quien
+// esté autorizado (ver internal/authorization).
+message Usuario {
+  string id = 1;
+  string nombres = 2;
+  string apellidos = 3;
+  string dni = 4;
+  string telefono = 5;
+  string correo = 6;
+  string direccion = 7;
+  string tipo_usuario = 8;
+  bool activo = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+// Proyección mínima pensada para resolver identificadores en otros módulos
+// (Expedientes, Derivaciones, Seguimiento). No incluye teléfono, correo
+// ni dirección. El dni solo se completa cuando quien consulta está
+// autorizado a ver datos personales (personal interno o el propio usuario);
+// para el resto viaja vacío.
+message UsuarioBasic {
+  string id = 1;
+  string nombres = 2;
+  string apellidos = 3;
+  string nombre_completo = 4;
+  string tipo_usuario = 5;
+  string dni = 6;
+}
+
+message GetUsuarioRequest {
+  string id = 1;
+}
+
+message GetUsuarioResponse {
+  Usuario usuario = 1;
+}
+
+message GetUsuarioBasicRequest {
+  string id = 1;
+}
+
+message GetUsuarioBasicResponse {
+  UsuarioBasic usuario = 1;
+}
+
+// Resolución por lote: evita N consultas cuando el Dashboard muestra una
+// lista de expedientes de distintos solicitantes.
+message GetUsuariosBasicRequest {
+  repeated string ids = 1;
+}
+
+message GetUsuariosBasicResponse {
+  repeated UsuarioBasic usuarios = 1;
+}
+
+message ListUsuariosRequest {
+  string tipo_usuario = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListUsuariosResponse {
+  repeated Usuario usuarios = 1;
+  int32 total = 2;
+}
+
+message SearchUsuariosRequest {
+  string query = 1;
+  string tipo_usuario = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message SearchUsuariosResponse {
+  repeated Usuario usuarios = 1;
+  int32 total = 2;
+}
+
+// UpsertUsuario permite crear/actualizar el perfil asociado a un usuario ya
+// existente en Auth. El id NO se genera aquí: debe ser el mismo UUID que
+// Auth Service asignó al usuario.
+message UpsertUsuarioRequest {
+  string id = 1;
+  string nombres = 2;
+  string apellidos = 3;
+  string dni = 4;
+  string telefono = 5;
+  string correo = 6;
+  string direccion = 7;
+  string tipo_usuario = 8;
+}
+
+message UpsertUsuarioResponse {
+  Usuario usuario = 1;
+}
+
+service Usuarios {
+  rpc GetUsuario(GetUsuarioRequest) returns (GetUsuarioResponse);
+  rpc GetUsuarioBasic(GetUsuarioBasicRequest) returns (GetUsuarioBasicResponse);
+  rpc GetUsuariosBasic(GetUsuariosBasicRequest) returns (GetUsuariosBasicResponse);
+  rpc ListUsuarios(ListUsuariosRequest) returns (ListUsuariosResponse);
+  rpc SearchUsuarios(SearchUsuariosRequest) returns (SearchUsuariosResponse);
+  rpc UpsertUsuario(UpsertUsuarioRequest) returns (UpsertUsuarioResponse);
+}
