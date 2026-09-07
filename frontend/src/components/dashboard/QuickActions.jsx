@@ -1,0 +1,75 @@
+import { useNavigate } from "react-router-dom";
+import { usePermissions } from "../../hooks/usePermissions";
+import Icon from "./Icon";
+import "./QuickActions.css";
+
+// "to: null" = módulo todavía no implementado (permanece visual/inerte).
+const ACTIONS = [
+    {
+        key: "nuevo-expediente",
+        label: "Nuevo expediente",
+        icon: "plus",
+        permission: ["expedientes.create", "solicitudes.create"],
+        to: "/expedientes",
+        state: { openCreate: true },
+    },
+    {
+        key: "registrar-documento",
+        label: "Registrar documento",
+        icon: "file",
+        permission: "documentos.create",
+        to: null,
+    },
+    {
+        key: "ver-expedientes",
+        label: "Ver expedientes",
+        icon: "folder",
+        permission: ["expedientes.view", "expedientes.view_own"],
+        to: "/expedientes",
+    },
+    {
+        key: "ver-seguimiento",
+        label: "Ver seguimiento",
+        icon: "trending",
+        permission: ["seguimiento.view", "seguimiento.view_own"],
+        to: null,
+    },
+];
+
+function QuickActions() {
+    const { can } = usePermissions();
+    const navigate = useNavigate();
+    const actions = ACTIONS.filter((action) => can(action.permission));
+
+    if (actions.length === 0) return null;
+
+    return (
+        <section className="dp-panel dp-quick-actions">
+            <h2 className="dp-panel-title">Acciones rápidas</h2>
+
+            <div className="dp-quick-actions-grid">
+                {actions.map((action) => (
+                    <button
+                        key={action.key}
+                        type="button"
+                        className="dp-quick-action"
+                        aria-disabled={!action.to}
+                        title={action.to ? undefined : "Disponible cuando se conecte el módulo correspondiente"}
+                        onClick={
+                            action.to
+                                ? () => navigate(action.to, action.state ? { state: action.state } : undefined)
+                                : undefined
+                        }
+                    >
+                        <span className="dp-quick-action-icon">
+                            <Icon name={action.icon} size={19} />
+                        </span>
+                        {action.label}
+                    </button>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+export default QuickActions;

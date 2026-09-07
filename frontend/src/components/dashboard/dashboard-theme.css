@@ -1,0 +1,33 @@
+/* ============================================
+   TOKENS VISUALES — DASHBOARD MESA DE PARTES
+   Paleta institucional, escopeada al Dashboard
+   ============================================ */
+
+.dashboard-shell {
+    --dp-sidebar-bg: #0F2942;
+    --dp-sidebar-hover: #1D3B66;
+    --dp-sidebar-active: #183B5E;
+
+    --dp-bg: #F4F7FE;
+    --dp-card-bg: #FFFFFF;
+
+    --dp-primary: #1D61E8;
+
+    --dp-text-primary: #1B2559;
+    --dp-text-secondary: #68769F;
+    --dp-text-muted: #A3AFD0;
+
+    --dp-border: #E9EDF7;
+
+    --dp-badge-pending-bg: #FEF3C7;
+    --dp-badge-pending-text: #D97706;
+    --dp-badge-process-bg: #E0F2FE;
+    --dp-badge-process-text: #0284C7;
+    --dp-badge-done-bg: #DCFCE7;
+    --dp-badge-done-text: #16A34A;
+    --dp-badge-observed-bg: #F3F4F6;
+    --dp-badge-observed-text: #4B5563;
+
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    color: var(--dp-text-primary);
+}

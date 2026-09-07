@@ -1,0 +1,29 @@
+.dp-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.dp-badge--pendiente {
+    background: var(--dp-badge-pending-bg);
+    color: var(--dp-badge-pending-text);
+}
+
+.dp-badge--proceso {
+    background: var(--dp-badge-process-bg);
+    color: var(--dp-badge-process-text);
+}
+
+.dp-badge--atendido {
+    background: var(--dp-badge-done-bg);
+    color: var(--dp-badge-done-text);
+}
+
+.dp-badge--observado {
+    background: var(--dp-badge-observed-bg);
+    color: var(--dp-badge-observed-text);
+}

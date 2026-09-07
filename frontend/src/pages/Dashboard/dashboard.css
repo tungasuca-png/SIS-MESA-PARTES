@@ -1,0 +1,12 @@
+.dp-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.dp-dashboard-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}

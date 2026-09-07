@@ -1,0 +1,82 @@
+.dp-notif {
+    position: relative;
+}
+
+.dp-notif-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--dp-text-secondary);
+    cursor: pointer;
+}
+
+.dp-notif-trigger:hover {
+    background: var(--dp-bg);
+    color: var(--dp-text-primary);
+}
+
+.dp-notif-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: #c62828;
+    color: #ffffff;
+    font-size: 9.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dp-notif-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 280px;
+    background: var(--dp-card-bg);
+    border: 1px solid var(--dp-border);
+    border-radius: 12px;
+    box-shadow: 0 16px 32px rgba(27, 37, 89, 0.14);
+    padding: 12px;
+    z-index: 25;
+}
+
+.dp-notif-title {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dp-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.dp-notif-item {
+    padding: 8px 4px;
+    border-top: 1px solid var(--dp-border);
+}
+
+.dp-notif-item:first-of-type {
+    border-top: none;
+}
+
+.dp-notif-item p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--dp-text-primary);
+    line-height: 1.4;
+}
+
+.dp-notif-item span {
+    font-size: 11px;
+    color: var(--dp-text-muted);
+}
