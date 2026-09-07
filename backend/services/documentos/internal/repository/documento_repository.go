@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -95,15 +97,53 @@ func (r *DocumentoRepository) GetWithContent(ctx context.Context, id string) (*D
 	return full, nil
 }
 
-func (r *DocumentoRepository) ListByExpediente(ctx context.Context, expedienteID string) ([]*Documento, error) {
-	rows, err := r.db.Query(ctx, `
-		SELECT `+metadataColumns+`
+// ListFilter filtra el listado de documentos. Los campos vacios no filtran.
+// SubidoPor permite acotar a "solo lo que subio este usuario" (usado para
+// que un SOLICITANTE liste sin ver documentos de otros expedientes, ya que
+// Documentos Service no puede consultar a Expedientes Service quien es el
+// dueno real del expediente — ver limitacion documentada en el README).
+type ListFilter struct {
+	ExpedienteID  string
+	TipoDocumento string
+	SubidoPor     string
+	Page          int
+	PageSize      int
+}
+
+func (r *DocumentoRepository) List(ctx context.Context, filter ListFilter) ([]*Documento, int, error) {
+	conditions := []string{"estado = 'ACTIVO'"}
+	args := make([]any, 0, 3)
+
+	addCondition := func(column, value string) {
+		args = append(args, value)
+		conditions = append(conditions, fmt.Sprintf("%s = $%d", column, len(args)))
+	}
+	if filter.ExpedienteID != "" {
+		addCondition("expediente_id", filter.ExpedienteID)
+	}
+	if filter.TipoDocumento != "" {
+		addCondition("tipo_documento", filter.TipoDocumento)
+	}
+	if filter.SubidoPor != "" {
+		addCondition("subido_por", filter.SubidoPor)
+	}
+	whereClause := strings.Join(conditions, " AND ")
+
+	var total int
+	if err := r.db.QueryRow(ctx, "SELECT COUNT(*) FROM documentos WHERE "+whereClause, args...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	limitArgs := append(append([]any{}, args...), filter.PageSize, (filter.Page-1)*filter.PageSize)
+	rows, err := r.db.Query(ctx, fmt.Sprintf(`
+		SELECT %s
 		FROM documentos
-		WHERE expediente_id = $1 AND estado = 'ACTIVO'
+		WHERE %s
 		ORDER BY fecha_registro DESC
-	`, expedienteID)
+		LIMIT $%d OFFSET $%d
+	`, metadataColumns, whereClause, len(limitArgs)-1, len(limitArgs)), limitArgs...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -111,14 +151,14 @@ func (r *DocumentoRepository) ListByExpediente(ctx context.Context, expedienteID
 	for rows.Next() {
 		item, err := scanMetadata(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		items = append(items, item)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return items, nil
+	return items, total, nil
 }
 
 func (r *DocumentoRepository) Delete(ctx context.Context, id string) error {

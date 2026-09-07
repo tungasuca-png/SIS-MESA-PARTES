@@ -106,6 +106,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
+				Path:    "/api/documentos",
+				Handler: ListAllDocumentosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
 				Path:    "/api/documentos/:id",
 				Handler: GetDocumentoHandler(serverCtx),
 			},

@@ -434,8 +434,13 @@ func (x *DownloadDocumentoResponse) GetContenido() []byte {
 }
 
 type ListDocumentosRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ExpedienteId  string                 `protobuf:"bytes,1,opt,name=expediente_id,json=expedienteId,proto3" json:"expediente_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// expediente_id vacio = listar de todos los expedientes (con alcance por
+	// rol, ver internal/authorization). Con valor, filtra a ese expediente.
+	ExpedienteId  string `protobuf:"bytes,1,opt,name=expediente_id,json=expedienteId,proto3" json:"expediente_id,omitempty"`
+	TipoDocumento string `protobuf:"bytes,2,opt,name=tipo_documento,json=tipoDocumento,proto3" json:"tipo_documento,omitempty"`
+	Page          int32  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -477,9 +482,31 @@ func (x *ListDocumentosRequest) GetExpedienteId() string {
 	return ""
 }
 
+func (x *ListDocumentosRequest) GetTipoDocumento() string {
+	if x != nil {
+		return x.TipoDocumento
+	}
+	return ""
+}
+
+func (x *ListDocumentosRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListDocumentosRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type ListDocumentosResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Documentos    []*Documento           `protobuf:"bytes,1,rep,name=documentos,proto3" json:"documentos,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -519,6 +546,13 @@ func (x *ListDocumentosResponse) GetDocumentos() []*Documento {
 		return x.Documentos
 	}
 	return nil
+}
+
+func (x *ListDocumentosResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
 }
 
 type DeleteDocumentoRequest struct {
@@ -642,13 +676,17 @@ const file_documentos_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"n\n" +
 	"\x19DownloadDocumentoResponse\x123\n" +
 	"\tdocumento\x18\x01 \x01(\v2\x15.documentos.DocumentoR\tdocumento\x12\x1c\n" +
-	"\tcontenido\x18\x02 \x01(\fR\tcontenido\"<\n" +
+	"\tcontenido\x18\x02 \x01(\fR\tcontenido\"\x94\x01\n" +
 	"\x15ListDocumentosRequest\x12#\n" +
-	"\rexpediente_id\x18\x01 \x01(\tR\fexpedienteId\"O\n" +
+	"\rexpediente_id\x18\x01 \x01(\tR\fexpedienteId\x12%\n" +
+	"\x0etipo_documento\x18\x02 \x01(\tR\rtipoDocumento\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"e\n" +
 	"\x16ListDocumentosResponse\x125\n" +
 	"\n" +
 	"documentos\x18\x01 \x03(\v2\x15.documentos.DocumentoR\n" +
-	"documentos\"(\n" +
+	"documentos\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"(\n" +
 	"\x16DeleteDocumentoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"3\n" +
 	"\x17DeleteDocumentoResponse\x12\x18\n" +

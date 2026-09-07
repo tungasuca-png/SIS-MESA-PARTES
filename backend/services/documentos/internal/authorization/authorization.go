@@ -42,3 +42,12 @@ func CanUpload(role, tipoDocumento string) bool {
 func CanDelete(role string) bool {
 	return IsInternal(role)
 }
+
+// CanViewAll: el personal interno puede listar documentos de cualquier
+// expediente sin filtro adicional. Un SOLICITANTE que liste SIN indicar un
+// expediente_id especifico se acota a "subido_por = el mismo" (ver
+// ListFilter.SubidoPor en el repositorio), ya que este servicio no puede
+// verificar de quien es cada expediente (limitacion ya documentada arriba).
+func CanViewAll(role string) bool {
+	return IsInternal(role)
+}

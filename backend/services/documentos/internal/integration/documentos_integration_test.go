@@ -74,7 +74,8 @@ func TestDocumentosIntegration(t *testing.T) {
 	defer conn.Close()
 	client := documentos.NewDocumentosClient(conn)
 
-	ctxSolicitante := authContext(fixedUUID(time.Now().UnixNano(), 2), "SOLICITANTE")
+	solicitanteID := fixedUUID(time.Now().UnixNano(), 2)
+	ctxSolicitante := authContext(solicitanteID, "SOLICITANTE")
 	ctxAdmin := authContext(fixedUUID(time.Now().UnixNano(), 3), "ADMIN")
 	contenido := []byte("%PDF-1.4 contenido de prueba")
 
@@ -153,6 +154,37 @@ func TestDocumentosIntegration(t *testing.T) {
 	}
 	if len(listResp.Documentos) != 2 {
 		t.Fatalf("expected 2 documentos, got %d", len(listResp.Documentos))
+	}
+
+	// --- Listado global (sin expediente_id) ---
+	globalAdmin, err := client.ListDocumentos(ctxAdmin, &documentos.ListDocumentosRequest{})
+	if err != nil {
+		t.Fatalf("global list as admin: %v", err)
+	}
+	if globalAdmin.Total < 2 {
+		t.Fatalf("expected admin global list total >= 2, got %d", globalAdmin.Total)
+	}
+
+	globalSolicitante, err := client.ListDocumentos(ctxSolicitante, &documentos.ListDocumentosRequest{})
+	if err != nil {
+		t.Fatalf("global list as solicitante: %v", err)
+	}
+	for _, doc := range globalSolicitante.Documentos {
+		if doc.SubidoPor != solicitanteID {
+			t.Fatalf("solicitante global list leaked a document uploaded by %s", doc.SubidoPor)
+		}
+	}
+	if globalSolicitante.Total != 1 {
+		t.Fatalf("expected solicitante to see exactly its own 1 upload, got total=%d", globalSolicitante.Total)
+	}
+
+	// --- Filtro por tipo_documento ---
+	proveidos, err := client.ListDocumentos(ctxAdmin, &documentos.ListDocumentosRequest{ExpedienteId: expedienteID, TipoDocumento: "PROVEIDO"})
+	if err != nil {
+		t.Fatalf("list filtered by tipo: %v", err)
+	}
+	if proveidos.Total != 1 || proveidos.Documentos[0].Id != proveidoResp.Documento.Id {
+		t.Fatalf("expected exactly the proveido uploaded, got %+v", proveidos)
 	}
 
 	// --- Eliminar: SOLICITANTE no puede, ADMIN si ---

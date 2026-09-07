@@ -28,3 +28,15 @@ func TestCanDelete(t *testing.T) {
 		t.Error("personal interno debe poder eliminar documentos")
 	}
 }
+
+func TestCanViewAll(t *testing.T) {
+	if CanViewAll("SOLICITANTE") {
+		t.Error("solicitante no debe poder ver todos los documentos sin filtro")
+	}
+	if !CanViewAll("ADMIN") {
+		t.Error("admin debe poder ver todos los documentos")
+	}
+	if !CanViewAll("AUXILIAR") {
+		t.Error("personal interno debe poder ver todos los documentos")
+	}
+}

@@ -30,6 +30,18 @@ export const getDocumentosByExpediente = async (expedienteId) => {
     return response.data;
 };
 
+export const getDocumentos = async ({ expedienteId, tipoDocumento, page, pageSize } = {}) => {
+    const response = await api.get("/api/documentos", {
+        params: {
+            expediente_id: expedienteId || undefined,
+            tipo_documento: tipoDocumento || undefined,
+            page: page || undefined,
+            page_size: pageSize || undefined,
+        },
+    });
+    return response.data;
+};
+
 export const uploadDocumento = async ({ expedienteId, nombre, tipoDocumento, extension, contenidoBase64 }) => {
     const response = await api.post("/api/documentos", {
         expediente_id: expedienteId,

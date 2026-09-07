@@ -10,9 +10,12 @@
 //
 // "documentos.view/create/delete" se alinearon con Documentos Service: TODO
 // el personal interno puede ver/subir/eliminar cualquier tipo de documento;
-// SOLICITANTE puede ver y subir (el backend restringe su subida a tipo
-// ADJUNTO — el frontend no distingue por tipo, solo el backend lo hace
-// cumplir).
+// SOLICITANTE puede ver y subir, pero solo lo suyo ("documentos.view_own",
+// igual que "expedientes.view_own") — el backend ya acota el listado global
+// a "lo que este usuario subió" cuando el rol no es interno (ver
+// authorization.CanViewAll en Documentos Service). El backend restringe
+// además su subida a tipo ADJUNTO — el frontend no distingue por tipo, solo
+// el backend lo hace cumplir.
 export const ROLE_PERMISSIONS = {
     ADMIN: [
         "dashboard.view",
@@ -89,7 +92,7 @@ export const ROLE_PERMISSIONS = {
         "dashboard.view",
         "solicitudes.create",
         "expedientes.view_own",
-        "documentos.view",
+        "documentos.view_own",
         "documentos.create",
         "seguimiento.view_own",
     ],

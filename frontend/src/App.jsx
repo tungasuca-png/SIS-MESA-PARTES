@@ -4,6 +4,7 @@ import Login from "./pages/Login/login";
 import Dashboard from "./pages/Dashboard/dashboard";
 import ExpedientesList from "./pages/Expedientes/ExpedientesList";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
+import DocumentosList from "./pages/Documentos/DocumentosList";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -40,6 +41,16 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <ExpedienteDetail />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Documentos (Documentos Service real) */}
+            <Route
+                path="/documentos"
+                element={
+                    <ProtectedRoute>
+                        <DocumentosList />
                     </ProtectedRoute>
                 }
             />

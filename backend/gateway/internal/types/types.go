@@ -115,6 +115,19 @@ type GetUsuariosBasicResponse struct {
 	Usuarios []UsuarioBasicDTO `json:"usuarios"`
 }
 
+type ListAllDocumentosRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `form:"expediente_id,optional"`
+	TipoDocumento string `form:"tipo_documento,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListAllDocumentosResponse struct {
+	Documentos []DocumentoDTO `json:"documentos"`
+	Total      int32          `json:"total"`
+}
+
 type ListDocumentosRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	ExpedienteId  string `path:"expediente_id"`

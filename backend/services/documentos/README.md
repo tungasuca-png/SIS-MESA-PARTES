@@ -58,7 +58,8 @@ documentos_db (PostgreSQL, aislada — sin FK hacia auth_db/expedientes_db/usuar
 
 ## Límite de tamaño
 
-8 MiB por archivo (`internal/validation.MaxTamanoDocumento`). El límite de mensaje
+5 MiB por archivo (`internal/validation.MaxTamanoDocumento`) — acotado por el límite de 8 MiB
+del body JSON del Gateway, no por gRPC (ver comentario en el propio archivo). El límite de mensaje
 gRPC (`MaxRecvMsgSize`/`MaxSendMsgSize`) se configura en `documentos.go` con margen
 sobre ese valor.
 

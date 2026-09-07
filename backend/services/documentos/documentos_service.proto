@@ -45,11 +45,17 @@ message DownloadDocumentoResponse {
 }
 
 message ListDocumentosRequest {
+  // expediente_id vacio = listar de todos los expedientes (con alcance por
+  // rol, ver internal/authorization). Con valor, filtra a ese expediente.
   string expediente_id = 1;
+  string tipo_documento = 2;
+  int32 page = 3;
+  int32 page_size = 4;
 }
 
 message ListDocumentosResponse {
   repeated Documento documentos = 1;
+  int32 total = 2;
 }
 
 message DeleteDocumentoRequest {

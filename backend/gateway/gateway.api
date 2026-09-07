@@ -302,6 +302,19 @@ type ListDocumentosResponse {
 	Documentos []DocumentoDTO `json:"documentos"`
 }
 
+type ListAllDocumentosRequest {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `form:"expediente_id,optional"`
+	TipoDocumento string `form:"tipo_documento,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListAllDocumentosResponse {
+	Documentos []DocumentoDTO `json:"documentos"`
+	Total      int32          `json:"total"`
+}
+
 type DeleteDocumentoRequest {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -326,5 +339,8 @@ service gateway-api {
 
 	@handler ListDocumentosByExpediente
 	get /api/expedientes/:expediente_id/documentos (ListDocumentosRequest) returns (ListDocumentosResponse)
+
+	@handler ListAllDocumentos
+	get /api/documentos (ListAllDocumentosRequest) returns (ListAllDocumentosResponse)
 }
 

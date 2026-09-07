@@ -49,11 +49,14 @@ func IsValidExtension(value string) bool {
 	return extensionesPermitidas[strings.ToLower(strings.TrimSpace(value))]
 }
 
-// MaxTamanoDocumento se mantiene deliberadamente por debajo del limite por
-// defecto de gRPC (4 MiB) mas el margen que este servicio habilita via
-// grpc.MaxRecvMsgSize/MaxSendMsgSize (ver documentos.go y el cliente del
-// Gateway). Subir este limite requiere subir ambos en conjunto.
-const MaxTamanoDocumento = 8 * 1024 * 1024 // 8 MiB
+// MaxTamanoDocumento esta acotado por el Gateway, no por este servicio: el
+// contenido viaja del frontend al Gateway como JSON con el archivo en
+// base64 (~33% de overhead), y go-zero limita a 8 MiB el body JSON completo
+// de cualquier request REST (rest/httpx.maxBodyLen, constante interna no
+// configurable por ruta). 5 MiB crudos ~= 6.7 MiB en base64, dejando margen
+// dentro de ese tope. Subir este limite requiere resolver primero el limite
+// de 8 MiB del Gateway (por ejemplo con upload multipart en vez de JSON).
+const MaxTamanoDocumento = 5 * 1024 * 1024 // 5 MiB
 
 const EstadoActivo = "ACTIVO"
 const EstadoEliminado = "ELIMINADO"
