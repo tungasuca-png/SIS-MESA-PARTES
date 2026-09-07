@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package documentos;
+option go_package="./documentos";
+
+message Documento {
+  string id = 1;
+  string expediente_id = 2;
+  string nombre = 3;
+  string tipo_documento = 4;
+  string extension = 5;
+  int64 tamano_bytes = 6;
+  string subido_por = 7;
+  string estado = 8;
+  string fecha_registro = 9;
+}
+
+message UploadDocumentoRequest {
+  string expediente_id = 1;
+  string nombre = 2;
+  string tipo_documento = 3;
+  string extension = 4;
+  bytes contenido = 5;
+}
+
+message UploadDocumentoResponse {
+  Documento documento = 1;
+}
+
+message GetDocumentoRequest {
+  string id = 1;
+}
+
+message GetDocumentoResponse {
+  Documento documento = 1;
+}
+
+message DownloadDocumentoRequest {
+  string id = 1;
+}
+
+message DownloadDocumentoResponse {
+  Documento documento = 1;
+  bytes contenido = 2;
+}
+
+message ListDocumentosRequest {
+  string expediente_id = 1;
+}
+
+message ListDocumentosResponse {
+  repeated Documento documentos = 1;
+}
+
+message DeleteDocumentoRequest {
+  string id = 1;
+}
+
+message DeleteDocumentoResponse {
+  bool success = 1;
+}
+
+service Documentos {
+  rpc UploadDocumento(UploadDocumentoRequest) returns (UploadDocumentoResponse);
+  rpc GetDocumento(GetDocumentoRequest) returns (GetDocumentoResponse);
+  rpc DownloadDocumento(DownloadDocumentoRequest) returns (DownloadDocumentoResponse);
+  rpc ListDocumentos(ListDocumentosRequest) returns (ListDocumentosResponse);
+  rpc DeleteDocumento(DeleteDocumentoRequest) returns (DeleteDocumentoResponse);
+}
