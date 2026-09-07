@@ -41,3 +41,10 @@ export const changeEstado = async (id, nuevoEstado) => {
     });
     return response.data;
 };
+
+// Baja lógica: el backend marca el expediente como inactivo (no lo borra de
+// la base de datos), así que deja de aparecer en listados/búsquedas.
+export const deleteExpediente = async (id) => {
+    const response = await api.delete(`/api/expedientes/${encodeURIComponent(id)}`);
+    return response.data;
+};

@@ -70,10 +70,19 @@ message ChangeEstadoResponse {
   Expediente expediente = 1;
 }
 
+message DeleteExpedienteRequest {
+  string id = 1;
+}
+
+message DeleteExpedienteResponse {
+  bool success = 1;
+}
+
 service Expedientes {
   rpc CreateExpediente(CreateExpedienteRequest) returns (CreateExpedienteResponse);
   rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
   rpc ListExpedientes(ListExpedientesRequest) returns (ListExpedientesResponse);
   rpc UpdateExpediente(UpdateExpedienteRequest) returns (UpdateExpedienteResponse);
   rpc ChangeEstado(ChangeEstadoRequest) returns (ChangeEstadoResponse);
+  rpc DeleteExpediente(DeleteExpedienteRequest) returns (DeleteExpedienteResponse);
 }

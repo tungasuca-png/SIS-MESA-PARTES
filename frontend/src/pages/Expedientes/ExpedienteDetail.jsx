@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
 import DocumentosPanel from "../../components/dashboard/DocumentosPanel";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
-import { changeEstado, getExpediente, updateExpediente } from "../../services/expedientesService";
+import { changeEstado, deleteExpediente, getExpediente, updateExpediente } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { ESTADOS, PRIORIDADES } from "../../constants/expedientes";
 import "../../components/dashboard/forms.css";
+import "../../components/dashboard/documentosPanel.css";
 import "./expedienteDetail.css";
 
 function ExpedienteDetail() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { can } = usePermissions();
 
     const [expediente, setExpediente] = useState(null);
@@ -32,8 +34,13 @@ function ExpedienteDetail() {
     const [changingEstado, setChangingEstado] = useState(false);
     const [estadoError, setEstadoError] = useState("");
 
+    const [confirmingDelete, setConfirmingDelete] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
+
     const canUpdate = can("expedientes.update");
     const canChangeEstado = can("expedientes.change_estado");
+    const canDelete = can("expedientes.delete");
     const { usuarios, unavailable } = useUsuariosBasic(
         expediente ? [expediente.solicitante_id] : []
     );
@@ -108,6 +115,18 @@ function ExpedienteDetail() {
             setEstadoError(friendlyErrorMessage(err));
         } finally {
             setChangingEstado(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setDeleteError("");
+        setDeleting(true);
+        try {
+            await deleteExpediente(expediente.id);
+            navigate("/expedientes");
+        } catch (err) {
+            setDeleteError(friendlyErrorMessage(err));
+            setDeleting(false);
         }
     };
 
@@ -266,6 +285,45 @@ function ExpedienteDetail() {
                                     </button>
                                 </div>
                             </form>
+                        </section>
+                    )}
+
+                    {canDelete && (
+                        <section className="dp-panel">
+                            <h2 className="dp-panel-title">Eliminar expediente</h2>
+                            <p className="dp-table-empty">
+                                Esta acción no borra el historial, pero el expediente deja de aparecer en las
+                                búsquedas y listados.
+                            </p>
+                            {deleteError && <p className="dp-form-error">{deleteError}</p>}
+                            {!confirmingDelete ? (
+                                <button
+                                    type="button"
+                                    className="dp-btn-secondary dp-documentos-delete"
+                                    onClick={() => setConfirmingDelete(true)}
+                                >
+                                    Eliminar expediente
+                                </button>
+                            ) : (
+                                <div className="dp-form-actions">
+                                    <button
+                                        type="button"
+                                        className="dp-btn-secondary"
+                                        onClick={() => setConfirmingDelete(false)}
+                                        disabled={deleting}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="dp-btn-primary dp-documentos-delete"
+                                        onClick={handleDelete}
+                                        disabled={deleting}
+                                    >
+                                        {deleting ? "Eliminando..." : "Sí, eliminar definitivamente"}
+                                    </button>
+                                </div>
+                            )}
                         </section>
                     )}
 

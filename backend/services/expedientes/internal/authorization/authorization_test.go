@@ -31,6 +31,15 @@ func TestCanChangeEstado_OnlyInternal(t *testing.T) {
 	}
 }
 
+func TestCanDelete_OnlyInternal(t *testing.T) {
+	if CanDelete(RoleSolicitante) {
+		t.Error("solicitante should not be able to delete")
+	}
+	if !CanDelete("SECRETARIA") {
+		t.Error("internal role should be able to delete")
+	}
+}
+
 func TestCanViewAll_OnlyInternal(t *testing.T) {
 	if CanViewAll(RoleSolicitante) {
 		t.Error("solicitante should not view all")

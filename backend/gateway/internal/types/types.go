@@ -34,6 +34,15 @@ type DeleteDocumentoResponse struct {
 	Success bool `json:"success"`
 }
 
+type DeleteExpedienteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type DeleteExpedienteResponse struct {
+	Success bool `json:"success"`
+}
+
 type DocumentoDTO struct {
 	Id            string `json:"id"`
 	ExpedienteId  string `json:"expediente_id"`

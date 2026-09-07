@@ -24,6 +24,7 @@ const (
 	Expedientes_ListExpedientes_FullMethodName  = "/expedientes.Expedientes/ListExpedientes"
 	Expedientes_UpdateExpediente_FullMethodName = "/expedientes.Expedientes/UpdateExpediente"
 	Expedientes_ChangeEstado_FullMethodName     = "/expedientes.Expedientes/ChangeEstado"
+	Expedientes_DeleteExpediente_FullMethodName = "/expedientes.Expedientes/DeleteExpediente"
 )
 
 // ExpedientesClient is the client API for Expedientes service.
@@ -35,6 +36,7 @@ type ExpedientesClient interface {
 	ListExpedientes(ctx context.Context, in *ListExpedientesRequest, opts ...grpc.CallOption) (*ListExpedientesResponse, error)
 	UpdateExpediente(ctx context.Context, in *UpdateExpedienteRequest, opts ...grpc.CallOption) (*UpdateExpedienteResponse, error)
 	ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error)
+	DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error)
 }
 
 type expedientesClient struct {
@@ -95,6 +97,16 @@ func (c *expedientesClient) ChangeEstado(ctx context.Context, in *ChangeEstadoRe
 	return out, nil
 }
 
+func (c *expedientesClient) DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteExpedienteResponse)
+	err := c.cc.Invoke(ctx, Expedientes_DeleteExpediente_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExpedientesServer is the server API for Expedientes service.
 // All implementations must embed UnimplementedExpedientesServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type ExpedientesServer interface {
 	ListExpedientes(context.Context, *ListExpedientesRequest) (*ListExpedientesResponse, error)
 	UpdateExpediente(context.Context, *UpdateExpedienteRequest) (*UpdateExpedienteResponse, error)
 	ChangeEstado(context.Context, *ChangeEstadoRequest) (*ChangeEstadoResponse, error)
+	DeleteExpediente(context.Context, *DeleteExpedienteRequest) (*DeleteExpedienteResponse, error)
 	mustEmbedUnimplementedExpedientesServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedExpedientesServer) UpdateExpediente(context.Context, *UpdateE
 }
 func (UnimplementedExpedientesServer) ChangeEstado(context.Context, *ChangeEstadoRequest) (*ChangeEstadoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangeEstado not implemented")
+}
+func (UnimplementedExpedientesServer) DeleteExpediente(context.Context, *DeleteExpedienteRequest) (*DeleteExpedienteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteExpediente not implemented")
 }
 func (UnimplementedExpedientesServer) mustEmbedUnimplementedExpedientesServer() {}
 func (UnimplementedExpedientesServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _Expedientes_ChangeEstado_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Expedientes_DeleteExpediente_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteExpedienteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).DeleteExpediente(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_DeleteExpediente_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).DeleteExpediente(ctx, req.(*DeleteExpedienteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Expedientes_ServiceDesc is the grpc.ServiceDesc for Expedientes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var Expedientes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangeEstado",
 			Handler:    _Expedientes_ChangeEstado_Handler,
+		},
+		{
+			MethodName: "DeleteExpediente",
+			Handler:    _Expedientes_DeleteExpediente_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

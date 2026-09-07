@@ -2,11 +2,12 @@
 // La autorización real vive en el API Gateway + Auth Service + microservicios;
 // esta tabla NO debe tratarse como fuente de verdad de seguridad.
 //
-// "expedientes.update" y "expedientes.change_estado" se agregaron para la
-// integración con Expedientes Service: reflejan (pero no reemplazan) la regla
-// real de ese microservicio, donde solo el personal interno puede editar o
-// cambiar el estado de un expediente (ver authorization.go de Expedientes
-// Service). El backend sigue siendo quien realmente lo hace cumplir.
+// "expedientes.update", "expedientes.change_estado" y "expedientes.delete" se
+// agregaron para la integración con Expedientes Service: reflejan (pero no
+// reemplazan) la regla real de ese microservicio, donde solo el personal
+// interno puede editar, cambiar el estado o eliminar (baja lógica) un
+// expediente (ver authorization.go de Expedientes Service). El backend sigue
+// siendo quien realmente lo hace cumplir.
 //
 // "documentos.view/create/delete" se alinearon con Documentos Service: TODO
 // el personal interno puede ver/subir/eliminar cualquier tipo de documento;
@@ -23,6 +24,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.create",
         "expedientes.update",
         "expedientes.change_estado",
+        "expedientes.delete",
         "documentos.view",
         "documentos.create",
         "documentos.delete",
@@ -37,6 +39,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.view",
         "expedientes.update",
         "expedientes.change_estado",
+        "expedientes.delete",
         "documentos.view",
         "documentos.create",
         "documentos.delete",
@@ -49,6 +52,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.view",
         "expedientes.update",
         "expedientes.change_estado",
+        "expedientes.delete",
         "documentos.view",
         "documentos.create",
         "documentos.delete",
@@ -62,6 +66,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.create",
         "expedientes.update",
         "expedientes.change_estado",
+        "expedientes.delete",
         "documentos.view",
         "documentos.create",
         "documentos.delete",
@@ -73,6 +78,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.view",
         "expedientes.update",
         "expedientes.change_estado",
+        "expedientes.delete",
         "documentos.view",
         "documentos.create",
         "documentos.delete",
@@ -83,6 +89,7 @@ export const ROLE_PERMISSIONS = {
         "expedientes.view",
         "expedientes.update",
         "expedientes.change_estado",
+        "expedientes.delete",
         "documentos.view",
         "documentos.create",
         "documentos.delete",

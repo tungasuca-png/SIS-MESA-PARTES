@@ -90,6 +90,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: UpdateExpedienteHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodDelete,
+				Path:    "/api/expedientes/:id",
+				Handler: DeleteExpedienteHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPatch,
 				Path:    "/api/expedientes/:id/estado",
 				Handler: ChangeEstadoHandler(serverCtx),

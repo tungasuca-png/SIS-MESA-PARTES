@@ -44,6 +44,12 @@ func CanChangeEstado(role string) bool {
 	return IsInternal(role)
 }
 
+// CanDelete: solo el personal interno puede eliminar (baja logica) un
+// expediente.
+func CanDelete(role string) bool {
+	return IsInternal(role)
+}
+
 // CanViewAll: el personal interno ve todos los expedientes; un SOLICITANTE
 // solo debe ver los suyos (el llamador debe filtrar por solicitante_id
 // cuando esta función devuelve false).

@@ -128,6 +128,15 @@ type UpdateExpedienteResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type DeleteExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type DeleteExpedienteResponse {
+	Success bool `json:"success"`
+}
+
 type ChangeEstadoRequest {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -247,6 +256,9 @@ service gateway-api {
 
 	@handler ChangeEstado
 	patch /api/expedientes/:id/estado (ChangeEstadoRequest) returns (ChangeEstadoResponse)
+
+	@handler DeleteExpediente
+	delete /api/expedientes/:id (DeleteExpedienteRequest) returns (DeleteExpedienteResponse)
 }
 
 type DocumentoDTO {

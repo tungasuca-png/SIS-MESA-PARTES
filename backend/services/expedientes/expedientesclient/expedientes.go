@@ -18,6 +18,8 @@ type (
 	ChangeEstadoResponse     = expedientes.ChangeEstadoResponse
 	CreateExpedienteRequest  = expedientes.CreateExpedienteRequest
 	CreateExpedienteResponse = expedientes.CreateExpedienteResponse
+	DeleteExpedienteRequest  = expedientes.DeleteExpedienteRequest
+	DeleteExpedienteResponse = expedientes.DeleteExpedienteResponse
 	Expediente               = expedientes.Expediente
 	GetExpedienteRequest     = expedientes.GetExpedienteRequest
 	GetExpedienteResponse    = expedientes.GetExpedienteResponse
@@ -32,6 +34,7 @@ type (
 		ListExpedientes(ctx context.Context, in *ListExpedientesRequest, opts ...grpc.CallOption) (*ListExpedientesResponse, error)
 		UpdateExpediente(ctx context.Context, in *UpdateExpedienteRequest, opts ...grpc.CallOption) (*UpdateExpedienteResponse, error)
 		ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error)
+		DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error)
 	}
 
 	defaultExpedientes struct {
@@ -68,4 +71,9 @@ func (m *defaultExpedientes) UpdateExpediente(ctx context.Context, in *UpdateExp
 func (m *defaultExpedientes) ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error) {
 	client := expedientes.NewExpedientesClient(m.cli.Conn())
 	return client.ChangeEstado(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.DeleteExpediente(ctx, in, opts...)
 }

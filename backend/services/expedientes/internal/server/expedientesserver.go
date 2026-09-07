@@ -47,3 +47,8 @@ func (s *ExpedientesServer) ChangeEstado(ctx context.Context, in *expedientes.Ch
 	l := logic.NewChangeEstadoLogic(ctx, s.svcCtx)
 	return l.ChangeEstado(in)
 }
+
+func (s *ExpedientesServer) DeleteExpediente(ctx context.Context, in *expedientes.DeleteExpedienteRequest) (*expedientes.DeleteExpedienteResponse, error) {
+	l := logic.NewDeleteExpedienteLogic(ctx, s.svcCtx)
+	return l.DeleteExpediente(in)
+}

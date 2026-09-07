@@ -682,6 +682,94 @@ func (x *ChangeEstadoResponse) GetExpediente() *Expediente {
 	return nil
 }
 
+type DeleteExpedienteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExpedienteRequest) Reset() {
+	*x = DeleteExpedienteRequest{}
+	mi := &file_expedientes_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExpedienteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExpedienteRequest) ProtoMessage() {}
+
+func (x *DeleteExpedienteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExpedienteRequest.ProtoReflect.Descriptor instead.
+func (*DeleteExpedienteRequest) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *DeleteExpedienteRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteExpedienteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExpedienteResponse) Reset() {
+	*x = DeleteExpedienteResponse{}
+	mi := &file_expedientes_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExpedienteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExpedienteResponse) ProtoMessage() {}
+
+func (x *DeleteExpedienteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExpedienteResponse.ProtoReflect.Descriptor instead.
+func (*DeleteExpedienteResponse) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *DeleteExpedienteResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_expedientes_service_proto protoreflect.FileDescriptor
 
 const file_expedientes_service_proto_rawDesc = "" +
@@ -740,13 +828,18 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x14ChangeEstadoResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente2\xda\x03\n" +
+	"expediente\")\n" +
+	"\x17DeleteExpedienteRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
+	"\x18DeleteExpedienteResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbb\x04\n" +
 	"\vExpedientes\x12_\n" +
 	"\x10CreateExpediente\x12$.expedientes.CreateExpedienteRequest\x1a%.expedientes.CreateExpedienteResponse\x12V\n" +
 	"\rGetExpediente\x12!.expedientes.GetExpedienteRequest\x1a\".expedientes.GetExpedienteResponse\x12\\\n" +
 	"\x0fListExpedientes\x12#.expedientes.ListExpedientesRequest\x1a$.expedientes.ListExpedientesResponse\x12_\n" +
 	"\x10UpdateExpediente\x12$.expedientes.UpdateExpedienteRequest\x1a%.expedientes.UpdateExpedienteResponse\x12S\n" +
-	"\fChangeEstado\x12 .expedientes.ChangeEstadoRequest\x1a!.expedientes.ChangeEstadoResponseB\x0fZ\r./expedientesb\x06proto3"
+	"\fChangeEstado\x12 .expedientes.ChangeEstadoRequest\x1a!.expedientes.ChangeEstadoResponse\x12_\n" +
+	"\x10DeleteExpediente\x12$.expedientes.DeleteExpedienteRequest\x1a%.expedientes.DeleteExpedienteResponseB\x0fZ\r./expedientesb\x06proto3"
 
 var (
 	file_expedientes_service_proto_rawDescOnce sync.Once
@@ -760,7 +853,7 @@ func file_expedientes_service_proto_rawDescGZIP() []byte {
 	return file_expedientes_service_proto_rawDescData
 }
 
-var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_expedientes_service_proto_goTypes = []any{
 	(*Expediente)(nil),               // 0: expedientes.Expediente
 	(*CreateExpedienteRequest)(nil),  // 1: expedientes.CreateExpedienteRequest
@@ -773,6 +866,8 @@ var file_expedientes_service_proto_goTypes = []any{
 	(*UpdateExpedienteResponse)(nil), // 8: expedientes.UpdateExpedienteResponse
 	(*ChangeEstadoRequest)(nil),      // 9: expedientes.ChangeEstadoRequest
 	(*ChangeEstadoResponse)(nil),     // 10: expedientes.ChangeEstadoResponse
+	(*DeleteExpedienteRequest)(nil),  // 11: expedientes.DeleteExpedienteRequest
+	(*DeleteExpedienteResponse)(nil), // 12: expedientes.DeleteExpedienteResponse
 }
 var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 0: expedientes.CreateExpedienteResponse.expediente:type_name -> expedientes.Expediente
@@ -785,13 +880,15 @@ var file_expedientes_service_proto_depIdxs = []int32{
 	5,  // 7: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
 	7,  // 8: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
 	9,  // 9: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
-	2,  // 10: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
-	4,  // 11: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
-	6,  // 12: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
-	8,  // 13: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
-	10, // 14: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
+	11, // 10: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
+	2,  // 11: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
+	4,  // 12: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
+	6,  // 13: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
+	8,  // 14: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
+	10, // 15: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
+	12, // 16: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -808,7 +905,7 @@ func file_expedientes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_expedientes_service_proto_rawDesc), len(file_expedientes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

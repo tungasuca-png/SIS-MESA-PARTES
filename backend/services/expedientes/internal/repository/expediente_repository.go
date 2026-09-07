@@ -188,6 +188,25 @@ func (r *ExpedienteRepository) Update(ctx context.Context, idOrCodigo, asunto, d
 	return updated, nil
 }
 
+// Delete es una baja logica: marca activo = FALSE en vez de borrar la fila,
+// para no perder el historial de un expediente que es un registro oficial.
+// A partir de ahi, el resto de los metodos (que ya filtran activo = TRUE)
+// dejan de encontrarlo.
+func (r *ExpedienteRepository) Delete(ctx context.Context, idOrCodigo string) error {
+	tag, err := r.db.Exec(ctx, `
+		UPDATE expedientes
+		SET activo = FALSE, fecha_actualizacion = NOW()
+		WHERE (id::text = $1 OR codigo = $1) AND activo = TRUE
+	`, idOrCodigo)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrExpedienteNotFound
+	}
+	return nil
+}
+
 // UpdateEstado exige el estado actual esperado (estadoActual) como guarda de
 // concurrencia optimista: si el expediente cambió de estado entre la lectura
 // y la escritura, no encuentra la fila y devuelve ErrExpedienteNotFound.
