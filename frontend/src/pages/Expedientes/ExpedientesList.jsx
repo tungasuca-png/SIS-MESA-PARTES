@@ -7,12 +7,13 @@ import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
 import Icon from "../../components/dashboard/Icon";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
-import { getExpedientes } from "../../services/expedientesService";
+import { deleteExpediente, getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
 import { DEFAULT_PAGE_SIZE, ESTADOS, PRIORIDADES, TIPOS } from "../../constants/expedientes";
 import "../../components/dashboard/RecentExpedientes.css";
 import "../../components/dashboard/forms.css";
+import "../../components/dashboard/documentosPanel.css";
 import "./expedientesList.css";
 
 function ExpedientesList() {
@@ -31,8 +32,13 @@ function ExpedientesList() {
     const [showCreate, setShowCreate] = useState(Boolean(location.state?.openCreate));
     const [refreshKey, setRefreshKey] = useState(0);
 
+    const [confirmingCodigo, setConfirmingCodigo] = useState(null);
+    const [deletingCodigo, setDeletingCodigo] = useState(null);
+    const [deleteError, setDeleteError] = useState("");
+
     const canCreate = can(["expedientes.create", "solicitudes.create"]);
     const canViewAll = can("expedientes.view");
+    const canDelete = can("expedientes.delete");
 
     useEffect(() => {
         let active = true;
@@ -73,6 +79,20 @@ function ExpedientesList() {
     const handleFilterChange = (setter) => (event) => {
         setPage(1);
         setter(event.target.value);
+    };
+
+    const handleDelete = async (codigo) => {
+        setDeleteError("");
+        setDeletingCodigo(codigo);
+        try {
+            await deleteExpediente(codigo);
+            setConfirmingCodigo(null);
+            setRefreshKey((current) => current + 1);
+        } catch (err) {
+            setDeleteError(friendlyErrorMessage(err));
+        } finally {
+            setDeletingCodigo(null);
+        }
     };
 
     const emptyMessage = canViewAll
@@ -121,6 +141,7 @@ function ExpedientesList() {
                 {loading && <p className="dp-table-empty">Cargando expedientes...</p>}
 
                 {!loading && error && <p className="dp-form-error">{error}</p>}
+                {deleteError && <p className="dp-form-error">{deleteError}</p>}
 
                 {!loading && !error && items.length === 0 && (
                     <p className="dp-table-empty">{emptyMessage}</p>
@@ -138,7 +159,7 @@ function ExpedientesList() {
                                         <th>Estado</th>
                                         <th>Prioridad</th>
                                         <th>Fecha</th>
-                                        <th>Acción</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -165,10 +186,43 @@ function ExpedientesList() {
                                             </td>
                                             <td>{formatDate(item.fecha_registro)}</td>
                                             <td>
-                                                <Link to={`/expedientes/${item.codigo}`} className="dp-table-action">
-                                                    <Icon name="eye" size={16} />
-                                                    Ver
-                                                </Link>
+                                                {confirmingCodigo === item.codigo ? (
+                                                    <div className="dp-table-actions">
+                                                        <span className="dp-table-confirm-text">¿Eliminar?</span>
+                                                        <button
+                                                            type="button"
+                                                            className="dp-table-action"
+                                                            onClick={() => setConfirmingCodigo(null)}
+                                                            disabled={deletingCodigo === item.codigo}
+                                                        >
+                                                            No
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="dp-table-action dp-documentos-delete"
+                                                            onClick={() => handleDelete(item.codigo)}
+                                                            disabled={deletingCodigo === item.codigo}
+                                                        >
+                                                            {deletingCodigo === item.codigo ? "Eliminando..." : "Sí"}
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="dp-table-actions">
+                                                        <Link to={`/expedientes/${item.codigo}`} className="dp-table-action">
+                                                            <Icon name="eye" size={16} />
+                                                            Ver
+                                                        </Link>
+                                                        {canDelete && (
+                                                            <button
+                                                                type="button"
+                                                                className="dp-table-action dp-documentos-delete"
+                                                                onClick={() => setConfirmingCodigo(item.codigo)}
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
