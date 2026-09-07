@@ -11,6 +11,7 @@ import {
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatBytes, formatDateTime } from "../../utils/format";
 import { EXTENSIONES_PERMITIDAS, MAX_TAMANO_BYTES, MIME_POR_EXTENSION, TIPOS_DOCUMENTO } from "../../constants/documentos";
+import { exportFutDelExpediente, tieneFutExportable } from "../../services/futService";
 import Icon from "./Icon";
 import "./forms.css";
 import "./documentosPanel.css";
@@ -24,7 +25,7 @@ function tipoLabel(value) {
     return TIPOS_DOCUMENTO.find((item) => item.value === value)?.label ?? value;
 }
 
-function DocumentosPanel({ expedienteId }) {
+function DocumentosPanel({ expedienteId, expediente }) {
     const { can } = usePermissions();
     const canUpload = can("documentos.create");
     const canDelete = can("documentos.delete");
@@ -114,10 +115,30 @@ function DocumentosPanel({ expedienteId }) {
         }
     };
 
-    // El FUT generado al registrar la solicitud se sube con este prefijo
-    // (ver futService.js). Se destaca aparte, con un botón propio, para que
-    // no haya que buscarlo dentro de la lista general de adjuntos.
-    const futDocumento = documentos.find((item) => item.nombre.startsWith("FUT-"));
+    // El cargo del FUT ya NO se guarda como documento del expediente (solo
+    // van ahí los adjuntos que realmente subió el solicitante) — se
+    // reconstruye al vuelo con los datos que ya tiene el expediente. Ver
+    // futService.js.
+    const [downloadingFut, setDownloadingFut] = useState(false);
+
+    const handleDownloadFut = () => {
+        const fut = exportFutDelExpediente(expediente);
+        if (!fut) return;
+        setDownloadingFut(true);
+        try {
+            const blob = base64ToBlob(fut.contenidoBase64, "application/pdf");
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fut.nombre;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } finally {
+            setDownloadingFut(false);
+        }
+    };
 
     const handleDelete = async (id) => {
         setDeletingId(id);
@@ -135,7 +156,7 @@ function DocumentosPanel({ expedienteId }) {
         <section className="dp-panel">
             <h2 className="dp-panel-title">Documentos</h2>
 
-            {!loading && !error && futDocumento && (
+            {tieneFutExportable(expediente) && (
                 <div className="dp-fut-callout">
                     <div className="dp-fut-callout-info">
                         <Icon name="file" size={20} />
@@ -149,10 +170,10 @@ function DocumentosPanel({ expedienteId }) {
                     <button
                         type="button"
                         className="dp-btn-primary"
-                        onClick={() => handleDownload(futDocumento)}
-                        disabled={downloadingId === futDocumento.id}
+                        onClick={handleDownloadFut}
+                        disabled={downloadingFut}
                     >
-                        {downloadingId === futDocumento.id ? "Descargando..." : "Descargar FUT"}
+                        {downloadingFut ? "Descargando..." : "Descargar FUT"}
                     </button>
                 </div>
             )}

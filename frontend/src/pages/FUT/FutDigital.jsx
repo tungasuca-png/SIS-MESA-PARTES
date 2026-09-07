@@ -432,8 +432,9 @@ function FutDigital() {
                         <p>Su solicitud ha sido registrada correctamente.</p>
                         <p>Guarde su número de expediente para realizar el seguimiento.</p>
                         <p>
-                            El FUT también quedó guardado como documento de su expediente: puede descargarlo cuando
-                            quiera desde ahí (personal de Secretaría también podrá hacerlo).
+                            Puede descargar el FUT cuando quiera desde el detalle del expediente (personal de
+                            Secretaría también podrá hacerlo); no se guarda como documento adjunto, ahí solo quedan
+                            los archivos que usted adjuntó.
                         </p>
 
                         <dl className="dp-detail-list">

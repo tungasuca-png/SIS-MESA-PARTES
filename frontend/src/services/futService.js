@@ -32,6 +32,19 @@ function buildDescripcion({ nombres, dni, telefono, domicilio, distrito, correo,
     return lineas.join("\n");
 }
 
+// Recupera del texto libre de "descripcion" los dos datos que hacen falta
+// para reconstruir el cargo del FUT (nombres y folios) — el resto (asunto,
+// código, fecha) ya vive en columnas propias del expediente. Si no calzan
+// los patrones (expediente que no vino del FUT Digital), no hay cargo que
+// generar.
+function parseDatosSolicitante(descripcion) {
+    if (!descripcion) return null;
+    const nombresMatch = descripcion.match(/Nombres y apellidos:\s*(.+)/);
+    const foliosMatch = descripcion.match(/N° de folios adjuntos:\s*(\d+)/);
+    if (!nombresMatch || !foliosMatch) return null;
+    return { nombres: nombresMatch[1].trim(), folios: foliosMatch[1] };
+}
+
 // Convierte un array de bytes a un PDF de una sola página que solo contiene
 // esa imagen a tamaño completo, escrito a mano (sin librerías: nada de
 // jsPDF/pdf-lib). La imagen se embebe tal cual como JPEG (filtro
@@ -181,27 +194,12 @@ export async function submitFut(fut) {
         prioridad: "NORMAL",
     });
 
+    // "Documentos adjuntos" del expediente es solo para lo que el solicitante
+    // adjunta de verdad (sus sustentos) — el cargo del FUT NO se sube ahí. Se
+    // recupera después bajo demanda con exportFutDelExpediente(), a partir de
+    // los datos que ya quedaron en el expediente (ver parseDatosSolicitante),
+    // así que no hace falta guardarlo como archivo aparte.
     const uploads = [];
-
-    // Cargo/FUT descargable: queda como documento del expediente para que el
-    // solicitante y el personal interno (Secretaría, etc.) puedan bajarlo
-    // más adelante, no solo verlo en pantalla al momento de enviar.
-    // tipoDocumento="ADJUNTO" porque un SOLICITANTE solo puede subir ese tipo
-    // (ver authorization.CanUpload de Documentos Service).
-    uploads.push(
-        uploadDocumento({
-            expedienteId: expediente.id,
-            nombre: `FUT-${expediente.codigo}.pdf`,
-            tipoDocumento: "ADJUNTO",
-            extension: "pdf",
-            contenidoBase64: renderCargoPdf({
-                nombres: fut.nombres,
-                sumilla: fut.sumilla,
-                codigo: expediente.codigo,
-                folios: fut.folios,
-            }),
-        })
-    );
 
     if (fut.firmaDataUrl) {
         const base64 = fut.firmaDataUrl.split(",")[1];
@@ -236,4 +234,29 @@ export async function submitFut(fut) {
     const failedUploads = results.filter((item) => item.status === "rejected").length;
 
     return { expediente, failedUploads, totalUploads: uploads.length };
+}
+
+// Chequeo barato (sin tocar el canvas) para decidir si mostrar el botón
+// "Descargar FUT" — exportFutDelExpediente() sí hace el trabajo pesado y
+// solo debe llamarse al momento de descargar, no en cada render.
+export function tieneFutExportable(expediente) {
+    return Boolean(parseDatosSolicitante(expediente?.descripcion));
+}
+
+// Reconstruye el PDF del cargo a partir de los datos ya guardados en el
+// propio expediente (no de un documento subido — ver el comentario en
+// submitFut). Devuelve null si el expediente no vino del FUT Digital (no
+// tiene "Nombres y apellidos" / "N° de folios" en su descripción).
+export function exportFutDelExpediente(expediente) {
+    const datos = parseDatosSolicitante(expediente.descripcion);
+    if (!datos) return null;
+
+    const contenidoBase64 = renderCargoPdf({
+        nombres: datos.nombres,
+        sumilla: expediente.asunto,
+        codigo: expediente.codigo,
+        folios: datos.folios,
+    });
+
+    return { nombre: `FUT-${expediente.codigo}.pdf`, contenidoBase64 };
 }

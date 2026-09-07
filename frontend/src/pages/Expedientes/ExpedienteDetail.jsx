@@ -270,7 +270,7 @@ function ExpedienteDetail() {
                     )}
 
                     <div className="dp-detail-full-width">
-                        <DocumentosPanel expedienteId={expediente.id} />
+                        <DocumentosPanel expedienteId={expediente.id} expediente={expediente} />
                     </div>
                 </div>
             )}
