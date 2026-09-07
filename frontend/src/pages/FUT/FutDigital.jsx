@@ -431,6 +431,10 @@ function FutDigital() {
                         <p className="fut-confirmacion-check">✓ Solicitud registrada</p>
                         <p>Su solicitud ha sido registrada correctamente.</p>
                         <p>Guarde su número de expediente para realizar el seguimiento.</p>
+                        <p>
+                            El FUT también quedó guardado como documento de su expediente: puede descargarlo cuando
+                            quiera desde ahí (personal de Secretaría también podrá hacerlo).
+                        </p>
 
                         <dl className="dp-detail-list">
                             <div>
