@@ -1,0 +1,90 @@
+.fut-header {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--dp-border);
+    margin-bottom: 18px;
+}
+
+.fut-header-tipo {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dp-text-secondary);
+    text-transform: uppercase;
+}
+
+.fut-header-nombre {
+    margin: 2px 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dp-text-primary);
+    letter-spacing: 0.5px;
+}
+
+.fut-header-linea {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--dp-text-secondary);
+    line-height: 1.4;
+}
+
+.fut-header-anio {
+    text-align: center;
+    align-self: center;
+}
+
+.fut-header-anio p {
+    margin: 0;
+    font-size: 12px;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--dp-text-primary);
+    line-height: 1.4;
+}
+
+.fut-header-numero {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 4px;
+}
+
+.fut-header-numero-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dp-text-secondary);
+    text-transform: uppercase;
+}
+
+.fut-header-numero-valor {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dp-primary);
+}
+
+.fut-header-numero-pendiente {
+    font-size: 12px;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--dp-text-muted);
+}
+
+@media (max-width: 720px) {
+    .fut-header {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .fut-header-anio {
+        text-align: left;
+    }
+
+    .fut-header-numero {
+        align-items: flex-start;
+        text-align: left;
+    }
+}

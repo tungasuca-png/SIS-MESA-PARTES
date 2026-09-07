@@ -5,13 +5,23 @@ import "./QuickActions.css";
 
 // "to: null" = módulo todavía no implementado (permanece visual/inerte).
 const ACTIONS = [
+    // Registro rápido para personal interno (modal simple). El SOLICITANTE
+    // no usa este atajo: su alta de acuerdo al FUT físico va por "Registrar
+    // solicitud" (FUT Digital), no por un formulario genérico.
     {
         key: "nuevo-expediente",
         label: "Nuevo expediente",
         icon: "plus",
-        permission: ["expedientes.create", "solicitudes.create"],
+        permission: "expedientes.create",
         to: "/expedientes",
         state: { openCreate: true },
+    },
+    {
+        key: "registrar-solicitud",
+        label: "Registrar solicitud",
+        icon: "plus",
+        permission: "solicitudes.create",
+        to: "/fut",
     },
     // No hay una accion "Registrar documento" independiente: un documento
     // siempre pertenece a un expediente (no existen documentos huerfanos), asi

@@ -1,0 +1,28 @@
+.dp-signature-pad {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dp-signature-canvas {
+    width: 100%;
+    max-width: 500px;
+    height: 160px;
+    border: 1px dashed var(--dp-border);
+    border-radius: 10px;
+    background: var(--dp-bg);
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.dp-signature-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dp-signature-hint {
+    font-size: 12px;
+    color: var(--dp-text-secondary);
+}

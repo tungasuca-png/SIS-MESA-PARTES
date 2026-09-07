@@ -1,0 +1,256 @@
+.fut-page {
+    background: var(--dp-card-bg);
+    border: 1px solid var(--dp-border);
+    border-radius: 14px;
+    padding: 24px 28px 30px;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.fut-titulo {
+    margin: 0 0 6px;
+    font-size: 19px;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 0.4px;
+    color: var(--dp-text-primary);
+}
+
+.fut-destinatario {
+    margin: 0 0 22px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--dp-text-primary);
+}
+
+.fut-form {
+    gap: 22px;
+}
+
+.fut-section {
+    padding-top: 18px;
+    border-top: 1px solid var(--dp-border);
+}
+
+.fut-section:first-child {
+    padding-top: 0;
+    border-top: none;
+}
+
+.fut-section-title {
+    display: block;
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--dp-text-primary);
+}
+
+.fut-section-subtitle {
+    font-weight: 500;
+    text-transform: none;
+    color: var(--dp-text-secondary);
+    letter-spacing: normal;
+}
+
+.fut-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.fut-grid-3:last-child {
+    margin-bottom: 0;
+}
+
+.fut-file-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fut-file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--dp-border);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--dp-text-primary);
+}
+
+.fut-file-item svg {
+    color: var(--dp-primary);
+    flex-shrink: 0;
+}
+
+.fut-file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fut-file-size {
+    color: var(--dp-text-secondary);
+    flex-shrink: 0;
+}
+
+.fut-file-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--dp-text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.fut-file-remove:hover {
+    background: #fff5f5;
+    color: #c62828;
+}
+
+.fut-folios {
+    max-width: 160px;
+    margin-top: 14px;
+}
+
+.fut-fecha-firma {
+    margin-bottom: 16px;
+}
+
+.fut-fecha-valor {
+    margin: 0;
+    padding: 10px 12px;
+    background: var(--dp-bg);
+    border-radius: 9px;
+    font-size: 13.5px;
+    color: var(--dp-text-primary);
+}
+
+.fut-table-wrapper {
+    margin-top: 8px;
+    overflow-x: auto;
+}
+
+.fut-derivacion-table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+}
+
+.fut-derivacion-table th {
+    text-align: left;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--dp-text-secondary);
+    padding: 8px 10px;
+    border: 1px solid var(--dp-border);
+    background: var(--dp-bg);
+}
+
+.fut-derivacion-table td {
+    padding: 12px 10px;
+    border: 1px solid var(--dp-border);
+    font-size: 12.5px;
+}
+
+.fut-derivacion-codigo {
+    font-weight: 600;
+    color: var(--dp-text-primary);
+}
+
+.fut-derivacion-pendiente {
+    color: var(--dp-text-muted);
+    font-style: italic;
+}
+
+.fut-derivacion-nota {
+    margin: 8px 0 0;
+    font-size: 11.5px;
+    color: var(--dp-text-muted);
+}
+
+.fut-preview-fundamentacion {
+    white-space: pre-wrap;
+}
+
+.fut-confirmacion,
+.fut-cargo {
+    text-align: center;
+}
+
+.fut-confirmacion-check {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dp-badge-done-text);
+    margin-bottom: 4px;
+}
+
+.fut-confirmacion-codigo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dp-primary);
+}
+
+.fut-confirmacion .dp-detail-list,
+.fut-cargo .dp-detail-list {
+    text-align: left;
+    margin-top: 18px;
+}
+
+.fut-confirmacion .dp-form-actions,
+.fut-cargo .dp-form-actions {
+    justify-content: center;
+}
+
+.fut-cargo-institucion {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--dp-text-secondary);
+}
+
+.fut-cargo-titulo {
+    margin: 4px 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--dp-text-primary);
+}
+
+.fut-cargo .fut-table-wrapper {
+    margin-top: 20px;
+}
+
+@media (max-width: 720px) {
+    .fut-page {
+        padding: 18px 16px 22px;
+    }
+
+    .fut-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    .dp-header,
+    .dp-sidebar,
+    .dp-form-actions {
+        display: none !important;
+    }
+}

@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard/dashboard";
 import ExpedientesList from "./pages/Expedientes/ExpedientesList";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
 import DocumentosList from "./pages/Documentos/DocumentosList";
+import FutDigital from "./pages/FUT/FutDigital";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -51,6 +52,16 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <DocumentosList />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* FUT Digital (crea un Expediente real vía Expedientes Service) */}
+            <Route
+                path="/fut"
+                element={
+                    <ProtectedRoute>
+                        <FutDigital />
                     </ProtectedRoute>
                 }
             />
