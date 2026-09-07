@@ -1,0 +1,23 @@
+Name: expedientes.rpc
+ListenOn: 0.0.0.0:8082
+Mode: dev
+
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: expedientes.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: expedientes_user
+  Password: expedientes_password
+  Database: expedientes_db
+  SSLMode: disable
+
+JWTSecret: ${JWT_SECRET}
+
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /expedientes.Expedientes/CreateExpediente
