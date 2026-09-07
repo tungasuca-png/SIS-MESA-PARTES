@@ -13,13 +13,10 @@ const ACTIONS = [
         to: "/expedientes",
         state: { openCreate: true },
     },
-    {
-        key: "registrar-documento",
-        label: "Registrar documento",
-        icon: "file",
-        permission: "documentos.create",
-        to: null,
-    },
+    // No hay una accion "Registrar documento" independiente: un documento
+    // siempre pertenece a un expediente (no existen documentos huerfanos), asi
+    // que subir uno se hace entrando al expediente concreto ("Ver
+    // expedientes" -> detalle -> panel de Documentos), no desde aqui.
     {
         key: "ver-expedientes",
         label: "Ver expedientes",
