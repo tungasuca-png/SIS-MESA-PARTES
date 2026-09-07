@@ -114,6 +114,11 @@ function DocumentosPanel({ expedienteId }) {
         }
     };
 
+    // El FUT generado al registrar la solicitud se sube con este prefijo
+    // (ver futService.js). Se destaca aparte, con un botón propio, para que
+    // no haya que buscarlo dentro de la lista general de adjuntos.
+    const futDocumento = documentos.find((item) => item.nombre.startsWith("FUT-"));
+
     const handleDelete = async (id) => {
         setDeletingId(id);
         try {
@@ -129,6 +134,28 @@ function DocumentosPanel({ expedienteId }) {
     return (
         <section className="dp-panel">
             <h2 className="dp-panel-title">Documentos</h2>
+
+            {!loading && !error && futDocumento && (
+                <div className="dp-fut-callout">
+                    <div className="dp-fut-callout-info">
+                        <Icon name="file" size={20} />
+                        <div>
+                            <p className="dp-fut-callout-title">FUT de este expediente</p>
+                            <p className="dp-fut-callout-subtitle">
+                                Formulario con el registro completo de la solicitud.
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        className="dp-btn-primary"
+                        onClick={() => handleDownload(futDocumento)}
+                        disabled={downloadingId === futDocumento.id}
+                    >
+                        {downloadingId === futDocumento.id ? "Descargando..." : "Descargar FUT"}
+                    </button>
+                </div>
+            )}
 
             {canUpload && (
                 <form className="dp-form dp-documentos-upload" onSubmit={handleUpload}>
