@@ -316,7 +316,7 @@ function ExpedienteDetail() {
                                     </button>
                                     <button
                                         type="button"
-                                        className="dp-btn-primary dp-documentos-delete"
+                                        className="dp-btn-secondary dp-documentos-delete"
                                         onClick={handleDelete}
                                         disabled={deleting}
                                     >
