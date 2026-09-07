@@ -11,4 +11,5 @@ type Config struct {
 	AuthRpc        zrpc.RpcClientConf
 	ExpedientesRpc zrpc.RpcClientConf
 	UsuariosRpc    zrpc.RpcClientConf
+	DocumentosRpc  zrpc.RpcClientConf
 }

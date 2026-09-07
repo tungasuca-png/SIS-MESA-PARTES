@@ -10,3 +10,6 @@ ExpedientesRpc:
 
 UsuariosRpc:
   Target: 127.0.0.1:8083
+
+DocumentosRpc:
+  Target: 127.0.0.1:8084

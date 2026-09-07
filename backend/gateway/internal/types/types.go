@@ -25,6 +25,37 @@ type CreateExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type DeleteDocumentoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type DeleteDocumentoResponse struct {
+	Success bool `json:"success"`
+}
+
+type DocumentoDTO struct {
+	Id            string `json:"id"`
+	ExpedienteId  string `json:"expediente_id"`
+	Nombre        string `json:"nombre"`
+	TipoDocumento string `json:"tipo_documento"`
+	Extension     string `json:"extension"`
+	TamanoBytes   int64  `json:"tamano_bytes"`
+	SubidoPor     string `json:"subido_por"`
+	Estado        string `json:"estado"`
+	FechaRegistro string `json:"fecha_registro"`
+}
+
+type DownloadDocumentoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type DownloadDocumentoResponse struct {
+	Documento DocumentoDTO `json:"documento"`
+	Contenido string       `json:"contenido"`
+}
+
 type ExpedienteDTO struct {
 	Id                 string `json:"id"`
 	Codigo             string `json:"codigo"`
@@ -37,6 +68,15 @@ type ExpedienteDTO struct {
 	FechaRegistro      string `json:"fecha_registro"`
 	FechaActualizacion string `json:"fecha_actualizacion"`
 	Activo             bool   `json:"activo"`
+}
+
+type GetDocumentoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetDocumentoResponse struct {
+	Documento DocumentoDTO `json:"documento"`
 }
 
 type GetExpedienteRequest struct {
@@ -73,6 +113,15 @@ type GetUsuariosBasicRequest struct {
 
 type GetUsuariosBasicResponse struct {
 	Usuarios []UsuarioBasicDTO `json:"usuarios"`
+}
+
+type ListDocumentosRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `path:"expediente_id"`
+}
+
+type ListDocumentosResponse struct {
+	Documentos []DocumentoDTO `json:"documentos"`
 }
 
 type ListExpedientesRequest struct {
@@ -162,6 +211,19 @@ type UpdateExpedienteRequest struct {
 
 type UpdateExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type UploadDocumentoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `json:"expediente_id"`
+	Nombre        string `json:"nombre"`
+	TipoDocumento string `json:"tipo_documento"`
+	Extension     string `json:"extension"`
+	Contenido     string `json:"contenido"`
+}
+
+type UploadDocumentoResponse struct {
+	Documento DocumentoDTO `json:"documento"`
 }
 
 type UsuarioBasicDTO struct {

@@ -249,3 +249,82 @@ service gateway-api {
 	patch /api/expedientes/:id/estado (ChangeEstadoRequest) returns (ChangeEstadoResponse)
 }
 
+type DocumentoDTO {
+	Id            string `json:"id"`
+	ExpedienteId  string `json:"expediente_id"`
+	Nombre        string `json:"nombre"`
+	TipoDocumento string `json:"tipo_documento"`
+	Extension     string `json:"extension"`
+	TamanoBytes   int64  `json:"tamano_bytes"`
+	SubidoPor     string `json:"subido_por"`
+	Estado        string `json:"estado"`
+	FechaRegistro string `json:"fecha_registro"`
+}
+
+type UploadDocumentoRequest {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `json:"expediente_id"`
+	Nombre        string `json:"nombre"`
+	TipoDocumento string `json:"tipo_documento"`
+	Extension     string `json:"extension"`
+	Contenido     string `json:"contenido"`
+}
+
+type UploadDocumentoResponse {
+	Documento DocumentoDTO `json:"documento"`
+}
+
+type GetDocumentoRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetDocumentoResponse {
+	Documento DocumentoDTO `json:"documento"`
+}
+
+type DownloadDocumentoRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type DownloadDocumentoResponse {
+	Documento DocumentoDTO `json:"documento"`
+	Contenido string       `json:"contenido"`
+}
+
+type ListDocumentosRequest {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `path:"expediente_id"`
+}
+
+type ListDocumentosResponse {
+	Documentos []DocumentoDTO `json:"documentos"`
+}
+
+type DeleteDocumentoRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type DeleteDocumentoResponse {
+	Success bool `json:"success"`
+}
+
+service gateway-api {
+	@handler UploadDocumento
+	post /api/documentos (UploadDocumentoRequest) returns (UploadDocumentoResponse)
+
+	@handler GetDocumento
+	get /api/documentos/:id (GetDocumentoRequest) returns (GetDocumentoResponse)
+
+	@handler DownloadDocumento
+	get /api/documentos/:id/contenido (DownloadDocumentoRequest) returns (DownloadDocumentoResponse)
+
+	@handler DeleteDocumento
+	delete /api/documentos/:id (DeleteDocumentoRequest) returns (DeleteDocumentoResponse)
+
+	@handler ListDocumentosByExpediente
+	get /api/expedientes/:expediente_id/documentos (ListDocumentosRequest) returns (ListDocumentosResponse)
+}
+

@@ -2,11 +2,13 @@ package svc
 
 import (
 	"auth/authclient"
+	"documentos/documentosclient"
 	"expedientes/expedientesclient"
 	"gateway/internal/config"
 	"usuarios/usuariosclient"
 
 	"github.com/zeromicro/go-zero/zrpc"
+	"google.golang.org/grpc"
 )
 
 type ServiceContext struct {
@@ -14,7 +16,13 @@ type ServiceContext struct {
 	AuthClient        authclient.Auth
 	ExpedientesClient expedientesclient.Expedientes
 	UsuariosClient    usuariosclient.Usuarios
+	DocumentosClient  documentosclient.Documentos
 }
+
+// documentosMaxMsgSize deja margen sobre el limite de archivo de Documentos
+// Service (5 MiB, ver documentos/internal/validation.MaxTamanoDocumento)
+// para el resto de campos del mensaje protobuf.
+const documentosMaxMsgSize = 5*1024*1024 + 64*1024
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
@@ -27,6 +35,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		),
 		UsuariosClient: usuariosclient.NewUsuarios(
 			zrpc.MustNewClient(c.UsuariosRpc),
+		),
+		DocumentosClient: documentosclient.NewDocumentos(
+			zrpc.MustNewClient(c.DocumentosRpc, zrpc.WithDialOption(grpc.WithDefaultCallOptions(
+				grpc.MaxCallRecvMsgSize(documentosMaxMsgSize),
+				grpc.MaxCallSendMsgSize(documentosMaxMsgSize),
+			))),
 		),
 	}
 }

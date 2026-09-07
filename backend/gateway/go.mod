@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	auth v0.0.0
+	documentos v0.0.0
 	expedientes v0.0.0
 	github.com/zeromicro/go-zero v1.10.3
 	google.golang.org/grpc v1.83.2
@@ -106,3 +107,5 @@ replace auth => ../services/auth
 replace expedientes => ../services/expedientes
 
 replace usuarios => ../services/usuarios
+
+replace documentos => ../services/documentos

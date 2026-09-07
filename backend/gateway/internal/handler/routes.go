@@ -96,4 +96,34 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/documentos",
+				Handler: UploadDocumentoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/documentos/:id",
+				Handler: GetDocumentoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodDelete,
+				Path:    "/api/documentos/:id",
+				Handler: DeleteDocumentoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/documentos/:id/contenido",
+				Handler: DownloadDocumentoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/expedientes/:expediente_id/documentos",
+				Handler: ListDocumentosByExpedienteHandler(serverCtx),
+			},
+		},
+	)
 }
