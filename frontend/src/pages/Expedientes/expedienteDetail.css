@@ -74,6 +74,12 @@
     margin-top: 18px;
 }
 
+.dp-detail-actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 @media (max-width: 900px) {
     .dp-detail-grid {
         grid-template-columns: 1fr;

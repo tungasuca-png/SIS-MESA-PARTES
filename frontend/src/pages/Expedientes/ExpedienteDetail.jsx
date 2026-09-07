@@ -243,14 +243,51 @@ function ExpedienteDetail() {
                             </form>
                         )}
 
-                        {!editing && canUpdate && (
-                            <button
-                                type="button"
-                                className="dp-btn-secondary dp-detail-edit-btn"
-                                onClick={() => setEditing(true)}
-                            >
-                                Editar
-                            </button>
+                        {!editing && (canUpdate || canDelete) && !confirmingDelete && (
+                            <div className="dp-detail-edit-btn dp-detail-actions-row">
+                                {canUpdate && (
+                                    <button type="button" className="dp-btn-secondary" onClick={() => setEditing(true)}>
+                                        Editar
+                                    </button>
+                                )}
+                                {canDelete && (
+                                    <button
+                                        type="button"
+                                        className="dp-btn-secondary dp-documentos-delete"
+                                        onClick={() => setConfirmingDelete(true)}
+                                    >
+                                        Eliminar expediente
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {!editing && confirmingDelete && (
+                            <div className="dp-detail-edit-btn">
+                                <p className="dp-table-empty">
+                                    Esta acción no borra el historial, pero el expediente deja de aparecer en las
+                                    búsquedas y listados.
+                                </p>
+                                {deleteError && <p className="dp-form-error">{deleteError}</p>}
+                                <div className="dp-detail-actions-row">
+                                    <button
+                                        type="button"
+                                        className="dp-btn-secondary"
+                                        onClick={() => setConfirmingDelete(false)}
+                                        disabled={deleting}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="dp-btn-secondary dp-documentos-delete"
+                                        onClick={handleDelete}
+                                        disabled={deleting}
+                                    >
+                                        {deleting ? "Eliminando..." : "Sí, eliminar definitivamente"}
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </section>
 
@@ -285,45 +322,6 @@ function ExpedienteDetail() {
                                     </button>
                                 </div>
                             </form>
-                        </section>
-                    )}
-
-                    {canDelete && (
-                        <section className="dp-panel">
-                            <h2 className="dp-panel-title">Eliminar expediente</h2>
-                            <p className="dp-table-empty">
-                                Esta acción no borra el historial, pero el expediente deja de aparecer en las
-                                búsquedas y listados.
-                            </p>
-                            {deleteError && <p className="dp-form-error">{deleteError}</p>}
-                            {!confirmingDelete ? (
-                                <button
-                                    type="button"
-                                    className="dp-btn-secondary dp-documentos-delete"
-                                    onClick={() => setConfirmingDelete(true)}
-                                >
-                                    Eliminar expediente
-                                </button>
-                            ) : (
-                                <div className="dp-form-actions">
-                                    <button
-                                        type="button"
-                                        className="dp-btn-secondary"
-                                        onClick={() => setConfirmingDelete(false)}
-                                        disabled={deleting}
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="dp-btn-secondary dp-documentos-delete"
-                                        onClick={handleDelete}
-                                        disabled={deleting}
-                                    >
-                                        {deleting ? "Eliminando..." : "Sí, eliminar definitivamente"}
-                                    </button>
-                                </div>
-                            )}
                         </section>
                     )}
 
