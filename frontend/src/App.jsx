@@ -9,6 +9,7 @@ import MesaPartesHome from "./pages/MesaDePartes/MesaPartesHome";
 import Seguimiento from "./pages/MesaDePartes/Seguimiento";
 import SeguimientoDetalle from "./pages/MesaDePartes/SeguimientoDetalle";
 import MiPerfil from "./pages/MesaDePartes/MiPerfil";
+import Notificaciones from "./pages/MesaDePartes/Notificaciones";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -98,6 +99,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <MiPerfil />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/mesa-de-partes/notificaciones"
+                element={
+                    <ProtectedRoute>
+                        <Notificaciones />
                     </ProtectedRoute>
                 }
             />

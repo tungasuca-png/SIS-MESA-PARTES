@@ -11,15 +11,16 @@ import "./PortalLayout.css";
 // (/fut, /expedientes) — acá solo se les da una entrada distinta.
 // No hay un ítem "Documentos" aparte: sus documentos se consultan desde el
 // detalle de cada expediente (panel de Documentos en ExpedienteDetail).
-// "Notificaciones" no tiene ruta: no existe todavía un Notificaciones Service
-// ni datos reales que mostrar (ver docs/etapa-12-especificacion-funcional.md);
-// se deja marcada como "Próximamente" en vez de inventar datos.
+// "Notificaciones" no tiene un Notificaciones Service propio (no hay canal
+// push/email todavía, ver docs/etapa-12-especificacion-funcional.md sección
+// 17) pero sí muestra novedades reales: derivaciones y resultados finales
+// ya registrados (ver Notificaciones.jsx) — no es un feed inventado.
 const PORTAL_NAV = [
     { key: "inicio", label: "Inicio", to: "/mesa-de-partes", icon: "dashboard" },
     { key: "registrar", label: "Registrar solicitud", to: "/fut", icon: "plus" },
     { key: "expedientes", label: "Mis expedientes", to: "/expedientes", icon: "folder" },
     { key: "seguimiento", label: "Seguimiento", to: "/mesa-de-partes/seguimiento", icon: "trending" },
-    { key: "notificaciones", label: "Notificaciones", to: null, icon: "bell" },
+    { key: "notificaciones", label: "Notificaciones", to: "/mesa-de-partes/notificaciones", icon: "bell" },
     { key: "perfil", label: "Mi perfil", to: "/mesa-de-partes/perfil", icon: "users" },
 ];
 
