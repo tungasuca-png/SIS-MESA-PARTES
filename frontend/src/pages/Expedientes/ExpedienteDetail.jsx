@@ -8,6 +8,7 @@ import DerivacionesPanel from "../../components/dashboard/DerivacionesPanel";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
 import { changeEstado, getExpediente, updateExpediente } from "../../services/expedientesService";
+import { parseDatosSolicitante } from "../../services/futService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { ESTADOS, PRIORIDADES } from "../../constants/expedientes";
@@ -116,6 +117,16 @@ function ExpedienteDetail() {
         }
     };
 
+    // Un expediente creado por el FUT Digital guarda los datos del
+    // solicitante (nombres/DNI/teléfono/domicilio/correo) y la
+    // fundamentación empaquetados dentro de "descripcion" (ver
+    // buildDescripcion en futService.js — no hay columnas propias para eso
+    // todavía). Si se puede desarmar ese formato, se muestran los datos por
+    // separado en vez de un bloque de texto plano; si no (un expediente
+    // creado por el personal interno, con descripción libre), se muestra
+    // tal cual.
+    const datosFut = expediente ? parseDatosSolicitante(expediente.descripcion) : null;
+
     return (
         <RoleLayout title="Detalle del expediente">
             <Link to="/expedientes" className="dp-back-link">
@@ -142,10 +153,48 @@ function ExpedienteDetail() {
                                     <dt>Tipo</dt>
                                     <dd>{expediente.tipo}</dd>
                                 </div>
-                                <div>
-                                    <dt>Descripción</dt>
-                                    <dd>{expediente.descripcion || "—"}</dd>
-                                </div>
+                                {datosFut ? (
+                                    <>
+                                        <div>
+                                            <dt>Nombres y apellidos</dt>
+                                            <dd>{datosFut.nombres}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>DNI</dt>
+                                            <dd>{datosFut.dni || "—"}</dd>
+                                        </div>
+                                        {datosFut.telefono && (
+                                            <div>
+                                                <dt>Teléfono</dt>
+                                                <dd>{datosFut.telefono}</dd>
+                                            </div>
+                                        )}
+                                        {(datosFut.domicilio || datosFut.distrito) && (
+                                            <div>
+                                                <dt>Domicilio</dt>
+                                                <dd>
+                                                    {datosFut.domicilio || "—"}
+                                                    {datosFut.distrito ? ` — ${datosFut.distrito}` : ""}
+                                                </dd>
+                                            </div>
+                                        )}
+                                        {datosFut.correo && (
+                                            <div>
+                                                <dt>Correo</dt>
+                                                <dd>{datosFut.correo}</dd>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <dt>Fundamentación</dt>
+                                            <dd>{datosFut.fundamentacion}</dd>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div>
+                                        <dt>Descripción</dt>
+                                        <dd>{expediente.descripcion || "—"}</dd>
+                                    </div>
+                                )}
                                 <div>
                                     <dt>Solicitante</dt>
                                     <dd>

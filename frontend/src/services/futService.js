@@ -32,17 +32,44 @@ function buildDescripcion({ nombres, dni, telefono, domicilio, distrito, correo,
     return lineas.join("\n");
 }
 
-// Recupera del texto libre de "descripcion" los dos datos que hacen falta
-// para reconstruir el cargo del FUT (nombres y folios) — el resto (asunto,
-// código, fecha) ya vive en columnas propias del expediente. Si no calzan
-// los patrones (expediente que no vino del FUT Digital), no hay cargo que
-// generar.
-function parseDatosSolicitante(descripcion) {
+// Recupera del texto libre de "descripcion" los datos que buildDescripcion()
+// empaquetó ahí (nombres/DNI/teléfono/domicilio/distrito/correo,
+// fundamentación y folios) — el resto (asunto, código, fecha) ya vive en
+// columnas propias del expediente. Si no calzan los patrones básicos
+// (nombres y folios), el expediente no vino del FUT Digital y no hay nada
+// que reconstruir/mostrar por separado.
+//
+// Se usa tanto para regenerar el cargo del FUT (renderCargoPdf, que solo
+// necesita nombres/folios) como para mostrar la descripción ordenada por
+// campos en el detalle del expediente (ver ExpedienteDetail.jsx), en vez de
+// un bloque de texto plano.
+export function parseDatosSolicitante(descripcion) {
     if (!descripcion) return null;
     const nombresMatch = descripcion.match(/Nombres y apellidos:\s*(.+)/);
     const foliosMatch = descripcion.match(/N° de folios adjuntos:\s*(\d+)/);
     if (!nombresMatch || !foliosMatch) return null;
-    return { nombres: nombresMatch[1].trim(), folios: foliosMatch[1] };
+
+    const dniMatch = descripcion.match(/DNI:\s*(.+)/);
+    const telefonoMatch = descripcion.match(/Teléfono:\s*(.+)/);
+    const domicilioMatch = descripcion.match(/Domicilio:\s*(.+?)\s*—\s*Distrito:\s*(.+)/);
+    const correoMatch = descripcion.match(/Correo:\s*(.+)/);
+    const fundamentacionMatch = descripcion.match(
+        /FUNDAMENTACIÓN DE LO QUE SOLICITA\n([\s\S]*?)\n\nN° de folios adjuntos:/
+    );
+
+    const domicilio = domicilioMatch && domicilioMatch[1].trim() !== "-" ? domicilioMatch[1].trim() : "";
+    const distrito = domicilioMatch && domicilioMatch[2].trim() !== "-" ? domicilioMatch[2].trim() : "";
+
+    return {
+        nombres: nombresMatch[1].trim(),
+        folios: foliosMatch[1],
+        dni: dniMatch ? dniMatch[1].trim() : "",
+        telefono: telefonoMatch ? telefonoMatch[1].trim() : "",
+        domicilio,
+        distrito,
+        correo: correoMatch ? correoMatch[1].trim() : "",
+        fundamentacion: fundamentacionMatch ? fundamentacionMatch[1].trim() : "",
+    };
 }
 
 // Convierte un array de bytes a un PDF de una sola página que solo contiene
