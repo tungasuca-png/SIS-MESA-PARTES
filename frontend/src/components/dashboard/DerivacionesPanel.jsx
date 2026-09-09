@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { crearDerivacion, getDerivacionesByExpediente } from "../../services/derivacionesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { TIPOS_DERIVACION } from "../../constants/derivaciones";
-import { ACTORES } from "../../constants/roles";
+import { ACTORES_DESTINO, roleLabel } from "../../constants/roles";
 import Icon from "./Icon";
 import "./forms.css";
 import "./documentosPanel.css";
@@ -13,11 +14,16 @@ function tipoLabel(value) {
     return TIPOS_DERIVACION.find((item) => item.value === value)?.label ?? value;
 }
 
-const CAMPOS_INICIALES = { tipo: "DERIVACION", origen: "", destino: "", motivo: "", condicion: "" };
+const CAMPOS_INICIALES = { tipo: "DERIVACION", destino: "", motivo: "", condicion: "" };
 
 function DerivacionesPanel({ expedienteId }) {
+    const { user } = useAuth();
     const { can } = usePermissions();
     const canCreate = can("derivaciones.create");
+
+    // El origen de una derivación YA NO se elige: siempre es quien está
+    // logueado registrándola (su usuario y su rol), no una lista de opciones.
+    const origenActual = user ? `${user.username} (${roleLabel(user.role)})` : "";
 
     const [derivaciones, setDerivaciones] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -54,14 +60,14 @@ function DerivacionesPanel({ expedienteId }) {
         event.preventDefault();
         setCreateError("");
 
-        if (!campos.origen.trim() || !campos.destino.trim() || !campos.motivo.trim()) {
-            setCreateError("Origen, destino y motivo son obligatorios.");
+        if (!campos.destino.trim() || !campos.motivo.trim()) {
+            setCreateError("Destino y motivo son obligatorios.");
             return;
         }
 
         setCreando(true);
         try {
-            await crearDerivacion(expedienteId, campos);
+            await crearDerivacion(expedienteId, { ...campos, origen: origenActual });
             setCampos(CAMPOS_INICIALES);
             await load();
         } catch (err) {
@@ -89,20 +95,13 @@ function DerivacionesPanel({ expedienteId }) {
                     </div>
                     <div className="dp-form-group">
                         <label htmlFor="deriv-origen">Origen</label>
-                        <select id="deriv-origen" value={campos.origen} onChange={handleChange("origen")} disabled={creando}>
-                            <option value="">Selecciona...</option>
-                            {ACTORES.map((item) => (
-                                <option key={item.value} value={item.value}>
-                                    {item.label}
-                                </option>
-                            ))}
-                        </select>
+                        <input id="deriv-origen" value={origenActual} readOnly disabled />
                     </div>
                     <div className="dp-form-group">
                         <label htmlFor="deriv-destino">Destino</label>
                         <select id="deriv-destino" value={campos.destino} onChange={handleChange("destino")} disabled={creando}>
                             <option value="">Selecciona...</option>
-                            {ACTORES.map((item) => (
+                            {ACTORES_DESTINO.map((item) => (
                                 <option key={item.value} value={item.value}>
                                     {item.label}
                                 </option>
