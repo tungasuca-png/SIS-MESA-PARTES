@@ -68,6 +68,11 @@
     margin: 0;
     font-size: 13.5px;
     color: var(--dp-text-primary);
+    /* La descripción de una solicitud del FUT Digital trae saltos de línea
+       reales (datos del solicitante + fundamentación, ver buildDescripcion
+       en futService.js) — sin esto el HTML los colapsa y todo el texto
+       queda amontonado en una sola línea. */
+    white-space: pre-line;
 }
 
 .dp-detail-edit-btn {
