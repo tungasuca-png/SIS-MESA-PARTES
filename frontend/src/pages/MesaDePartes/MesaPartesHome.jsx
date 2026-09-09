@@ -5,8 +5,10 @@ import "./mesaDePartes.css";
 
 // Acciones del solicitante — NO son tarjetas KPI (sin conteos globales, sin
 // datos de otros usuarios): cada bloque es simplemente un atajo a una
-// función real que ya existe (/fut, /expedientes, .../seguimiento,
-// /documentos), acotada al propio usuario por el backend.
+// función real que ya existe (/fut, /expedientes, .../seguimiento), acotada
+// al propio usuario por el backend.
+// No hay una tarjeta "Documentos" aparte: sus documentos se consultan desde
+// el detalle de cada expediente (panel de Documentos en ExpedienteDetail).
 const ACCIONES = [
     {
         key: "registrar",
@@ -31,14 +33,6 @@ const ACCIONES = [
         boton: "Ver seguimiento",
         to: "/mesa-de-partes/seguimiento",
         icon: "trending",
-    },
-    {
-        key: "documentos",
-        titulo: "Documentos",
-        descripcion: "Consulte los documentos relacionados con sus expedientes.",
-        boton: "Ver documentos",
-        to: "/documentos",
-        icon: "file",
     },
 ];
 

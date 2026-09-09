@@ -4,7 +4,6 @@ import Login from "./pages/Login/login";
 import Dashboard from "./pages/Dashboard/dashboard";
 import ExpedientesList from "./pages/Expedientes/ExpedientesList";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
-import MisDocumentos from "./pages/Documentos/MisDocumentos";
 import FutDigital from "./pages/FUT/FutDigital";
 import MesaPartesHome from "./pages/MesaDePartes/MesaPartesHome";
 import Seguimiento from "./pages/MesaDePartes/Seguimiento";
@@ -50,18 +49,10 @@ function App() {
                 }
             />
 
-            {/* "Mis documentos": listado propio del SOLICITANTE (el backend ya
-                acota a lo que el usuario subió). El personal interno sigue
-                viendo/subiendo documentos desde el detalle del expediente
-                (panel de Documentos), no desde acá. */}
-            <Route
-                path="/documentos"
-                element={
-                    <ProtectedRoute>
-                        <MisDocumentos />
-                    </ProtectedRoute>
-                }
-            />
+            {/* No hay ruta "/documentos" aparte: sus documentos se consultan
+                desde el detalle de cada expediente (panel de Documentos en
+                ExpedienteDetail), tanto para personal interno como para el
+                SOLICITANTE. */}
 
             {/* FUT Digital (crea un Expediente real vía Expedientes Service) */}
             <Route
@@ -74,10 +65,10 @@ function App() {
             />
 
             {/* Portal del SOLICITANTE — Mesa de Partes Virtual. Sin sidebar
-                azul administrativo (ver PortalLayout). "Registrar solicitud",
-                "Mis expedientes" y "Documentos" reutilizan /fut, /expedientes
-                y /documentos (arriba); acá solo van las páginas que no
-                existían antes: el inicio del portal, seguimiento y perfil. */}
+                azul administrativo (ver PortalLayout). "Registrar solicitud"
+                y "Mis expedientes" reutilizan /fut y /expedientes (arriba);
+                acá solo van las páginas que no existían antes: el inicio del
+                portal, seguimiento y perfil. */}
             <Route
                 path="/mesa-de-partes"
                 element={

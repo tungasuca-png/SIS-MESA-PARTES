@@ -8,7 +8,9 @@ import "./PortalLayout.css";
 // Navegación del SOLICITANTE: header institucional + menú horizontal, SIN el
 // sidebar azul del administrador (ver PortalLayout vs. DashboardLayout). Las
 // rutas ya existen y ya están acotadas al propio usuario por el backend
-// (/fut, /expedientes, /documentos) — acá solo se les da una entrada distinta.
+// (/fut, /expedientes) — acá solo se les da una entrada distinta.
+// No hay un ítem "Documentos" aparte: sus documentos se consultan desde el
+// detalle de cada expediente (panel de Documentos en ExpedienteDetail).
 // "Notificaciones" no tiene ruta: no existe todavía un Notificaciones Service
 // ni datos reales que mostrar (ver docs/etapa-12-especificacion-funcional.md);
 // se deja marcada como "Próximamente" en vez de inventar datos.
@@ -17,7 +19,6 @@ const PORTAL_NAV = [
     { key: "registrar", label: "Registrar solicitud", to: "/fut", icon: "plus" },
     { key: "expedientes", label: "Mis expedientes", to: "/expedientes", icon: "folder" },
     { key: "seguimiento", label: "Seguimiento", to: "/mesa-de-partes/seguimiento", icon: "trending" },
-    { key: "documentos", label: "Documentos", to: "/documentos", icon: "file" },
     { key: "notificaciones", label: "Notificaciones", to: null, icon: "bell" },
     { key: "perfil", label: "Mi perfil", to: "/mesa-de-partes/perfil", icon: "users" },
 ];
