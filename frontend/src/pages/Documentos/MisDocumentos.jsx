@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import RoleLayout from "../../components/portal/RoleLayout";
 import Icon from "../../components/dashboard/Icon";
 import {
     base64ToBlob,
@@ -89,7 +89,7 @@ function MisDocumentos() {
     };
 
     return (
-        <DashboardLayout title="Documentos">
+        <RoleLayout title="Documentos">
             <section className="dp-panel">
                 <div className="dp-list-header">
                     <h2 className="dp-panel-title">Mis documentos</h2>
@@ -181,7 +181,7 @@ function MisDocumentos() {
                     </>
                 )}
             </section>
-        </DashboardLayout>
+        </RoleLayout>
     );
 }
 

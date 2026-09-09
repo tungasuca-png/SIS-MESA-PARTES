@@ -25,8 +25,11 @@ function Login() {
         setLoading(true);
 
         try {
-            await loginUser(username, password);
-            navigate("/dashboard");
+            const loggedInUser = await loginUser(username, password);
+            // El SOLICITANTE entra a su propio portal (Mesa de Partes
+            // Virtual, sin sidebar administrativo); el resto de roles sigue
+            // entrando al Dashboard de siempre.
+            navigate(loggedInUser.role === "SOLICITANTE" ? "/mesa-de-partes" : "/dashboard");
         } catch (err) {
             console.error(err);
             setError("Usuario o contraseña incorrectos");

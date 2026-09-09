@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import RoleLayout from "../../components/portal/RoleLayout";
 import FutHeader from "../../components/dashboard/FutHeader";
 import SignaturePad from "../../components/dashboard/SignaturePad";
 import Icon from "../../components/dashboard/Icon";
@@ -159,7 +159,7 @@ function FutDigital() {
     };
 
     return (
-        <DashboardLayout title="FUT Digital">
+        <RoleLayout title="FUT Digital">
             <div className="fut-page">
                 <FutHeader numero={result?.expediente?.codigo} />
 
@@ -420,7 +420,7 @@ function FutDigital() {
                                 onClick={handleConfirmSend}
                                 disabled={submitting}
                             >
-                                {submitting ? "Enviando..." : "Enviar solicitud →"}
+                                {submitting ? "Enviando..." : "Presentar solicitud"}
                             </button>
                         </div>
                     </div>
@@ -462,10 +462,13 @@ function FutDigital() {
                             </button>
                             <button
                                 type="button"
-                                className="dp-btn-primary"
+                                className="dp-btn-secondary"
                                 onClick={() => navigate(`/expedientes/${result.expediente.codigo}`)}
                             >
-                                Ir al expediente
+                                Ver expediente
+                            </button>
+                            <button type="button" className="dp-btn-primary" onClick={() => navigate("/mesa-de-partes")}>
+                                Volver a Mesa de Partes
                             </button>
                         </div>
                     </div>
@@ -512,7 +515,7 @@ function FutDigital() {
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+        </RoleLayout>
     );
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
 import DocumentosPanel from "../../components/dashboard/DocumentosPanel";
@@ -113,7 +113,7 @@ function ExpedienteDetail() {
     };
 
     return (
-        <DashboardLayout title="Detalle del expediente">
+        <RoleLayout title="Detalle del expediente">
             <Link to="/expedientes" className="dp-back-link">
                 ← Volver a expedientes
             </Link>
@@ -279,7 +279,7 @@ function ExpedienteDetail() {
                     </div>
                 </div>
             )}
-        </DashboardLayout>
+        </RoleLayout>
     );
 }
 

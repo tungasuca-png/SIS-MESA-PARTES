@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
+import RoleLayout from "../../components/portal/RoleLayout";
 import ExpedienteFormModal from "../../components/dashboard/ExpedienteFormModal";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
@@ -107,7 +107,7 @@ function ExpedientesList() {
     const titulo = canViewAll ? "Expedientes" : "Mis expedientes";
 
     return (
-        <DashboardLayout title={titulo}>
+        <RoleLayout title={titulo}>
             <section className="dp-panel">
                 <div className="dp-list-header">
                     <h2 className="dp-panel-title">{titulo}</h2>
@@ -276,7 +276,7 @@ function ExpedientesList() {
                     }}
                 />
             )}
-        </DashboardLayout>
+        </RoleLayout>
     );
 }
 

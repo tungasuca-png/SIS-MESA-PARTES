@@ -6,6 +6,10 @@ import ExpedientesList from "./pages/Expedientes/ExpedientesList";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
 import MisDocumentos from "./pages/Documentos/MisDocumentos";
 import FutDigital from "./pages/FUT/FutDigital";
+import MesaPartesHome from "./pages/MesaDePartes/MesaPartesHome";
+import Seguimiento from "./pages/MesaDePartes/Seguimiento";
+import SeguimientoDetalle from "./pages/MesaDePartes/SeguimientoDetalle";
+import MiPerfil from "./pages/MesaDePartes/MiPerfil";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -65,6 +69,44 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <FutDigital />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Portal del SOLICITANTE — Mesa de Partes Virtual. Sin sidebar
+                azul administrativo (ver PortalLayout). "Registrar solicitud",
+                "Mis expedientes" y "Documentos" reutilizan /fut, /expedientes
+                y /documentos (arriba); acá solo van las páginas que no
+                existían antes: el inicio del portal, seguimiento y perfil. */}
+            <Route
+                path="/mesa-de-partes"
+                element={
+                    <ProtectedRoute>
+                        <MesaPartesHome />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/mesa-de-partes/seguimiento"
+                element={
+                    <ProtectedRoute>
+                        <Seguimiento />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/mesa-de-partes/seguimiento/:id"
+                element={
+                    <ProtectedRoute>
+                        <SeguimientoDetalle />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/mesa-de-partes/perfil"
+                element={
+                    <ProtectedRoute>
+                        <MiPerfil />
                     </ProtectedRoute>
                 }
             />

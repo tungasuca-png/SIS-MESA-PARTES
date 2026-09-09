@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import Icon from "./Icon";
 import "./QuickActions.css";
 
+// Acciones rápidas del Dashboard ADMINISTRATIVO. Un SOLICITANTE nunca
+// renderiza este componente (Dashboard.jsx lo redirige antes a su propio
+// portal, /mesa-de-partes, que tiene sus propias tarjetas de acción) — por
+// eso esta lista ya no necesita distinguir su rol.
+//
 // "to: null" = módulo todavía no implementado (permanece visual/inerte).
 const ACTIONS = [
-    // Registro rápido para personal interno (modal simple). El SOLICITANTE
-    // no usa este atajo: su alta de acuerdo al FUT físico va por "Registrar
-    // solicitud" (FUT Digital), no por un formulario genérico.
     {
         key: "nuevo-expediente",
         label: "Nuevo expediente",
@@ -17,13 +18,6 @@ const ACTIONS = [
         to: "/expedientes",
         state: { openCreate: true },
     },
-    {
-        key: "registrar-solicitud",
-        label: "Registrar solicitud",
-        icon: "plus",
-        permission: "solicitudes.create",
-        to: "/fut",
-    },
     // No hay una accion "Registrar documento" independiente: un documento
     // siempre pertenece a un expediente (no existen documentos huerfanos), asi
     // que subir uno se hace entrando al expediente concreto ("Ver
@@ -31,40 +25,23 @@ const ACTIONS = [
     {
         key: "ver-expedientes",
         label: "Ver expedientes",
-        labelSolicitante: "Ver mis expedientes",
         icon: "folder",
-        permission: ["expedientes.view", "expedientes.view_own"],
+        permission: "expedientes.view",
         to: "/expedientes",
-    },
-    // "Ver documentos" solo aplica al SOLICITANTE (documentos.view_own): es
-    // su propio listado de documentos subidos. El personal interno sigue
-    // viendo/subiendo documentos desde el detalle del expediente, no desde
-    // un atajo aparte (mismo criterio que el ítem del menú lateral).
-    {
-        key: "ver-documentos",
-        label: "Ver documentos",
-        icon: "file",
-        permission: "documentos.view_own",
-        to: "/documentos",
     },
     {
         key: "ver-seguimiento",
         label: "Ver seguimiento",
         icon: "trending",
-        permission: ["seguimiento.view", "seguimiento.view_own"],
+        permission: "seguimiento.view",
         to: null,
     },
 ];
 
 function QuickActions() {
-    const { user } = useAuth();
     const { can } = usePermissions();
     const navigate = useNavigate();
-    const esSolicitante = user?.role === "SOLICITANTE";
-    const actions = ACTIONS.filter((action) => can(action.permission)).map((action) => ({
-        ...action,
-        label: esSolicitante && action.labelSolicitante ? action.labelSolicitante : action.label,
-    }));
+    const actions = ACTIONS.filter((action) => can(action.permission));
 
     if (actions.length === 0) return null;
 
