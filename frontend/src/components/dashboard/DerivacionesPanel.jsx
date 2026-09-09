@@ -4,6 +4,7 @@ import { crearDerivacion, getDerivacionesByExpediente } from "../../services/der
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { TIPOS_DERIVACION } from "../../constants/derivaciones";
+import { ACTORES } from "../../constants/roles";
 import Icon from "./Icon";
 import "./forms.css";
 import "./documentosPanel.css";
@@ -88,25 +89,25 @@ function DerivacionesPanel({ expedienteId }) {
                     </div>
                     <div className="dp-form-group">
                         <label htmlFor="deriv-origen">Origen</label>
-                        <input
-                            id="deriv-origen"
-                            value={campos.origen}
-                            onChange={handleChange("origen")}
-                            placeholder="Ej: Secretaría"
-                            maxLength={100}
-                            disabled={creando}
-                        />
+                        <select id="deriv-origen" value={campos.origen} onChange={handleChange("origen")} disabled={creando}>
+                            <option value="">Selecciona...</option>
+                            {ACTORES.map((item) => (
+                                <option key={item.value} value={item.value}>
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="dp-form-group">
                         <label htmlFor="deriv-destino">Destino</label>
-                        <input
-                            id="deriv-destino"
-                            value={campos.destino}
-                            onChange={handleChange("destino")}
-                            placeholder="Ej: Dirección"
-                            maxLength={100}
-                            disabled={creando}
-                        />
+                        <select id="deriv-destino" value={campos.destino} onChange={handleChange("destino")} disabled={creando}>
+                            <option value="">Selecciona...</option>
+                            {ACTORES.map((item) => (
+                                <option key={item.value} value={item.value}>
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="dp-form-group">
                         <label htmlFor="deriv-motivo">Motivo</label>
