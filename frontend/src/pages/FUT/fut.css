@@ -189,8 +189,7 @@
     white-space: pre-wrap;
 }
 
-.fut-confirmacion,
-.fut-cargo {
+.fut-confirmacion {
     text-align: center;
 }
 
@@ -207,8 +206,7 @@
     color: var(--dp-primary);
 }
 
-.fut-confirmacion .dp-detail-list,
-.fut-cargo .dp-detail-list {
+.fut-confirmacion .dp-detail-list {
     text-align: left;
     margin-top: 18px;
 }
@@ -218,23 +216,183 @@
     justify-content: center;
 }
 
-.fut-cargo-institucion {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
+/* =====================================================
+   CARGO DIGITAL — réplica del FUT físico completo (los
+   mismos datos ya capturados en el formulario, en modo
+   solo lectura), para que lo que se imprime se parezca
+   al formulario de papel real.
+   ====================================================== */
+
+.fut-cargo {
+    text-align: left;
+}
+
+.fut-cargo-section {
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--dp-border);
+}
+
+.fut-cargo-section:first-of-type {
+    padding-top: 0;
+    margin-top: 20px;
+    border-top: none;
+}
+
+.fut-cargo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.fut-cargo-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--dp-border);
+}
+
+.fut-cargo-field span {
+    font-size: 13.5px;
+    color: var(--dp-text-primary);
+    min-height: 1.2em;
+}
+
+.fut-cargo-field label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
     color: var(--dp-text-secondary);
 }
 
-.fut-cargo-titulo {
-    margin: 4px 0 0;
-    font-size: 16px;
-    font-weight: 800;
+.fut-cargo-linea {
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--dp-border);
+    font-size: 13.5px;
     color: var(--dp-text-primary);
+}
+
+.fut-cargo-lined-text {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--dp-text-primary);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(1.9em - 1px),
+        var(--dp-border) calc(1.9em - 1px),
+        var(--dp-border) 1.9em
+    );
+    min-height: 5.7em;
+}
+
+.fut-cargo-vacio {
+    color: var(--dp-text-muted);
+    font-style: italic;
+}
+
+.fut-cargo-doc-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--dp-text-primary);
+}
+
+.fut-cargo-folios {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: var(--dp-text-secondary);
+}
+
+.fut-cargo-fecha-firma {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.fut-cargo-fecha-firma > p {
+    margin: 0;
+    font-size: 13.5px;
+}
+
+.fut-cargo-firma {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 160px;
+}
+
+.fut-cargo-firma img {
+    height: 60px;
+    object-fit: contain;
+    border-bottom: 1px solid var(--dp-border);
+}
+
+.fut-cargo-firma span {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--dp-text-secondary);
 }
 
 .fut-cargo .fut-table-wrapper {
     margin-top: 20px;
+}
+
+.fut-cargo-separator {
+    margin: 26px 0;
+    text-align: center;
+    letter-spacing: 2px;
+    color: var(--dp-text-muted);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.fut-cargo-resumen-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.fut-cargo-resumen-table th,
+.fut-cargo-resumen-table td {
+    border: 1px solid var(--dp-border);
+    padding: 8px 12px;
+    font-size: 13px;
+    text-align: left;
+}
+
+.fut-cargo-resumen-table th {
+    width: 35%;
+    background: var(--dp-bg);
+    font-weight: 700;
+    color: var(--dp-text-secondary);
+}
+
+@media print {
+    .fut-cargo-section,
+    .fut-cargo-fecha-firma,
+    .fut-cargo .fut-table-wrapper,
+    .fut-cargo-resumen-table {
+        page-break-inside: avoid;
+    }
+}
+
+@media (max-width: 720px) {
+    .fut-cargo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fut-cargo-fecha-firma {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 @media (max-width: 720px) {

@@ -476,33 +476,115 @@ function FutDigital() {
 
                 {step === "confirmation" && result && showCargo && (
                     <div className="fut-cargo">
-                        <p className="fut-cargo-institucion">I.E. TUNGASUCA</p>
-                        <p className="fut-cargo-titulo">Formulario Único de Trámite (FUT)</p>
+                        <p className="fut-destinatario">SEÑORA DIRECTORA DE LA I.E &quot;TUNGASUCA&quot;:</p>
 
-                        <dl className="dp-detail-list">
-                            <div>
-                                <dt>Apellidos y nombres</dt>
-                                <dd>{nombres}</dd>
+                        <section className="fut-cargo-section">
+                            <h3 className="fut-section-title">Datos del solicitante</h3>
+                            <div className="fut-cargo-grid">
+                                <div className="fut-cargo-field">
+                                    <span>{nombres}</span>
+                                    <label>Nombres y apellidos</label>
+                                </div>
+                                <div className="fut-cargo-field">
+                                    <span>{dni}</span>
+                                    <label>DNI</label>
+                                </div>
+                                <div className="fut-cargo-field">
+                                    <span>{telefono || "—"}</span>
+                                    <label>Teléfono</label>
+                                </div>
+                                <div className="fut-cargo-field">
+                                    <span>{domicilio || "—"}</span>
+                                    <label>Domicilio actual</label>
+                                </div>
+                                <div className="fut-cargo-field">
+                                    <span>{distrito || "—"}</span>
+                                    <label>Distrito</label>
+                                </div>
+                                <div className="fut-cargo-field">
+                                    <span>{correo || "—"}</span>
+                                    <label>Correo electrónico</label>
+                                </div>
                             </div>
-                            <div>
-                                <dt>Asunto</dt>
-                                <dd>{sumilla}</dd>
+                        </section>
+
+                        <section className="fut-cargo-section">
+                            <h3 className="fut-section-title">Asunto</h3>
+                            <p className="fut-cargo-linea">{sumilla}</p>
+                        </section>
+
+                        <section className="fut-cargo-section">
+                            <h3 className="fut-section-title">Fundamentación de lo que solicita</h3>
+                            <p className="fut-cargo-lined-text">{fundamentacion}</p>
+                        </section>
+
+                        <section className="fut-cargo-section">
+                            <h3 className="fut-section-title">
+                                Documento que se adjunta
+                                <span className="fut-section-subtitle"> (sustentatorio de su solicitud)</span>
+                            </h3>
+                            {documentos.length === 0 ? (
+                                <p className="fut-cargo-lined-text fut-cargo-vacio">Ninguno</p>
+                            ) : (
+                                <ul className="fut-cargo-doc-list">
+                                    {documentos.map((item, index) => (
+                                        <li key={`${item.file.name}-${index}`}>
+                                            {item.descripcion ? `${item.descripcion} — ` : ""}
+                                            {item.file.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            <p className="fut-cargo-folios">N° de folios: {folios}</p>
+                        </section>
+
+                        <section className="fut-cargo-section fut-cargo-fecha-firma">
+                            <p>
+                                <strong>Fecha:</strong> Carabayllo, {fechaHoy}
+                            </p>
+                            <div className="fut-cargo-firma">
+                                {firmaDataUrl ? (
+                                    <img src={firmaDataUrl} alt="Firma del solicitante" />
+                                ) : (
+                                    <p className="fut-cargo-vacio">Firma no capturada</p>
+                                )}
+                                <span>Firma del solicitante</span>
                             </div>
-                            <div>
-                                <dt>Fecha</dt>
-                                <dd>Carabayllo, {fechaHoy}</dd>
-                            </div>
-                            <div>
-                                <dt>N° expediente</dt>
-                                <dd className="fut-confirmacion-codigo">{result.expediente.codigo}</dd>
-                            </div>
-                            <div>
-                                <dt>N° folios</dt>
-                                <dd>{folios}</dd>
-                            </div>
-                        </dl>
+                        </section>
 
                         <DerivacionTable numeroExpediente={result.expediente.codigo} />
+
+                        <div className="fut-cargo-separator">
+                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                        </div>
+
+                        <section className="fut-cargo-section">
+                            <h3 className="fut-section-title">Cargo de recepción</h3>
+                            <table className="fut-cargo-resumen-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Apellidos y nombres</th>
+                                        <td>{nombres}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Asunto</th>
+                                        <td>{sumilla}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <td>Carabayllo, {fechaHoy}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>N° expediente</th>
+                                        <td className="fut-confirmacion-codigo">{result.expediente.codigo}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>N° folios</th>
+                                        <td>{folios}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
 
                         <div className="dp-form-actions">
                             <button type="button" className="dp-btn-secondary" onClick={() => setShowCargo(false)}>
