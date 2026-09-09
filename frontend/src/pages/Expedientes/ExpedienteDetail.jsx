@@ -12,7 +12,7 @@ import { parseDatosSolicitante } from "../../services/futService";
 import { roleLabel } from "../../constants/roles";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
-import { ESTADOS, PRIORIDADES } from "../../constants/expedientes";
+import { ESTADOS, PRIORIDADES, TRANSICIONES_ESTADO } from "../../constants/expedientes";
 import "../../components/dashboard/forms.css";
 import "./expedienteDetail.css";
 
@@ -127,6 +127,15 @@ function ExpedienteDetail() {
     // creado por el personal interno, con descripción libre), se muestra
     // tal cual.
     const datosFut = expediente ? parseDatosSolicitante(expediente.descripcion) : null;
+
+    // Solo se ofrecen las transiciones que el backend realmente admite
+    // desde el estado actual (ver estados.go) — antes se mostraban las 3
+    // opciones restantes sin importar cuál, y el backend rechazaba las
+    // inválidas (por ejemplo, "Pendiente" directo a "Atendido"), lo que se
+    // sentía como que no se podía cambiar el estado sin decir por qué.
+    const estadosDisponibles = expediente
+        ? ESTADOS.filter((item) => (TRANSICIONES_ESTADO[expediente.estado] || []).includes(item.value))
+        : [];
 
     return (
         <RoleLayout title="Detalle del expediente">
@@ -299,6 +308,12 @@ function ExpedienteDetail() {
                     {canChangeEstado && (
                         <section className="dp-panel">
                             <h2 className="dp-panel-title">Cambiar estado</h2>
+                            {estadosDisponibles.length === 0 ? (
+                                <p className="dp-table-empty">
+                                    Este expediente ya está en un estado final ({expediente.estado.replace("_", " ")})
+                                    y no admite más cambios.
+                                </p>
+                            ) : (
                             <form className="dp-form" onSubmit={handleChangeEstado}>
                                 <div className="dp-form-group">
                                     <label htmlFor="nuevo-estado">Nuevo estado</label>
@@ -309,7 +324,7 @@ function ExpedienteDetail() {
                                         disabled={changingEstado}
                                     >
                                         <option value="">Selecciona un estado</option>
-                                        {ESTADOS.filter((item) => item.value !== expediente.estado).map((item) => (
+                                        {estadosDisponibles.map((item) => (
                                             <option key={item.value} value={item.value}>
                                                 {item.label}
                                             </option>
@@ -327,6 +342,7 @@ function ExpedienteDetail() {
                                     </button>
                                 </div>
                             </form>
+                            )}
                         </section>
                     )}
 

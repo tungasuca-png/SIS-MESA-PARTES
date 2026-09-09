@@ -20,4 +20,17 @@ export const ESTADOS = [
     { value: "OBSERVADO", label: "Observado" },
 ];
 
+// Transiciones válidas, mismo mapa que internal/estados/estados.go
+// (transiciones): ATENDIDO y OBSERVADO son finales a propósito. El
+// formulario de "Cambiar estado" solo debe ofrecer estas opciones — antes
+// mostraba cualquier otro estado y dejaba que el backend rechazara la
+// transición inválida, lo que se sentía como que "no se podía cambiar el
+// estado" sin explicar por qué.
+export const TRANSICIONES_ESTADO = {
+    PENDIENTE: ["EN_PROCESO", "OBSERVADO"],
+    EN_PROCESO: ["ATENDIDO"],
+    ATENDIDO: [],
+    OBSERVADO: [],
+};
+
 export const DEFAULT_PAGE_SIZE = 10;
