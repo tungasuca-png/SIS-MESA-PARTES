@@ -1,5 +1,5 @@
 import { createExpediente } from "./expedientesService";
-import { fileToBase64, uploadDocumento } from "./documentosService";
+import { downloadDocumento, fileToBase64, getDocumentosByExpediente, uploadDocumento } from "./documentosService";
 import { formatDate } from "../utils/format";
 
 // El FUT no tiene un número de trámite propio en el backend real (no existe
@@ -135,79 +135,264 @@ function buildImagePdf({ jpegBase64, width, height }) {
     return btoa(parts.join(""));
 }
 
-// Genera un PDF (canvas nativo + armado manual del PDF, sin librerías) con el
-// mismo contenido que el "Cargo digital" en pantalla. Se sube como documento
-// del propio expediente para que quede descargable después de enviar la
-// solicitud — no solo para el solicitante en el momento, también para
-// Secretaría/personal interno cuando revisen el expediente más adelante.
-function renderCargoPdf({ nombres, sumilla, codigo, folios }) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 800;
-    canvas.height = 420;
-    const ctx = canvas.getContext("2d");
+// Layout tipo A4 (ancho fijo, alto variable según el contenido real) para
+// que el PDF descargado se parezca al "Cargo digital" en pantalla
+// (FutDigital.jsx), con TODOS los campos del solicitante y la
+// fundamentación completa (con salto de línea real), no solo 5 campos en
+// una sola línea como antes.
+const PAGE_WIDTH = 850;
+const MARGIN = 50;
+const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.textBaseline = "top";
+// Envuelve texto por ancho disponible, respetando los saltos de línea que
+// ya tenga (p. ej. párrafos de la fundamentación). ctx.font debe estar
+// seteado antes de llamar a esto.
+function wrapText(ctx, text, maxWidth) {
+    const paragraphs = String(text ?? "").split("\n");
+    const lines = [];
+    paragraphs.forEach((paragraph) => {
+        if (paragraph === "") {
+            lines.push("");
+            return;
+        }
+        const words = paragraph.split(" ");
+        let current = "";
+        words.forEach((word) => {
+            const attempt = current ? `${current} ${word}` : word;
+            if (current && ctx.measureText(attempt).width > maxWidth) {
+                lines.push(current);
+                current = word;
+            } else {
+                current = attempt;
+            }
+        });
+        if (current) lines.push(current);
+    });
+    return lines;
+}
 
-    let y = 36;
+function loadImage(dataUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("No se pudo cargar la imagen de la firma."));
+        img.src = dataUrl;
+    });
+}
+
+function drawSectionTitle(ctx, y, text) {
+    ctx.fillStyle = "#68769F";
+    ctx.font = "700 11px Segoe UI, Arial, sans-serif";
+    ctx.fillText(text.toUpperCase(), MARGIN, y);
+    return y + 20;
+}
+
+// Dos campos (label + valor) por fila, con una línea debajo de cada uno —
+// igual que la grilla ".fut-cargo-grid" del cargo en pantalla.
+function drawFieldGrid(ctx, y, fields) {
+    const colGap = 24;
+    const colWidth = (CONTENT_WIDTH - colGap) / 2;
+    for (let i = 0; i < fields.length; i += 2) {
+        fields.slice(i, i + 2).forEach(([label, value], col) => {
+            const x = MARGIN + col * (colWidth + colGap);
+            ctx.fillStyle = "#68769F";
+            ctx.font = "700 9.5px Segoe UI, Arial, sans-serif";
+            ctx.fillText(label.toUpperCase(), x, y);
+            ctx.fillStyle = "#1B2559";
+            ctx.font = "500 13.5px Segoe UI, Arial, sans-serif";
+            ctx.fillText(String(value || "—"), x, y + 16);
+            ctx.strokeStyle = "#E9EDF7";
+            ctx.beginPath();
+            ctx.moveTo(x, y + 34);
+            ctx.lineTo(x + colWidth, y + 34);
+            ctx.stroke();
+        });
+        y += 44;
+    }
+    return y;
+}
+
+// Párrafo con líneas de cuaderno de fondo (como ".fut-cargo-lined-text"),
+// con un mínimo de líneas aunque el texto sea corto para que se note el
+// espacio destinado a la fundamentación.
+function drawLinedParagraph(ctx, y, text, minLines = 4) {
+    const lineHeight = 22;
+    ctx.font = "500 12.5px Segoe UI, Arial, sans-serif";
+    const lines = text ? wrapText(ctx, text, CONTENT_WIDTH) : [];
+    const totalLines = Math.max(lines.length, minLines);
+
+    for (let i = 0; i < totalLines; i += 1) {
+        const baseline = y + i * lineHeight + lineHeight - 6;
+        ctx.strokeStyle = "#E9EDF7";
+        ctx.beginPath();
+        ctx.moveTo(MARGIN, baseline);
+        ctx.lineTo(MARGIN + CONTENT_WIDTH, baseline);
+        ctx.stroke();
+        if (lines[i]) {
+            ctx.fillStyle = "#1B2559";
+            ctx.fillText(lines[i], MARGIN, baseline - 16);
+        }
+    }
+    if (!text) {
+        ctx.fillStyle = "#A0A8C0";
+        ctx.font = "italic 500 12.5px Segoe UI, Arial, sans-serif";
+        ctx.fillText("—", MARGIN, y + lineHeight - 22);
+    }
+    return y + totalLines * lineHeight + 14;
+}
+
+function drawResumenRow(ctx, y, label, value) {
+    const labelWidth = CONTENT_WIDTH * 0.32;
+    ctx.strokeStyle = "#E9EDF7";
+    ctx.strokeRect(MARGIN, y, labelWidth, 30);
+    ctx.strokeRect(MARGIN + labelWidth, y, CONTENT_WIDTH - labelWidth, 30);
+    ctx.fillStyle = "#68769F";
+    ctx.font = "700 11px Segoe UI, Arial, sans-serif";
+    ctx.fillText(label.toUpperCase(), MARGIN + 10, y + 11);
+    ctx.fillStyle = "#1B2559";
+    ctx.font = "600 12.5px Segoe UI, Arial, sans-serif";
+    ctx.fillText(String(value), MARGIN + labelWidth + 10, y + 11, CONTENT_WIDTH - labelWidth - 20);
+    return y + 30;
+}
+
+// Dibuja el cargo completo sobre el contexto recibido y devuelve la
+// posición Y final usada. Se llama dos veces: una sobre un canvas
+// descartable solo para medir cuánto alto hace falta (el texto de la
+// fundamentación y la lista de documentos son de largo variable), y otra
+// sobre el canvas final ya con el alto correcto — así no queda ni espacio
+// vacío de más ni contenido cortado.
+function drawCargo(ctx, datos) {
+    const { nombres, dni, telefono, domicilio, distrito, correo, sumilla, fundamentacion, folios, documentos, codigo, fecha, firmaImg } = datos;
+
+    ctx.textBaseline = "alphabetic";
+    let y = MARGIN;
+
     ctx.fillStyle = "#68769F";
     ctx.font = "700 12px Segoe UI, Arial, sans-serif";
-    ctx.fillText("I.E. TUNGASUCA", 40, y);
+    ctx.fillText("I.E. TUNGASUCA", MARGIN, y);
     y += 22;
     ctx.fillStyle = "#1B2559";
-    ctx.font = "800 21px Segoe UI, Arial, sans-serif";
-    ctx.fillText("Formulario Único de Trámite (FUT)", 40, y);
-    y += 40;
+    ctx.font = "800 20px Segoe UI, Arial, sans-serif";
+    ctx.fillText("Formulario Único de Trámite (FUT)", MARGIN, y);
+    y += 26;
+    ctx.fillStyle = "#1B2559";
+    ctx.font = "700 13px Segoe UI, Arial, sans-serif";
+    ctx.fillText('SEÑORA DIRECTORA DE LA I.E. "TUNGASUCA":', MARGIN, y);
+    y += 26;
+
+    y = drawSectionTitle(ctx, y, "Datos del solicitante");
+    y = drawFieldGrid(ctx, y, [
+        ["Nombres y apellidos", nombres],
+        ["DNI", dni],
+        ["Teléfono", telefono],
+        ["Domicilio actual", domicilio],
+        ["Distrito", distrito],
+        ["Correo electrónico", correo],
+    ]);
+    y += 6;
+
+    y = drawSectionTitle(ctx, y, "Asunto");
+    ctx.fillStyle = "#1B2559";
+    ctx.font = "500 13px Segoe UI, Arial, sans-serif";
+    const asuntoLines = wrapText(ctx, sumilla, CONTENT_WIDTH);
+    asuntoLines.forEach((line, index) => ctx.fillText(line, MARGIN, y + index * 18));
+    y += asuntoLines.length * 18 + 14;
+
+    y = drawSectionTitle(ctx, y, "Fundamentación de lo que solicita");
+    y = drawLinedParagraph(ctx, y, fundamentacion, 5);
+
+    y = drawSectionTitle(ctx, y, "Documento que se adjunta (sustentatorio de su solicitud)");
+    ctx.font = "500 12.5px Segoe UI, Arial, sans-serif";
+    if (!documentos || documentos.length === 0) {
+        ctx.fillStyle = "#A0A8C0";
+        ctx.font = "italic 500 12.5px Segoe UI, Arial, sans-serif";
+        ctx.fillText("Ninguno", MARGIN, y + 10);
+        y += 22;
+    } else {
+        documentos.forEach((nombreDoc) => {
+            ctx.fillStyle = "#1B2559";
+            ctx.font = "500 12.5px Segoe UI, Arial, sans-serif";
+            const lines = wrapText(ctx, `•  ${nombreDoc}`, CONTENT_WIDTH);
+            lines.forEach((line, index) => ctx.fillText(line, MARGIN, y + 10 + index * 17));
+            y += lines.length * 17 + 2;
+        });
+    }
+    ctx.fillStyle = "#68769F";
+    ctx.font = "500 11.5px Segoe UI, Arial, sans-serif";
+    ctx.fillText(`N° de folios: ${folios}`, MARGIN, y + 12);
+    y += 32;
+
+    const fechaFirmaY = y;
+    ctx.fillStyle = "#1B2559";
+    ctx.font = "600 13px Segoe UI, Arial, sans-serif";
+    ctx.fillText(`Fecha: Carabayllo, ${fecha}`, MARGIN, fechaFirmaY + 40);
+
+    const firmaBoxWidth = 180;
+    const firmaX = MARGIN + CONTENT_WIDTH - firmaBoxWidth;
+    if (firmaImg) {
+        const maxH = 60;
+        const scale = Math.min(firmaBoxWidth / firmaImg.width, maxH / firmaImg.height);
+        const drawW = firmaImg.width * scale;
+        const drawH = firmaImg.height * scale;
+        ctx.drawImage(firmaImg, firmaX + (firmaBoxWidth - drawW) / 2, fechaFirmaY, drawW, drawH);
+    } else {
+        ctx.fillStyle = "#A0A8C0";
+        ctx.font = "italic 500 12px Segoe UI, Arial, sans-serif";
+        ctx.fillText("Firma no capturada", firmaX, fechaFirmaY + 34);
+    }
+    ctx.strokeStyle = "#E9EDF7";
+    ctx.beginPath();
+    ctx.moveTo(firmaX, fechaFirmaY + 44);
+    ctx.lineTo(firmaX + firmaBoxWidth, fechaFirmaY + 44);
+    ctx.stroke();
+    ctx.fillStyle = "#68769F";
+    ctx.font = "700 9.5px Segoe UI, Arial, sans-serif";
+    ctx.fillText("FIRMA DEL SOLICITANTE", firmaX, fechaFirmaY + 58);
+    y = fechaFirmaY + 74;
 
     ctx.strokeStyle = "#E9EDF7";
     ctx.beginPath();
-    ctx.moveTo(40, y);
-    ctx.lineTo(760, y);
+    ctx.moveTo(MARGIN, y + 16);
+    ctx.lineTo(MARGIN + CONTENT_WIDTH, y + 16);
     ctx.stroke();
-    y += 22;
+    y += 40;
 
-    const field = (label, value) => {
-        ctx.fillStyle = "#68769F";
-        ctx.font = "700 10.5px Segoe UI, Arial, sans-serif";
-        ctx.fillText(label.toUpperCase(), 40, y);
-        y += 17;
-        ctx.fillStyle = "#1B2559";
-        ctx.font = "500 14.5px Segoe UI, Arial, sans-serif";
-        ctx.fillText(String(value), 40, y);
-        y += 28;
-    };
+    y = drawSectionTitle(ctx, y, "Cargo de recepción");
+    y = drawResumenRow(ctx, y, "Apellidos y nombres", nombres);
+    y = drawResumenRow(ctx, y, "Asunto", sumilla);
+    y = drawResumenRow(ctx, y, "Fecha", `Carabayllo, ${fecha}`);
+    y = drawResumenRow(ctx, y, "N° expediente", codigo);
+    y = drawResumenRow(ctx, y, "N° folios", folios);
 
-    field("Apellidos y nombres", nombres);
-    field("Asunto", sumilla);
-    field("Fecha", `Carabayllo, ${formatDate(new Date().toISOString())}`);
-    field("N° expediente", codigo);
-    field("N° folios", folios);
+    return y + MARGIN;
+}
 
-    y += 8;
-    const columnas = ["N° Expediente", "Dirección", "Subdirección", "Recursos financieros", "Secretaría u otros"];
-    const valores = [codigo, "Pendiente", "Pendiente", "Pendiente", "Pendiente"];
-    const anchoColumna = 144;
-    const alturaFila = 34;
+// Genera un PDF (canvas nativo + armado manual del PDF, sin librerías) con
+// el mismo contenido que el "Cargo digital" en pantalla. Se reconstruye al
+// vuelo a partir de los datos ya guardados en el propio expediente y en sus
+// documentos reales (no se guarda como archivo aparte — ver comentario en
+// submitFut).
+async function renderCargoPdf(datos) {
+    const firmaImg = datos.firmaDataUrl ? await loadImage(datos.firmaDataUrl).catch(() => null) : null;
+    const full = { ...datos, firmaImg };
 
-    columnas.forEach((columna, index) => {
-        const x = 40 + index * anchoColumna;
-        ctx.strokeRect(x, y, anchoColumna, alturaFila);
-        ctx.fillStyle = "#68769F";
-        ctx.font = "700 9px Segoe UI, Arial, sans-serif";
-        ctx.fillText(columna.toUpperCase(), x + 6, y + 8, anchoColumna - 12);
-    });
-    y += alturaFila;
+    // Primera pasada sobre un canvas descartable solo para medir el alto
+    // real que va a ocupar el contenido (varía según la fundamentación y la
+    // cantidad de documentos adjuntos).
+    const measureCanvas = document.createElement("canvas");
+    measureCanvas.width = PAGE_WIDTH;
+    measureCanvas.height = 10;
+    const contentHeight = drawCargo(measureCanvas.getContext("2d"), full);
 
-    valores.forEach((valor, index) => {
-        const x = 40 + index * anchoColumna;
-        ctx.strokeRect(x, y, anchoColumna, alturaFila);
-        ctx.fillStyle = "#1B2559";
-        ctx.font = "500 11px Segoe UI, Arial, sans-serif";
-        ctx.fillText(valor, x + 6, y + 11, anchoColumna - 12);
-    });
+    const canvas = document.createElement("canvas");
+    canvas.width = PAGE_WIDTH;
+    canvas.height = Math.ceil(contentHeight);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawCargo(ctx, full);
 
-    const jpegBase64 = canvas.toDataURL("image/jpeg", 0.92).split(",")[1];
+    const jpegBase64 = canvas.toDataURL("image/jpeg", 0.95).split(",")[1];
     return buildImagePdf({ jpegBase64, width: canvas.width, height: canvas.height });
 }
 
@@ -274,15 +459,46 @@ export function tieneFutExportable(expediente) {
 // propio expediente (no de un documento subido — ver el comentario en
 // submitFut). Devuelve null si el expediente no vino del FUT Digital (no
 // tiene "Nombres y apellidos" / "N° de folios" en su descripción).
-export function exportFutDelExpediente(expediente) {
+//
+// Además intenta traer los documentos REALES ya subidos a este expediente
+// (Documentos Service) para listarlos en el cargo con su nombre real, y si
+// entre ellos está la firma capturada en el FUT ("firma.png", subida por
+// submitFut), la descarga y la embebe como imagen — igual que se ve en
+// pantalla. Si esa consulta falla (p. ej. el usuario ya no tiene acceso a
+// ese detalle), el cargo se genera igual, solo que sin esos dos extras.
+export async function exportFutDelExpediente(expediente) {
     const datos = parseDatosSolicitante(expediente.descripcion);
     if (!datos) return null;
 
-    const contenidoBase64 = renderCargoPdf({
+    let documentos = [];
+    let firmaDataUrl = null;
+    try {
+        const { documentos: lista } = await getDocumentosByExpediente(expediente.id);
+        const firma = (lista || []).find((item) => item.nombre === "firma.png");
+        documentos = (lista || []).filter((item) => item.nombre !== "firma.png").map((item) => item.nombre);
+        if (firma) {
+            const { contenido } = await downloadDocumento(firma.id);
+            firmaDataUrl = `data:image/png;base64,${contenido}`;
+        }
+    } catch {
+        // Sin documentos/firma extra — el cargo igual sale con los datos del
+        // propio expediente.
+    }
+
+    const contenidoBase64 = await renderCargoPdf({
         nombres: datos.nombres,
+        dni: datos.dni,
+        telefono: datos.telefono,
+        domicilio: datos.domicilio,
+        distrito: datos.distrito,
+        correo: datos.correo,
         sumilla: expediente.asunto,
-        codigo: expediente.codigo,
+        fundamentacion: datos.fundamentacion,
         folios: datos.folios,
+        documentos,
+        firmaDataUrl,
+        codigo: expediente.codigo,
+        fecha: formatDate(expediente.fecha_registro),
     });
 
     return { nombre: `FUT-${expediente.codigo}.pdf`, contenidoBase64 };

@@ -121,11 +121,11 @@ function DocumentosPanel({ expedienteId, expediente }) {
     // futService.js.
     const [downloadingFut, setDownloadingFut] = useState(false);
 
-    const handleDownloadFut = () => {
-        const fut = exportFutDelExpediente(expediente);
-        if (!fut) return;
+    const handleDownloadFut = async () => {
         setDownloadingFut(true);
         try {
+            const fut = await exportFutDelExpediente(expediente);
+            if (!fut) return;
             const blob = base64ToBlob(fut.contenidoBase64, "application/pdf");
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -135,6 +135,8 @@ function DocumentosPanel({ expedienteId, expediente }) {
             link.click();
             link.remove();
             URL.revokeObjectURL(url);
+        } catch (err) {
+            setError(friendlyErrorMessage(err));
         } finally {
             setDownloadingFut(false);
         }
