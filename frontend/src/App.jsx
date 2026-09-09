@@ -4,7 +4,6 @@ import Login from "./pages/Login/login";
 import Dashboard from "./pages/Dashboard/dashboard";
 import ExpedientesList from "./pages/Expedientes/ExpedientesList";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
-import DocumentosList from "./pages/Documentos/DocumentosList";
 import FutDigital from "./pages/FUT/FutDigital";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -46,15 +45,9 @@ function App() {
                 }
             />
 
-            {/* Documentos (Documentos Service real) */}
-            <Route
-                path="/documentos"
-                element={
-                    <ProtectedRoute>
-                        <DocumentosList />
-                    </ProtectedRoute>
-                }
-            />
+            {/* No hay ruta "/documentos" aparte: los documentos siempre viven
+                dentro de un expediente (ver panel de Documentos en
+                ExpedienteDetail), no como módulo independiente. */}
 
             {/* FUT Digital (crea un Expediente real vía Expedientes Service) */}
             <Route
