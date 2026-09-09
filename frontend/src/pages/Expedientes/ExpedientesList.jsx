@@ -36,7 +36,10 @@ function ExpedientesList() {
     const [deletingCodigo, setDeletingCodigo] = useState(null);
     const [deleteError, setDeleteError] = useState("");
 
-    const canCreate = can(["expedientes.create", "solicitudes.create"]);
+    // Solo el personal interno usa este atajo genérico ("Nuevo expediente").
+    // Un SOLICITANTE registra su solicitud por el flujo del FUT Digital
+    // (ver "Registrar solicitud" en el menú), no por este modal.
+    const canCreate = can("expedientes.create");
     const canViewAll = can("expedientes.view");
     const canDelete = can("expedientes.delete");
 
@@ -72,7 +75,10 @@ function ExpedientesList() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const { usuarios, unavailable } = useUsuariosBasic(items.map((item) => item.solicitante_id));
+    // "Remitente" no aplica cuando el usuario solo ve sus propios
+    // expedientes (SOLICITANTE): siempre sería él mismo, y evita una
+    // llamada de menos al backend.
+    const { usuarios, unavailable } = useUsuariosBasic(canViewAll ? items.map((item) => item.solicitante_id) : []);
 
     const totalPages = Math.max(1, Math.ceil(total / DEFAULT_PAGE_SIZE));
 
@@ -98,12 +104,13 @@ function ExpedientesList() {
     const emptyMessage = canViewAll
         ? "No hay expedientes registrados."
         : "Aún no tienes expedientes registrados.";
+    const titulo = canViewAll ? "Expedientes" : "Mis expedientes";
 
     return (
-        <DashboardLayout title="Expedientes">
+        <DashboardLayout title={titulo}>
             <section className="dp-panel">
                 <div className="dp-list-header">
-                    <h2 className="dp-panel-title">Expedientes</h2>
+                    <h2 className="dp-panel-title">{titulo}</h2>
                     {canCreate && (
                         <button type="button" className="dp-btn-primary" onClick={() => setShowCreate(true)}>
                             Nuevo expediente
@@ -155,7 +162,7 @@ function ExpedientesList() {
                                     <tr>
                                         <th>Expediente</th>
                                         <th>Asunto</th>
-                                        <th>Remitente</th>
+                                        {canViewAll && <th>Remitente</th>}
                                         <th>Estado</th>
                                         <th>Prioridad</th>
                                         <th>Fecha</th>
@@ -167,13 +174,15 @@ function ExpedientesList() {
                                         <tr key={item.codigo}>
                                             <td className="dp-table-code">{item.codigo}</td>
                                             <td>{item.asunto}</td>
-                                            <td>
-                                                <SolicitanteNombre
-                                                    id={item.solicitante_id}
-                                                    usuarios={usuarios}
-                                                    unavailable={unavailable}
-                                                />
-                                            </td>
+                                            {canViewAll && (
+                                                <td>
+                                                    <SolicitanteNombre
+                                                        id={item.solicitante_id}
+                                                        usuarios={usuarios}
+                                                        unavailable={unavailable}
+                                                    />
+                                                </td>
+                                            )}
                                             <td>
                                                 <StatusBadge status={item.estado} />
                                             </td>

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import Icon from "./Icon";
 import "./QuickActions.css";
@@ -30,9 +31,21 @@ const ACTIONS = [
     {
         key: "ver-expedientes",
         label: "Ver expedientes",
+        labelSolicitante: "Ver mis expedientes",
         icon: "folder",
         permission: ["expedientes.view", "expedientes.view_own"],
         to: "/expedientes",
+    },
+    // "Ver documentos" solo aplica al SOLICITANTE (documentos.view_own): es
+    // su propio listado de documentos subidos. El personal interno sigue
+    // viendo/subiendo documentos desde el detalle del expediente, no desde
+    // un atajo aparte (mismo criterio que el ítem del menú lateral).
+    {
+        key: "ver-documentos",
+        label: "Ver documentos",
+        icon: "file",
+        permission: "documentos.view_own",
+        to: "/documentos",
     },
     {
         key: "ver-seguimiento",
@@ -44,9 +57,14 @@ const ACTIONS = [
 ];
 
 function QuickActions() {
+    const { user } = useAuth();
     const { can } = usePermissions();
     const navigate = useNavigate();
-    const actions = ACTIONS.filter((action) => can(action.permission));
+    const esSolicitante = user?.role === "SOLICITANTE";
+    const actions = ACTIONS.filter((action) => can(action.permission)).map((action) => ({
+        ...action,
+        label: esSolicitante && action.labelSolicitante ? action.labelSolicitante : action.label,
+    }));
 
     if (actions.length === 0) return null;
 

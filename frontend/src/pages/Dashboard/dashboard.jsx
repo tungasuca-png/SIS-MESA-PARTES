@@ -4,6 +4,7 @@ import StatCard from "../../components/dashboard/StatCard";
 import RecentExpedientes from "../../components/dashboard/RecentExpedientes";
 import QuickActions from "../../components/dashboard/QuickActions";
 import "../../components/dashboard/forms.css";
+import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
@@ -13,15 +14,22 @@ import "./dashboard.css";
 // con page_size=1 porque solo se necesita el campo "total" de la respuesta,
 // no la lista. No se calcula ninguna variación (%) porque el backend no
 // entrega datos históricos: mostrarla sería inventar un número.
+//
+// "recibidos"/"atendidos" cambian de texto para un SOLICITANTE ("Mis
+// solicitudes"/"Atendidas"): son SUS propios expedientes (el backend ya los
+// acota, ver ListExpedientesLogic), así que "recibidos" daría la impresión
+// equivocada de que recibe expedientes de otras personas.
 const STAT_DEFS = [
-    { key: "recibidos", label: "Expedientes recibidos", icon: "inbox", estado: undefined },
+    { key: "recibidos", label: "Expedientes recibidos", labelSolicitante: "Mis solicitudes", icon: "inbox", estado: undefined },
     { key: "pendientes", label: "Pendientes", icon: "clock", estado: "PENDIENTE" },
     { key: "proceso", label: "En proceso", icon: "loader", estado: "EN_PROCESO" },
-    { key: "atendidos", label: "Atendidos", icon: "check", estado: "ATENDIDO" },
+    { key: "atendidos", label: "Atendidos", labelSolicitante: "Atendidas", icon: "check", estado: "ATENDIDO" },
 ];
 
 function Dashboard() {
+    const { user } = useAuth();
     const { can } = usePermissions();
+    const esSolicitante = user?.role === "SOLICITANTE";
     const [stats, setStats] = useState([]);
     const [recientes, setRecientes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -46,7 +54,7 @@ function Dashboard() {
                 setStats(
                     STAT_DEFS.map((def, index) => ({
                         key: def.key,
-                        label: def.label,
+                        label: esSolicitante && def.labelSolicitante ? def.labelSolicitante : def.label,
                         icon: def.icon,
                         value: statResults[index].total ?? 0,
                     }))
@@ -63,7 +71,7 @@ function Dashboard() {
         return () => {
             active = false;
         };
-    }, []);
+    }, [esSolicitante]);
 
     const emptyMessage = can("expedientes.view")
         ? "No hay expedientes registrados."
@@ -84,7 +92,12 @@ function Dashboard() {
                     </div>
 
                     <div className="dp-dashboard-sections">
-                        <RecentExpedientes items={recientes} emptyMessage={emptyMessage} />
+                        <RecentExpedientes
+                            items={recientes}
+                            emptyMessage={emptyMessage}
+                            title={esSolicitante ? "Mis últimas solicitudes" : "Expedientes recientes"}
+                            showRemitente={!esSolicitante}
+                        />
                         <QuickActions />
                     </div>
                 </>

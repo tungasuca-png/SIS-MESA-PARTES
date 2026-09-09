@@ -30,6 +30,22 @@ export const getDocumentosByExpediente = async (expedienteId) => {
     return response.data;
 };
 
+// Listado global: el backend ya acota el resultado según el rol (personal
+// interno ve todo; un SOLICITANTE sin filtro por expediente solo ve lo que
+// él mismo subió — ver authorization.CanViewAll de Documentos Service). Se
+// usa para "Mis documentos" del solicitante.
+export const getDocumentos = async ({ expedienteId, tipoDocumento, page, pageSize } = {}) => {
+    const response = await api.get("/api/documentos", {
+        params: {
+            expediente_id: expedienteId || undefined,
+            tipo_documento: tipoDocumento || undefined,
+            page: page || undefined,
+            page_size: pageSize || undefined,
+        },
+    });
+    return response.data;
+};
+
 export const uploadDocumento = async ({ expedienteId, nombre, tipoDocumento, extension, contenidoBase64 }) => {
     const response = await api.post("/api/documentos", {
         expediente_id: expedienteId,

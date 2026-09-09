@@ -4,6 +4,7 @@ import Login from "./pages/Login/login";
 import Dashboard from "./pages/Dashboard/dashboard";
 import ExpedientesList from "./pages/Expedientes/ExpedientesList";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
+import MisDocumentos from "./pages/Documentos/MisDocumentos";
 import FutDigital from "./pages/FUT/FutDigital";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -45,9 +46,18 @@ function App() {
                 }
             />
 
-            {/* No hay ruta "/documentos" aparte: los documentos siempre viven
-                dentro de un expediente (ver panel de Documentos en
-                ExpedienteDetail), no como módulo independiente. */}
+            {/* "Mis documentos": listado propio del SOLICITANTE (el backend ya
+                acota a lo que el usuario subió). El personal interno sigue
+                viendo/subiendo documentos desde el detalle del expediente
+                (panel de Documentos), no desde acá. */}
+            <Route
+                path="/documentos"
+                element={
+                    <ProtectedRoute>
+                        <MisDocumentos />
+                    </ProtectedRoute>
+                }
+            />
 
             {/* FUT Digital (crea un Expediente real vía Expedientes Service) */}
             <Route

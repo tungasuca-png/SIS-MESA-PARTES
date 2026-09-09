@@ -6,12 +6,22 @@ import StatusBadge from "./StatusBadge";
 import Icon from "./Icon";
 import "./RecentExpedientes.css";
 
-function RecentExpedientes({ items, emptyMessage = "No hay expedientes registrados." }) {
-    const { usuarios, unavailable } = useUsuariosBasic((items || []).map((item) => item.solicitante_id));
+function RecentExpedientes({
+    items,
+    emptyMessage = "No hay expedientes registrados.",
+    title = "Expedientes recientes",
+    showRemitente = true,
+}) {
+    // Cuando no se muestra "Remitente" (SOLICITANTE viendo solo sus propios
+    // expedientes, siempre él mismo) no tiene sentido pedir los nombres de
+    // usuario: es una llamada de menos al backend.
+    const { usuarios, unavailable } = useUsuariosBasic(
+        showRemitente ? (items || []).map((item) => item.solicitante_id) : []
+    );
 
     return (
         <section className="dp-panel">
-            <h2 className="dp-panel-title">Expedientes recientes</h2>
+            <h2 className="dp-panel-title">{title}</h2>
 
             {(!items || items.length === 0) ? (
                 <p className="dp-table-empty">{emptyMessage}</p>
@@ -22,7 +32,7 @@ function RecentExpedientes({ items, emptyMessage = "No hay expedientes registrad
                             <tr>
                                 <th>Expediente</th>
                                 <th>Asunto</th>
-                                <th>Remitente</th>
+                                {showRemitente && <th>Remitente</th>}
                                 <th>Estado</th>
                                 <th>Prioridad</th>
                                 <th>Fecha</th>
@@ -34,13 +44,15 @@ function RecentExpedientes({ items, emptyMessage = "No hay expedientes registrad
                                 <tr key={item.codigo}>
                                     <td className="dp-table-code">{item.codigo}</td>
                                     <td>{item.asunto}</td>
-                                    <td>
-                                        <SolicitanteNombre
-                                            id={item.solicitante_id}
-                                            usuarios={usuarios}
-                                            unavailable={unavailable}
-                                        />
-                                    </td>
+                                    {showRemitente && (
+                                        <td>
+                                            <SolicitanteNombre
+                                                id={item.solicitante_id}
+                                                usuarios={usuarios}
+                                                unavailable={unavailable}
+                                            />
+                                        </td>
+                                    )}
                                     <td>
                                         <StatusBadge status={item.estado} />
                                     </td>
