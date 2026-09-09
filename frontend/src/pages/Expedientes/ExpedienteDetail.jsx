@@ -35,6 +35,10 @@ function ExpedienteDetail() {
 
     const canUpdate = can("expedientes.update");
     const canChangeEstado = can("expedientes.change_estado");
+    // Las derivaciones son un movimiento interno del expediente (que area lo
+    // deriva a cual, y por que): es informacion de gestion, no algo que el
+    // SOLICITANTE necesite ver en el detalle de su propio tramite.
+    const canViewDerivaciones = can("derivaciones.view");
     const { usuarios, unavailable } = useUsuariosBasic(
         expediente ? [expediente.solicitante_id] : []
     );
@@ -270,9 +274,11 @@ function ExpedienteDetail() {
                         </section>
                     )}
 
-                    <div className="dp-detail-full-width">
-                        <DerivacionesPanel expedienteId={expediente.id} />
-                    </div>
+                    {canViewDerivaciones && (
+                        <div className="dp-detail-full-width">
+                            <DerivacionesPanel expedienteId={expediente.id} />
+                        </div>
+                    )}
 
                     <div className="dp-detail-full-width">
                         <DocumentosPanel expedienteId={expediente.id} expediente={expediente} />
