@@ -21,6 +21,32 @@ const (
 	EstadoObservado = "OBSERVADO"
 )
 
+// Áreas internas responsables de un expediente (ver migración
+// 002_add_area_actual.sql). Los códigos coinciden con los roles reales del
+// JWT — ADMIN se incluye por si alguna vez se deriva ahí explícitamente,
+// aunque en la práctica ya ve todo sin importar el área (CanViewAll).
+const (
+	AreaSecretaria  = "SECRETARIA"
+	AreaDirector    = "DIRECTOR"
+	AreaSubdirector = "SUBDIRECTOR"
+	AreaDocente     = "DOCENTE"
+	AreaAuxiliar    = "AUXILIAR"
+	AreaAdmin       = "ADMIN"
+)
+
+var areasValidas = map[string]bool{
+	AreaSecretaria:  true,
+	AreaDirector:    true,
+	AreaSubdirector: true,
+	AreaDocente:     true,
+	AreaAuxiliar:    true,
+	AreaAdmin:       true,
+}
+
+func IsValidArea(area string) bool {
+	return areasValidas[area]
+}
+
 var tiposValidos = map[string]bool{
 	TipoSolicitud: true,
 	TipoTramite:   true,

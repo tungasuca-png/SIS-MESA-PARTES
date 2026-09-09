@@ -12,6 +12,7 @@
 package authorization
 
 const RoleSolicitante = "SOLICITANTE"
+const RoleSecretaria = "SECRETARIA"
 
 var internalRoles = map[string]bool{
 	"ADMIN":       true,
@@ -50,9 +51,34 @@ func CanDelete(role string) bool {
 	return IsInternal(role)
 }
 
-// CanViewAll: el personal interno ve todos los expedientes; un SOLICITANTE
-// solo debe ver los suyos (el llamador debe filtrar por solicitante_id
-// cuando esta función devuelve false).
-func CanViewAll(role string) bool {
+// CanUpdateArea: solo el personal interno puede cambiar el área responsable
+// de un expediente — se llama al registrar una derivación real (ver
+// Derivaciones Service, tipo = 'DERIVACION').
+func CanUpdateArea(role string) bool {
 	return IsInternal(role)
+}
+
+// CanViewAll: quien ve TODOS los expedientes sin importar el área actual.
+// Secretaría es la mesa de partes (punto de entrada de todo trámite nuevo,
+// ver migración 002_add_area_actual.sql) y Admin supervisa el sistema
+// completo; el resto del personal interno solo debe ver lo que ya se le
+// derivó a su propia área (ver AreaDelRol) — antes veían todo, lo que
+// permitía que, por ejemplo, Dirección viera una solicitud recién
+// presentada antes de que Secretaría la derivara.
+func CanViewAll(role string) bool {
+	return role == "ADMIN" || role == RoleSecretaria
+}
+
+// AreaDelRol: el área cuyos expedientes puede ver un rol interno que NO
+// tiene CanViewAll (Director solo ve lo derivado a Dirección, etc). Los
+// valores coinciden exactamente con los que acepta la columna area_actual
+// (mismos códigos que el rol). Devuelve "" para un rol sin área propia
+// mapeada (no debería llegar a usarse si CanViewAll ya es true).
+func AreaDelRol(role string) string {
+	switch role {
+	case "DIRECTOR", "SUBDIRECTOR", "DOCENTE", "AUXILIAR":
+		return role
+	default:
+		return ""
+	}
 }

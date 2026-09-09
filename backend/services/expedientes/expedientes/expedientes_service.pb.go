@@ -34,6 +34,7 @@ type Expediente struct {
 	FechaRegistro      string                 `protobuf:"bytes,9,opt,name=fecha_registro,json=fechaRegistro,proto3" json:"fecha_registro,omitempty"`
 	FechaActualizacion string                 `protobuf:"bytes,10,opt,name=fecha_actualizacion,json=fechaActualizacion,proto3" json:"fecha_actualizacion,omitempty"`
 	Activo             bool                   `protobuf:"varint,11,opt,name=activo,proto3" json:"activo,omitempty"`
+	AreaActual         string                 `protobuf:"bytes,12,opt,name=area_actual,json=areaActual,proto3" json:"area_actual,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -143,6 +144,13 @@ func (x *Expediente) GetActivo() bool {
 		return x.Activo
 	}
 	return false
+}
+
+func (x *Expediente) GetAreaActual() string {
+	if x != nil {
+		return x.AreaActual
+	}
+	return ""
 }
 
 type CreateExpedienteRequest struct {
@@ -770,11 +778,107 @@ func (x *DeleteExpedienteResponse) GetSuccess() bool {
 	return false
 }
 
+type UpdateAreaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Area          string                 `protobuf:"bytes,2,opt,name=area,proto3" json:"area,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAreaRequest) Reset() {
+	*x = UpdateAreaRequest{}
+	mi := &file_expedientes_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAreaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAreaRequest) ProtoMessage() {}
+
+func (x *UpdateAreaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAreaRequest.ProtoReflect.Descriptor instead.
+func (*UpdateAreaRequest) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *UpdateAreaRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateAreaRequest) GetArea() string {
+	if x != nil {
+		return x.Area
+	}
+	return ""
+}
+
+type UpdateAreaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Expediente    *Expediente            `protobuf:"bytes,1,opt,name=expediente,proto3" json:"expediente,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAreaResponse) Reset() {
+	*x = UpdateAreaResponse{}
+	mi := &file_expedientes_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAreaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAreaResponse) ProtoMessage() {}
+
+func (x *UpdateAreaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAreaResponse.ProtoReflect.Descriptor instead.
+func (*UpdateAreaResponse) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UpdateAreaResponse) GetExpediente() *Expediente {
+	if x != nil {
+		return x.Expediente
+	}
+	return nil
+}
+
 var File_expedientes_service_proto protoreflect.FileDescriptor
 
 const file_expedientes_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19expedientes_service.proto\x12\vexpedientes\"\xcf\x02\n" +
+	"\x19expedientes_service.proto\x12\vexpedientes\"\xf0\x02\n" +
 	"\n" +
 	"Expediente\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
@@ -788,7 +892,9 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x0efecha_registro\x18\t \x01(\tR\rfechaRegistro\x12/\n" +
 	"\x13fecha_actualizacion\x18\n" +
 	" \x01(\tR\x12fechaActualizacion\x12\x16\n" +
-	"\x06activo\x18\v \x01(\bR\x06activo\"\x85\x01\n" +
+	"\x06activo\x18\v \x01(\bR\x06activo\x12\x1f\n" +
+	"\varea_actual\x18\f \x01(\tR\n" +
+	"areaActual\"\x85\x01\n" +
 	"\x17CreateExpedienteRequest\x12\x12\n" +
 	"\x04tipo\x18\x01 \x01(\tR\x04tipo\x12\x16\n" +
 	"\x06asunto\x18\x02 \x01(\tR\x06asunto\x12 \n" +
@@ -832,14 +938,23 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x17DeleteExpedienteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
 	"\x18DeleteExpedienteResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbb\x04\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"7\n" +
+	"\x11UpdateAreaRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04area\x18\x02 \x01(\tR\x04area\"M\n" +
+	"\x12UpdateAreaResponse\x127\n" +
+	"\n" +
+	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
+	"expediente2\x8a\x05\n" +
 	"\vExpedientes\x12_\n" +
 	"\x10CreateExpediente\x12$.expedientes.CreateExpedienteRequest\x1a%.expedientes.CreateExpedienteResponse\x12V\n" +
 	"\rGetExpediente\x12!.expedientes.GetExpedienteRequest\x1a\".expedientes.GetExpedienteResponse\x12\\\n" +
 	"\x0fListExpedientes\x12#.expedientes.ListExpedientesRequest\x1a$.expedientes.ListExpedientesResponse\x12_\n" +
 	"\x10UpdateExpediente\x12$.expedientes.UpdateExpedienteRequest\x1a%.expedientes.UpdateExpedienteResponse\x12S\n" +
 	"\fChangeEstado\x12 .expedientes.ChangeEstadoRequest\x1a!.expedientes.ChangeEstadoResponse\x12_\n" +
-	"\x10DeleteExpediente\x12$.expedientes.DeleteExpedienteRequest\x1a%.expedientes.DeleteExpedienteResponseB\x0fZ\r./expedientesb\x06proto3"
+	"\x10DeleteExpediente\x12$.expedientes.DeleteExpedienteRequest\x1a%.expedientes.DeleteExpedienteResponse\x12M\n" +
+	"\n" +
+	"UpdateArea\x12\x1e.expedientes.UpdateAreaRequest\x1a\x1f.expedientes.UpdateAreaResponseB\x0fZ\r./expedientesb\x06proto3"
 
 var (
 	file_expedientes_service_proto_rawDescOnce sync.Once
@@ -853,7 +968,7 @@ func file_expedientes_service_proto_rawDescGZIP() []byte {
 	return file_expedientes_service_proto_rawDescData
 }
 
-var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_expedientes_service_proto_goTypes = []any{
 	(*Expediente)(nil),               // 0: expedientes.Expediente
 	(*CreateExpedienteRequest)(nil),  // 1: expedientes.CreateExpedienteRequest
@@ -868,6 +983,8 @@ var file_expedientes_service_proto_goTypes = []any{
 	(*ChangeEstadoResponse)(nil),     // 10: expedientes.ChangeEstadoResponse
 	(*DeleteExpedienteRequest)(nil),  // 11: expedientes.DeleteExpedienteRequest
 	(*DeleteExpedienteResponse)(nil), // 12: expedientes.DeleteExpedienteResponse
+	(*UpdateAreaRequest)(nil),        // 13: expedientes.UpdateAreaRequest
+	(*UpdateAreaResponse)(nil),       // 14: expedientes.UpdateAreaResponse
 }
 var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 0: expedientes.CreateExpedienteResponse.expediente:type_name -> expedientes.Expediente
@@ -875,23 +992,26 @@ var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 2: expedientes.ListExpedientesResponse.expedientes:type_name -> expedientes.Expediente
 	0,  // 3: expedientes.UpdateExpedienteResponse.expediente:type_name -> expedientes.Expediente
 	0,  // 4: expedientes.ChangeEstadoResponse.expediente:type_name -> expedientes.Expediente
-	1,  // 5: expedientes.Expedientes.CreateExpediente:input_type -> expedientes.CreateExpedienteRequest
-	3,  // 6: expedientes.Expedientes.GetExpediente:input_type -> expedientes.GetExpedienteRequest
-	5,  // 7: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
-	7,  // 8: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
-	9,  // 9: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
-	11, // 10: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
-	2,  // 11: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
-	4,  // 12: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
-	6,  // 13: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
-	8,  // 14: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
-	10, // 15: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
-	12, // 16: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
-	11, // [11:17] is the sub-list for method output_type
-	5,  // [5:11] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0,  // 5: expedientes.UpdateAreaResponse.expediente:type_name -> expedientes.Expediente
+	1,  // 6: expedientes.Expedientes.CreateExpediente:input_type -> expedientes.CreateExpedienteRequest
+	3,  // 7: expedientes.Expedientes.GetExpediente:input_type -> expedientes.GetExpedienteRequest
+	5,  // 8: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
+	7,  // 9: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
+	9,  // 10: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
+	11, // 11: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
+	13, // 12: expedientes.Expedientes.UpdateArea:input_type -> expedientes.UpdateAreaRequest
+	2,  // 13: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
+	4,  // 14: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
+	6,  // 15: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
+	8,  // 16: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
+	10, // 17: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
+	12, // 18: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
+	14, // 19: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
+	13, // [13:20] is the sub-list for method output_type
+	6,  // [6:13] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_expedientes_service_proto_init() }
@@ -905,7 +1025,7 @@ func file_expedientes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_expedientes_service_proto_rawDesc), len(file_expedientes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

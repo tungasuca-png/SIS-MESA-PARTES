@@ -26,6 +26,7 @@ func toExpedienteDTO(e *expedientesclient.Expediente) types.ExpedienteDTO {
 		FechaRegistro:      e.FechaRegistro,
 		FechaActualizacion: e.FechaActualizacion,
 		Activo:             e.Activo,
+		AreaActual:         e.AreaActual,
 	}
 }
 

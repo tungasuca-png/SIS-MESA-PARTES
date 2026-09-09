@@ -64,8 +64,15 @@ func (l *ListExpedientesLogic) ListExpedientes(in *expedientes.ListExpedientesRe
 		filter.PageSize = defaultPageSize
 	}
 
+	// Secretaría (mesa de partes) y Admin ven todo. El resto del personal
+	// interno solo ve lo que ya se le derivó a su propia área; un
+	// SOLICITANTE (externo) solo ve lo que presentó él mismo.
 	if !authorization.CanViewAll(role) {
-		filter.SolicitanteID = userID
+		if authorization.IsInternal(role) {
+			filter.AreaActual = authorization.AreaDelRol(role)
+		} else {
+			filter.SolicitanteID = userID
+		}
 	}
 
 	items, total, err := l.svcCtx.ExpedienteRepository.List(l.ctx, filter)

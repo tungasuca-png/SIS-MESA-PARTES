@@ -22,6 +22,7 @@ type Expediente struct {
 	FechaRegistro      time.Time
 	FechaActualizacion time.Time
 	Activo             bool
+	AreaActual         string
 }
 
 type ListFilter struct {
@@ -29,6 +30,7 @@ type ListFilter struct {
 	Prioridad     string
 	Tipo          string
 	SolicitanteID string
+	AreaActual    string
 	Page          int
 	PageSize      int
 }
@@ -43,14 +45,14 @@ func NewExpedienteRepository(db *pgxpool.Pool) *ExpedienteRepository {
 
 const expedienteColumns = `
 	id, codigo, tipo, asunto, descripcion, solicitante_id, estado, prioridad,
-	fecha_registro, fecha_actualizacion, activo
+	fecha_registro, fecha_actualizacion, activo, area_actual
 `
 
 func scanExpediente(row pgx.Row) (*Expediente, error) {
 	e := &Expediente{}
 	err := row.Scan(
 		&e.ID, &e.Codigo, &e.Tipo, &e.Asunto, &e.Descripcion, &e.SolicitanteID,
-		&e.Estado, &e.Prioridad, &e.FechaRegistro, &e.FechaActualizacion, &e.Activo,
+		&e.Estado, &e.Prioridad, &e.FechaRegistro, &e.FechaActualizacion, &e.Activo, &e.AreaActual,
 	)
 	if err != nil {
 		return nil, err
@@ -137,6 +139,9 @@ func (r *ExpedienteRepository) List(ctx context.Context, filter ListFilter) ([]*
 	if filter.SolicitanteID != "" {
 		addCondition("solicitante_id", filter.SolicitanteID)
 	}
+	if filter.AreaActual != "" {
+		addCondition("area_actual", filter.AreaActual)
+	}
 	whereClause := strings.Join(conditions, " AND ")
 
 	var total int
@@ -205,6 +210,25 @@ func (r *ExpedienteRepository) Delete(ctx context.Context, idOrCodigo string) er
 		return ErrExpedienteNotFound
 	}
 	return nil
+}
+
+// UpdateArea cambia el area interna responsable del expediente (a quien le
+// corresponde atenderlo ahora). Se llama cuando se registra una derivacion
+// real (ver Derivaciones Service) hacia otra area — no hay guarda de
+// concurrencia como en UpdateEstado porque no es una maquina de estados con
+// transiciones restringidas, solo el ultimo destino gana.
+func (r *ExpedienteRepository) UpdateArea(ctx context.Context, idOrCodigo, nuevaArea string) (*Expediente, error) {
+	updated, err := scanExpediente(r.db.QueryRow(ctx, `
+		UPDATE expedientes
+		SET area_actual = $1, fecha_actualizacion = NOW()
+		WHERE (id::text = $2 OR codigo = $2) AND activo = TRUE
+		RETURNING `+expedienteColumns,
+		nuevaArea, idOrCodigo,
+	))
+	if err != nil {
+		return nil, classifyNotFound(err, ErrExpedienteNotFound)
+	}
+	return updated, nil
 }
 
 // UpdateEstado exige el estado actual esperado (estadoActual) como guarda de

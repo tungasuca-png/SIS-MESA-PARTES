@@ -24,5 +24,6 @@ func toProto(e *repository.Expediente) *expedientes.Expediente {
 		FechaRegistro:      e.FechaRegistro.Format(time.RFC3339),
 		FechaActualizacion: e.FechaActualizacion.Format(time.RFC3339),
 		Activo:             e.Activo,
+		AreaActual:         e.AreaActual,
 	}
 }

@@ -9,6 +9,7 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
 import { changeEstado, getExpediente, updateExpediente } from "../../services/expedientesService";
 import { parseDatosSolicitante } from "../../services/futService";
+import { roleLabel } from "../../constants/roles";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { ESTADOS, PRIORIDADES } from "../../constants/expedientes";
@@ -153,6 +154,12 @@ function ExpedienteDetail() {
                                     <dt>Tipo</dt>
                                     <dd>{expediente.tipo}</dd>
                                 </div>
+                                {canViewDerivaciones && (
+                                    <div>
+                                        <dt>Área actual</dt>
+                                        <dd>{roleLabel(expediente.area_actual)}</dd>
+                                    </div>
+                                )}
                                 {datosFut ? (
                                     <>
                                         <div>

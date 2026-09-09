@@ -79,6 +79,7 @@ type ExpedienteDTO {
 	FechaRegistro      string `json:"fecha_registro"`
 	FechaActualizacion string `json:"fecha_actualizacion"`
 	Activo             bool   `json:"activo"`
+	AreaActual         string `json:"area_actual"`
 }
 
 type CreateExpedienteRequest {
@@ -135,6 +136,16 @@ type DeleteExpedienteRequest {
 
 type DeleteExpedienteResponse {
 	Success bool `json:"success"`
+}
+
+type UpdateAreaRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Area          string `json:"area"`
+}
+
+type UpdateAreaResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
 }
 
 type ChangeEstadoRequest {
@@ -259,6 +270,9 @@ service gateway-api {
 
 	@handler DeleteExpediente
 	delete /api/expedientes/:id (DeleteExpedienteRequest) returns (DeleteExpedienteResponse)
+
+	@handler UpdateArea
+	patch /api/expedientes/:id/area (UpdateAreaRequest) returns (UpdateAreaResponse)
 }
 
 type DocumentoDTO {

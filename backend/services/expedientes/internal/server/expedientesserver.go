@@ -52,3 +52,8 @@ func (s *ExpedientesServer) DeleteExpediente(ctx context.Context, in *expediente
 	l := logic.NewDeleteExpedienteLogic(ctx, s.svcCtx)
 	return l.DeleteExpediente(in)
 }
+
+func (s *ExpedientesServer) UpdateArea(ctx context.Context, in *expedientes.UpdateAreaRequest) (*expedientes.UpdateAreaResponse, error) {
+	l := logic.NewUpdateAreaLogic(ctx, s.svcCtx)
+	return l.UpdateArea(in)
+}

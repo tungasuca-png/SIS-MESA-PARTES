@@ -48,3 +48,12 @@ export const deleteExpediente = async (id) => {
     const response = await api.delete(`/api/expedientes/${encodeURIComponent(id)}`);
     return response.data;
 };
+
+// Cambia el área interna responsable del expediente (a quién le
+// corresponde atenderlo ahora). Se llama al registrar una derivación real
+// (ver DerivacionesPanel.jsx) — no es algo que el usuario dispare
+// directamente.
+export const updateArea = async (id, area) => {
+    const response = await api.patch(`/api/expedientes/${encodeURIComponent(id)}/area`, { area });
+    return response.data;
+};

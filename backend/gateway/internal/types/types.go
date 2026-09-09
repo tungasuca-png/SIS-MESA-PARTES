@@ -103,6 +103,7 @@ type ExpedienteDTO struct {
 	FechaRegistro      string `json:"fecha_registro"`
 	FechaActualizacion string `json:"fecha_actualizacion"`
 	Activo             bool   `json:"activo"`
+	AreaActual         string `json:"area_actual"`
 }
 
 type GetDerivacionRequest struct {
@@ -274,6 +275,16 @@ type RegisterResponse struct {
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 	Message  string `json:"message"`
+}
+
+type UpdateAreaRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Area          string `json:"area"`
+}
+
+type UpdateAreaResponse struct {
+	Expediente ExpedienteDTO `json:"expediente"`
 }
 
 type UpdateExpedienteRequest struct {

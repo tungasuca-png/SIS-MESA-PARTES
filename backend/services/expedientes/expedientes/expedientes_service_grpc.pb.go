@@ -25,6 +25,7 @@ const (
 	Expedientes_UpdateExpediente_FullMethodName = "/expedientes.Expedientes/UpdateExpediente"
 	Expedientes_ChangeEstado_FullMethodName     = "/expedientes.Expedientes/ChangeEstado"
 	Expedientes_DeleteExpediente_FullMethodName = "/expedientes.Expedientes/DeleteExpediente"
+	Expedientes_UpdateArea_FullMethodName       = "/expedientes.Expedientes/UpdateArea"
 )
 
 // ExpedientesClient is the client API for Expedientes service.
@@ -37,6 +38,7 @@ type ExpedientesClient interface {
 	UpdateExpediente(ctx context.Context, in *UpdateExpedienteRequest, opts ...grpc.CallOption) (*UpdateExpedienteResponse, error)
 	ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error)
 	DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error)
+	UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error)
 }
 
 type expedientesClient struct {
@@ -107,6 +109,16 @@ func (c *expedientesClient) DeleteExpediente(ctx context.Context, in *DeleteExpe
 	return out, nil
 }
 
+func (c *expedientesClient) UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAreaResponse)
+	err := c.cc.Invoke(ctx, Expedientes_UpdateArea_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExpedientesServer is the server API for Expedientes service.
 // All implementations must embed UnimplementedExpedientesServer
 // for forward compatibility.
@@ -117,6 +129,7 @@ type ExpedientesServer interface {
 	UpdateExpediente(context.Context, *UpdateExpedienteRequest) (*UpdateExpedienteResponse, error)
 	ChangeEstado(context.Context, *ChangeEstadoRequest) (*ChangeEstadoResponse, error)
 	DeleteExpediente(context.Context, *DeleteExpedienteRequest) (*DeleteExpedienteResponse, error)
+	UpdateArea(context.Context, *UpdateAreaRequest) (*UpdateAreaResponse, error)
 	mustEmbedUnimplementedExpedientesServer()
 }
 
@@ -144,6 +157,9 @@ func (UnimplementedExpedientesServer) ChangeEstado(context.Context, *ChangeEstad
 }
 func (UnimplementedExpedientesServer) DeleteExpediente(context.Context, *DeleteExpedienteRequest) (*DeleteExpedienteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteExpediente not implemented")
+}
+func (UnimplementedExpedientesServer) UpdateArea(context.Context, *UpdateAreaRequest) (*UpdateAreaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateArea not implemented")
 }
 func (UnimplementedExpedientesServer) mustEmbedUnimplementedExpedientesServer() {}
 func (UnimplementedExpedientesServer) testEmbeddedByValue()                     {}
@@ -274,6 +290,24 @@ func _Expedientes_DeleteExpediente_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Expedientes_UpdateArea_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAreaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).UpdateArea(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_UpdateArea_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).UpdateArea(ctx, req.(*UpdateAreaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Expedientes_ServiceDesc is the grpc.ServiceDesc for Expedientes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +338,10 @@ var Expedientes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteExpediente",
 			Handler:    _Expedientes_DeleteExpediente_Handler,
+		},
+		{
+			MethodName: "UpdateArea",
+			Handler:    _Expedientes_UpdateArea_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

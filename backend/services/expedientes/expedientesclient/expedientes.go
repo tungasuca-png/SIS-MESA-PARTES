@@ -27,6 +27,8 @@ type (
 	ListExpedientesResponse  = expedientes.ListExpedientesResponse
 	UpdateExpedienteRequest  = expedientes.UpdateExpedienteRequest
 	UpdateExpedienteResponse = expedientes.UpdateExpedienteResponse
+	UpdateAreaRequest        = expedientes.UpdateAreaRequest
+	UpdateAreaResponse       = expedientes.UpdateAreaResponse
 
 	Expedientes interface {
 		CreateExpediente(ctx context.Context, in *CreateExpedienteRequest, opts ...grpc.CallOption) (*CreateExpedienteResponse, error)
@@ -35,6 +37,7 @@ type (
 		UpdateExpediente(ctx context.Context, in *UpdateExpedienteRequest, opts ...grpc.CallOption) (*UpdateExpedienteResponse, error)
 		ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error)
 		DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error)
+		UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error)
 	}
 
 	defaultExpedientes struct {
@@ -76,4 +79,9 @@ func (m *defaultExpedientes) ChangeEstado(ctx context.Context, in *ChangeEstadoR
 func (m *defaultExpedientes) DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error) {
 	client := expedientes.NewExpedientesClient(m.cli.Conn())
 	return client.DeleteExpediente(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.UpdateArea(ctx, in, opts...)
 }

@@ -96,6 +96,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPatch,
+				Path:    "/api/expedientes/:id/area",
+				Handler: UpdateAreaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
 				Path:    "/api/expedientes/:id/estado",
 				Handler: ChangeEstadoHandler(serverCtx),
 			},

@@ -47,8 +47,14 @@ func (l *GetExpedienteLogic) GetExpediente(in *expedientes.GetExpedienteRequest)
 		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
 	}
 
-	if !authorization.CanViewAll(role) && found.SolicitanteID != userID {
-		return nil, status.Error(codes.PermissionDenied, "no tiene acceso a este expediente")
+	if !authorization.CanViewAll(role) {
+		if authorization.IsInternal(role) {
+			if found.AreaActual != authorization.AreaDelRol(role) {
+				return nil, status.Error(codes.PermissionDenied, "no tiene acceso a este expediente")
+			}
+		} else if found.SolicitanteID != userID {
+			return nil, status.Error(codes.PermissionDenied, "no tiene acceso a este expediente")
+		}
 	}
 
 	return &expedientes.GetExpedienteResponse{Expediente: toProto(found)}, nil

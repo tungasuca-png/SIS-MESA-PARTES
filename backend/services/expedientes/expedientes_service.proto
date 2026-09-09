@@ -15,6 +15,7 @@ message Expediente {
   string fecha_registro = 9;
   string fecha_actualizacion = 10;
   bool activo = 11;
+  string area_actual = 12;
 }
 
 message CreateExpedienteRequest {
@@ -78,6 +79,15 @@ message DeleteExpedienteResponse {
   bool success = 1;
 }
 
+message UpdateAreaRequest {
+  string id = 1;
+  string area = 2;
+}
+
+message UpdateAreaResponse {
+  Expediente expediente = 1;
+}
+
 service Expedientes {
   rpc CreateExpediente(CreateExpedienteRequest) returns (CreateExpedienteResponse);
   rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
@@ -85,4 +95,5 @@ service Expedientes {
   rpc UpdateExpediente(UpdateExpedienteRequest) returns (UpdateExpedienteResponse);
   rpc ChangeEstado(ChangeEstadoRequest) returns (ChangeEstadoResponse);
   rpc DeleteExpediente(DeleteExpedienteRequest) returns (DeleteExpedienteResponse);
+  rpc UpdateArea(UpdateAreaRequest) returns (UpdateAreaResponse);
 }

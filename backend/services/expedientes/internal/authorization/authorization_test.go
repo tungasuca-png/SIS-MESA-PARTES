@@ -40,11 +40,42 @@ func TestCanDelete_OnlyInternal(t *testing.T) {
 	}
 }
 
-func TestCanViewAll_OnlyInternal(t *testing.T) {
+func TestCanViewAll_OnlySecretariaAndAdmin(t *testing.T) {
 	if CanViewAll(RoleSolicitante) {
 		t.Error("solicitante should not view all")
 	}
-	if !CanViewAll("ADMIN") {
-		t.Error("admin should view all")
+	for _, role := range []string{"ADMIN", "SECRETARIA"} {
+		if !CanViewAll(role) {
+			t.Errorf("%s should view all", role)
+		}
+	}
+	// El resto del personal interno solo ve lo que se le derivo a su area
+	// (ver AreaDelRol) — no todo, aunque siga siendo IsInternal.
+	for _, role := range []string{"DIRECTOR", "SUBDIRECTOR", "DOCENTE", "AUXILIAR"} {
+		if CanViewAll(role) {
+			t.Errorf("%s should NOT view all, only its own area", role)
+		}
+	}
+}
+
+func TestAreaDelRol(t *testing.T) {
+	for _, role := range []string{"DIRECTOR", "SUBDIRECTOR", "DOCENTE", "AUXILIAR"} {
+		if AreaDelRol(role) != role {
+			t.Errorf("expected AreaDelRol(%s) == %s, got %q", role, role, AreaDelRol(role))
+		}
+	}
+	for _, role := range []string{"ADMIN", "SECRETARIA", RoleSolicitante} {
+		if AreaDelRol(role) != "" {
+			t.Errorf("expected AreaDelRol(%s) == \"\", got %q", role, AreaDelRol(role))
+		}
+	}
+}
+
+func TestCanUpdateArea_OnlyInternal(t *testing.T) {
+	if CanUpdateArea(RoleSolicitante) {
+		t.Error("solicitante should not be able to update area")
+	}
+	if !CanUpdateArea("SECRETARIA") {
+		t.Error("internal role should be able to update area")
 	}
 }

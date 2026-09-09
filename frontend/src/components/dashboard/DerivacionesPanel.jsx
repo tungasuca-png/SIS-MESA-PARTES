@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { crearDerivacion, getDerivacionesByExpediente } from "../../services/derivacionesService";
+import { updateArea } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { TIPOS_DERIVACION } from "../../constants/derivaciones";
-import { ACTORES_DESTINO, roleLabel } from "../../constants/roles";
+import { ACTORES_DESTINO, roleForLabel, roleLabel } from "../../constants/roles";
 import Icon from "./Icon";
 import "./forms.css";
 import "./documentosPanel.css";
@@ -68,6 +69,21 @@ function DerivacionesPanel({ expedienteId }) {
         setCreando(true);
         try {
             await crearDerivacion(expedienteId, { ...campos, origen: origenActual });
+
+            // Solo una derivación real (tipo DERIVACION) cambia quién es
+            // responsable del expediente — una notificación, asignación,
+            // recepción o aprobación no transfieren esa responsabilidad
+            // (ver sección 15 del análisis funcional). "Sistema" y
+            // "Solicitante" tampoco son un área interna a la que se le
+            // pueda asignar el expediente, así que roleForLabel no
+            // devuelve nada útil para esos casos y no se actualiza el área.
+            if (campos.tipo === "DERIVACION") {
+                const area = roleForLabel(campos.destino);
+                if (area && area !== "SOLICITANTE") {
+                    await updateArea(expedienteId, area);
+                }
+            }
+
             setCampos(CAMPOS_INICIALES);
             await load();
         } catch (err) {
