@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package derivaciones;
+option go_package="./derivaciones";
+
+message Derivacion {
+  string id = 1;
+  string expediente_id = 2;
+  string tipo = 3;
+  string origen = 4;
+  string destino = 5;
+  string motivo = 6;
+  string condicion = 7;
+  string registrado_por = 8;
+  string fecha_registro = 9;
+}
+
+message CrearDerivacionRequest {
+  string expediente_id = 1;
+  string tipo = 2;
+  string origen = 3;
+  string destino = 4;
+  string motivo = 5;
+  string condicion = 6;
+}
+
+message CrearDerivacionResponse {
+  Derivacion derivacion = 1;
+}
+
+message GetDerivacionRequest {
+  string id = 1;
+}
+
+message GetDerivacionResponse {
+  Derivacion derivacion = 1;
+}
+
+message ListDerivacionesRequest {
+  // expediente_id vacio = listar de todos los expedientes (solo personal
+  // interno, ver internal/authorization.CanViewAll). Con valor, filtra a
+  // ese expediente puntual.
+  string expediente_id = 1;
+  string tipo = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message ListDerivacionesResponse {
+  repeated Derivacion derivaciones = 1;
+  int32 total = 2;
+}
+
+service Derivaciones {
+  rpc CrearDerivacion(CrearDerivacionRequest) returns (CrearDerivacionResponse);
+  rpc GetDerivacion(GetDerivacionRequest) returns (GetDerivacionResponse);
+  rpc ListDerivaciones(ListDerivacionesRequest) returns (ListDerivacionesResponse);
+}

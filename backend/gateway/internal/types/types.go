@@ -13,6 +13,20 @@ type ChangeEstadoResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type CrearDerivacionRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `path:"expediente_id"`
+	Tipo          string `json:"tipo"`
+	Origen        string `json:"origen"`
+	Destino       string `json:"destino"`
+	Motivo        string `json:"motivo"`
+	Condicion     string `json:"condicion,optional"`
+}
+
+type CrearDerivacionResponse struct {
+	Derivacion DerivacionDTO `json:"derivacion"`
+}
+
 type CreateExpedienteRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Tipo          string `json:"tipo,optional"`
@@ -41,6 +55,18 @@ type DeleteExpedienteRequest struct {
 
 type DeleteExpedienteResponse struct {
 	Success bool `json:"success"`
+}
+
+type DerivacionDTO struct {
+	Id            string `json:"id"`
+	ExpedienteId  string `json:"expediente_id"`
+	Tipo          string `json:"tipo"`
+	Origen        string `json:"origen"`
+	Destino       string `json:"destino"`
+	Motivo        string `json:"motivo"`
+	Condicion     string `json:"condicion"`
+	RegistradoPor string `json:"registrado_por"`
+	FechaRegistro string `json:"fecha_registro"`
 }
 
 type DocumentoDTO struct {
@@ -77,6 +103,15 @@ type ExpedienteDTO struct {
 	FechaRegistro      string `json:"fecha_registro"`
 	FechaActualizacion string `json:"fecha_actualizacion"`
 	Activo             bool   `json:"activo"`
+}
+
+type GetDerivacionRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetDerivacionResponse struct {
+	Derivacion DerivacionDTO `json:"derivacion"`
 }
 
 type GetDocumentoRequest struct {
@@ -124,6 +159,14 @@ type GetUsuariosBasicResponse struct {
 	Usuarios []UsuarioBasicDTO `json:"usuarios"`
 }
 
+type ListAllDerivacionesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `form:"expediente_id,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
 type ListAllDocumentosRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	ExpedienteId  string `form:"expediente_id,optional"`
@@ -135,6 +178,16 @@ type ListAllDocumentosRequest struct {
 type ListAllDocumentosResponse struct {
 	Documentos []DocumentoDTO `json:"documentos"`
 	Total      int32          `json:"total"`
+}
+
+type ListDerivacionesByExpedienteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `path:"expediente_id"`
+}
+
+type ListDerivacionesResponse struct {
+	Derivaciones []DerivacionDTO `json:"derivaciones"`
+	Total        int32           `json:"total"`
 }
 
 type ListDocumentosRequest struct {

@@ -4,6 +4,7 @@ import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
 import DocumentosPanel from "../../components/dashboard/DocumentosPanel";
+import DerivacionesPanel from "../../components/dashboard/DerivacionesPanel";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
 import { changeEstado, getExpediente, updateExpediente } from "../../services/expedientesService";
@@ -268,6 +269,10 @@ function ExpedienteDetail() {
                             </form>
                         </section>
                     )}
+
+                    <div className="dp-detail-full-width">
+                        <DerivacionesPanel expedienteId={expediente.id} />
+                    </div>
 
                     <div className="dp-detail-full-width">
                         <DocumentosPanel expedienteId={expediente.id} expediente={expediente} />

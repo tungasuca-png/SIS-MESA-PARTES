@@ -136,4 +136,29 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/derivaciones",
+				Handler: ListAllDerivacionesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/derivaciones/:id",
+				Handler: GetDerivacionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/expedientes/:expediente_id/derivaciones",
+				Handler: CrearDerivacionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/expedientes/:expediente_id/derivaciones",
+				Handler: ListDerivacionesByExpedienteHandler(serverCtx),
+			},
+		},
+	)
 }

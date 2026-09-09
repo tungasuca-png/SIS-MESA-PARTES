@@ -2,6 +2,7 @@ package svc
 
 import (
 	"auth/authclient"
+	"derivaciones/derivacionesclient"
 	"documentos/documentosclient"
 	"expedientes/expedientesclient"
 	"gateway/internal/config"
@@ -12,11 +13,12 @@ import (
 )
 
 type ServiceContext struct {
-	Config            config.Config
-	AuthClient        authclient.Auth
-	ExpedientesClient expedientesclient.Expedientes
-	UsuariosClient    usuariosclient.Usuarios
-	DocumentosClient  documentosclient.Documentos
+	Config             config.Config
+	AuthClient         authclient.Auth
+	ExpedientesClient  expedientesclient.Expedientes
+	UsuariosClient     usuariosclient.Usuarios
+	DocumentosClient   documentosclient.Documentos
+	DerivacionesClient derivacionesclient.Derivaciones
 }
 
 // documentosMaxMsgSize deja margen sobre el limite de archivo de Documentos
@@ -41,6 +43,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 				grpc.MaxCallRecvMsgSize(documentosMaxMsgSize),
 				grpc.MaxCallSendMsgSize(documentosMaxMsgSize),
 			))),
+		),
+		DerivacionesClient: derivacionesclient.NewDerivaciones(
+			zrpc.MustNewClient(c.DerivacionesRpc),
 		),
 	}
 }

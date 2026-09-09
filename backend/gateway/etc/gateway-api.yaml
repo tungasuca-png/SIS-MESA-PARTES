@@ -13,3 +13,6 @@ UsuariosRpc:
 
 DocumentosRpc:
   Target: 127.0.0.1:8084
+
+DerivacionesRpc:
+  Target: 127.0.0.1:8085

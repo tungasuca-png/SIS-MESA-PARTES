@@ -1,0 +1,23 @@
+Name: derivaciones.rpc
+ListenOn: 0.0.0.0:8085
+Mode: dev
+
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: derivaciones.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: derivaciones_user
+  Password: derivaciones_password
+  Database: derivaciones_db
+  SSLMode: disable
+
+JWTSecret: ${JWT_SECRET}
+
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /derivaciones.Derivaciones/CrearDerivacion

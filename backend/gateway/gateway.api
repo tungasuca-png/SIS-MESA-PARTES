@@ -356,3 +356,70 @@ service gateway-api {
 	get /api/documentos (ListAllDocumentosRequest) returns (ListAllDocumentosResponse)
 }
 
+type DerivacionDTO {
+	Id            string `json:"id"`
+	ExpedienteId  string `json:"expediente_id"`
+	Tipo          string `json:"tipo"`
+	Origen        string `json:"origen"`
+	Destino       string `json:"destino"`
+	Motivo        string `json:"motivo"`
+	Condicion     string `json:"condicion"`
+	RegistradoPor string `json:"registrado_por"`
+	FechaRegistro string `json:"fecha_registro"`
+}
+
+type CrearDerivacionRequest {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `path:"expediente_id"`
+	Tipo          string `json:"tipo"`
+	Origen        string `json:"origen"`
+	Destino       string `json:"destino"`
+	Motivo        string `json:"motivo"`
+	Condicion     string `json:"condicion,optional"`
+}
+
+type CrearDerivacionResponse {
+	Derivacion DerivacionDTO `json:"derivacion"`
+}
+
+type GetDerivacionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetDerivacionResponse {
+	Derivacion DerivacionDTO `json:"derivacion"`
+}
+
+type ListDerivacionesByExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `path:"expediente_id"`
+}
+
+type ListDerivacionesResponse {
+	Derivaciones []DerivacionDTO `json:"derivaciones"`
+	Total        int32           `json:"total"`
+}
+
+type ListAllDerivacionesRequest {
+	Authorization string `header:"Authorization,optional"`
+	ExpedienteId  string `form:"expediente_id,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+service gateway-api {
+	@handler CrearDerivacion
+	post /api/expedientes/:expediente_id/derivaciones (CrearDerivacionRequest) returns (CrearDerivacionResponse)
+
+	@handler GetDerivacion
+	get /api/derivaciones/:id (GetDerivacionRequest) returns (GetDerivacionResponse)
+
+	@handler ListDerivacionesByExpediente
+	get /api/expedientes/:expediente_id/derivaciones (ListDerivacionesByExpedienteRequest) returns (ListDerivacionesResponse)
+
+	@handler ListAllDerivaciones
+	get /api/derivaciones (ListAllDerivacionesRequest) returns (ListDerivacionesResponse)
+}
+

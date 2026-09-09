@@ -17,6 +17,16 @@
 // authorization.CanViewAll en Documentos Service). El backend restringe
 // además su subida a tipo ADJUNTO — el frontend no distingue por tipo, solo
 // el backend lo hace cumplir.
+//
+// "derivaciones.view/create" se alinearon con Derivaciones Service: TODO el
+// personal interno puede registrar y ver derivaciones (mismo criterio que
+// CanCreate/CanViewAll de ese microservicio — es una acción de ruteo interno
+// del expediente, no algo que decida un SOLICITANTE). Un SOLICITANTE puede
+// ver el historial de derivaciones de SU propio expediente puntual (por eso
+// no tiene "derivaciones.view" acá: ese permiso es para el listado global;
+// el panel del expediente no depende de este permiso, solo de estar
+// autenticado — el backend ya lo acota a un expediente_id obligatorio para
+// quien no sea personal interno).
 export const ROLE_PERMISSIONS = {
     ADMIN: [
         "dashboard.view",
@@ -29,6 +39,7 @@ export const ROLE_PERMISSIONS = {
         "documentos.create",
         "documentos.delete",
         "derivaciones.view",
+        "derivaciones.create",
         "seguimiento.view",
         "reportes.view",
         "usuarios.view",
@@ -44,6 +55,7 @@ export const ROLE_PERMISSIONS = {
         "documentos.create",
         "documentos.delete",
         "derivaciones.view",
+        "derivaciones.create",
         "seguimiento.view",
         "reportes.view",
     ],
@@ -57,6 +69,7 @@ export const ROLE_PERMISSIONS = {
         "documentos.create",
         "documentos.delete",
         "derivaciones.view",
+        "derivaciones.create",
         "seguimiento.view",
         "reportes.view",
     ],
@@ -71,6 +84,7 @@ export const ROLE_PERMISSIONS = {
         "documentos.create",
         "documentos.delete",
         "derivaciones.view",
+        "derivaciones.create",
         "seguimiento.view",
     ],
     DOCENTE: [
@@ -82,6 +96,8 @@ export const ROLE_PERMISSIONS = {
         "documentos.view",
         "documentos.create",
         "documentos.delete",
+        "derivaciones.view",
+        "derivaciones.create",
         "seguimiento.view",
     ],
     AUXILIAR: [
@@ -93,6 +109,8 @@ export const ROLE_PERMISSIONS = {
         "documentos.view",
         "documentos.create",
         "documentos.delete",
+        "derivaciones.view",
+        "derivaciones.create",
         "seguimiento.view",
     ],
     SOLICITANTE: [

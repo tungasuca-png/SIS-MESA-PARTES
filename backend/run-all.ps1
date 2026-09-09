@@ -1,5 +1,6 @@
-# Levanta los 5 procesos del backend (Auth, Expedientes, Usuarios,
-# Documentos, Gateway) con un solo comando, todos con el mismo JWT_SECRET.
+# Levanta los 6 procesos del backend (Auth, Expedientes, Usuarios,
+# Documentos, Derivaciones, Gateway) con un solo comando, todos con el mismo
+# JWT_SECRET.
 #
 # Uso:
 #   cd backend
@@ -30,14 +31,15 @@ $env:JWT_SECRET = ($jwtLine -replace "^JWT_SECRET=", "").Trim()
 $logsDir = Join-Path $root "logs"
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
 
-# Orden: los 4 RPC primero (se registran en etcd), el Gateway al final (les
+# Orden: los 5 RPC primero (se registran en etcd), el Gateway al final (les
 # apunta a traves de etcd, no importa si tarda un segundo mas en levantar).
 $services = @(
-    @{ Name = "auth";        Dir = "services/auth";        Main = "auth.go";        Yaml = "etc/auth.yaml";        Port = 8080 }
-    @{ Name = "expedientes"; Dir = "services/expedientes"; Main = "expedientes.go"; Yaml = "etc/expedientes.yaml"; Port = 8082 }
-    @{ Name = "usuarios";    Dir = "services/usuarios";    Main = "usuarios.go";    Yaml = "etc/usuarios.yaml";    Port = 8083 }
-    @{ Name = "documentos";  Dir = "services/documentos";  Main = "documentos.go";  Yaml = "etc/documentos.yaml";  Port = 8084 }
-    @{ Name = "gateway";     Dir = "gateway";               Main = "gateway.go";     Yaml = "etc/gateway-api.yaml"; Port = 8888 }
+    @{ Name = "auth";         Dir = "services/auth";         Main = "auth.go";         Yaml = "etc/auth.yaml";         Port = 8080 }
+    @{ Name = "expedientes";  Dir = "services/expedientes";  Main = "expedientes.go";  Yaml = "etc/expedientes.yaml";  Port = 8082 }
+    @{ Name = "usuarios";     Dir = "services/usuarios";     Main = "usuarios.go";     Yaml = "etc/usuarios.yaml";     Port = 8083 }
+    @{ Name = "documentos";   Dir = "services/documentos";   Main = "documentos.go";   Yaml = "etc/documentos.yaml";   Port = 8084 }
+    @{ Name = "derivaciones"; Dir = "services/derivaciones"; Main = "derivaciones.go"; Yaml = "etc/derivaciones.yaml"; Port = 8085 }
+    @{ Name = "gateway";      Dir = "gateway";               Main = "gateway.go";      Yaml = "etc/gateway-api.yaml";  Port = 8888 }
 )
 
 $pidsFile = Join-Path $logsDir "pids.json"
@@ -63,6 +65,6 @@ foreach ($svc in $services) {
 $started | ConvertTo-Json | Out-File -FilePath $pidsFile -Encoding utf8
 
 Write-Host ""
-Write-Host "Los 5 procesos se lanzaron (compilando con 'go run', puede tardar unos segundos)." -ForegroundColor Green
+Write-Host "Los 6 procesos se lanzaron (compilando con 'go run', puede tardar unos segundos)." -ForegroundColor Green
 Write-Host "Logs en backend\logs\<servicio>.log - para bajarlos todos: .\stop-all.ps1" -ForegroundColor Green
 $started | Format-Table -AutoSize
