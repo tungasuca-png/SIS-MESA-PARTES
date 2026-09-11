@@ -17,6 +17,31 @@ function isItemActive(item, location) {
     return new URLSearchParams(location.search).toString() === new URLSearchParams(itemSearch).toString();
 }
 
+// Cada página monta su propio DashboardLayout/Sidebar (no hay un layout de
+// ruta persistente en App.jsx), así que un simple useState se reinicia con
+// cada navegación: se colapsa "Administración" y, al hacer clic en
+// cualquier link, vuelve a aparecer abierta. Se guarda en localStorage para
+// que la preferencia sobreviva el remount (y la sesión del navegador).
+const STORAGE_KEY = "dp_sidebar_closed_groups";
+
+function loadClosedGroups() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch {
+        return new Set();
+    }
+}
+
+function saveClosedGroups(set) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+    } catch {
+        // localStorage no disponible (privado/bloqueado): no es crítico, el
+        // desplegable sigue funcionando dentro de la misma página.
+    }
+}
+
 function Sidebar({ open, onClose }) {
     const { logout } = useAuth();
     const { can } = usePermissions();
@@ -24,12 +49,13 @@ function Sidebar({ open, onClose }) {
 
     // Cada categoría (Mesa de partes, Seguimiento, etc.) es desplegable.
     // Empiezan todas abiertas; el usuario colapsa la que no le interese.
-    const [closedGroups, setClosedGroups] = useState(() => new Set());
+    const [closedGroups, setClosedGroups] = useState(loadClosedGroups);
     const toggleGroup = (label) => {
         setClosedGroups((current) => {
             const next = new Set(current);
             if (next.has(label)) next.delete(label);
             else next.add(label);
+            saveClosedGroups(next);
             return next;
         });
     };
