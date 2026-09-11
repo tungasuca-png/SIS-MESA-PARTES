@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -21,6 +22,18 @@ function Sidebar({ open, onClose }) {
     const { can } = usePermissions();
     const location = useLocation();
 
+    // Cada categoría (Mesa de partes, Seguimiento, etc.) es desplegable.
+    // Empiezan todas abiertas; el usuario colapsa la que no le interese.
+    const [closedGroups, setClosedGroups] = useState(() => new Set());
+    const toggleGroup = (label) => {
+        setClosedGroups((current) => {
+            const next = new Set(current);
+            if (next.has(label)) next.delete(label);
+            else next.add(label);
+            return next;
+        });
+    };
+
     const groups = NAV_GROUPS.map((group) => ({
         ...group,
         items: group.items.filter((item) => can(item.permission)),
@@ -40,38 +53,56 @@ function Sidebar({ open, onClose }) {
             </div>
 
             <nav className="dp-nav">
-                {groups.map((group) => (
-                    <div
-                        key={group.label ?? "top"}
-                        className={`dp-nav-group ${group.label ? "dp-nav-group--nested" : ""}`}
-                    >
-                        {group.label && <p className="dp-nav-group-label">{group.label}</p>}
-                        {group.items.map((item) =>
-                            item.path ? (
-                                <Link
-                                    key={item.key}
-                                    to={item.path}
-                                    className={`dp-nav-item ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
-                                    onClick={onClose}
-                                >
-                                    <Icon name={item.icon} size={18} />
-                                    <span>{item.label}</span>
-                                </Link>
-                            ) : (
+                {groups.map((group) => {
+                    const isOpen = !group.label || !closedGroups.has(group.label);
+                    return (
+                        <div
+                            key={group.label ?? "top"}
+                            className={`dp-nav-group ${group.label ? "dp-nav-group--nested" : ""}`}
+                        >
+                            {group.label && (
                                 <button
-                                    key={item.key}
                                     type="button"
-                                    className="dp-nav-item dp-nav-item--soon"
-                                    aria-disabled="true"
+                                    className="dp-nav-group-label"
+                                    onClick={() => toggleGroup(group.label)}
+                                    aria-expanded={isOpen}
                                 >
-                                    <Icon name={item.icon} size={18} />
-                                    <span>{item.label}</span>
-                                    <span className="dp-nav-soon">Próximamente</span>
+                                    <span>{group.label}</span>
+                                    <Icon
+                                        name="chevronDown"
+                                        size={13}
+                                        className={`dp-nav-group-chevron ${isOpen ? "" : "dp-nav-group-chevron--closed"}`}
+                                    />
                                 </button>
-                            )
-                        )}
-                    </div>
-                ))}
+                            )}
+                            {isOpen &&
+                                group.items.map((item) =>
+                                    item.path ? (
+                                        <Link
+                                            key={item.key}
+                                            to={item.path}
+                                            className={`dp-nav-item ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
+                                            onClick={onClose}
+                                        >
+                                            <Icon name={item.icon} size={18} />
+                                            <span>{item.label}</span>
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            key={item.key}
+                                            type="button"
+                                            className="dp-nav-item dp-nav-item--soon"
+                                            aria-disabled="true"
+                                        >
+                                            <Icon name={item.icon} size={18} />
+                                            <span>{item.label}</span>
+                                            <span className="dp-nav-soon">Próximamente</span>
+                                        </button>
+                                    )
+                                )}
+                        </div>
+                    );
+                })}
             </nav>
 
             <div className="dp-sidebar-footer">
