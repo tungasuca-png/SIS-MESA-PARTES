@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import ExpedienteFormModal from "../../components/dashboard/ExpedienteFormModal";
 import StatusBadge from "../../components/dashboard/StatusBadge";
@@ -11,6 +11,7 @@ import { deleteExpediente, getExpedientes } from "../../services/expedientesServ
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
 import { DEFAULT_PAGE_SIZE, ESTADOS, PRIORIDADES, TIPOS } from "../../constants/expedientes";
+import { tituloBandeja } from "../../constants/bandejas";
 import "../../components/dashboard/RecentExpedientes.css";
 import "../../components/dashboard/forms.css";
 import "../../components/dashboard/documentosPanel.css";
@@ -20,11 +21,15 @@ function ExpedientesList() {
     const { can } = usePermissions();
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [items, setItems] = useState([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
-    const [estado, setEstado] = useState("");
+    // El filtro de estado es la "bandeja" (ver constants/bandejas.js): vive
+    // en la URL (?estado=PENDIENTE) para que el menú pueda enlazar
+    // directo a cada una y quede en el historial/favoritos del navegador.
+    const [estado, setEstado] = useState(searchParams.get("estado") || "");
     const [prioridad, setPrioridad] = useState("");
     const [tipo, setTipo] = useState("");
     const [loading, setLoading] = useState(true);
@@ -75,6 +80,20 @@ function ExpedientesList() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        // La URL es la fuente de verdad del filtro de estado (bandeja): si
+        // cambia por fuera (link del menú, atrás/adelante del navegador),
+        // el <select> debe reflejarlo.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setEstado(searchParams.get("estado") || "");
+        setPage(1);
+    }, [searchParams]);
+
+    const handleEstadoChange = (event) => {
+        const value = event.target.value;
+        setSearchParams(value ? { estado: value } : {}, { replace: true });
+    };
+
     // "Remitente" no aplica cuando el usuario solo ve sus propios
     // expedientes (SOLICITANTE): siempre sería él mismo, y evita una
     // llamada de menos al backend.
@@ -104,7 +123,10 @@ function ExpedientesList() {
     const emptyMessage = canViewAll
         ? "No hay expedientes registrados."
         : "Aún no tienes expedientes registrados.";
-    const titulo = canViewAll ? "Expedientes" : "Mis expedientes";
+    // El título sigue a la bandeja activa (ver constants/bandejas.js) para
+    // que quede claro qué filtro se está viendo, sin crear una página por
+    // bandeja.
+    const titulo = tituloBandeja(estado) || (canViewAll ? "Expedientes" : "Mis expedientes");
 
     return (
         <RoleLayout title={titulo}>
@@ -119,7 +141,7 @@ function ExpedientesList() {
                 </div>
 
                 <div className="dp-filters">
-                    <select value={estado} onChange={handleFilterChange(setEstado)} aria-label="Filtrar por estado">
+                    <select value={estado} onChange={handleEstadoChange} aria-label="Filtrar por estado">
                         <option value="">Todos los estados</option>
                         {ESTADOS.map((item) => (
                             <option key={item.value} value={item.value}>

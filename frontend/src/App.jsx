@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login/login";
 import Dashboard from "./pages/Dashboard/dashboard";
 import ExpedientesList from "./pages/Expedientes/ExpedientesList";
+import ExpedientesDerivados from "./pages/Expedientes/ExpedientesDerivados";
 import ExpedienteDetail from "./pages/Expedientes/ExpedienteDetail";
 import FutDigital from "./pages/FUT/FutDigital";
 import MesaPartesHome from "./pages/MesaDePartes/MesaPartesHome";
@@ -38,6 +39,16 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <ExpedientesList />
+                    </ProtectedRoute>
+                }
+            />
+            {/* "Derivados" (bandeja, ver constants/bandejas.js): ruta propia
+                porque va antes que ":id" — no es un expediente puntual. */}
+            <Route
+                path="/expedientes/derivados"
+                element={
+                    <ProtectedRoute>
+                        <ExpedientesDerivados />
                     </ProtectedRoute>
                 }
             />

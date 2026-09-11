@@ -1,13 +1,25 @@
-import { NavLink } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { NAV_ITEMS } from "./navItems";
 import Icon from "./Icon";
 import "./Sidebar.css";
 
+// react-router's NavLink solo compara el pathname (ignora el query string),
+// así que con varias bandejas apuntando a "/expedientes" con distinto
+// "?estado=" todas quedarían resaltadas a la vez. Se compara a mano
+// pathname + search contra cada item.path.
+function isItemActive(item, location) {
+    const [itemPath, itemSearch] = item.path.split("?");
+    if (location.pathname !== itemPath) return false;
+    if (!itemSearch) return true;
+    return new URLSearchParams(location.search).toString() === new URLSearchParams(itemSearch).toString();
+}
+
 function Sidebar({ open, onClose }) {
     const { logout } = useAuth();
     const { can } = usePermissions();
+    const location = useLocation();
 
     const items = NAV_ITEMS.filter((item) => can(item.permission));
 
@@ -27,17 +39,15 @@ function Sidebar({ open, onClose }) {
             <nav className="dp-nav">
                 {items.map((item) =>
                     item.path ? (
-                        <NavLink
+                        <Link
                             key={item.key}
                             to={item.path}
-                            className={({ isActive }) =>
-                                `dp-nav-item ${isActive ? "dp-nav-item--active" : ""}`
-                            }
+                            className={`dp-nav-item ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
                             onClick={onClose}
                         >
                             <Icon name={item.icon} size={18} />
                             <span>{item.label}</span>
-                        </NavLink>
+                        </Link>
                     ) : (
                         <button
                             key={item.key}
