@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
-import { NAV_ITEMS } from "./navItems";
+import { NAV_GROUPS } from "./navItems";
 import Icon from "./Icon";
 import "./Sidebar.css";
 
@@ -21,7 +21,10 @@ function Sidebar({ open, onClose }) {
     const { can } = usePermissions();
     const location = useLocation();
 
-    const items = NAV_ITEMS.filter((item) => can(item.permission));
+    const groups = NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items.filter((item) => can(item.permission)),
+    })).filter((group) => group.items.length > 0);
 
     return (
         <aside className={`dp-sidebar ${open ? "dp-sidebar--open" : ""}`}>
@@ -37,30 +40,38 @@ function Sidebar({ open, onClose }) {
             </div>
 
             <nav className="dp-nav">
-                {items.map((item) =>
-                    item.path ? (
-                        <Link
-                            key={item.key}
-                            to={item.path}
-                            className={`dp-nav-item ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
-                            onClick={onClose}
-                        >
-                            <Icon name={item.icon} size={18} />
-                            <span>{item.label}</span>
-                        </Link>
-                    ) : (
-                        <button
-                            key={item.key}
-                            type="button"
-                            className="dp-nav-item dp-nav-item--soon"
-                            aria-disabled="true"
-                        >
-                            <Icon name={item.icon} size={18} />
-                            <span>{item.label}</span>
-                            <span className="dp-nav-soon">Próximamente</span>
-                        </button>
-                    )
-                )}
+                {groups.map((group) => (
+                    <div
+                        key={group.label ?? "top"}
+                        className={`dp-nav-group ${group.label ? "dp-nav-group--nested" : ""}`}
+                    >
+                        {group.label && <p className="dp-nav-group-label">{group.label}</p>}
+                        {group.items.map((item) =>
+                            item.path ? (
+                                <Link
+                                    key={item.key}
+                                    to={item.path}
+                                    className={`dp-nav-item ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
+                                    onClick={onClose}
+                                >
+                                    <Icon name={item.icon} size={18} />
+                                    <span>{item.label}</span>
+                                </Link>
+                            ) : (
+                                <button
+                                    key={item.key}
+                                    type="button"
+                                    className="dp-nav-item dp-nav-item--soon"
+                                    aria-disabled="true"
+                                >
+                                    <Icon name={item.icon} size={18} />
+                                    <span>{item.label}</span>
+                                    <span className="dp-nav-soon">Próximamente</span>
+                                </button>
+                            )
+                        )}
+                    </div>
+                ))}
             </nav>
 
             <div className="dp-sidebar-footer">

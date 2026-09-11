@@ -43,6 +43,7 @@ export const ROLE_PERMISSIONS = {
         "seguimiento.view",
         "reportes.view",
         "usuarios.view",
+        "roles.view",
         "configuracion.view",
     ],
     DIRECTOR: [
