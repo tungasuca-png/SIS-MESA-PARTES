@@ -9,6 +9,7 @@ import { submitFut } from "../../services/futService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatBytes, formatDate } from "../../utils/format";
 import { EXTENSIONES_PERMITIDAS, MAX_TAMANO_BYTES } from "../../constants/documentos";
+import { TIPOS_TRAMITE } from "../../constants/expedientes";
 import "../../components/dashboard/forms.css";
 import "../Expedientes/expedienteDetail.css";
 import "./fut.css";
@@ -54,6 +55,12 @@ function FutDigital() {
 
     const [step, setStep] = useState("form"); // form | preview | confirmation
 
+    // Etapa 2: antes todo expediente creado por el FUT se registraba con
+    // tipo="SOLICITUD" fijo (Expedientes Service no distinguía Certificado
+    // de Permiso). Ahora el solicitante elige el trámite real entre los 5
+    // confirmados en docs/analisis-5-flujos-completo.md — sin valor por
+    // defecto: debe elegirlo explícitamente.
+    const [tipo, setTipo] = useState("");
     const [sumilla, setSumilla] = useState("");
     const [nombres, setNombres] = useState(user?.username ?? "");
     const [dni, setDni] = useState("");
@@ -78,6 +85,7 @@ function FutDigital() {
 
     const validate = () => {
         const next = {};
+        if (!tipo) next.tipo = "Selecciona el tipo de trámite.";
         if (!sumilla.trim()) next.sumilla = "La sumilla es obligatoria.";
         if (!nombres.trim()) next.nombres = "Los nombres y apellidos son obligatorios.";
         if (!DNI_PATTERN.test(dni.trim())) next.dni = "El DNI debe tener 8 dígitos.";
@@ -137,6 +145,7 @@ function FutDigital() {
         setSubmitError("");
         try {
             const res = await submitFut({
+                tipo,
                 sumilla: sumilla.trim(),
                 nombres: nombres.trim(),
                 dni: dni.trim(),
@@ -172,6 +181,21 @@ function FutDigital() {
 
                 {step === "form" && (
                     <form className="dp-form fut-form" onSubmit={handleReview}>
+                        <section className="fut-section">
+                            <label htmlFor="fut-tipo" className="fut-section-title">
+                                Tipo de trámite *
+                            </label>
+                            <select id="fut-tipo" value={tipo} onChange={(event) => setTipo(event.target.value)}>
+                                <option value="">Selecciona...</option>
+                                {TIPOS_TRAMITE.map((item) => (
+                                    <option key={item.value} value={item.value}>
+                                        {item.label}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.tipo && <p className="dp-form-error">{errors.tipo}</p>}
+                        </section>
+
                         <section className="fut-section">
                             <label htmlFor="fut-sumilla" className="fut-section-title">
                                 Sumilla
@@ -362,6 +386,10 @@ function FutDigital() {
                         <h2 className="fut-section-title">Revisar FUT</h2>
 
                         <dl className="dp-detail-list">
+                            <div>
+                                <dt>Tipo de trámite</dt>
+                                <dd>{TIPOS_TRAMITE.find((item) => item.value === tipo)?.label ?? tipo}</dd>
+                            </div>
                             <div>
                                 <dt>Sumilla</dt>
                                 <dd>{sumilla}</dd>

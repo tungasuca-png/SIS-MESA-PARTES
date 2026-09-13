@@ -38,3 +38,14 @@ export const ACTORES_DESTINO = [
     { value: "Sistema", label: "Sistema" },
     ...Object.values(ROLE_LABELS).map((label) => ({ value: label, label })),
 ];
+
+// Áreas reales a las que se puede DERIVAR un expediente (Etapa 3): mismo
+// vocabulario que expedientes.area_actual y internal/estados.IsValidArea
+// del backend (value = código de área, no el label) — a diferencia de
+// ACTORES_DESTINO (que es texto libre para el resto de tipos de
+// derivación), acá el backend valida la transición real, así que el value
+// debe ser el código exacto que espera DerivarExpediente. No incluye
+// SOLICITANTE (no es un área interna a la que se derive un expediente).
+export const AREAS_DESTINO = Object.entries(ROLE_LABELS)
+    .filter(([role]) => role !== "SOLICITANTE")
+    .map(([value, label]) => ({ value, label }));

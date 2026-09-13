@@ -400,7 +400,7 @@ export async function submitFut(fut) {
     const descripcion = buildDescripcion(fut);
 
     const { expediente } = await createExpediente({
-        tipo: "SOLICITUD",
+        tipo: fut.tipo,
         asunto: fut.sumilla,
         descripcion,
         prioridad: "NORMAL",

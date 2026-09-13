@@ -50,10 +50,12 @@ func (l *CreateExpedienteLogic) CreateExpediente(in *expedientes.CreateExpedient
 		return nil, status.Error(codes.InvalidArgument, "el asunto no puede superar los 255 caracteres")
 	}
 
+	// El tipo es obligatorio (Etapa 2): antes un tipo vacío se completaba
+	// silenciosamente como "SOLICITUD" genérica, lo que le permitía al FUT
+	// Digital no distinguir nunca un trámite real (Certificado, Constancia,
+	// Permiso, Justificación...). Ahora quien registra el expediente debe
+	// indicar explícitamente cuál es.
 	tipo := strings.ToUpper(strings.TrimSpace(in.Tipo))
-	if tipo == "" {
-		tipo = estados.TipoSolicitud
-	}
 	if !estados.IsValidTipo(tipo) {
 		return nil, status.Error(codes.InvalidArgument, "el tipo de expediente no es válido")
 	}

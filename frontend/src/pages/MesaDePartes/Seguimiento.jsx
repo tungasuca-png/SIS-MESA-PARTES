@@ -6,7 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
-import { DEFAULT_PAGE_SIZE } from "../../constants/expedientes";
+import { DEFAULT_PAGE_SIZE, tipoLabel } from "../../constants/expedientes";
 import "../../components/dashboard/RecentExpedientes.css";
 import "../../components/dashboard/forms.css";
 import "./mesaDePartes.css";
@@ -65,6 +65,7 @@ function Seguimiento() {
                             <thead>
                                 <tr>
                                     <th>Expediente</th>
+                                    <th>Tipo</th>
                                     <th>Asunto</th>
                                     <th>Fecha</th>
                                     <th>Estado</th>
@@ -75,6 +76,7 @@ function Seguimiento() {
                                 {items.map((item) => (
                                     <tr key={item.codigo}>
                                         <td className="dp-table-code">{item.codigo}</td>
+                                        <td>{tipoLabel(item.tipo)}</td>
                                         <td>{item.asunto}</td>
                                         <td>{formatDate(item.fecha_registro)}</td>
                                         <td>

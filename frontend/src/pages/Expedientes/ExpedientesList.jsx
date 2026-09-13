@@ -10,7 +10,7 @@ import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
 import { deleteExpediente, getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
-import { DEFAULT_PAGE_SIZE, ESTADOS, PRIORIDADES, TIPOS } from "../../constants/expedientes";
+import { DEFAULT_PAGE_SIZE, ESTADOS, PRIORIDADES, TIPOS, tipoLabel } from "../../constants/expedientes";
 import { tituloBandeja } from "../../constants/bandejas";
 import "../../components/dashboard/RecentExpedientes.css";
 import "../../components/dashboard/forms.css";
@@ -183,6 +183,7 @@ function ExpedientesList() {
                                 <thead>
                                     <tr>
                                         <th>Expediente</th>
+                                        <th>Tipo</th>
                                         <th>Asunto</th>
                                         {canViewAll && <th>Remitente</th>}
                                         <th>Estado</th>
@@ -195,6 +196,7 @@ function ExpedientesList() {
                                     {items.map((item) => (
                                         <tr key={item.codigo}>
                                             <td className="dp-table-code">{item.codigo}</td>
+                                            <td>{tipoLabel(item.tipo)}</td>
                                             <td>{item.asunto}</td>
                                             {canViewAll && (
                                                 <td>

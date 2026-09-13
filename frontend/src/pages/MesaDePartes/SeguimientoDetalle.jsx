@@ -7,6 +7,7 @@ import { getExpediente } from "../../services/expedientesService";
 import { getDerivacionesByExpediente } from "../../services/derivacionesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
+import { tipoLabel } from "../../constants/expedientes";
 import "../Expedientes/expedienteDetail.css";
 import "./mesaDePartes.css";
 
@@ -84,7 +85,9 @@ function SeguimientoDetalle() {
                 <section className="dp-panel">
                     <div className="dp-detail-header">
                         <div>
-                            <p className="dp-detail-codigo">{expediente.codigo}</p>
+                            <p className="dp-detail-codigo">
+                                {expediente.codigo} · {tipoLabel(expediente.tipo)}
+                            </p>
                             <h2 className="dp-panel-title dp-detail-asunto">{expediente.asunto}</h2>
                         </div>
                         <StatusBadge status={expediente.estado} />
