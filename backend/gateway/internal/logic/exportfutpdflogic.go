@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"strings"
 
 	"documentos/documentosclient"
 	"expedientes/expedientesclient"
@@ -84,7 +83,7 @@ func (l *ExportFutPdfLogic) ExportFutPdf(req *types.ExportFutPdfRequest) (resp *
 		datosSolicitanteFut: *datosSolicitante,
 		Sumilla:             expediente.Asunto,
 		Codigo:              expediente.Codigo,
-		Fecha:               formatFechaFut(expediente.FechaRegistro),
+		FechaRegistro:       expediente.FechaRegistro,
 		Documentos:          nombresDocumentos,
 		FirmaPNG:            firmaPNG,
 	})
@@ -96,16 +95,4 @@ func (l *ExportFutPdfLogic) ExportFutPdf(req *types.ExportFutPdfRequest) (resp *
 		Nombre:          fmt.Sprintf("FUT-%s.pdf", expediente.Codigo),
 		ContenidoBase64: base64.StdEncoding.EncodeToString(pdfBytes),
 	}, nil
-}
-
-// formatFechaFut muestra solo la fecha (DD/MM/AAAA), igual que
-// formatDate() del frontend (utils/format.js) — fecha_registro llega como
-// timestamp ISO completo desde Expedientes Service.
-func formatFechaFut(fechaRegistro string) string {
-	fecha := strings.SplitN(fechaRegistro, "T", 2)[0]
-	partes := strings.Split(fecha, "-")
-	if len(partes) != 3 {
-		return fechaRegistro
-	}
-	return fmt.Sprintf("%s/%s/%s", partes[2], partes[1], partes[0])
 }
