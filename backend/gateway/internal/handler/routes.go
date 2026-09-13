@@ -115,6 +115,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ChangeEstadoHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodGet,
+				Path:    "/api/expedientes/:id/fut-pdf",
+				Handler: ExportFutPdfHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPatch,
 				Path:    "/api/expedientes/:id/rechazar",
 				Handler: RechazarExpedienteHandler(serverCtx),

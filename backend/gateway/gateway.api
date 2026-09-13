@@ -217,6 +217,23 @@ type ResolverExpedienteResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+// ExportFutPdf: reconstruye el cargo del FUT como PDF vectorial real
+// (texto con glifos, no una imagen rasterizada) a partir de los datos ya
+// guardados en el propio expediente y en sus documentos reales — mismo
+// dato que ya usaba el PDF generado en el navegador, solo que ahora el
+// render ocurre en el backend con una librería de PDF en Go (mejor
+// resolución al imprimir/hacer zoom, y el mismo archivo se ve igual sin
+// depender del navegador de cada usuario).
+type ExportFutPdfRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type ExportFutPdfResponse {
+	Nombre          string `json:"nombre"`
+	ContenidoBase64 string `json:"contenido_base64"`
+}
+
 service gateway-api {
 	@handler Register
 	post /api/auth/register (RegisterRequest) returns (RegisterResponse)
@@ -344,6 +361,9 @@ service gateway-api {
 
 	@handler ResolverExpediente
 	patch /api/expedientes/:id/resolver (ResolverExpedienteRequest) returns (ResolverExpedienteResponse)
+
+	@handler ExportFutPdf
+	get /api/expedientes/:id/fut-pdf (ExportFutPdfRequest) returns (ExportFutPdfResponse)
 }
 
 type DocumentoDTO {

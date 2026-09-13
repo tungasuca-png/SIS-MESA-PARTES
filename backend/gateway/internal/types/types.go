@@ -129,6 +129,16 @@ type ExpedienteDTO struct {
 	AreaActual         string `json:"area_actual"`
 }
 
+type ExportFutPdfRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type ExportFutPdfResponse struct {
+	Nombre          string `json:"nombre"`
+	ContenidoBase64 string `json:"contenido_base64"`
+}
+
 type GetDerivacionRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
