@@ -6,6 +6,15 @@
     display: flex;
     flex-direction: column;
     padding: 22px 14px;
+    /* Antes el sidebar era un hijo flex más: al bajar en una página larga
+       (como el detalle de un expediente), la página entera scrolleaba y se
+       lo llevaba con el contenido. Con "sticky" se queda fijo en pantalla;
+       si su propio contenido llegara a ser más alto que la ventana, se
+       desplaza solo internamente (overflow-y) en vez de arrastrar todo. */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .dp-sidebar-brand {
