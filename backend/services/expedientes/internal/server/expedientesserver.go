@@ -57,3 +57,23 @@ func (s *ExpedientesServer) UpdateArea(ctx context.Context, in *expedientes.Upda
 	l := logic.NewUpdateAreaLogic(ctx, s.svcCtx)
 	return l.UpdateArea(in)
 }
+
+func (s *ExpedientesServer) DerivarExpediente(ctx context.Context, in *expedientes.DerivarExpedienteRequest) (*expedientes.DerivarExpedienteResponse, error) {
+	l := logic.NewDerivarExpedienteLogic(ctx, s.svcCtx)
+	return l.DerivarExpediente(in)
+}
+
+func (s *ExpedientesServer) RechazarExpediente(ctx context.Context, in *expedientes.RechazarExpedienteRequest) (*expedientes.RechazarExpedienteResponse, error) {
+	l := logic.NewRechazarExpedienteLogic(ctx, s.svcCtx)
+	return l.RechazarExpediente(in)
+}
+
+func (s *ExpedientesServer) CorregirExpediente(ctx context.Context, in *expedientes.CorregirExpedienteRequest) (*expedientes.CorregirExpedienteResponse, error) {
+	l := logic.NewCorregirExpedienteLogic(ctx, s.svcCtx)
+	return l.CorregirExpediente(in)
+}
+
+func (s *ExpedientesServer) ResolverExpediente(ctx context.Context, in *expedientes.ResolverExpedienteRequest) (*expedientes.ResolverExpedienteResponse, error) {
+	l := logic.NewResolverExpedienteLogic(ctx, s.svcCtx)
+	return l.ResolverExpediente(in)
+}

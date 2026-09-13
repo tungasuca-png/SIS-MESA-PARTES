@@ -19,13 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Expedientes_CreateExpediente_FullMethodName = "/expedientes.Expedientes/CreateExpediente"
-	Expedientes_GetExpediente_FullMethodName    = "/expedientes.Expedientes/GetExpediente"
-	Expedientes_ListExpedientes_FullMethodName  = "/expedientes.Expedientes/ListExpedientes"
-	Expedientes_UpdateExpediente_FullMethodName = "/expedientes.Expedientes/UpdateExpediente"
-	Expedientes_ChangeEstado_FullMethodName     = "/expedientes.Expedientes/ChangeEstado"
-	Expedientes_DeleteExpediente_FullMethodName = "/expedientes.Expedientes/DeleteExpediente"
-	Expedientes_UpdateArea_FullMethodName       = "/expedientes.Expedientes/UpdateArea"
+	Expedientes_CreateExpediente_FullMethodName   = "/expedientes.Expedientes/CreateExpediente"
+	Expedientes_GetExpediente_FullMethodName      = "/expedientes.Expedientes/GetExpediente"
+	Expedientes_ListExpedientes_FullMethodName    = "/expedientes.Expedientes/ListExpedientes"
+	Expedientes_UpdateExpediente_FullMethodName   = "/expedientes.Expedientes/UpdateExpediente"
+	Expedientes_ChangeEstado_FullMethodName       = "/expedientes.Expedientes/ChangeEstado"
+	Expedientes_DeleteExpediente_FullMethodName   = "/expedientes.Expedientes/DeleteExpediente"
+	Expedientes_UpdateArea_FullMethodName         = "/expedientes.Expedientes/UpdateArea"
+	Expedientes_DerivarExpediente_FullMethodName  = "/expedientes.Expedientes/DerivarExpediente"
+	Expedientes_RechazarExpediente_FullMethodName = "/expedientes.Expedientes/RechazarExpediente"
+	Expedientes_CorregirExpediente_FullMethodName = "/expedientes.Expedientes/CorregirExpediente"
+	Expedientes_ResolverExpediente_FullMethodName = "/expedientes.Expedientes/ResolverExpediente"
 )
 
 // ExpedientesClient is the client API for Expedientes service.
@@ -39,6 +43,10 @@ type ExpedientesClient interface {
 	ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error)
 	DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error)
 	UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error)
+	DerivarExpediente(ctx context.Context, in *DerivarExpedienteRequest, opts ...grpc.CallOption) (*DerivarExpedienteResponse, error)
+	RechazarExpediente(ctx context.Context, in *RechazarExpedienteRequest, opts ...grpc.CallOption) (*RechazarExpedienteResponse, error)
+	CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error)
+	ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error)
 }
 
 type expedientesClient struct {
@@ -119,6 +127,46 @@ func (c *expedientesClient) UpdateArea(ctx context.Context, in *UpdateAreaReques
 	return out, nil
 }
 
+func (c *expedientesClient) DerivarExpediente(ctx context.Context, in *DerivarExpedienteRequest, opts ...grpc.CallOption) (*DerivarExpedienteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DerivarExpedienteResponse)
+	err := c.cc.Invoke(ctx, Expedientes_DerivarExpediente_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *expedientesClient) RechazarExpediente(ctx context.Context, in *RechazarExpedienteRequest, opts ...grpc.CallOption) (*RechazarExpedienteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RechazarExpedienteResponse)
+	err := c.cc.Invoke(ctx, Expedientes_RechazarExpediente_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *expedientesClient) CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CorregirExpedienteResponse)
+	err := c.cc.Invoke(ctx, Expedientes_CorregirExpediente_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *expedientesClient) ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolverExpedienteResponse)
+	err := c.cc.Invoke(ctx, Expedientes_ResolverExpediente_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExpedientesServer is the server API for Expedientes service.
 // All implementations must embed UnimplementedExpedientesServer
 // for forward compatibility.
@@ -130,6 +178,10 @@ type ExpedientesServer interface {
 	ChangeEstado(context.Context, *ChangeEstadoRequest) (*ChangeEstadoResponse, error)
 	DeleteExpediente(context.Context, *DeleteExpedienteRequest) (*DeleteExpedienteResponse, error)
 	UpdateArea(context.Context, *UpdateAreaRequest) (*UpdateAreaResponse, error)
+	DerivarExpediente(context.Context, *DerivarExpedienteRequest) (*DerivarExpedienteResponse, error)
+	RechazarExpediente(context.Context, *RechazarExpedienteRequest) (*RechazarExpedienteResponse, error)
+	CorregirExpediente(context.Context, *CorregirExpedienteRequest) (*CorregirExpedienteResponse, error)
+	ResolverExpediente(context.Context, *ResolverExpedienteRequest) (*ResolverExpedienteResponse, error)
 	mustEmbedUnimplementedExpedientesServer()
 }
 
@@ -160,6 +212,18 @@ func (UnimplementedExpedientesServer) DeleteExpediente(context.Context, *DeleteE
 }
 func (UnimplementedExpedientesServer) UpdateArea(context.Context, *UpdateAreaRequest) (*UpdateAreaResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateArea not implemented")
+}
+func (UnimplementedExpedientesServer) DerivarExpediente(context.Context, *DerivarExpedienteRequest) (*DerivarExpedienteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DerivarExpediente not implemented")
+}
+func (UnimplementedExpedientesServer) RechazarExpediente(context.Context, *RechazarExpedienteRequest) (*RechazarExpedienteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RechazarExpediente not implemented")
+}
+func (UnimplementedExpedientesServer) CorregirExpediente(context.Context, *CorregirExpedienteRequest) (*CorregirExpedienteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CorregirExpediente not implemented")
+}
+func (UnimplementedExpedientesServer) ResolverExpediente(context.Context, *ResolverExpedienteRequest) (*ResolverExpedienteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ResolverExpediente not implemented")
 }
 func (UnimplementedExpedientesServer) mustEmbedUnimplementedExpedientesServer() {}
 func (UnimplementedExpedientesServer) testEmbeddedByValue()                     {}
@@ -308,6 +372,78 @@ func _Expedientes_UpdateArea_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Expedientes_DerivarExpediente_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DerivarExpedienteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).DerivarExpediente(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_DerivarExpediente_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).DerivarExpediente(ctx, req.(*DerivarExpedienteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Expedientes_RechazarExpediente_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RechazarExpedienteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).RechazarExpediente(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_RechazarExpediente_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).RechazarExpediente(ctx, req.(*RechazarExpedienteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Expedientes_CorregirExpediente_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CorregirExpedienteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).CorregirExpediente(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_CorregirExpediente_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).CorregirExpediente(ctx, req.(*CorregirExpedienteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Expedientes_ResolverExpediente_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolverExpedienteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).ResolverExpediente(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_ResolverExpediente_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).ResolverExpediente(ctx, req.(*ResolverExpedienteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Expedientes_ServiceDesc is the grpc.ServiceDesc for Expedientes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +478,22 @@ var Expedientes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateArea",
 			Handler:    _Expedientes_UpdateArea_Handler,
+		},
+		{
+			MethodName: "DerivarExpediente",
+			Handler:    _Expedientes_DerivarExpediente_Handler,
+		},
+		{
+			MethodName: "RechazarExpediente",
+			Handler:    _Expedientes_RechazarExpediente_Handler,
+		},
+		{
+			MethodName: "CorregirExpediente",
+			Handler:    _Expedientes_CorregirExpediente_Handler,
+		},
+		{
+			MethodName: "ResolverExpediente",
+			Handler:    _Expedientes_ResolverExpediente_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

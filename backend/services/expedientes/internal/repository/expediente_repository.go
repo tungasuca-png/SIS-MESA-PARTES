@@ -214,16 +214,17 @@ func (r *ExpedienteRepository) Delete(ctx context.Context, idOrCodigo string) er
 
 // UpdateArea cambia el area interna responsable del expediente (a quien le
 // corresponde atenderlo ahora). Se llama cuando se registra una derivacion
-// real (ver Derivaciones Service) hacia otra area — no hay guarda de
-// concurrencia como en UpdateEstado porque no es una maquina de estados con
-// transiciones restringidas, solo el ultimo destino gana.
-func (r *ExpedienteRepository) UpdateArea(ctx context.Context, idOrCodigo, nuevaArea string) (*Expediente, error) {
+// real (ver Derivaciones Service) hacia otra area. Exige el area_actual
+// esperada (areaAnterior) como guarda de concurrencia optimista — mismo
+// patron que UpdateEstado: si el area cambio entre la lectura y la
+// escritura, no encuentra la fila y devuelve ErrExpedienteNotFound.
+func (r *ExpedienteRepository) UpdateArea(ctx context.Context, idOrCodigo, areaAnterior, nuevaArea string) (*Expediente, error) {
 	updated, err := scanExpediente(r.db.QueryRow(ctx, `
 		UPDATE expedientes
 		SET area_actual = $1, fecha_actualizacion = NOW()
-		WHERE (id::text = $2 OR codigo = $2) AND activo = TRUE
+		WHERE (id::text = $2 OR codigo = $2) AND activo = TRUE AND area_actual = $3
 		RETURNING `+expedienteColumns,
-		nuevaArea, idOrCodigo,
+		nuevaArea, idOrCodigo, areaAnterior,
 	))
 	if err != nil {
 		return nil, classifyNotFound(err, ErrExpedienteNotFound)
@@ -241,6 +242,66 @@ func (r *ExpedienteRepository) UpdateEstado(ctx context.Context, idOrCodigo, est
 		WHERE (id::text = $2 OR codigo = $2) AND activo = TRUE AND estado = $3
 		RETURNING `+expedienteColumns,
 		nuevoEstado, idOrCodigo, estadoActual,
+	))
+	if err != nil {
+		return nil, classifyNotFound(err, ErrExpedienteNotFound)
+	}
+	return updated, nil
+}
+
+// RechazarYDevolver (Etapa 4): Dirección o Subdirección rechazan un F4 y el
+// expediente vuelve a Secretaría para que el solicitante corrija — cambia
+// estado Y área en una sola escritura (ambos viven en la misma fila/tabla,
+// no hay problema de transacción distribuida acá). Exige ambos valores
+// anteriores como guarda de concurrencia optimista, mismo patrón que
+// UpdateArea/UpdateEstado.
+func (r *ExpedienteRepository) RechazarYDevolver(ctx context.Context, idOrCodigo, estadoActual, areaActual, nuevaArea string) (*Expediente, error) {
+	updated, err := scanExpediente(r.db.QueryRow(ctx, `
+		UPDATE expedientes
+		SET estado = 'OBSERVADO', area_actual = $1, fecha_actualizacion = NOW()
+		WHERE (id::text = $2 OR codigo = $2) AND activo = TRUE AND estado = $3 AND area_actual = $4
+		RETURNING `+expedienteColumns,
+		nuevaArea, idOrCodigo, estadoActual, areaActual,
+	))
+	if err != nil {
+		return nil, classifyNotFound(err, ErrExpedienteNotFound)
+	}
+	return updated, nil
+}
+
+// CorregirYReenviar (Etapa 4): el solicitante corrige un expediente
+// OBSERVADO y vuelve a entrar a la revisión de Secretaría (mismo código,
+// mismo expediente — no se crea uno nuevo). Actualiza la descripción y
+// regresa el estado a PENDIENTE. Exige estado=OBSERVADO como guarda.
+func (r *ExpedienteRepository) CorregirYReenviar(ctx context.Context, idOrCodigo, descripcionNueva string) (*Expediente, error) {
+	updated, err := scanExpediente(r.db.QueryRow(ctx, `
+		UPDATE expedientes
+		SET estado = 'PENDIENTE', descripcion = $1, fecha_actualizacion = NOW()
+		WHERE (id::text = $2 OR codigo = $2) AND activo = TRUE AND estado = 'OBSERVADO'
+		RETURNING `+expedienteColumns,
+		descripcionNueva, idOrCodigo,
+	))
+	if err != nil {
+		return nil, classifyNotFound(err, ErrExpedienteNotFound)
+	}
+	return updated, nil
+}
+
+// DerivarConCambioDeEstado (Etapa 4): caso especial de derivación que
+// además cambia el estado en la MISMA escritura — necesario cuando mover
+// el área y cambiar el estado por separado dejaría una ventana donde el
+// actor original ya no es dueño del área nueva para poder completar el
+// segundo paso (ver DerivarExpedienteLogic para los dos casos reales:
+// Secretaría -> Dirección pasa PENDIENTE -> EN_PROCESO para F2/F4, y
+// Subdirección -> Docente en F4 además cierra a ATENDIDO). Exige área Y
+// estado anteriores como guarda de concurrencia optimista.
+func (r *ExpedienteRepository) DerivarConCambioDeEstado(ctx context.Context, idOrCodigo, areaActual, nuevaArea, estadoActual, nuevoEstado string) (*Expediente, error) {
+	updated, err := scanExpediente(r.db.QueryRow(ctx, `
+		UPDATE expedientes
+		SET area_actual = $1, estado = $2, fecha_actualizacion = NOW()
+		WHERE (id::text = $3 OR codigo = $3) AND activo = TRUE AND area_actual = $4 AND estado = $5
+		RETURNING `+expedienteColumns,
+		nuevaArea, nuevoEstado, idOrCodigo, areaActual, estadoActual,
 	))
 	if err != nil {
 		return nil, classifyNotFound(err, ErrExpedienteNotFound)

@@ -5,19 +5,28 @@ import StatusBadge from "../../components/dashboard/StatusBadge";
 import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
 import DocumentosPanel from "../../components/dashboard/DocumentosPanel";
 import DerivacionesPanel from "../../components/dashboard/DerivacionesPanel";
+import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
-import { changeEstado, getExpediente, updateExpediente } from "../../services/expedientesService";
+import {
+    changeEstado,
+    corregirExpediente,
+    getExpediente,
+    rechazarExpediente,
+    resolverExpediente,
+    updateExpediente,
+} from "../../services/expedientesService";
 import { parseDatosSolicitante } from "../../services/futService";
 import { roleLabel } from "../../constants/roles";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
-import { ESTADOS, PRIORIDADES, TRANSICIONES_ESTADO } from "../../constants/expedientes";
+import { ESTADOS, PRIORIDADES, TRANSICIONES_ESTADO, TIPOS_F2, TIPOS_F4, tipoLabel } from "../../constants/expedientes";
 import "../../components/dashboard/forms.css";
 import "./expedienteDetail.css";
 
 function ExpedienteDetail() {
     const { id } = useParams();
+    const { user } = useAuth();
     const { can } = usePermissions();
 
     const [expediente, setExpediente] = useState(null);
@@ -34,6 +43,17 @@ function ExpedienteDetail() {
     const [nuevoEstado, setNuevoEstado] = useState("");
     const [changingEstado, setChangingEstado] = useState(false);
     const [estadoError, setEstadoError] = useState("");
+
+    const [motivoRechazo, setMotivoRechazo] = useState("");
+    const [rechazando, setRechazando] = useState(false);
+    const [rechazoError, setRechazoError] = useState("");
+
+    const [resolviendo, setResolviendo] = useState(false);
+    const [resolverError, setResolverError] = useState("");
+
+    const [descripcionCorregida, setDescripcionCorregida] = useState("");
+    const [corrigiendo, setCorrigiendo] = useState(false);
+    const [corregirError, setCorregirError] = useState("");
 
     const canUpdate = can("expedientes.update");
     const canChangeEstado = can("expedientes.change_estado");
@@ -118,6 +138,61 @@ function ExpedienteDetail() {
         }
     };
 
+    // Etapa 4: cierre real de F2/F4 (ver docs/etapa-4-resolucion-cierre-f2-f4.md).
+    // El backend vuelve a validar todo (tipo, área, estado, dueño) — estas
+    // condiciones solo evitan ofrecer un botón que el backend va a
+    // rechazar seguro; ocultar un botón no es la seguridad real.
+    const handleRechazar = async (event) => {
+        event.preventDefault();
+        setRechazoError("");
+        if (!motivoRechazo.trim()) {
+            setRechazoError("El motivo es obligatorio.");
+            return;
+        }
+        setRechazando(true);
+        try {
+            const data = await rechazarExpediente(expediente.id, motivoRechazo.trim());
+            setExpediente(data.expediente);
+            setMotivoRechazo("");
+        } catch (err) {
+            setRechazoError(friendlyErrorMessage(err));
+        } finally {
+            setRechazando(false);
+        }
+    };
+
+    const handleResolver = async () => {
+        setResolverError("");
+        setResolviendo(true);
+        try {
+            const data = await resolverExpediente(expediente.id);
+            setExpediente(data.expediente);
+        } catch (err) {
+            setResolverError(friendlyErrorMessage(err));
+        } finally {
+            setResolviendo(false);
+        }
+    };
+
+    const handleCorregir = async (event) => {
+        event.preventDefault();
+        setCorregirError("");
+        if (!descripcionCorregida.trim()) {
+            setCorregirError("La descripción corregida es obligatoria.");
+            return;
+        }
+        setCorrigiendo(true);
+        try {
+            const data = await corregirExpediente(expediente.id, descripcionCorregida.trim());
+            setExpediente(data.expediente);
+            setDescripcionCorregida("");
+        } catch (err) {
+            setCorregirError(friendlyErrorMessage(err));
+        } finally {
+            setCorrigiendo(false);
+        }
+    };
+
     // Un expediente creado por el FUT Digital guarda los datos del
     // solicitante (nombres/DNI/teléfono/domicilio/correo) y la
     // fundamentación empaquetados dentro de "descripcion" (ver
@@ -136,6 +211,32 @@ function ExpedienteDetail() {
     const estadosDisponibles = expediente
         ? ESTADOS.filter((item) => (TRANSICIONES_ESTADO[expediente.estado] || []).includes(item.value))
         : [];
+
+    // Rechazar: exclusivo de F4, lo ejecuta quien tiene el expediente
+    // (Dirección o Subdirección) mientras está en trámite.
+    const puedeRechazar =
+        expediente &&
+        TIPOS_F4.includes(expediente.tipo) &&
+        expediente.estado === "EN_PROCESO" &&
+        (user?.role === "DIRECTOR" || user?.role === "SUBDIRECTOR") &&
+        expediente.area_actual === user?.role;
+
+    // Resolver/cerrar: exclusivo de F2, solo Secretaría y solo cuando ya lo
+    // tiene de vuelta (Dirección ya lo procesó y devolvió).
+    const puedeResolver =
+        expediente &&
+        TIPOS_F2.includes(expediente.tipo) &&
+        expediente.estado === "EN_PROCESO" &&
+        expediente.area_actual === "SECRETARIA" &&
+        user?.role === "SECRETARIA";
+
+    // Corregir y reenviar: exclusivo del propio solicitante, sobre su
+    // propio expediente observado.
+    const puedeCorregir =
+        expediente &&
+        expediente.estado === "OBSERVADO" &&
+        user?.role === "SOLICITANTE" &&
+        expediente.solicitante_id === user?.id;
 
     return (
         <RoleLayout title="Detalle del expediente">
@@ -161,7 +262,7 @@ function ExpedienteDetail() {
                             <dl className="dp-detail-list">
                                 <div>
                                     <dt>Tipo</dt>
-                                    <dd>{expediente.tipo}</dd>
+                                    <dd>{tipoLabel(expediente.tipo)}</dd>
                                 </div>
                                 {canViewDerivaciones && (
                                     <div>
@@ -343,6 +444,81 @@ function ExpedienteDetail() {
                                 </div>
                             </form>
                             )}
+                        </section>
+                    )}
+
+                    {puedeRechazar && (
+                        <section className="dp-panel">
+                            <h2 className="dp-panel-title">Rechazar (devolver para corrección)</h2>
+                            <p className="dp-table-empty" style={{ textAlign: "left", padding: 0, marginBottom: 12 }}>
+                                El expediente vuelve a Secretaría con estado Observado; el solicitante podrá
+                                corregir y volver a presentarlo.
+                            </p>
+                            <form className="dp-form" onSubmit={handleRechazar}>
+                                <div className="dp-form-group">
+                                    <label htmlFor="motivo-rechazo">Motivo</label>
+                                    <textarea
+                                        id="motivo-rechazo"
+                                        value={motivoRechazo}
+                                        onChange={(event) => setMotivoRechazo(event.target.value)}
+                                        rows={2}
+                                        maxLength={500}
+                                        disabled={rechazando}
+                                    />
+                                </div>
+                                {rechazoError && <p className="dp-form-error">{rechazoError}</p>}
+                                <div className="dp-form-actions">
+                                    <button type="submit" className="dp-btn-secondary" disabled={rechazando}>
+                                        {rechazando ? "Rechazando..." : "Rechazar y devolver"}
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+                    )}
+
+                    {puedeResolver && (
+                        <section className="dp-panel">
+                            <h2 className="dp-panel-title">Cerrar expediente</h2>
+                            <p className="dp-table-empty" style={{ textAlign: "left", padding: 0, marginBottom: 12 }}>
+                                Requiere que el documento final ya esté cargado en Documentos (tipo "Proveído")
+                                — verifica el panel de Documentos más abajo.
+                            </p>
+                            {resolverError && <p className="dp-form-error">{resolverError}</p>}
+                            <div className="dp-form-actions">
+                                <button
+                                    type="button"
+                                    className="dp-btn-primary"
+                                    onClick={handleResolver}
+                                    disabled={resolviendo}
+                                >
+                                    {resolviendo ? "Cerrando..." : "Marcar como atendido"}
+                                </button>
+                            </div>
+                        </section>
+                    )}
+
+                    {puedeCorregir && (
+                        <section className="dp-panel">
+                            <h2 className="dp-panel-title">Corregir y reenviar</h2>
+                            <form className="dp-form" onSubmit={handleCorregir}>
+                                <div className="dp-form-group">
+                                    <label htmlFor="descripcion-corregida">Descripción corregida</label>
+                                    <textarea
+                                        id="descripcion-corregida"
+                                        value={descripcionCorregida}
+                                        onChange={(event) => setDescripcionCorregida(event.target.value)}
+                                        rows={4}
+                                        placeholder={expediente.descripcion}
+                                        disabled={corrigiendo}
+                                    />
+                                </div>
+                                {corregirError && <p className="dp-form-error">{corregirError}</p>}
+                                <div className="dp-form-actions">
+                                    <button type="submit" className="dp-btn-primary" disabled={corrigiendo}>
+                                        {corrigiendo ? "Enviando..." : "Corregir y volver a presentar"}
+                                    </button>
+                                </div>
+                            </form>
                         </section>
                     )}
 

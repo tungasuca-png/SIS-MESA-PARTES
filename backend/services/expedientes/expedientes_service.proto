@@ -88,6 +88,59 @@ message UpdateAreaResponse {
   Expediente expediente = 1;
 }
 
+// DerivarExpediente (Etapa 3): operación de negocio real, distinta de
+// UpdateArea genérico — valida que la transición de área esté confirmada
+// para el tipo de trámite del expediente (ver internal/estados.CanDerivar)
+// antes de moverlo. UpdateArea sigue existiendo tal cual para el resto de
+// usos (administrativos, tipos genéricos) que no pasan por esta regla.
+message DerivarExpedienteRequest {
+  string id = 1;
+  string area_destino = 2;
+}
+
+message DerivarExpedienteResponse {
+  Expediente expediente = 1;
+}
+
+// Etapa 4: cierre real de F2 (CERTIFICADO/CONSTANCIA) y F4 (PERMISO/
+// JUSTIFICACION_FALTA/JUSTIFICACION_TARDANZA) — ver
+// docs/etapa-4-resolucion-cierre-f2-f4.md.
+
+// RechazarExpediente: exclusivo de F4. Lo ejecuta quien tiene actualmente
+// el expediente (DIRECTOR o SUBDIRECTOR) para devolverlo a SECRETARIA con
+// estado OBSERVADO, para que el solicitante corrija.
+message RechazarExpedienteRequest {
+  string id = 1;
+  string motivo = 2;
+}
+
+message RechazarExpedienteResponse {
+  Expediente expediente = 1;
+}
+
+// CorregirExpediente: exclusivo del propio solicitante, sobre su propio
+// expediente en estado OBSERVADO. Actualiza la descripción (la corrección)
+// y reingresa a la revisión de Secretaría (vuelve a PENDIENTE).
+message CorregirExpedienteRequest {
+  string id = 1;
+  string descripcion = 2;
+}
+
+message CorregirExpedienteResponse {
+  Expediente expediente = 1;
+}
+
+// ResolverExpediente: exclusivo de F2, lo ejecuta Secretaría cuando ya
+// tiene el documento final (verificado por el Gateway contra Documentos
+// Service antes de llamar acá) y cierra el expediente como ATENDIDO.
+message ResolverExpedienteRequest {
+  string id = 1;
+}
+
+message ResolverExpedienteResponse {
+  Expediente expediente = 1;
+}
+
 service Expedientes {
   rpc CreateExpediente(CreateExpedienteRequest) returns (CreateExpedienteResponse);
   rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
@@ -96,4 +149,8 @@ service Expedientes {
   rpc ChangeEstado(ChangeEstadoRequest) returns (ChangeEstadoResponse);
   rpc DeleteExpediente(DeleteExpedienteRequest) returns (DeleteExpedienteResponse);
   rpc UpdateArea(UpdateAreaRequest) returns (UpdateAreaResponse);
+  rpc DerivarExpediente(DerivarExpedienteRequest) returns (DerivarExpedienteResponse);
+  rpc RechazarExpediente(RechazarExpedienteRequest) returns (RechazarExpedienteResponse);
+  rpc CorregirExpediente(CorregirExpedienteRequest) returns (CorregirExpedienteResponse);
+  rpc ResolverExpediente(ResolverExpedienteRequest) returns (ResolverExpedienteResponse);
 }

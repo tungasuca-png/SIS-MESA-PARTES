@@ -14,21 +14,29 @@ import (
 )
 
 type (
-	ChangeEstadoRequest      = expedientes.ChangeEstadoRequest
-	ChangeEstadoResponse     = expedientes.ChangeEstadoResponse
-	CreateExpedienteRequest  = expedientes.CreateExpedienteRequest
-	CreateExpedienteResponse = expedientes.CreateExpedienteResponse
-	DeleteExpedienteRequest  = expedientes.DeleteExpedienteRequest
-	DeleteExpedienteResponse = expedientes.DeleteExpedienteResponse
-	Expediente               = expedientes.Expediente
-	GetExpedienteRequest     = expedientes.GetExpedienteRequest
-	GetExpedienteResponse    = expedientes.GetExpedienteResponse
-	ListExpedientesRequest   = expedientes.ListExpedientesRequest
-	ListExpedientesResponse  = expedientes.ListExpedientesResponse
-	UpdateExpedienteRequest  = expedientes.UpdateExpedienteRequest
-	UpdateExpedienteResponse = expedientes.UpdateExpedienteResponse
-	UpdateAreaRequest        = expedientes.UpdateAreaRequest
-	UpdateAreaResponse       = expedientes.UpdateAreaResponse
+	ChangeEstadoRequest        = expedientes.ChangeEstadoRequest
+	ChangeEstadoResponse       = expedientes.ChangeEstadoResponse
+	CreateExpedienteRequest    = expedientes.CreateExpedienteRequest
+	CreateExpedienteResponse   = expedientes.CreateExpedienteResponse
+	DeleteExpedienteRequest    = expedientes.DeleteExpedienteRequest
+	DeleteExpedienteResponse   = expedientes.DeleteExpedienteResponse
+	Expediente                 = expedientes.Expediente
+	GetExpedienteRequest       = expedientes.GetExpedienteRequest
+	GetExpedienteResponse      = expedientes.GetExpedienteResponse
+	ListExpedientesRequest     = expedientes.ListExpedientesRequest
+	ListExpedientesResponse    = expedientes.ListExpedientesResponse
+	UpdateExpedienteRequest    = expedientes.UpdateExpedienteRequest
+	UpdateExpedienteResponse   = expedientes.UpdateExpedienteResponse
+	UpdateAreaRequest          = expedientes.UpdateAreaRequest
+	UpdateAreaResponse         = expedientes.UpdateAreaResponse
+	DerivarExpedienteRequest   = expedientes.DerivarExpedienteRequest
+	DerivarExpedienteResponse  = expedientes.DerivarExpedienteResponse
+	RechazarExpedienteRequest  = expedientes.RechazarExpedienteRequest
+	RechazarExpedienteResponse = expedientes.RechazarExpedienteResponse
+	CorregirExpedienteRequest  = expedientes.CorregirExpedienteRequest
+	CorregirExpedienteResponse = expedientes.CorregirExpedienteResponse
+	ResolverExpedienteRequest  = expedientes.ResolverExpedienteRequest
+	ResolverExpedienteResponse = expedientes.ResolverExpedienteResponse
 
 	Expedientes interface {
 		CreateExpediente(ctx context.Context, in *CreateExpedienteRequest, opts ...grpc.CallOption) (*CreateExpedienteResponse, error)
@@ -38,6 +46,10 @@ type (
 		ChangeEstado(ctx context.Context, in *ChangeEstadoRequest, opts ...grpc.CallOption) (*ChangeEstadoResponse, error)
 		DeleteExpediente(ctx context.Context, in *DeleteExpedienteRequest, opts ...grpc.CallOption) (*DeleteExpedienteResponse, error)
 		UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error)
+		DerivarExpediente(ctx context.Context, in *DerivarExpedienteRequest, opts ...grpc.CallOption) (*DerivarExpedienteResponse, error)
+		RechazarExpediente(ctx context.Context, in *RechazarExpedienteRequest, opts ...grpc.CallOption) (*RechazarExpedienteResponse, error)
+		CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error)
+		ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error)
 	}
 
 	defaultExpedientes struct {
@@ -84,4 +96,24 @@ func (m *defaultExpedientes) DeleteExpediente(ctx context.Context, in *DeleteExp
 func (m *defaultExpedientes) UpdateArea(ctx context.Context, in *UpdateAreaRequest, opts ...grpc.CallOption) (*UpdateAreaResponse, error) {
 	client := expedientes.NewExpedientesClient(m.cli.Conn())
 	return client.UpdateArea(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) DerivarExpediente(ctx context.Context, in *DerivarExpedienteRequest, opts ...grpc.CallOption) (*DerivarExpedienteResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.DerivarExpediente(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) RechazarExpediente(ctx context.Context, in *RechazarExpedienteRequest, opts ...grpc.CallOption) (*RechazarExpedienteResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.RechazarExpediente(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.CorregirExpediente(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.ResolverExpediente(ctx, in, opts...)
 }

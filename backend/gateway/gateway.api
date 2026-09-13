@@ -158,6 +158,65 @@ type ChangeEstadoResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+// DerivarExpediente (Etapa 3): operación de negocio real que reemplaza el
+// patrón anterior del frontend (crear derivación + PATCH /area por
+// separado, sin garantía de que ambas tuvieran éxito). El Gateway compone:
+// primero Expedientes.DerivarExpediente (autoritativo — valida la
+// transición y mueve area_actual), y solo si eso tuvo éxito, registra la
+// derivación en Derivaciones Service como historial.
+type DerivarExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	AreaDestino   string `json:"area_destino"`
+	Motivo        string `json:"motivo"`
+	Condicion     string `json:"condicion,optional"`
+}
+
+type DerivarExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+	Derivacion DerivacionDTO `json:"derivacion"`
+}
+
+// Etapa 4: cierre real de F2/F4 — ver docs/etapa-4-resolucion-cierre-f2-f4.md.
+// RechazarExpediente: Dirección o Subdirección rechazan un F4 y lo
+// devuelven a Secretaría (OBSERVADO) para que el solicitante corrija. El
+// Gateway compone igual que DerivarExpediente: primero mueve
+// estado+área (autoritativo), luego registra el historial.
+type RechazarExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type RechazarExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+	Derivacion DerivacionDTO `json:"derivacion"`
+}
+
+// CorregirExpediente: el solicitante corrige su propio expediente
+// observado y vuelve a entrar a revisión (mismo expediente, mismo código).
+type CorregirExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Descripcion   string `json:"descripcion"`
+}
+
+type CorregirExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+// ResolverExpediente: Secretaría cierra un F2 (ATENDIDO) una vez que
+// existe el documento final — el Gateway verifica contra Documentos
+// Service antes de llamar a Expedientes Service.
+type ResolverExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type ResolverExpedienteResponse {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
 service gateway-api {
 	@handler Register
 	post /api/auth/register (RegisterRequest) returns (RegisterResponse)
@@ -273,6 +332,18 @@ service gateway-api {
 
 	@handler UpdateArea
 	patch /api/expedientes/:id/area (UpdateAreaRequest) returns (UpdateAreaResponse)
+
+	@handler DerivarExpediente
+	patch /api/expedientes/:id/derivar (DerivarExpedienteRequest) returns (DerivarExpedienteResponse)
+
+	@handler RechazarExpediente
+	patch /api/expedientes/:id/rechazar (RechazarExpedienteRequest) returns (RechazarExpedienteResponse)
+
+	@handler CorregirExpediente
+	patch /api/expedientes/:id/corregir (CorregirExpedienteRequest) returns (CorregirExpedienteResponse)
+
+	@handler ResolverExpediente
+	patch /api/expedientes/:id/resolver (ResolverExpedienteRequest) returns (ResolverExpedienteResponse)
 }
 
 type DocumentoDTO {

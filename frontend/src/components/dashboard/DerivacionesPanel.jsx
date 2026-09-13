@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { crearDerivacion, getDerivacionesByExpediente } from "../../services/derivacionesService";
-import { updateArea } from "../../services/expedientesService";
+import { derivarExpediente } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { TIPOS_DERIVACION } from "../../constants/derivaciones";
-import { ACTORES_DESTINO, roleForLabel, roleLabel } from "../../constants/roles";
+import { ACTORES_DESTINO, AREAS_DESTINO, roleLabel } from "../../constants/roles";
 import Icon from "./Icon";
 import "./forms.css";
 import "./documentosPanel.css";
@@ -29,6 +29,10 @@ function DerivacionesPanel({ expedienteId }) {
     const [derivaciones, setDerivaciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    // El historial ocupa mucho espacio en el detalle del expediente —
+    // queda colapsado por defecto, disponible con un clic en vez de
+    // siempre visible.
+    const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
     const [campos, setCampos] = useState(CAMPOS_INICIALES);
     const [creando, setCreando] = useState(false);
@@ -54,7 +58,15 @@ function DerivacionesPanel({ expedienteId }) {
     }, [expedienteId]);
 
     const handleChange = (campo) => (event) => {
-        setCampos((current) => ({ ...current, [campo]: event.target.value }));
+        setCampos((current) => ({
+            ...current,
+            [campo]: event.target.value,
+            // El "destino" cambia de vocabulario según el tipo (código de
+            // área para DERIVACION, texto libre para el resto — ver el
+            // select más abajo) — al cambiar de tipo se limpia para no
+            // arrastrar un valor que ya no aplica.
+            ...(campo === "tipo" ? { destino: "" } : {}),
+        }));
     };
 
     const handleCrear = async (event) => {
@@ -68,20 +80,22 @@ function DerivacionesPanel({ expedienteId }) {
 
         setCreando(true);
         try {
-            await crearDerivacion(expedienteId, { ...campos, origen: origenActual });
-
-            // Solo una derivación real (tipo DERIVACION) cambia quién es
-            // responsable del expediente — una notificación, asignación,
-            // recepción o aprobación no transfieren esa responsabilidad
-            // (ver sección 15 del análisis funcional). "Sistema" y
-            // "Solicitante" tampoco son un área interna a la que se le
-            // pueda asignar el expediente, así que roleForLabel no
-            // devuelve nada útil para esos casos y no se actualiza el área.
+            // Una derivación real (tipo DERIVACION) es la única que cambia
+            // quién es responsable del expediente — una notificación,
+            // asignación, recepción o aprobación no transfieren esa
+            // responsabilidad (ver sección 15 del análisis funcional). Para
+            // esa, desde la Etapa 3, se usa una sola operación de negocio
+            // (derivarExpediente) en vez de crear la derivación y mover el
+            // área por separado: el backend valida la transición y hace
+            // ambas cosas de forma atómica-como-se-puede.
             if (campos.tipo === "DERIVACION") {
-                const area = roleForLabel(campos.destino);
-                if (area && area !== "SOLICITANTE") {
-                    await updateArea(expedienteId, area);
-                }
+                await derivarExpediente(expedienteId, {
+                    areaDestino: campos.destino,
+                    motivo: campos.motivo,
+                    condicion: campos.condicion,
+                });
+            } else {
+                await crearDerivacion(expedienteId, { ...campos, origen: origenActual });
             }
 
             setCampos(CAMPOS_INICIALES);
@@ -117,7 +131,7 @@ function DerivacionesPanel({ expedienteId }) {
                         <label htmlFor="deriv-destino">Destino</label>
                         <select id="deriv-destino" value={campos.destino} onChange={handleChange("destino")} disabled={creando}>
                             <option value="">Selecciona...</option>
-                            {ACTORES_DESTINO.map((item) => (
+                            {(campos.tipo === "DERIVACION" ? AREAS_DESTINO : ACTORES_DESTINO).map((item) => (
                                 <option key={item.value} value={item.value}>
                                     {item.label}
                                 </option>
@@ -162,25 +176,39 @@ function DerivacionesPanel({ expedienteId }) {
             )}
 
             {!loading && !error && derivaciones.length > 0 && (
-                <ul className="dp-documentos-list">
-                    {derivaciones.map((item) => (
-                        <li key={item.id} className="dp-documentos-item">
-                            <div className="dp-documentos-info">
-                                <Icon name="share" size={18} />
-                                <div>
-                                    <p className="dp-documentos-nombre">
-                                        {item.origen} → {item.destino}
-                                    </p>
-                                    <p className="dp-documentos-meta">
-                                        {tipoLabel(item.tipo)} · {item.motivo}
-                                        {item.condicion ? ` · ${item.condicion}` : ""} ·{" "}
-                                        {formatDateTime(item.fecha_registro)}
-                                    </p>
-                                </div>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+                <>
+                    <button
+                        type="button"
+                        className="dp-btn-secondary"
+                        onClick={() => setMostrarHistorial((current) => !current)}
+                    >
+                        {mostrarHistorial
+                            ? "Ocultar historial"
+                            : `Ver historial (${derivaciones.length})`}
+                    </button>
+
+                    {mostrarHistorial && (
+                        <ul className="dp-documentos-list">
+                            {derivaciones.map((item) => (
+                                <li key={item.id} className="dp-documentos-item">
+                                    <div className="dp-documentos-info">
+                                        <Icon name="share" size={18} />
+                                        <div>
+                                            <p className="dp-documentos-nombre">
+                                                {item.origen} → {item.destino}
+                                            </p>
+                                            <p className="dp-documentos-meta">
+                                                {tipoLabel(item.tipo)} · {item.motivo}
+                                                {item.condicion ? ` · ${item.condicion}` : ""} ·{" "}
+                                                {formatDateTime(item.fecha_registro)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </>
             )}
         </section>
     );

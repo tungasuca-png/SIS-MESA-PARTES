@@ -101,8 +101,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPatch,
+				Path:    "/api/expedientes/:id/corregir",
+				Handler: CorregirExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/expedientes/:id/derivar",
+				Handler: DerivarExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
 				Path:    "/api/expedientes/:id/estado",
 				Handler: ChangeEstadoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/expedientes/:id/rechazar",
+				Handler: RechazarExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/expedientes/:id/resolver",
+				Handler: ResolverExpedienteHandler(serverCtx),
 			},
 		},
 	)

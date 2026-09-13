@@ -13,6 +13,16 @@ type ChangeEstadoResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type CorregirExpedienteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Descripcion   string `json:"descripcion"`
+}
+
+type CorregirExpedienteResponse struct {
+	Expediente ExpedienteDTO `json:"expediente"`
+}
+
 type CrearDerivacionRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	ExpedienteId  string `path:"expediente_id"`
@@ -67,6 +77,19 @@ type DerivacionDTO struct {
 	Condicion     string `json:"condicion"`
 	RegistradoPor string `json:"registrado_por"`
 	FechaRegistro string `json:"fecha_registro"`
+}
+
+type DerivarExpedienteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	AreaDestino   string `json:"area_destino"`
+	Motivo        string `json:"motivo"`
+	Condicion     string `json:"condicion,optional"`
+}
+
+type DerivarExpedienteResponse struct {
+	Expediente ExpedienteDTO `json:"expediente"`
+	Derivacion DerivacionDTO `json:"derivacion"`
 }
 
 type DocumentoDTO struct {
@@ -252,6 +275,17 @@ type LogoutResponse struct {
 	Message string `json:"message"`
 }
 
+type RechazarExpedienteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type RechazarExpedienteResponse struct {
+	Expediente ExpedienteDTO `json:"expediente"`
+	Derivacion DerivacionDTO `json:"derivacion"`
+}
+
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
@@ -275,6 +309,15 @@ type RegisterResponse struct {
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 	Message  string `json:"message"`
+}
+
+type ResolverExpedienteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type ResolverExpedienteResponse struct {
+	Expediente ExpedienteDTO `json:"expediente"`
 }
 
 type UpdateAreaRequest struct {
