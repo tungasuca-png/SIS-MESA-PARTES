@@ -48,10 +48,36 @@ func (l *UpdateAreaLogic) UpdateArea(in *expedientes.UpdateAreaRequest) (*expedi
 		return nil, status.Error(codes.InvalidArgument, "el área indicada no es válida")
 	}
 
-	updated, err := l.svcCtx.ExpedienteRepository.UpdateArea(l.ctx, strings.TrimSpace(in.Id), area)
+	current, err := l.svcCtx.ExpedienteRepository.FindByIDOrCodigo(l.ctx, strings.TrimSpace(in.Id))
 	if err != nil {
 		if errors.Is(err, repository.ErrExpedienteNotFound) {
 			return nil, status.Error(codes.NotFound, "expediente no encontrado")
+		}
+		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
+	}
+
+	// Derivar (mover) un expediente es una acción que le corresponde a quien
+	// lo tiene actualmente — no a cualquier interno (ver DerivacionesPanel.jsx
+	// del frontend: siempre es el área actual la que deriva hacia otra). Es
+	// la misma condición que ChangeEstado por eso: en ambos casos el actor
+	// debe ser dueño actual del expediente, no por casualidad sino porque las
+	// dos acciones (cambiar su estado o entregarlo a otra área) solo tienen
+	// sentido para quien lo tiene en este momento. CanUpdateArea ya garantizó
+	// que role es personal interno.
+	if !authorization.CanViewAll(role) && current.AreaActual != authorization.AreaDelRol(role) {
+		return nil, status.Error(codes.PermissionDenied, "el expediente no pertenece al área del usuario")
+	}
+
+	// Concurrencia optimista: se exige que area_actual siga siendo la misma
+	// que se acaba de leer (current.AreaActual). Si otra operación la cambió
+	// entretanto, la fila no matchea y el repositorio devuelve
+	// ErrExpedienteNotFound — acá ya se confirmó arriba que el expediente
+	// existe, así que ese error en este punto solo puede significar que el
+	// área cambió mientras tanto (mismo criterio que ChangeEstadoLogic).
+	updated, err := l.svcCtx.ExpedienteRepository.UpdateArea(l.ctx, strings.TrimSpace(in.Id), current.AreaActual, area)
+	if err != nil {
+		if errors.Is(err, repository.ErrExpedienteNotFound) {
+			return nil, status.Error(codes.Aborted, "el área del expediente cambió, intente nuevamente")
 		}
 		return nil, status.Error(codes.Internal, "no se pudo actualizar el área del expediente")
 	}

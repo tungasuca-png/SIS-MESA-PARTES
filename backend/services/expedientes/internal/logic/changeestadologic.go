@@ -56,6 +56,15 @@ func (l *ChangeEstadoLogic) ChangeEstado(in *expedientes.ChangeEstadoRequest) (*
 		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
 	}
 
+	// Misma regla que ya aplica GetExpedienteLogic para lectura: quien no
+	// tiene CanViewAll (ADMIN/SECRETARIA) solo puede actuar sobre expedientes
+	// que ya están en su propia área. CanChangeEstado ya garantizó arriba que
+	// role es personal interno, así que AreaDelRol siempre devuelve un área
+	// real acá (nunca "").
+	if !authorization.CanViewAll(role) && current.AreaActual != authorization.AreaDelRol(role) {
+		return nil, status.Error(codes.PermissionDenied, "el expediente no pertenece al área del usuario")
+	}
+
 	if !estados.CanTransition(current.Estado, nuevoEstado) {
 		return nil, status.Error(codes.FailedPrecondition, "la transición de estado no está permitida")
 	}

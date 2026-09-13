@@ -1,5 +1,11 @@
 Name: derivaciones.rpc
-ListenOn: 0.0.0.0:8085
+# Escucha solo en loopback: CrearDerivacion valida el rol pero no valida
+# area_actual (esa validación vive en el Gateway, componiendo GetExpediente
+# — ver docs/etapa-1.1-cierre-seguridad.md, punto 2). Mientras esa
+# validación no viva en este propio servicio, no debe ser alcanzable desde
+# fuera de esta máquina (Gateway, el único llamador legítimo, ya se conecta
+# vía 127.0.0.1 — ver gateway/etc/gateway-api.yaml DerivacionesRpc.Target).
+ListenOn: 127.0.0.1:8085
 Mode: dev
 
 Etcd:
