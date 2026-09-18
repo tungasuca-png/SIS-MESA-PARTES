@@ -33,6 +33,21 @@ func DefaultMethodPolicies() map[string]MethodPolicy {
 		"/auth.Auth/RefreshToken":  PublicMethod(),
 		"/auth.Auth/ValidateToken": PublicMethod(),
 		"/auth.Auth/Logout":        AuthenticatedMethod(),
+		// HasPermission consulta si existe un permiso: no puede depender de
+		// un permiso para poder consultarlo. Solo exige autenticación, igual
+		// que Logout — la restricción real (solo el propio usuario) la
+		// aplica HasPermissionLogic comparando contra el sub del JWT.
+		"/auth.Auth/HasPermission": AuthenticatedMethod(),
+
+		// Paso 21B: primer consumidor real de "roles.view" (sembrado desde
+		// la migración 005, sin ningún RPC que lo usara hasta ahora — ver
+		// Paso 21A). ProtectedMethod ya resuelve JWT + permiso vía
+		// AuthorizationInterceptor/AuthorizationService.HasPermission, sin
+		// necesitar ningún chequeo adicional en el Logic de cada RPC.
+		"/auth.Auth/ListRoles":             ProtectedMethod("roles.view"),
+		"/auth.Auth/ListPermissions":       ProtectedMethod("roles.view"),
+		"/auth.Auth/GetRolePermissions":    ProtectedMethod("roles.view"),
+		"/auth.Auth/UpdateRolePermissions": ProtectedMethod("roles.view"),
 	}
 }
 

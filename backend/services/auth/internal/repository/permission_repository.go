@@ -55,8 +55,16 @@ func (r *PermissionRepository) Create(ctx context.Context, permission *Permissio
 }
 
 func (r *PermissionRepository) GetByID(ctx context.Context, permissionID string) (*Permission, error) {
+	return findPermissionByID(ctx, r.db, permissionID)
+}
+
+// findPermissionByID (Paso 21C): función libre reutilizable dentro de una
+// transacción — mismo patrón ya establecido por findRoleByName/findRoleByID
+// — usada por RolePermissionRepository.ReplacePermissionsByRoleID para
+// validar cada permission_id DENTRO de la misma transacción del reemplazo.
+func findPermissionByID(ctx context.Context, executor queryExecutor, permissionID string) (*Permission, error) {
 	permission := &Permission{}
-	err := r.db.QueryRow(ctx, `
+	err := executor.QueryRow(ctx, `
 		SELECT id, codigo, nombre, COALESCE(descripcion, ''), modulo, estado, created_at, updated_at
 		FROM permissions
 		WHERE id = $1

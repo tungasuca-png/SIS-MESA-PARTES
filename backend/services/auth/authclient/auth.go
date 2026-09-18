@@ -14,18 +14,30 @@ import (
 )
 
 type (
-	LoginRequest          = auth.LoginRequest
-	LoginResponse         = auth.LoginResponse
-	LogoutRequest         = auth.LogoutRequest
-	LogoutResponse        = auth.LogoutResponse
-	RefreshTokenRequest   = auth.RefreshTokenRequest
-	RefreshTokenResponse  = auth.RefreshTokenResponse
-	RegisterRequest       = auth.RegisterRequest
-	RegisterResponse      = auth.RegisterResponse
-	Request               = auth.Request
-	Response              = auth.Response
-	ValidateTokenRequest  = auth.ValidateTokenRequest
-	ValidateTokenResponse = auth.ValidateTokenResponse
+	HasPermissionRequest          = auth.HasPermissionRequest
+	HasPermissionResponse         = auth.HasPermissionResponse
+	LoginRequest                  = auth.LoginRequest
+	LoginResponse                 = auth.LoginResponse
+	LogoutRequest                 = auth.LogoutRequest
+	LogoutResponse                = auth.LogoutResponse
+	RefreshTokenRequest           = auth.RefreshTokenRequest
+	RefreshTokenResponse          = auth.RefreshTokenResponse
+	RegisterRequest               = auth.RegisterRequest
+	RegisterResponse              = auth.RegisterResponse
+	Request                       = auth.Request
+	Response                      = auth.Response
+	ValidateTokenRequest          = auth.ValidateTokenRequest
+	ValidateTokenResponse         = auth.ValidateTokenResponse
+	Role                          = auth.Role
+	ListRolesRequest              = auth.ListRolesRequest
+	ListRolesResponse             = auth.ListRolesResponse
+	Permission                    = auth.Permission
+	ListPermissionsRequest        = auth.ListPermissionsRequest
+	ListPermissionsResponse       = auth.ListPermissionsResponse
+	GetRolePermissionsRequest     = auth.GetRolePermissionsRequest
+	GetRolePermissionsResponse    = auth.GetRolePermissionsResponse
+	UpdateRolePermissionsRequest  = auth.UpdateRolePermissionsRequest
+	UpdateRolePermissionsResponse = auth.UpdateRolePermissionsResponse
 
 	Auth interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
@@ -34,6 +46,11 @@ type (
 		RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 		Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 		ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error)
+		HasPermission(ctx context.Context, in *HasPermissionRequest, opts ...grpc.CallOption) (*HasPermissionResponse, error)
+		ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
+		ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
+		GetRolePermissions(ctx context.Context, in *GetRolePermissionsRequest, opts ...grpc.CallOption) (*GetRolePermissionsResponse, error)
+		UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
 	}
 
 	defaultAuth struct {
@@ -75,4 +92,29 @@ func (m *defaultAuth) Logout(ctx context.Context, in *LogoutRequest, opts ...grp
 func (m *defaultAuth) ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.ValidateToken(ctx, in, opts...)
+}
+
+func (m *defaultAuth) HasPermission(ctx context.Context, in *HasPermissionRequest, opts ...grpc.CallOption) (*HasPermissionResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.HasPermission(ctx, in, opts...)
+}
+
+func (m *defaultAuth) ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.ListRoles(ctx, in, opts...)
+}
+
+func (m *defaultAuth) ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.ListPermissions(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GetRolePermissions(ctx context.Context, in *GetRolePermissionsRequest, opts ...grpc.CallOption) (*GetRolePermissionsResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GetRolePermissions(ctx, in, opts...)
+}
+
+func (m *defaultAuth) UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.UpdateRolePermissions(ctx, in, opts...)
 }

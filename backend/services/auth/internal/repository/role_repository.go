@@ -9,8 +9,10 @@ import (
 )
 
 type Role struct {
-	ID   string
-	Name string
+	ID          string
+	Name        string
+	Descripcion string
+	Estado      bool
 }
 
 type queryExecutor interface {
@@ -43,4 +45,60 @@ func findRoleByName(ctx context.Context, executor queryExecutor, name string) (*
 	}
 
 	return role, nil
+}
+
+// GetByID (Paso 21B): valida que un role_id real exista antes de consultar
+// sus permisos (GetRolePermissions) — a diferencia de FindByName, NO filtra
+// por estado=TRUE: un rol inactivo sigue siendo un rol real (mismo criterio
+// ya usado por PermissionRepository.List, que tampoco filtra por estado).
+func (r *RoleRepository) GetByID(ctx context.Context, roleID string) (*Role, error) {
+	return findRoleByID(ctx, r.db, roleID)
+}
+
+// findRoleByID (Paso 21C): misma función libre reutilizable dentro de una
+// transacción (mismo patrón ya establecido por findRoleByName, usada por
+// CreateUserWithRole) — RolePermissionRepository.ReplacePermissionsByRoleID
+// la reutiliza pasándole un pgx.Tx en vez de r.db, para validar el rol
+// DENTRO de la misma transacción que hace el reemplazo.
+func findRoleByID(ctx context.Context, executor queryExecutor, roleID string) (*Role, error) {
+	role := &Role{}
+	err := executor.QueryRow(ctx, `
+		SELECT id, nombre, COALESCE(descripcion, ''), estado
+		FROM roles
+		WHERE id = $1
+	`, roleID).Scan(&role.ID, &role.Name, &role.Descripcion, &role.Estado)
+	if err != nil {
+		return nil, classifyNotFound(err, ErrRoleNotFound)
+	}
+
+	return role, nil
+}
+
+// List (Paso 21B): catálogo completo de roles reales, para la futura
+// configuración administrativa — mismo criterio que PermissionRepository.
+// List (sin filtrar por estado, orden determinista).
+func (r *RoleRepository) List(ctx context.Context) ([]*Role, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT id, nombre, COALESCE(descripcion, ''), estado
+		FROM roles
+		ORDER BY nombre
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	roles := make([]*Role, 0)
+	for rows.Next() {
+		role := &Role{}
+		if err := rows.Scan(&role.ID, &role.Name, &role.Descripcion, &role.Estado); err != nil {
+			return nil, err
+		}
+		roles = append(roles, role)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return roles, nil
 }

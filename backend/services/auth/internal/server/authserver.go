@@ -52,3 +52,28 @@ func (s *AuthServer) ValidateToken(ctx context.Context, in *auth.ValidateTokenRe
 	l := logic.NewValidateTokenLogic(ctx, s.svcCtx)
 	return l.ValidateToken(in)
 }
+
+func (s *AuthServer) HasPermission(ctx context.Context, in *auth.HasPermissionRequest) (*auth.HasPermissionResponse, error) {
+	l := logic.NewHasPermissionLogic(ctx, s.svcCtx)
+	return l.HasPermission(in)
+}
+
+func (s *AuthServer) ListRoles(ctx context.Context, in *auth.ListRolesRequest) (*auth.ListRolesResponse, error) {
+	l := logic.NewListRolesLogic(ctx, s.svcCtx)
+	return l.ListRoles(in)
+}
+
+func (s *AuthServer) ListPermissions(ctx context.Context, in *auth.ListPermissionsRequest) (*auth.ListPermissionsResponse, error) {
+	l := logic.NewListPermissionsLogic(ctx, s.svcCtx)
+	return l.ListPermissions(in)
+}
+
+func (s *AuthServer) GetRolePermissions(ctx context.Context, in *auth.GetRolePermissionsRequest) (*auth.GetRolePermissionsResponse, error) {
+	l := logic.NewGetRolePermissionsLogic(ctx, s.svcCtx)
+	return l.GetRolePermissions(in)
+}
+
+func (s *AuthServer) UpdateRolePermissions(ctx context.Context, in *auth.UpdateRolePermissionsRequest) (*auth.UpdateRolePermissionsResponse, error) {
+	l := logic.NewUpdateRolePermissionsLogic(ctx, s.svcCtx)
+	return l.UpdateRolePermissions(in)
+}

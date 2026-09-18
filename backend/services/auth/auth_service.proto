@@ -71,6 +71,78 @@ message ValidateTokenResponse {
   string role = 4;
 }
 
+message HasPermissionRequest {
+  string user_id = 1;
+  string permission = 2;
+}
+
+message HasPermissionResponse {
+  bool allowed = 1;
+}
+
+// Paso 21B: capa de SOLO LECTURA del catálogo de roles/permisos, para la
+// futura configuración administrativa (Paso 21A confirmó que no existía
+// ningún RPC de lectura ni de escritura sobre roles/permissions/
+// role_permissions). Fuente de datos: las mismas tablas reales, vía los
+// repositorios ya existentes (RoleRepository/PermissionRepository/
+// RolePermissionRepository) — ningún catálogo paralelo en Go.
+
+message Role {
+  string id = 1;
+  string nombre = 2;
+  string descripcion = 3;
+  bool estado = 4;
+}
+
+message ListRolesRequest {
+}
+
+message ListRolesResponse {
+  repeated Role roles = 1;
+}
+
+message Permission {
+  string id = 1;
+  string codigo = 2;
+  string nombre = 3;
+  string descripcion = 4;
+  string modulo = 5;
+  bool estado = 6;
+}
+
+message ListPermissionsRequest {
+}
+
+message ListPermissionsResponse {
+  repeated Permission permissions = 1;
+}
+
+// GetRolePermissions: el acceso se identifica por role_id real (nunca por
+// role_name ni por una lista de permission_ids enviada por el cliente) —
+// la fuente de verdad de qué permisos tiene un rol sigue siendo
+// exclusivamente la tabla role_permissions.
+message GetRolePermissionsRequest {
+  string role_id = 1;
+}
+
+message GetRolePermissionsResponse {
+  repeated Permission permissions = 1;
+}
+
+// UpdateRolePermissions (Paso 21C): reemplaza el conjunto COMPLETO de
+// permisos de un rol (no "agrega") — permission_ids representa el estado
+// FINAL deseado. role_id y cada permission_id se validan contra las tablas
+// reales (roles/permissions); ninguno se acepta ciegamente.
+message UpdateRolePermissionsRequest {
+  string role_id = 1;
+  repeated string permission_ids = 2;
+}
+
+message UpdateRolePermissionsResponse {
+  string role_id = 1;
+  repeated string permission_ids = 2;
+}
+
 service Auth {
   rpc Ping(Request) returns(Response);
   rpc Register(RegisterRequest) returns(RegisterResponse);
@@ -78,4 +150,9 @@ service Auth {
   rpc RefreshToken(RefreshTokenRequest) returns(RefreshTokenResponse);
   rpc Logout(LogoutRequest) returns(LogoutResponse);
   rpc ValidateToken(ValidateTokenRequest) returns(ValidateTokenResponse);
+  rpc HasPermission(HasPermissionRequest) returns(HasPermissionResponse);
+  rpc ListRoles(ListRolesRequest) returns(ListRolesResponse);
+  rpc ListPermissions(ListPermissionsRequest) returns(ListPermissionsResponse);
+  rpc GetRolePermissions(GetRolePermissionsRequest) returns(GetRolePermissionsResponse);
+  rpc UpdateRolePermissions(UpdateRolePermissionsRequest) returns(UpdateRolePermissionsResponse);
 }
