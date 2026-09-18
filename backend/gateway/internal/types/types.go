@@ -166,6 +166,15 @@ type GetExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type GetRolePermissionsRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetRolePermissionsResponse struct {
+	Permissions []PermissionDTO `json:"permissions"`
+}
+
 type GetUsuarioBasicRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -247,6 +256,22 @@ type ListExpedientesResponse struct {
 	Total       int32           `json:"total"`
 }
 
+type ListPermissionsRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ListPermissionsResponse struct {
+	Permissions []PermissionDTO `json:"permissions"`
+}
+
+type ListRolesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ListRolesResponse struct {
+	Roles []RoleDTO `json:"roles"`
+}
+
 type ListUsuariosRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Q             string `form:"q,optional"`
@@ -283,6 +308,15 @@ type LogoutRequest struct {
 type LogoutResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
+}
+
+type PermissionDTO struct {
+	Id          string `json:"id"`
+	Codigo      string `json:"codigo"`
+	Nombre      string `json:"nombre"`
+	Descripcion string `json:"descripcion"`
+	Modulo      string `json:"modulo"`
+	Estado      bool   `json:"estado"`
 }
 
 type RechazarExpedienteRequest struct {
@@ -330,6 +364,13 @@ type ResolverExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type RoleDTO struct {
+	Id          string `json:"id"`
+	Nombre      string `json:"nombre"`
+	Descripcion string `json:"descripcion"`
+	Estado      bool   `json:"estado"`
+}
+
 type UpdateAreaRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -350,6 +391,28 @@ type UpdateExpedienteRequest struct {
 
 type UpdateExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type UpdateMyProfileRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Telefono      string `json:"telefono,optional"`
+	Correo        string `json:"correo,optional"`
+	Direccion     string `json:"direccion,optional"`
+}
+
+type UpdateMyProfileResponse struct {
+	Usuario UsuarioDTO `json:"usuario"`
+}
+
+type UpdateRolePermissionsRequest struct {
+	Authorization string   `header:"Authorization,optional"`
+	Id            string   `path:"id"`
+	PermissionIds []string `json:"permission_ids"`
+}
+
+type UpdateRolePermissionsResponse struct {
+	RoleId        string   `json:"role_id"`
+	PermissionIds []string `json:"permission_ids"`
 }
 
 type UploadDocumentoRequest struct {

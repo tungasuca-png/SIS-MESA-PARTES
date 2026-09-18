@@ -314,6 +314,21 @@ type ListUsuariosResponse {
 	Total    int32        `json:"total"`
 }
 
+// UpdateMyProfile (Paso 22E): edición del PROPIO perfil por el usuario
+// autenticado — sin id/user_id en el request, a propósito: la identidad
+// sale exclusivamente del JWT reenviado a Usuarios Service, nunca de un
+// campo enviado por el cliente.
+type UpdateMyProfileRequest {
+	Authorization string `header:"Authorization,optional"`
+	Telefono      string `json:"telefono,optional"`
+	Correo        string `json:"correo,optional"`
+	Direccion     string `json:"direccion,optional"`
+}
+
+type UpdateMyProfileResponse {
+	Usuario UsuarioDTO `json:"usuario"`
+}
+
 service gateway-api {
 	@handler ListUsuarios
 	get /api/usuarios (ListUsuariosRequest) returns (ListUsuariosResponse)
@@ -326,6 +341,9 @@ service gateway-api {
 
 	@handler GetUsuarioBasic
 	get /api/usuarios/:id/basic (GetUsuarioBasicRequest) returns (GetUsuarioBasicResponse)
+
+	@handler UpdateMyProfile
+	put /api/usuarios/me (UpdateMyProfileRequest) returns (UpdateMyProfileResponse)
 }
 
 service gateway-api {
@@ -526,5 +544,81 @@ service gateway-api {
 
 	@handler ListAllDerivaciones
 	get /api/derivaciones (ListAllDerivacionesRequest) returns (ListDerivacionesResponse)
+}
+
+// Paso 21D: exposición de solo transporte HTTP para los RPC de
+// configuración de roles/permisos ya implementados en Auth Service (Pasos
+// 21B/21C) — autenticación (JWT) y autorización ("roles.view") siguen
+// resolviéndose por completo en Auth (ProtectedMethod), igual que el resto
+// del Gateway: estos handlers son passthrough puro, sin ninguna regla de
+// negocio ni chequeo de rol propio.
+type RoleDTO {
+	Id          string `json:"id"`
+	Nombre      string `json:"nombre"`
+	Descripcion string `json:"descripcion"`
+	Estado      bool   `json:"estado"`
+}
+
+type PermissionDTO {
+	Id          string `json:"id"`
+	Codigo      string `json:"codigo"`
+	Nombre      string `json:"nombre"`
+	Descripcion string `json:"descripcion"`
+	Modulo      string `json:"modulo"`
+	Estado      bool   `json:"estado"`
+}
+
+type ListRolesRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ListRolesResponse {
+	Roles []RoleDTO `json:"roles"`
+}
+
+type ListPermissionsRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ListPermissionsResponse {
+	Permissions []PermissionDTO `json:"permissions"`
+}
+
+type GetRolePermissionsRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetRolePermissionsResponse {
+	Permissions []PermissionDTO `json:"permissions"`
+}
+
+// UpdateRolePermissionsRequest.PermissionIds representa el conjunto FINAL
+// de permisos del rol (reemplaza, no agrega) — un arreglo vacío es una
+// entrada válida (el rol queda sin ningún permiso), ver
+// Auth.UpdateRolePermissions.
+type UpdateRolePermissionsRequest {
+	Authorization string   `header:"Authorization,optional"`
+	Id            string   `path:"id"`
+	PermissionIds []string `json:"permission_ids"`
+}
+
+type UpdateRolePermissionsResponse {
+	RoleId        string   `json:"role_id"`
+	PermissionIds []string `json:"permission_ids"`
+}
+
+service gateway-api {
+	@handler ListRoles
+	get /api/roles (ListRolesRequest) returns (ListRolesResponse)
+
+	@handler ListPermissions
+	get /api/permissions (ListPermissionsRequest) returns (ListPermissionsResponse)
+
+	@handler GetRolePermissions
+	get /api/roles/:id/permissions (GetRolePermissionsRequest) returns (GetRolePermissionsResponse)
+
+	@handler UpdateRolePermissions
+	put /api/roles/:id/permissions (UpdateRolePermissionsRequest) returns (UpdateRolePermissionsResponse)
 }
 

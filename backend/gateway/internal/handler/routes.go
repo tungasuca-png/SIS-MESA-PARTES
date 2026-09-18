@@ -64,6 +64,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/usuarios/basic-batch",
 				Handler: GetUsuariosBasicHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/usuarios/me",
+				Handler: UpdateMyProfileHandler(serverCtx),
+			},
 		},
 	)
 
@@ -188,6 +193,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/api/expedientes/:expediente_id/derivaciones",
 				Handler: ListDerivacionesByExpedienteHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/permissions",
+				Handler: ListPermissionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/roles",
+				Handler: ListRolesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/roles/:id/permissions",
+				Handler: GetRolePermissionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/roles/:id/permissions",
+				Handler: UpdateRolePermissionsHandler(serverCtx),
 			},
 		},
 	)
