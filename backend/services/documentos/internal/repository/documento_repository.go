@@ -98,12 +98,21 @@ func (r *DocumentoRepository) GetWithContent(ctx context.Context, id string) (*D
 }
 
 // ListFilter filtra el listado de documentos. Los campos vacios no filtran.
-// SubidoPor permite acotar a "solo lo que subio este usuario" (usado para
-// que un SOLICITANTE liste sin ver documentos de otros expedientes, ya que
-// Documentos Service no puede consultar a Expedientes Service quien es el
-// dueno real del expediente — ver limitacion documentada en el README).
+//
+// ExpedienteIDs (Paso 19C) acota el listado a un conjunto de expedientes
+// (usado para "documentos.view_own" SIN expediente_id puntual: la lista de
+// expedientes propios del solicitante se resuelve consultando a Expedientes
+// Service, nunca con un JOIN entre bases de datos distintas). Mutuamente
+// excluyente en la práctica con ExpedienteID (un id puntual ya implica
+// ownership confirmado sobre ESE expediente, ver ListDocumentosLogic).
+//
+// SubidoPor queda SIN USO para decidir ownership (Paso 19C: "quien subió el
+// documento" no es "el dueño del expediente" — ver Paso 19). Se conserva el
+// campo porque otras rutas de código externas al alcance de este paso no lo
+// usan tampoco hoy, pero no se elimina para no tocar más de lo necesario.
 type ListFilter struct {
 	ExpedienteID  string
+	ExpedienteIDs []string
 	TipoDocumento string
 	SubidoPor     string
 	Page          int
@@ -112,7 +121,7 @@ type ListFilter struct {
 
 func (r *DocumentoRepository) List(ctx context.Context, filter ListFilter) ([]*Documento, int, error) {
 	conditions := []string{"estado = 'ACTIVO'"}
-	args := make([]any, 0, 3)
+	args := make([]any, 0, 4)
 
 	addCondition := func(column, value string) {
 		args = append(args, value)
@@ -120,6 +129,18 @@ func (r *DocumentoRepository) List(ctx context.Context, filter ListFilter) ([]*D
 	}
 	if filter.ExpedienteID != "" {
 		addCondition("expediente_id", filter.ExpedienteID)
+	} else if filter.ExpedienteIDs != nil {
+		// nil = sin filtro (comportamiento previo, usado cuando hasViewAll).
+		// No-nil pero vacío = el llamador SÍ quiso filtrar por un conjunto
+		// de expedientes y ese conjunto resultó vacío (p. ej. un
+		// solicitante sin ningún expediente propio) — debe devolver CERO
+		// filas, nunca "sin filtro" (que expondría todo el listado).
+		if len(filter.ExpedienteIDs) == 0 {
+			conditions = append(conditions, "1 = 0")
+		} else {
+			args = append(args, filter.ExpedienteIDs)
+			conditions = append(conditions, fmt.Sprintf("expediente_id = ANY($%d::uuid[])", len(args)))
+		}
 	}
 	if filter.TipoDocumento != "" {
 		addCondition("tipo_documento", filter.TipoDocumento)

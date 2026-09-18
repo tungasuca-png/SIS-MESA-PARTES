@@ -49,11 +49,22 @@ func TestDocumentosIntegration(t *testing.T) {
 	expedienteID := fixedUUID(time.Now().UnixNano(), 1)
 	defer cleanupIntegrationData(t, pool, expedienteID)
 
+	solicitanteID := fixedUUID(time.Now().UnixNano(), 2)
+
 	svcCtx := &svc.ServiceContext{
 		Config:              config.Config{JWTSecret: testSecret},
 		DB:                  pool,
 		DocumentoRepository: repository.NewDocumentoRepository(pool),
 		JWTValidator:        security.NewJWTValidator(testSecret),
+		// Esta suite usa identidades sintéticas que no existen en auth_db
+		// — ver fake_authclient_test.go. El catálogo de permisos real se
+		// prueba en TestHasPermissionIntegration, en este mismo paquete.
+		AuthClient: newReplicaAuthClient(security.NewJWTValidator(testSecret)),
+		// ExpedientesClient (Paso 19C): mismo motivo — expedienteID/
+		// solicitanteID son sintéticos, sin relación con un Expedientes
+		// Service real. El ownership real se prueba en
+		// TestHasPermissionIntegration.
+		ExpedientesClient: &fakeExpedientesClient{expedienteID: expedienteID, solicitanteID: solicitanteID},
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
@@ -74,7 +85,6 @@ func TestDocumentosIntegration(t *testing.T) {
 	defer conn.Close()
 	client := documentos.NewDocumentosClient(conn)
 
-	solicitanteID := fixedUUID(time.Now().UnixNano(), 2)
 	ctxSolicitante := authContext(solicitanteID, "SOLICITANTE")
 	ctxAdmin := authContext(fixedUUID(time.Now().UnixNano(), 3), "ADMIN")
 	contenido := []byte("%PDF-1.4 contenido de prueba")
@@ -165,17 +175,25 @@ func TestDocumentosIntegration(t *testing.T) {
 		t.Fatalf("expected admin global list total >= 2, got %d", globalAdmin.Total)
 	}
 
+	// Paso 19C: el ownership de "documentos.view_own" ya NO se decide por
+	// SubidoPor -- se resuelve por expediente (Expedientes.ListExpedientes,
+	// aquí fakeExpedientesClient, que dice que expedienteID pertenece a
+	// solicitanteID). Por eso el solicitante ve AMBOS documentos de su
+	// expediente, incluido el PROVEIDO subido por ADMIN -- es exactamente
+	// el caso institucional que este paso resolvió (ver Paso 19).
 	globalSolicitante, err := client.ListDocumentos(ctxSolicitante, &documentos.ListDocumentosRequest{})
 	if err != nil {
 		t.Fatalf("global list as solicitante: %v", err)
 	}
-	for _, doc := range globalSolicitante.Documentos {
-		if doc.SubidoPor != solicitanteID {
-			t.Fatalf("solicitante global list leaked a document uploaded by %s", doc.SubidoPor)
-		}
+	if globalSolicitante.Total != 2 {
+		t.Fatalf("expected solicitante to see both documentos of its expediente (propio + proveido), got total=%d", globalSolicitante.Total)
 	}
-	if globalSolicitante.Total != 1 {
-		t.Fatalf("expected solicitante to see exactly its own 1 upload, got total=%d", globalSolicitante.Total)
+	seenIDs := map[string]bool{}
+	for _, doc := range globalSolicitante.Documentos {
+		seenIDs[doc.Id] = true
+	}
+	if !seenIDs[uploadResp.Documento.Id] || !seenIDs[proveidoResp.Documento.Id] {
+		t.Fatalf("expected solicitante global list to include both its own upload and the proveido, got %+v", globalSolicitante.Documentos)
 	}
 
 	// --- Filtro por tipo_documento ---

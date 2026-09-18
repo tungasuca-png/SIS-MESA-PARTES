@@ -6,11 +6,14 @@ import (
 	"log"
 	"time"
 
+	"auth/authclient"
 	"documentos/internal/config"
 	"documentos/internal/repository"
 	"documentos/internal/security"
+	"expedientes/expedientesclient"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -18,6 +21,17 @@ type ServiceContext struct {
 	DB                  *pgxpool.Pool
 	DocumentoRepository *repository.DocumentoRepository
 	JWTValidator        *security.JWTValidator
+
+	// AuthClient consulta Auth.HasPermission (Paso 14B) — el permiso real
+	// se combina con las reglas de negocio existentes de
+	// internal/authorization, nunca las reemplaza.
+	AuthClient authclient.Auth
+
+	// ExpedientesClient (Paso 19B): resuelve el propietario REAL del
+	// expediente (Expediente.SolicitanteID) para el ownership de
+	// "documentos.view_own" — mismo cliente generado que ya usa el
+	// Gateway, sin arquitectura nueva.
+	ExpedientesClient expedientesclient.Expedientes
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -71,6 +85,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:                  db,
 		DocumentoRepository: repository.NewDocumentoRepository(db),
 		JWTValidator:        security.NewJWTValidator(c.JWTSecret),
+		AuthClient:          authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc)),
+		ExpedientesClient:   expedientesclient.NewExpedientes(zrpc.MustNewClient(c.ExpedientesRpc)),
 	}
 }
 

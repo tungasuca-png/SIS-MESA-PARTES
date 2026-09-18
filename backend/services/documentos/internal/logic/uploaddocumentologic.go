@@ -30,6 +30,14 @@ func (l *UploadDocumentoLogic) UploadDocumento(in *documentos.UploadDocumentoReq
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
+	// Permiso real (Paso 14B): reemplaza el antiguo gate implícito de
+	// "cualquier autenticado puede intentar subir". CanUpload(role,
+	// tipoDocumento), abajo, sigue aplicándose sin cambios — la regla de
+	// "qué tipo puede subir cada rol" no es un permiso, es una regla de
+	// negocio aparte.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "documentos.create"); err != nil {
+		return nil, err
+	}
 	if in == nil {
 		return nil, status.Error(codes.InvalidArgument, "la solicitud es obligatoria")
 	}

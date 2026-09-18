@@ -3,12 +3,18 @@ module documentos
 go 1.27.1
 
 require (
+	auth v0.0.0
+	expedientes v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/zeromicro/go-zero v1.10.3
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 )
+
+replace auth => ../auth
+
+replace expedientes => ../expedientes
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
