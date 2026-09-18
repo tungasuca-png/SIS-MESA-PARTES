@@ -11,6 +11,7 @@ import Seguimiento from "./pages/MesaDePartes/Seguimiento";
 import SeguimientoDetalle from "./pages/MesaDePartes/SeguimientoDetalle";
 import MiPerfil from "./pages/MesaDePartes/MiPerfil";
 import Notificaciones from "./pages/MesaDePartes/Notificaciones";
+import RolesPermisos from "./pages/Configuracion/RolesPermisos/RolesPermisos";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -118,6 +119,21 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <Notificaciones />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Configuración → Roles y permisos (Paso 21E). El backend
+                (Auth Service, vía Gateway) sigue siendo la única autoridad
+                real sobre "roles.view"; esta ruta solo exige sesión
+                autenticada, igual que el resto — un usuario sin el permiso
+                recibe 403 del Gateway y la página lo muestra como acceso
+                denegado. */}
+            <Route
+                path="/configuracion/roles-permisos"
+                element={
+                    <ProtectedRoute>
+                        <RolesPermisos />
                     </ProtectedRoute>
                 }
             />

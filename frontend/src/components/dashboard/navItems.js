@@ -52,7 +52,7 @@ export const NAV_GROUPS = [
         label: "Administración",
         items: [
             { key: "usuarios", label: "Usuarios", path: null, icon: "users", permission: "usuarios.view" },
-            { key: "roles", label: "Roles y permisos", path: null, icon: "settings", permission: "roles.view" },
+            { key: "roles", label: "Roles y permisos", path: "/configuracion/roles-permisos", icon: "settings", permission: "roles.view" },
             { key: "configuracion", label: "Configuración", path: null, icon: "settings", permission: "configuracion.view" },
         ],
     },

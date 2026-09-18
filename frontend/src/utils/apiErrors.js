@@ -11,7 +11,7 @@ function extractBackendMessage(rawBody) {
     return match ? match[1].trim() : null;
 }
 
-export function friendlyErrorMessage(error) {
+export function friendlyErrorMessage(error, notFoundMessage = "El expediente no fue encontrado.") {
     if (!error?.response) {
         return "No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.";
     }
@@ -27,7 +27,7 @@ export function friendlyErrorMessage(error) {
         case 403:
             return backendMessage || "No tienes permisos para realizar esta acción.";
         case 404:
-            return "El expediente no fue encontrado.";
+            return notFoundMessage;
         default:
             return "Ocurrió un error en el servidor. Intenta nuevamente más tarde.";
     }
