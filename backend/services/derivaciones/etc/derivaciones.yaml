@@ -23,6 +23,12 @@ Postgres:
 
 JWTSecret: ${JWT_SECRET}
 
+AuthRpc:
+  Target: 127.0.0.1:8080
+
+ExpedientesRpc:
+  Target: 127.0.0.1:8082
+
 Middlewares:
   StatConf:
     IgnoreContentMethods:
