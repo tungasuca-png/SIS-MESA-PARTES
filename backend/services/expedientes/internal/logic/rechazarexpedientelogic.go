@@ -38,14 +38,17 @@ func NewRechazarExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 // devuelve a SECRETARIA con estado OBSERVADO, para que el solicitante
 // corrija (ver CorregirExpediente).
 func (l *RechazarExpedienteLogic) RechazarExpediente(in *expedientes.RechazarExpedienteRequest) (*expedientes.RechazarExpedienteResponse, error) {
-	_, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	// Misma condición que derivar (Etapa 3): rechazar es, en esencia, una
-	// derivación de vuelta a Secretaría — mismo permiso que CanUpdateArea.
-	if !authorization.CanUpdateArea(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede rechazar el expediente")
+	// Permiso real (Paso 13B): reemplaza únicamente el gate de rol. Misma
+	// condición que derivar (Etapa 3): rechazar es, en esencia, una
+	// derivación de vuelta a Secretaría — mismo permiso que ya usa
+	// UpdateArea/DerivarExpediente. El chequeo de área, EsF4 y el estado
+	// EN_PROCESO (abajo) siguen exactamente igual.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.update"); err != nil {
+		return nil, err
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")

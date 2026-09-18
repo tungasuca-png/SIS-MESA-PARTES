@@ -141,6 +141,21 @@ message ResolverExpedienteResponse {
   Expediente expediente = 1;
 }
 
+// ValidateDerivacion (Paso 20B.2): RPC de SOLO LECTURA, sin ningún efecto
+// secundario — expone las mismas reglas reales que ya usa DerivarExpediente
+// (estados.IsValidArea + estados.CanDerivar, sobre el Tipo/AreaActual REAL
+// del expediente, nunca datos enviados por el cliente) para que otro
+// microservicio (Derivaciones) pueda validar una transición SIN ejecutarla.
+// No mueve area_actual, no cambia estado, no crea nada.
+message ValidateDerivacionRequest {
+  string expediente_id = 1;
+  string area_destino = 2;
+}
+
+message ValidateDerivacionResponse {
+  bool valido = 1;
+}
+
 service Expedientes {
   rpc CreateExpediente(CreateExpedienteRequest) returns (CreateExpedienteResponse);
   rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
@@ -153,4 +168,5 @@ service Expedientes {
   rpc RechazarExpediente(RechazarExpedienteRequest) returns (RechazarExpedienteResponse);
   rpc CorregirExpediente(CorregirExpedienteRequest) returns (CorregirExpedienteResponse);
   rpc ResolverExpediente(ResolverExpedienteRequest) returns (ResolverExpedienteResponse);
+  rpc ValidateDerivacion(ValidateDerivacionRequest) returns (ValidateDerivacionResponse);
 }

@@ -30,6 +30,7 @@ const (
 	Expedientes_RechazarExpediente_FullMethodName = "/expedientes.Expedientes/RechazarExpediente"
 	Expedientes_CorregirExpediente_FullMethodName = "/expedientes.Expedientes/CorregirExpediente"
 	Expedientes_ResolverExpediente_FullMethodName = "/expedientes.Expedientes/ResolverExpediente"
+	Expedientes_ValidateDerivacion_FullMethodName = "/expedientes.Expedientes/ValidateDerivacion"
 )
 
 // ExpedientesClient is the client API for Expedientes service.
@@ -47,6 +48,7 @@ type ExpedientesClient interface {
 	RechazarExpediente(ctx context.Context, in *RechazarExpedienteRequest, opts ...grpc.CallOption) (*RechazarExpedienteResponse, error)
 	CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error)
 	ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error)
+	ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error)
 }
 
 type expedientesClient struct {
@@ -167,6 +169,16 @@ func (c *expedientesClient) ResolverExpediente(ctx context.Context, in *Resolver
 	return out, nil
 }
 
+func (c *expedientesClient) ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateDerivacionResponse)
+	err := c.cc.Invoke(ctx, Expedientes_ValidateDerivacion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExpedientesServer is the server API for Expedientes service.
 // All implementations must embed UnimplementedExpedientesServer
 // for forward compatibility.
@@ -182,6 +194,7 @@ type ExpedientesServer interface {
 	RechazarExpediente(context.Context, *RechazarExpedienteRequest) (*RechazarExpedienteResponse, error)
 	CorregirExpediente(context.Context, *CorregirExpedienteRequest) (*CorregirExpedienteResponse, error)
 	ResolverExpediente(context.Context, *ResolverExpedienteRequest) (*ResolverExpedienteResponse, error)
+	ValidateDerivacion(context.Context, *ValidateDerivacionRequest) (*ValidateDerivacionResponse, error)
 	mustEmbedUnimplementedExpedientesServer()
 }
 
@@ -224,6 +237,9 @@ func (UnimplementedExpedientesServer) CorregirExpediente(context.Context, *Corre
 }
 func (UnimplementedExpedientesServer) ResolverExpediente(context.Context, *ResolverExpedienteRequest) (*ResolverExpedienteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResolverExpediente not implemented")
+}
+func (UnimplementedExpedientesServer) ValidateDerivacion(context.Context, *ValidateDerivacionRequest) (*ValidateDerivacionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ValidateDerivacion not implemented")
 }
 func (UnimplementedExpedientesServer) mustEmbedUnimplementedExpedientesServer() {}
 func (UnimplementedExpedientesServer) testEmbeddedByValue()                     {}
@@ -444,6 +460,24 @@ func _Expedientes_ResolverExpediente_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Expedientes_ValidateDerivacion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateDerivacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).ValidateDerivacion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_ValidateDerivacion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).ValidateDerivacion(ctx, req.(*ValidateDerivacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Expedientes_ServiceDesc is the grpc.ServiceDesc for Expedientes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -494,6 +528,10 @@ var Expedientes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResolverExpediente",
 			Handler:    _Expedientes_ResolverExpediente_Handler,
+		},
+		{
+			MethodName: "ValidateDerivacion",
+			Handler:    _Expedientes_ValidateDerivacion_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

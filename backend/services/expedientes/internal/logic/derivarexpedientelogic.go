@@ -39,12 +39,15 @@ func NewDerivarExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 // concurrencia optimista (Etapa 1.1) que ya usa UpdateArea — no se
 // duplica esa parte, solo se agrega la validación de transición.
 func (l *DerivarExpedienteLogic) DerivarExpediente(in *expedientes.DerivarExpedienteRequest) (*expedientes.DerivarExpedienteResponse, error) {
-	_, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	if !authorization.CanUpdateArea(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede derivar el expediente")
+	// Permiso real (Paso 13B): reemplaza únicamente el gate de rol
+	// (CanUpdateArea). El chequeo de área, CanDerivar y los casos
+	// especiales F2/F4 (abajo) siguen exactamente igual.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.update"); err != nil {
+		return nil, err
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")

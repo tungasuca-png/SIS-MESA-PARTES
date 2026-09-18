@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"expedientes/expedientes"
+	"expedientes/internal/authorization"
 	"expedientes/internal/estados"
 	"expedientes/internal/interceptor"
 	"expedientes/internal/repository"
@@ -37,7 +38,7 @@ func NewCorregirExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 // crea uno nuevo, se actualiza la descripción (la corrección) y se
 // reingresa a la revisión de Secretaría (OBSERVADO -> PENDIENTE).
 func (l *CorregirExpedienteLogic) CorregirExpediente(in *expedientes.CorregirExpedienteRequest) (*expedientes.CorregirExpedienteResponse, error) {
-	userID, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, _, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -49,6 +50,14 @@ func (l *CorregirExpedienteLogic) CorregirExpediente(in *expedientes.CorregirExp
 		return nil, status.Error(codes.InvalidArgument, "la descripción corregida es obligatoria")
 	}
 
+	// Permiso real (Paso 13B): reemplaza únicamente el antiguo gate
+	// "role != SOLICITANTE". expedientes.view_own NO significa "puede
+	// corregir" por sí solo — el ownership exacto (SolicitanteID ==
+	// userID, verificado abajo) sigue siendo obligatorio.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.view_own"); err != nil {
+		return nil, err
+	}
+
 	current, err := l.svcCtx.ExpedienteRepository.FindByIDOrCodigo(l.ctx, strings.TrimSpace(in.Id))
 	if err != nil {
 		if errors.Is(err, repository.ErrExpedienteNotFound) {
@@ -57,7 +66,7 @@ func (l *CorregirExpedienteLogic) CorregirExpediente(in *expedientes.CorregirExp
 		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
 	}
 
-	if role != "SOLICITANTE" || current.SolicitanteID != userID {
+	if current.SolicitanteID != userID {
 		return nil, status.Error(codes.PermissionDenied, "solo el solicitante dueño del expediente puede corregirlo")
 	}
 	if current.Estado != estados.EstadoObservado {

@@ -1264,6 +1264,108 @@ func (x *ResolverExpedienteResponse) GetExpediente() *Expediente {
 	return nil
 }
 
+// ValidateDerivacion (Paso 20B.2): RPC de SOLO LECTURA, sin ningún efecto
+// secundario — expone las mismas reglas reales que ya usa DerivarExpediente
+// (estados.IsValidArea + estados.CanDerivar, sobre el Tipo/AreaActual REAL
+// del expediente, nunca datos enviados por el cliente) para que otro
+// microservicio (Derivaciones) pueda validar una transición SIN ejecutarla.
+// No mueve area_actual, no cambia estado, no crea nada.
+type ValidateDerivacionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExpedienteId  string                 `protobuf:"bytes,1,opt,name=expediente_id,json=expedienteId,proto3" json:"expediente_id,omitempty"`
+	AreaDestino   string                 `protobuf:"bytes,2,opt,name=area_destino,json=areaDestino,proto3" json:"area_destino,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateDerivacionRequest) Reset() {
+	*x = ValidateDerivacionRequest{}
+	mi := &file_expedientes_service_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateDerivacionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateDerivacionRequest) ProtoMessage() {}
+
+func (x *ValidateDerivacionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateDerivacionRequest.ProtoReflect.Descriptor instead.
+func (*ValidateDerivacionRequest) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ValidateDerivacionRequest) GetExpedienteId() string {
+	if x != nil {
+		return x.ExpedienteId
+	}
+	return ""
+}
+
+func (x *ValidateDerivacionRequest) GetAreaDestino() string {
+	if x != nil {
+		return x.AreaDestino
+	}
+	return ""
+}
+
+type ValidateDerivacionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Valido        bool                   `protobuf:"varint,1,opt,name=valido,proto3" json:"valido,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateDerivacionResponse) Reset() {
+	*x = ValidateDerivacionResponse{}
+	mi := &file_expedientes_service_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateDerivacionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateDerivacionResponse) ProtoMessage() {}
+
+func (x *ValidateDerivacionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateDerivacionResponse.ProtoReflect.Descriptor instead.
+func (*ValidateDerivacionResponse) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ValidateDerivacionResponse) GetValido() bool {
+	if x != nil {
+		return x.Valido
+	}
+	return false
+}
+
 var File_expedientes_service_proto protoreflect.FileDescriptor
 
 const file_expedientes_service_proto_rawDesc = "" +
@@ -1362,7 +1464,12 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x1aResolverExpedienteResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente2\xa3\b\n" +
+	"expediente\"c\n" +
+	"\x19ValidateDerivacionRequest\x12#\n" +
+	"\rexpediente_id\x18\x01 \x01(\tR\fexpedienteId\x12!\n" +
+	"\farea_destino\x18\x02 \x01(\tR\vareaDestino\"4\n" +
+	"\x1aValidateDerivacionResponse\x12\x16\n" +
+	"\x06valido\x18\x01 \x01(\bR\x06valido2\x8a\t\n" +
 	"\vExpedientes\x12_\n" +
 	"\x10CreateExpediente\x12$.expedientes.CreateExpedienteRequest\x1a%.expedientes.CreateExpedienteResponse\x12V\n" +
 	"\rGetExpediente\x12!.expedientes.GetExpedienteRequest\x1a\".expedientes.GetExpedienteResponse\x12\\\n" +
@@ -1375,7 +1482,8 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x11DerivarExpediente\x12%.expedientes.DerivarExpedienteRequest\x1a&.expedientes.DerivarExpedienteResponse\x12e\n" +
 	"\x12RechazarExpediente\x12&.expedientes.RechazarExpedienteRequest\x1a'.expedientes.RechazarExpedienteResponse\x12e\n" +
 	"\x12CorregirExpediente\x12&.expedientes.CorregirExpedienteRequest\x1a'.expedientes.CorregirExpedienteResponse\x12e\n" +
-	"\x12ResolverExpediente\x12&.expedientes.ResolverExpedienteRequest\x1a'.expedientes.ResolverExpedienteResponseB\x0fZ\r./expedientesb\x06proto3"
+	"\x12ResolverExpediente\x12&.expedientes.ResolverExpedienteRequest\x1a'.expedientes.ResolverExpedienteResponse\x12e\n" +
+	"\x12ValidateDerivacion\x12&.expedientes.ValidateDerivacionRequest\x1a'.expedientes.ValidateDerivacionResponseB\x0fZ\r./expedientesb\x06proto3"
 
 var (
 	file_expedientes_service_proto_rawDescOnce sync.Once
@@ -1389,7 +1497,7 @@ func file_expedientes_service_proto_rawDescGZIP() []byte {
 	return file_expedientes_service_proto_rawDescData
 }
 
-var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_expedientes_service_proto_goTypes = []any{
 	(*Expediente)(nil),                 // 0: expedientes.Expediente
 	(*CreateExpedienteRequest)(nil),    // 1: expedientes.CreateExpedienteRequest
@@ -1414,6 +1522,8 @@ var file_expedientes_service_proto_goTypes = []any{
 	(*CorregirExpedienteResponse)(nil), // 20: expedientes.CorregirExpedienteResponse
 	(*ResolverExpedienteRequest)(nil),  // 21: expedientes.ResolverExpedienteRequest
 	(*ResolverExpedienteResponse)(nil), // 22: expedientes.ResolverExpedienteResponse
+	(*ValidateDerivacionRequest)(nil),  // 23: expedientes.ValidateDerivacionRequest
+	(*ValidateDerivacionResponse)(nil), // 24: expedientes.ValidateDerivacionResponse
 }
 var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 0: expedientes.CreateExpedienteResponse.expediente:type_name -> expedientes.Expediente
@@ -1437,19 +1547,21 @@ var file_expedientes_service_proto_depIdxs = []int32{
 	17, // 18: expedientes.Expedientes.RechazarExpediente:input_type -> expedientes.RechazarExpedienteRequest
 	19, // 19: expedientes.Expedientes.CorregirExpediente:input_type -> expedientes.CorregirExpedienteRequest
 	21, // 20: expedientes.Expedientes.ResolverExpediente:input_type -> expedientes.ResolverExpedienteRequest
-	2,  // 21: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
-	4,  // 22: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
-	6,  // 23: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
-	8,  // 24: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
-	10, // 25: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
-	12, // 26: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
-	14, // 27: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
-	16, // 28: expedientes.Expedientes.DerivarExpediente:output_type -> expedientes.DerivarExpedienteResponse
-	18, // 29: expedientes.Expedientes.RechazarExpediente:output_type -> expedientes.RechazarExpedienteResponse
-	20, // 30: expedientes.Expedientes.CorregirExpediente:output_type -> expedientes.CorregirExpedienteResponse
-	22, // 31: expedientes.Expedientes.ResolverExpediente:output_type -> expedientes.ResolverExpedienteResponse
-	21, // [21:32] is the sub-list for method output_type
-	10, // [10:21] is the sub-list for method input_type
+	23, // 21: expedientes.Expedientes.ValidateDerivacion:input_type -> expedientes.ValidateDerivacionRequest
+	2,  // 22: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
+	4,  // 23: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
+	6,  // 24: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
+	8,  // 25: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
+	10, // 26: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
+	12, // 27: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
+	14, // 28: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
+	16, // 29: expedientes.Expedientes.DerivarExpediente:output_type -> expedientes.DerivarExpedienteResponse
+	18, // 30: expedientes.Expedientes.RechazarExpediente:output_type -> expedientes.RechazarExpedienteResponse
+	20, // 31: expedientes.Expedientes.CorregirExpediente:output_type -> expedientes.CorregirExpedienteResponse
+	22, // 32: expedientes.Expedientes.ResolverExpediente:output_type -> expedientes.ResolverExpedienteResponse
+	24, // 33: expedientes.Expedientes.ValidateDerivacion:output_type -> expedientes.ValidateDerivacionResponse
+	22, // [22:34] is the sub-list for method output_type
+	10, // [10:22] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name
 	10, // [10:10] is the sub-list for extension extendee
 	0,  // [0:10] is the sub-list for field type_name
@@ -1466,7 +1578,7 @@ func file_expedientes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_expedientes_service_proto_rawDesc), len(file_expedientes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   23,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

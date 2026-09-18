@@ -37,6 +37,8 @@ type (
 	CorregirExpedienteResponse = expedientes.CorregirExpedienteResponse
 	ResolverExpedienteRequest  = expedientes.ResolverExpedienteRequest
 	ResolverExpedienteResponse = expedientes.ResolverExpedienteResponse
+	ValidateDerivacionRequest  = expedientes.ValidateDerivacionRequest
+	ValidateDerivacionResponse = expedientes.ValidateDerivacionResponse
 
 	Expedientes interface {
 		CreateExpediente(ctx context.Context, in *CreateExpedienteRequest, opts ...grpc.CallOption) (*CreateExpedienteResponse, error)
@@ -50,6 +52,7 @@ type (
 		RechazarExpediente(ctx context.Context, in *RechazarExpedienteRequest, opts ...grpc.CallOption) (*RechazarExpedienteResponse, error)
 		CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error)
 		ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error)
+		ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error)
 	}
 
 	defaultExpedientes struct {
@@ -116,4 +119,9 @@ func (m *defaultExpedientes) CorregirExpediente(ctx context.Context, in *Corregi
 func (m *defaultExpedientes) ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error) {
 	client := expedientes.NewExpedientesClient(m.cli.Conn())
 	return client.ResolverExpediente(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.ValidateDerivacion(ctx, in, opts...)
 }

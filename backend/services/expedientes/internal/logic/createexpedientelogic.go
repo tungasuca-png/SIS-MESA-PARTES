@@ -35,8 +35,15 @@ func (l *CreateExpedienteLogic) CreateExpediente(in *expedientes.CreateExpedient
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	if !authorization.CanCreate(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede registrar expedientes")
+	// Permiso real (Paso 13B): la clasificación solicitante/interno sigue
+	// viniendo de authorization.IsInternal (regla existente, sin cambios) —
+	// solo decide QUÉ permiso corresponde consultar a Auth.
+	permission := "expedientes.create"
+	if !authorization.IsInternal(role) {
+		permission = "solicitudes.create"
+	}
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, permission); err != nil {
+		return nil, err
 	}
 	if in == nil {
 		return nil, status.Error(codes.InvalidArgument, "la solicitud es obligatoria")

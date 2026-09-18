@@ -39,6 +39,17 @@ func (l *GetExpedienteLogic) GetExpediente(in *expedientes.GetExpedienteRequest)
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")
 	}
 
+	// Permiso real (Paso 13B): decide SI puede pedir este tipo de consulta.
+	// El ownership/área de abajo sigue decidiendo, sin cambios, si ESTE
+	// expediente puntual le corresponde.
+	getPermission := "expedientes.view"
+	if !authorization.IsInternal(role) {
+		getPermission = "expedientes.view_own"
+	}
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, getPermission); err != nil {
+		return nil, err
+	}
+
 	found, err := l.svcCtx.ExpedienteRepository.FindByIDOrCodigo(l.ctx, strings.TrimSpace(in.Id))
 	if err != nil {
 		if errors.Is(err, repository.ErrExpedienteNotFound) {

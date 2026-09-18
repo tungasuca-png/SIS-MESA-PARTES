@@ -32,12 +32,15 @@ func NewChangeEstadoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Chan
 }
 
 func (l *ChangeEstadoLogic) ChangeEstado(in *expedientes.ChangeEstadoRequest) (*expedientes.ChangeEstadoResponse, error) {
-	_, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	if !authorization.CanChangeEstado(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede cambiar el estado del expediente")
+	// Permiso real (Paso 13B): reemplaza únicamente el gate de rol
+	// (CanChangeEstado). El chequeo de área (abajo) y la máquina de
+	// estados (CanTransition) siguen exactamente igual.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.change_estado"); err != nil {
+		return nil, err
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")

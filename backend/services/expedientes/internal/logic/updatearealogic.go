@@ -32,12 +32,15 @@ func NewUpdateAreaLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 }
 
 func (l *UpdateAreaLogic) UpdateArea(in *expedientes.UpdateAreaRequest) (*expedientes.UpdateAreaResponse, error) {
-	_, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	if !authorization.CanUpdateArea(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede cambiar el área del expediente")
+	// Permiso real (Paso 13B): reemplaza únicamente el gate de rol
+	// (CanUpdateArea). El chequeo de área (abajo) y el CAS optimista siguen
+	// exactamente igual.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.update"); err != nil {
+		return nil, err
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")

@@ -19,4 +19,8 @@ type Config struct {
 	// Expedientes no emite ni renueva tokens, solo valida la firma del
 	// access token que el Gateway reenvía como metadata "authorization".
 	JWTSecret string
+
+	// AuthRpc: destino de Auth Service para consultar Auth.HasPermission
+	// (mismo patrón zrpc ya usado por el Gateway para este mismo servicio).
+	AuthRpc zrpc.RpcClientConf
 }

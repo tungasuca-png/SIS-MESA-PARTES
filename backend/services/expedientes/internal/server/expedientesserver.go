@@ -77,3 +77,8 @@ func (s *ExpedientesServer) ResolverExpediente(ctx context.Context, in *expedien
 	l := logic.NewResolverExpedienteLogic(ctx, s.svcCtx)
 	return l.ResolverExpediente(in)
 }
+
+func (s *ExpedientesServer) ValidateDerivacion(ctx context.Context, in *expedientes.ValidateDerivacionRequest) (*expedientes.ValidateDerivacionResponse, error) {
+	l := logic.NewValidateDerivacionLogic(ctx, s.svcCtx)
+	return l.ValidateDerivacion(in)
+}

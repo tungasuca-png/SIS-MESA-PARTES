@@ -57,6 +57,11 @@ func TestExpedientesIntegration(t *testing.T) {
 		DB:                   pool,
 		ExpedienteRepository: repository.NewExpedienteRepository(pool),
 		JWTValidator:         security.NewJWTValidator(testSecret),
+		// Esta suite prueba reglas de negocio (área/ownership/estado/CAS/
+		// F2/F4) con identidades sintéticas que no existen en auth_db — ver
+		// fake_authclient_test.go. El catálogo de permisos real se prueba
+		// en TestHasPermissionIntegration, en este mismo paquete.
+		AuthClient: newReplicaAuthClient(security.NewJWTValidator(testSecret)),
 	}
 
 	listener := bufconn.Listen(1024 * 1024)

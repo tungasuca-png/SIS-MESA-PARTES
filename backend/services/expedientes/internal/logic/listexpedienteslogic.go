@@ -40,6 +40,16 @@ func (l *ListExpedientesLogic) ListExpedientes(in *expedientes.ListExpedientesRe
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
+	// Permiso real (Paso 13B): decide SI puede pedir este tipo de consulta.
+	// Las reglas de abajo (CanViewAll/AreaDelRol/SolicitanteID) siguen
+	// decidiendo, sin cambios, CUÁLES expedientes recibe.
+	listPermission := "expedientes.view"
+	if !authorization.IsInternal(role) {
+		listPermission = "expedientes.view_own"
+	}
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, listPermission); err != nil {
+		return nil, err
+	}
 
 	filter := repository.ListFilter{
 		Estado:    strings.ToUpper(strings.TrimSpace(in.GetEstado())),
