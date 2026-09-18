@@ -158,6 +158,27 @@ func (r *UsuarioRepository) Upsert(ctx context.Context, u *Usuario) (*Usuario, e
 	return saved, nil
 }
 
+// UpdateOwnProfile (Paso 22E) actualiza ÚNICAMENTE telefono/correo/direccion
+// del perfil identificado por id — a propósito NO es un UPDATE genérico: no
+// toca nombres, apellidos, dni, tipo_usuario ni activo, precisamente para
+// que este método nunca pueda usarse (por error o a futuro) para más de lo
+// que la edición del propio perfil debe permitir. Si el id no tiene perfil
+// registrado, la sentencia no afecta ninguna fila y RETURNING no devuelve
+// nada: se traduce en ErrUsuarioNotFound, sin crear un perfil nuevo.
+func (r *UsuarioRepository) UpdateOwnProfile(ctx context.Context, id, telefono, correo, direccion string) (*Usuario, error) {
+	found, err := scanUsuario(r.db.QueryRow(ctx, `
+		UPDATE usuarios
+		SET telefono = $2, correo = $3, direccion = $4, updated_at = NOW()
+		WHERE id = $1
+		RETURNING `+usuarioColumns,
+		id, telefono, correo, direccion,
+	))
+	if err != nil {
+		return nil, classifyNotFound(err, ErrUsuarioNotFound)
+	}
+	return found, nil
+}
+
 func collectUsuarios(rows pgx.Rows) ([]*Usuario, error) {
 	items := make([]*Usuario, 0)
 	for rows.Next() {

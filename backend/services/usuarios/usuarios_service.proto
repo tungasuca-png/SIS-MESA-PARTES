@@ -100,6 +100,23 @@ message UpsertUsuarioResponse {
   Usuario usuario = 1;
 }
 
+// UpdateMyProfile (Paso 22E): edición del PROPIO perfil por el usuario
+// autenticado. A propósito NO incluye id/user_id: la identidad se obtiene
+// exclusivamente del contexto autenticado (JWT), nunca de un campo del
+// request — evita cualquier IDOR. Solo cubre los 3 campos de contacto que
+// el propio usuario puede tocar sobre sí mismo (ver Paso 22D/22B):
+// nombres, apellidos, DNI, tipo_usuario y activo permanecen fuera de este
+// RPC (edición administrativa, no implementada todavía).
+message UpdateMyProfileRequest {
+  string telefono = 1;
+  string correo = 2;
+  string direccion = 3;
+}
+
+message UpdateMyProfileResponse {
+  Usuario usuario = 1;
+}
+
 service Usuarios {
   rpc GetUsuario(GetUsuarioRequest) returns (GetUsuarioResponse);
   rpc GetUsuarioBasic(GetUsuarioBasicRequest) returns (GetUsuarioBasicResponse);
@@ -107,4 +124,5 @@ service Usuarios {
   rpc ListUsuarios(ListUsuariosRequest) returns (ListUsuariosResponse);
   rpc SearchUsuarios(SearchUsuariosRequest) returns (SearchUsuariosResponse);
   rpc UpsertUsuario(UpsertUsuarioRequest) returns (UpsertUsuarioResponse);
+  rpc UpdateMyProfile(UpdateMyProfileRequest) returns (UpdateMyProfileResponse);
 }

@@ -6,11 +6,13 @@ import (
 	"log"
 	"time"
 
+	"auth/authclient"
 	"usuarios/internal/config"
 	"usuarios/internal/repository"
 	"usuarios/internal/security"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -18,6 +20,11 @@ type ServiceContext struct {
 	DB                *pgxpool.Pool
 	UsuarioRepository *repository.UsuarioRepository
 	JWTValidator      *security.JWTValidator
+
+	// AuthClient consulta Auth.HasPermission (Paso 16B) — el permiso real
+	// se combina con las reglas de negocio existentes de
+	// internal/authorization, nunca las reemplaza.
+	AuthClient authclient.Auth
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -71,6 +78,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		DB:                db,
 		UsuarioRepository: repository.NewUsuarioRepository(db),
 		JWTValidator:      security.NewJWTValidator(c.JWTSecret),
+		AuthClient:        authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc)),
 	}
 }
 

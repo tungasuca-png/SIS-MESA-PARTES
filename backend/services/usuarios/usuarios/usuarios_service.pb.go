@@ -881,6 +881,117 @@ func (x *UpsertUsuarioResponse) GetUsuario() *Usuario {
 	return nil
 }
 
+// UpdateMyProfile (Paso 22E): edición del PROPIO perfil por el usuario
+// autenticado. A propósito NO incluye id/user_id: la identidad se obtiene
+// exclusivamente del contexto autenticado (JWT), nunca de un campo del
+// request — evita cualquier IDOR. Solo cubre los 3 campos de contacto que
+// el propio usuario puede tocar sobre sí mismo (ver Paso 22D/22B):
+// nombres, apellidos, DNI, tipo_usuario y activo permanecen fuera de este
+// RPC (edición administrativa, no implementada todavía).
+type UpdateMyProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Telefono      string                 `protobuf:"bytes,1,opt,name=telefono,proto3" json:"telefono,omitempty"`
+	Correo        string                 `protobuf:"bytes,2,opt,name=correo,proto3" json:"correo,omitempty"`
+	Direccion     string                 `protobuf:"bytes,3,opt,name=direccion,proto3" json:"direccion,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateMyProfileRequest) Reset() {
+	*x = UpdateMyProfileRequest{}
+	mi := &file_usuarios_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMyProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMyProfileRequest) ProtoMessage() {}
+
+func (x *UpdateMyProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMyProfileRequest.ProtoReflect.Descriptor instead.
+func (*UpdateMyProfileRequest) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UpdateMyProfileRequest) GetTelefono() string {
+	if x != nil {
+		return x.Telefono
+	}
+	return ""
+}
+
+func (x *UpdateMyProfileRequest) GetCorreo() string {
+	if x != nil {
+		return x.Correo
+	}
+	return ""
+}
+
+func (x *UpdateMyProfileRequest) GetDireccion() string {
+	if x != nil {
+		return x.Direccion
+	}
+	return ""
+}
+
+type UpdateMyProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Usuario       *Usuario               `protobuf:"bytes,1,opt,name=usuario,proto3" json:"usuario,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateMyProfileResponse) Reset() {
+	*x = UpdateMyProfileResponse{}
+	mi := &file_usuarios_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMyProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMyProfileResponse) ProtoMessage() {}
+
+func (x *UpdateMyProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMyProfileResponse.ProtoReflect.Descriptor instead.
+func (*UpdateMyProfileResponse) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *UpdateMyProfileResponse) GetUsuario() *Usuario {
+	if x != nil {
+		return x.Usuario
+	}
+	return nil
+}
+
 var File_usuarios_service_proto protoreflect.FileDescriptor
 
 const file_usuarios_service_proto_rawDesc = "" +
@@ -945,7 +1056,13 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\tdireccion\x18\a \x01(\tR\tdireccion\x12!\n" +
 	"\ftipo_usuario\x18\b \x01(\tR\vtipoUsuario\"D\n" +
 	"\x15UpsertUsuarioResponse\x12+\n" +
-	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario2\xfc\x03\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario\"j\n" +
+	"\x16UpdateMyProfileRequest\x12\x1a\n" +
+	"\btelefono\x18\x01 \x01(\tR\btelefono\x12\x16\n" +
+	"\x06correo\x18\x02 \x01(\tR\x06correo\x12\x1c\n" +
+	"\tdireccion\x18\x03 \x01(\tR\tdireccion\"F\n" +
+	"\x17UpdateMyProfileResponse\x12+\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario2\xd4\x04\n" +
 	"\bUsuarios\x12G\n" +
 	"\n" +
 	"GetUsuario\x12\x1b.usuarios.GetUsuarioRequest\x1a\x1c.usuarios.GetUsuarioResponse\x12V\n" +
@@ -953,7 +1070,8 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\x10GetUsuariosBasic\x12!.usuarios.GetUsuariosBasicRequest\x1a\".usuarios.GetUsuariosBasicResponse\x12M\n" +
 	"\fListUsuarios\x12\x1d.usuarios.ListUsuariosRequest\x1a\x1e.usuarios.ListUsuariosResponse\x12S\n" +
 	"\x0eSearchUsuarios\x12\x1f.usuarios.SearchUsuariosRequest\x1a .usuarios.SearchUsuariosResponse\x12P\n" +
-	"\rUpsertUsuario\x12\x1e.usuarios.UpsertUsuarioRequest\x1a\x1f.usuarios.UpsertUsuarioResponseB\fZ\n" +
+	"\rUpsertUsuario\x12\x1e.usuarios.UpsertUsuarioRequest\x1a\x1f.usuarios.UpsertUsuarioResponse\x12V\n" +
+	"\x0fUpdateMyProfile\x12 .usuarios.UpdateMyProfileRequest\x1a!.usuarios.UpdateMyProfileResponseB\fZ\n" +
 	"./usuariosb\x06proto3"
 
 var (
@@ -968,7 +1086,7 @@ func file_usuarios_service_proto_rawDescGZIP() []byte {
 	return file_usuarios_service_proto_rawDescData
 }
 
-var file_usuarios_service_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_usuarios_service_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_usuarios_service_proto_goTypes = []any{
 	(*Usuario)(nil),                  // 0: usuarios.Usuario
 	(*UsuarioBasic)(nil),             // 1: usuarios.UsuarioBasic
@@ -984,6 +1102,8 @@ var file_usuarios_service_proto_goTypes = []any{
 	(*SearchUsuariosResponse)(nil),   // 11: usuarios.SearchUsuariosResponse
 	(*UpsertUsuarioRequest)(nil),     // 12: usuarios.UpsertUsuarioRequest
 	(*UpsertUsuarioResponse)(nil),    // 13: usuarios.UpsertUsuarioResponse
+	(*UpdateMyProfileRequest)(nil),   // 14: usuarios.UpdateMyProfileRequest
+	(*UpdateMyProfileResponse)(nil),  // 15: usuarios.UpdateMyProfileResponse
 }
 var file_usuarios_service_proto_depIdxs = []int32{
 	0,  // 0: usuarios.GetUsuarioResponse.usuario:type_name -> usuarios.Usuario
@@ -992,23 +1112,26 @@ var file_usuarios_service_proto_depIdxs = []int32{
 	0,  // 3: usuarios.ListUsuariosResponse.usuarios:type_name -> usuarios.Usuario
 	0,  // 4: usuarios.SearchUsuariosResponse.usuarios:type_name -> usuarios.Usuario
 	0,  // 5: usuarios.UpsertUsuarioResponse.usuario:type_name -> usuarios.Usuario
-	2,  // 6: usuarios.Usuarios.GetUsuario:input_type -> usuarios.GetUsuarioRequest
-	4,  // 7: usuarios.Usuarios.GetUsuarioBasic:input_type -> usuarios.GetUsuarioBasicRequest
-	6,  // 8: usuarios.Usuarios.GetUsuariosBasic:input_type -> usuarios.GetUsuariosBasicRequest
-	8,  // 9: usuarios.Usuarios.ListUsuarios:input_type -> usuarios.ListUsuariosRequest
-	10, // 10: usuarios.Usuarios.SearchUsuarios:input_type -> usuarios.SearchUsuariosRequest
-	12, // 11: usuarios.Usuarios.UpsertUsuario:input_type -> usuarios.UpsertUsuarioRequest
-	3,  // 12: usuarios.Usuarios.GetUsuario:output_type -> usuarios.GetUsuarioResponse
-	5,  // 13: usuarios.Usuarios.GetUsuarioBasic:output_type -> usuarios.GetUsuarioBasicResponse
-	7,  // 14: usuarios.Usuarios.GetUsuariosBasic:output_type -> usuarios.GetUsuariosBasicResponse
-	9,  // 15: usuarios.Usuarios.ListUsuarios:output_type -> usuarios.ListUsuariosResponse
-	11, // 16: usuarios.Usuarios.SearchUsuarios:output_type -> usuarios.SearchUsuariosResponse
-	13, // 17: usuarios.Usuarios.UpsertUsuario:output_type -> usuarios.UpsertUsuarioResponse
-	12, // [12:18] is the sub-list for method output_type
-	6,  // [6:12] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0,  // 6: usuarios.UpdateMyProfileResponse.usuario:type_name -> usuarios.Usuario
+	2,  // 7: usuarios.Usuarios.GetUsuario:input_type -> usuarios.GetUsuarioRequest
+	4,  // 8: usuarios.Usuarios.GetUsuarioBasic:input_type -> usuarios.GetUsuarioBasicRequest
+	6,  // 9: usuarios.Usuarios.GetUsuariosBasic:input_type -> usuarios.GetUsuariosBasicRequest
+	8,  // 10: usuarios.Usuarios.ListUsuarios:input_type -> usuarios.ListUsuariosRequest
+	10, // 11: usuarios.Usuarios.SearchUsuarios:input_type -> usuarios.SearchUsuariosRequest
+	12, // 12: usuarios.Usuarios.UpsertUsuario:input_type -> usuarios.UpsertUsuarioRequest
+	14, // 13: usuarios.Usuarios.UpdateMyProfile:input_type -> usuarios.UpdateMyProfileRequest
+	3,  // 14: usuarios.Usuarios.GetUsuario:output_type -> usuarios.GetUsuarioResponse
+	5,  // 15: usuarios.Usuarios.GetUsuarioBasic:output_type -> usuarios.GetUsuarioBasicResponse
+	7,  // 16: usuarios.Usuarios.GetUsuariosBasic:output_type -> usuarios.GetUsuariosBasicResponse
+	9,  // 17: usuarios.Usuarios.ListUsuarios:output_type -> usuarios.ListUsuariosResponse
+	11, // 18: usuarios.Usuarios.SearchUsuarios:output_type -> usuarios.SearchUsuariosResponse
+	13, // 19: usuarios.Usuarios.UpsertUsuario:output_type -> usuarios.UpsertUsuarioResponse
+	15, // 20: usuarios.Usuarios.UpdateMyProfile:output_type -> usuarios.UpdateMyProfileResponse
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_usuarios_service_proto_init() }
@@ -1022,7 +1145,7 @@ func file_usuarios_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_usuarios_service_proto_rawDesc), len(file_usuarios_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

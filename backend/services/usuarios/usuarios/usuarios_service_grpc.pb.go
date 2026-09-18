@@ -25,6 +25,7 @@ const (
 	Usuarios_ListUsuarios_FullMethodName     = "/usuarios.Usuarios/ListUsuarios"
 	Usuarios_SearchUsuarios_FullMethodName   = "/usuarios.Usuarios/SearchUsuarios"
 	Usuarios_UpsertUsuario_FullMethodName    = "/usuarios.Usuarios/UpsertUsuario"
+	Usuarios_UpdateMyProfile_FullMethodName  = "/usuarios.Usuarios/UpdateMyProfile"
 )
 
 // UsuariosClient is the client API for Usuarios service.
@@ -37,6 +38,7 @@ type UsuariosClient interface {
 	ListUsuarios(ctx context.Context, in *ListUsuariosRequest, opts ...grpc.CallOption) (*ListUsuariosResponse, error)
 	SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 	UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
+	UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
 }
 
 type usuariosClient struct {
@@ -107,6 +109,16 @@ func (c *usuariosClient) UpsertUsuario(ctx context.Context, in *UpsertUsuarioReq
 	return out, nil
 }
 
+func (c *usuariosClient) UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateMyProfileResponse)
+	err := c.cc.Invoke(ctx, Usuarios_UpdateMyProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsuariosServer is the server API for Usuarios service.
 // All implementations must embed UnimplementedUsuariosServer
 // for forward compatibility.
@@ -117,6 +129,7 @@ type UsuariosServer interface {
 	ListUsuarios(context.Context, *ListUsuariosRequest) (*ListUsuariosResponse, error)
 	SearchUsuarios(context.Context, *SearchUsuariosRequest) (*SearchUsuariosResponse, error)
 	UpsertUsuario(context.Context, *UpsertUsuarioRequest) (*UpsertUsuarioResponse, error)
+	UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error)
 	mustEmbedUnimplementedUsuariosServer()
 }
 
@@ -144,6 +157,9 @@ func (UnimplementedUsuariosServer) SearchUsuarios(context.Context, *SearchUsuari
 }
 func (UnimplementedUsuariosServer) UpsertUsuario(context.Context, *UpsertUsuarioRequest) (*UpsertUsuarioResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpsertUsuario not implemented")
+}
+func (UnimplementedUsuariosServer) UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMyProfile not implemented")
 }
 func (UnimplementedUsuariosServer) mustEmbedUnimplementedUsuariosServer() {}
 func (UnimplementedUsuariosServer) testEmbeddedByValue()                  {}
@@ -274,6 +290,24 @@ func _Usuarios_UpsertUsuario_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Usuarios_UpdateMyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMyProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).UpdateMyProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_UpdateMyProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).UpdateMyProfile(ctx, req.(*UpdateMyProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Usuarios_ServiceDesc is the grpc.ServiceDesc for Usuarios service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +338,10 @@ var Usuarios_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpsertUsuario",
 			Handler:    _Usuarios_UpsertUsuario_Handler,
+		},
+		{
+			MethodName: "UpdateMyProfile",
+			Handler:    _Usuarios_UpdateMyProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

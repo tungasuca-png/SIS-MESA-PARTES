@@ -26,6 +26,8 @@ type (
 	SearchUsuariosResponse   = usuarios.SearchUsuariosResponse
 	UpsertUsuarioRequest     = usuarios.UpsertUsuarioRequest
 	UpsertUsuarioResponse    = usuarios.UpsertUsuarioResponse
+	UpdateMyProfileRequest   = usuarios.UpdateMyProfileRequest
+	UpdateMyProfileResponse  = usuarios.UpdateMyProfileResponse
 	Usuario                  = usuarios.Usuario
 	UsuarioBasic             = usuarios.UsuarioBasic
 
@@ -36,6 +38,7 @@ type (
 		ListUsuarios(ctx context.Context, in *ListUsuariosRequest, opts ...grpc.CallOption) (*ListUsuariosResponse, error)
 		SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 		UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
+		UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
 	}
 
 	defaultUsuarios struct {
@@ -77,4 +80,9 @@ func (m *defaultUsuarios) SearchUsuarios(ctx context.Context, in *SearchUsuarios
 func (m *defaultUsuarios) UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error) {
 	client := usuarios.NewUsuariosClient(m.cli.Conn())
 	return client.UpsertUsuario(ctx, in, opts...)
+}
+
+func (m *defaultUsuarios) UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.UpdateMyProfile(ctx, in, opts...)
 }

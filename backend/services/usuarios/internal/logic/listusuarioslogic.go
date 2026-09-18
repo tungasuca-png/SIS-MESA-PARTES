@@ -36,9 +36,18 @@ func NewListUsuariosLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 }
 
 func (l *ListUsuariosLogic) ListUsuarios(in *usuarios.ListUsuariosRequest) (*usuarios.ListUsuariosResponse, error) {
-	_, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
+	}
+	// Permiso real (Paso 16B) + regla de negocio existente (CanListOrSearch),
+	// AMBAS deben cumplirse — a propósito, no se reemplaza una por la otra.
+	// El catálogo real le da "usuarios.view" a todo interno, pero esta
+	// operación devuelve el perfil COMPLETO (DNI/teléfono/correo/dirección)
+	// de todos los resultados, así que se mantiene la restricción exclusiva
+	// a ADMIN además del permiso.
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "usuarios.view"); err != nil {
+		return nil, err
 	}
 	if !authorization.CanListOrSearch(role) {
 		return nil, status.Error(codes.PermissionDenied, "el rol no puede listar usuarios")

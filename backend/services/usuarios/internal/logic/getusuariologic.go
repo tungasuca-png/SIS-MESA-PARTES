@@ -44,6 +44,18 @@ func (l *GetUsuarioLogic) GetUsuario(in *usuarios.GetUsuarioRequest) (*usuarios.
 	if !validation.IsValidUUID(id) {
 		return nil, status.Error(codes.InvalidArgument, "el identificador no es un UUID válido")
 	}
+
+	// Permiso real (Paso 16B), SOLO para el caso de consultar el perfil de
+	// OTRO usuario. La autoconsulta (requesterID == id) sigue permitida
+	// sin depender de "usuarios.view" — un SOLICITANTE nunca tiene ese
+	// permiso, y exigírselo para ver SU PROPIO perfil rompería un caso ya
+	// funcionando (ver Paso 16, Gap #4). CanViewFullProfile se conserva
+	// SIN CAMBIOS como regla de negocio en ambos casos.
+	if requesterID != id {
+		if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, requesterID, "usuarios.view"); err != nil {
+			return nil, err
+		}
+	}
 	if !authorization.CanViewFullProfile(role, requesterID, id) {
 		return nil, status.Error(codes.PermissionDenied, "no tiene acceso al perfil completo de este usuario")
 	}

@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"net/mail"
 	"regexp"
 	"strings"
 )
@@ -28,4 +29,15 @@ var tiposUsuario = map[string]bool{
 
 func IsValidTipoUsuario(value string) bool {
 	return tiposUsuario[value]
+}
+
+// IsValidEmail (Paso 22E) valida el formato del correo de CONTACTO del
+// perfil (campo "correo" de Usuarios Service, distinto del email de
+// autenticación de Auth Service). Mismo criterio ya usado por
+// Auth/RegisterLogic: net/mail.ParseAddress, exigiendo que la dirección
+// parseada sea idéntica al valor recibido (rechaza formatos con nombre de
+// display, ej. "Juan <juan@test.com>").
+func IsValidEmail(value string) bool {
+	parsed, err := mail.ParseAddress(value)
+	return err == nil && parsed.Address == value
 }

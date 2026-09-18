@@ -52,3 +52,8 @@ func (s *UsuariosServer) UpsertUsuario(ctx context.Context, in *usuarios.UpsertU
 	l := logic.NewUpsertUsuarioLogic(ctx, s.svcCtx)
 	return l.UpsertUsuario(in)
 }
+
+func (s *UsuariosServer) UpdateMyProfile(ctx context.Context, in *usuarios.UpdateMyProfileRequest) (*usuarios.UpdateMyProfileResponse, error) {
+	l := logic.NewUpdateMyProfileLogic(ctx, s.svcCtx)
+	return l.UpdateMyProfile(in)
+}
