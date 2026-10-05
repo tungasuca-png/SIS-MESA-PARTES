@@ -1,0 +1,16 @@
+Name: maestros.rpc
+ListenOn: 0.0.0.0:8086
+Mode: dev
+
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: maestros.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: maestros_user
+  Password: maestros_password
+  Database: maestros_db
+  SSLMode: disable

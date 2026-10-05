@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package maestros;
+
+option go_package = "./maestros";
+
+// Persona representa la identidad institucional central.
+// Los demás servicios deben referenciarla por su UUID estable.
+message Persona {
+  string id = 1;
+  string tipo_documento = 2;
+  string numero_documento = 3;
+  string nombres = 4;
+  string apellido_paterno = 5;
+  string apellido_materno = 6;
+
+  string fecha_nacimiento = 7;
+  string sexo = 8;
+
+  string correo_personal = 9;
+  string telefono = 10;
+
+  bool activo = 11;
+
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+// Estudiante representa la información académica maestra
+// asociada a una Persona institucional.
+message Estudiante {
+  string id = 1;
+  string persona_id = 2;
+
+  string codigo_institucional = 3;
+  string codigo_siagie = 4;
+
+  string estado_academico = 5;
+
+  string created_at = 6;
+  string updated_at = 7;
+
+  Persona persona = 8;
+}
+
+// ==================== PERSONAS ====================
+
+message GetPersonaRequest {
+  string id = 1;
+}
+
+message GetPersonaResponse {
+  Persona persona = 1;
+}
+
+// ==================== ESTUDIANTES ====================
+
+message GetEstudianteRequest {
+  string id = 1;
+}
+
+message GetEstudianteResponse {
+  Estudiante estudiante = 1;
+}
+
+service Maestros {
+  rpc GetPersona(GetPersonaRequest) returns (GetPersonaResponse);
+
+  rpc GetEstudiante(GetEstudianteRequest)
+      returns (GetEstudianteResponse);
+}

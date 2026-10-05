@@ -346,6 +346,39 @@ service gateway-api {
 	put /api/usuarios/me (UpdateMyProfileRequest) returns (UpdateMyProfileResponse)
 }
 
+// ==================== MAESTROS / PERSONAS ====================
+// PersonaDTO representa la identidad institucional central.
+// Los datos personales autoritativos provienen de Maestros Service.
+type PersonaDTO {
+	Id              string `json:"id"`
+	TipoDocumento   string `json:"tipo_documento"`
+	NumeroDocumento string `json:"numero_documento"`
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno"`
+	FechaNacimiento string `json:"fecha_nacimiento"`
+	Sexo            string `json:"sexo"`
+	CorreoPersonal  string `json:"correo_personal"`
+	Telefono        string `json:"telefono"`
+	Activo          bool   `json:"activo"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+}
+
+type GetPersonaRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetPersonaResponse {
+	Persona PersonaDTO `json:"persona"`
+}
+
+service gateway-api {
+	@handler GetPersona
+	get /api/personas/:id (GetPersonaRequest) returns (GetPersonaResponse)
+}
+
 service gateway-api {
 	@handler CreateExpediente
 	post /api/expedientes (CreateExpedienteRequest) returns (CreateExpedienteResponse)

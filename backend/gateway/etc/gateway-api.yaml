@@ -16,3 +16,6 @@ DocumentosRpc:
 
 DerivacionesRpc:
   Target: 127.0.0.1:8085
+
+MaestrosRpc:
+  Target: 127.0.0.1:8086

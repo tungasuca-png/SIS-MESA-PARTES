@@ -6,6 +6,7 @@ import (
 	"documentos/documentosclient"
 	"expedientes/expedientesclient"
 	"gateway/internal/config"
+	"maestros/maestrosclient"
 	"usuarios/usuariosclient"
 
 	"github.com/zeromicro/go-zero/zrpc"
@@ -19,6 +20,7 @@ type ServiceContext struct {
 	UsuariosClient     usuariosclient.Usuarios
 	DocumentosClient   documentosclient.Documentos
 	DerivacionesClient derivacionesclient.Derivaciones
+	MaestrosClient     maestrosclient.Maestros
 }
 
 // documentosMaxMsgSize deja margen sobre el limite de archivo de Documentos
@@ -29,23 +31,37 @@ const documentosMaxMsgSize = 5*1024*1024 + 64*1024
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config: c,
+
 		AuthClient: authclient.NewAuth(
 			zrpc.MustNewClient(c.AuthRpc),
 		),
+
 		ExpedientesClient: expedientesclient.NewExpedientes(
 			zrpc.MustNewClient(c.ExpedientesRpc),
 		),
+
 		UsuariosClient: usuariosclient.NewUsuarios(
 			zrpc.MustNewClient(c.UsuariosRpc),
 		),
+
 		DocumentosClient: documentosclient.NewDocumentos(
-			zrpc.MustNewClient(c.DocumentosRpc, zrpc.WithDialOption(grpc.WithDefaultCallOptions(
-				grpc.MaxCallRecvMsgSize(documentosMaxMsgSize),
-				grpc.MaxCallSendMsgSize(documentosMaxMsgSize),
-			))),
+			zrpc.MustNewClient(
+				c.DocumentosRpc,
+				zrpc.WithDialOption(
+					grpc.WithDefaultCallOptions(
+						grpc.MaxCallRecvMsgSize(documentosMaxMsgSize),
+						grpc.MaxCallSendMsgSize(documentosMaxMsgSize),
+					),
+				),
+			),
 		),
+
 		DerivacionesClient: derivacionesclient.NewDerivaciones(
 			zrpc.MustNewClient(c.DerivacionesRpc),
+		),
+
+		MaestrosClient: maestrosclient.NewMaestros(
+			zrpc.MustNewClient(c.MaestrosRpc),
 		),
 	}
 }

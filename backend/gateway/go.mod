@@ -7,8 +7,10 @@ require (
 	derivaciones v0.0.0
 	documentos v0.0.0
 	expedientes v0.0.0
+	github.com/go-pdf/fpdf v0.9.0
 	github.com/zeromicro/go-zero v1.10.3
 	google.golang.org/grpc v1.83.2
+	maestros v0.0.0
 	usuarios v0.0.0
 )
 
@@ -27,7 +29,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
-	github.com/go-pdf/fpdf v0.9.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -113,3 +114,5 @@ replace usuarios => ../services/usuarios
 replace documentos => ../services/documentos
 
 replace derivaciones => ../services/derivaciones
+
+replace maestros => ../services/maestros

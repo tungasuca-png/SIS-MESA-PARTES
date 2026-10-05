@@ -13,4 +13,5 @@ type Config struct {
 	UsuariosRpc     zrpc.RpcClientConf
 	DocumentosRpc   zrpc.RpcClientConf
 	DerivacionesRpc zrpc.RpcClientConf
+	MaestrosRpc     zrpc.RpcClientConf
 }
