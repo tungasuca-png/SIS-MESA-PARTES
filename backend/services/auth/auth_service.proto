@@ -16,6 +16,8 @@ message RegisterRequest {
   string email = 2;
   string password = 3;
   string role = 4;
+  // DNI (8 dígitos): credencial de ingreso junto con la contraseña.
+  string dni = 5;
 }
 
 message RegisterResponse {
@@ -27,7 +29,8 @@ message RegisterResponse {
 }
 
 message LoginRequest {
-  string username = 1;
+  // DNI (8 dígitos): identifica al usuario; reemplaza al username como credencial.
+  string dni = 1;
   string password = 2;
 }
 
@@ -78,6 +81,21 @@ message HasPermissionRequest {
 
 message HasPermissionResponse {
   bool allowed = 1;
+}
+
+// GetMyPermissions: lista COMPLETA de permisos efectivos del usuario
+// AUTENTICADO (union de todos sus roles reales) — self-only, sin user_id
+// en el request, mismo criterio de identidad ya usado por HasPermission/
+// Logout/UpdateMyProfile (Usuarios Service): la identidad sale
+// exclusivamente del JWT/contexto, nunca de un campo del cliente.
+// Reutiliza AuthorizationService.GetPermissionsByUserID (ya existente,
+// ya usado internamente por HasPermission) — no hay una segunda
+// implementación del cálculo de permisos.
+message GetMyPermissionsRequest {
+}
+
+message GetMyPermissionsResponse {
+  repeated string permissions = 1;
 }
 
 // Paso 21B: capa de SOLO LECTURA del catálogo de roles/permisos, para la
@@ -143,6 +161,45 @@ message UpdateRolePermissionsResponse {
   repeated string permission_ids = 2;
 }
 
+// UpdateUserRole: reemplaza el ÚNICO rol de un usuario ya existente
+// (Usuario -> Rol, distinto de Rol -> Permisos de arriba). El sistema
+// trabaja con la regla "1 usuario = 1 rol": esto NUNCA agrega un rol
+// adicional, siempre reemplaza el que el usuario tenía (transaccional:
+// DELETE del rol anterior + INSERT del nuevo, o ninguno de los dos).
+message UpdateUserRoleRequest {
+  string user_id = 1;
+  string role_id = 2;
+}
+
+message UpdateUserRoleResponse {
+  string user_id = 1;
+  string role_id = 2;
+  string role_nombre = 3;
+}
+
+// CreateUser (administrativo, distinto de Register): a diferencia de
+// Register (público, self-service, solo permite SOLICITANTE), esta
+// operación la ejecuta un actor con "usuarios.change_role" y puede asignar
+// cualquier rol real activo mediante role_id (nunca un nombre de rol
+// enviado directo, y nunca confiando en el frontend para decidir si el rol
+// existe/está activo). Sigue siendo "1 usuario = 1 rol": crea exactamente
+// una fila en usuario_roles, igual que Register.
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string role_id = 4;
+  string dni = 5;
+}
+
+message CreateUserResponse {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string role_id = 4;
+  string role_nombre = 5;
+}
+
 service Auth {
   rpc Ping(Request) returns(Response);
   rpc Register(RegisterRequest) returns(RegisterResponse);
@@ -151,8 +208,11 @@ service Auth {
   rpc Logout(LogoutRequest) returns(LogoutResponse);
   rpc ValidateToken(ValidateTokenRequest) returns(ValidateTokenResponse);
   rpc HasPermission(HasPermissionRequest) returns(HasPermissionResponse);
+  rpc GetMyPermissions(GetMyPermissionsRequest) returns(GetMyPermissionsResponse);
   rpc ListRoles(ListRolesRequest) returns(ListRolesResponse);
   rpc ListPermissions(ListPermissionsRequest) returns(ListPermissionsResponse);
   rpc GetRolePermissions(GetRolePermissionsRequest) returns(GetRolePermissionsResponse);
   rpc UpdateRolePermissions(UpdateRolePermissionsRequest) returns(UpdateRolePermissionsResponse);
+  rpc UpdateUserRole(UpdateUserRoleRequest) returns(UpdateUserRoleResponse);
+  rpc CreateUser(CreateUserRequest) returns(CreateUserResponse);
 }

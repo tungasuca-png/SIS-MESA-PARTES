@@ -60,7 +60,13 @@ function ExpedienteDetail() {
     // Las derivaciones son un movimiento interno del expediente (que area lo
     // deriva a cual, y por que): es informacion de gestion, no algo que el
     // SOLICITANTE necesite ver en el detalle de su propio tramite.
-    const canViewDerivaciones = can("derivaciones.view");
+    // view -> alcance general; view_own -> solo si el expediente es propio
+    // (el backend lo valida igual: esto solo evita mostrar un panel que
+    // respondería 403).
+    const canViewDerivacionesGeneral = can("derivaciones.view");
+    const canViewDerivaciones =
+        canViewDerivacionesGeneral ||
+        (can("derivaciones.view_own") && !!expediente && expediente.solicitante_id === user?.id);
     const { usuarios, unavailable } = useUsuariosBasic(
         expediente ? [expediente.solicitante_id] : []
     );
@@ -212,30 +218,47 @@ function ExpedienteDetail() {
         ? ESTADOS.filter((item) => (TRANSICIONES_ESTADO[expediente.estado] || []).includes(item.value))
         : [];
 
-    // Rechazar: exclusivo de F4, lo ejecuta quien tiene el expediente
-    // (Dirección o Subdirección) mientras está en trámite.
+    // Cada acción = PERMISO (Auth, vía can()) + ESTADO + ÁREA/PROPIEDAD/FLUJO.
+    // El permiso responde "¿puede hacer esta clase de operación?"; el resto es
+    // el momento y el alcance sobre ESTE expediente. El backend es la
+    // autoridad definitiva y revalida todo (permiso, área, estado, ownership).
+    //
+    // user.role se usa SOLO como contexto: en este sistema el área
+    // institucional del personal interno coincide con el código de su rol
+    // (mismo criterio que Expedientes Service, AreaDelRol), y es lo único que
+    // dice "este expediente está en MI área". No otorga ninguna acción.
+    const areaDelUsuario = user?.role;
+
+    // Rechazar (F4): permiso expedientes.update (el mismo que exige el
+    // backend). Regla de flujo institucional: solo Dirección o Subdirección,
+    // mientras el expediente está en trámite y en su propia área.
     const puedeRechazar =
         expediente &&
+        can("expedientes.update") &&
         TIPOS_F4.includes(expediente.tipo) &&
         expediente.estado === "EN_PROCESO" &&
-        (user?.role === "DIRECTOR" || user?.role === "SUBDIRECTOR") &&
-        expediente.area_actual === user?.role;
+        (expediente.area_actual === "DIRECTOR" || expediente.area_actual === "SUBDIRECTOR") &&
+        expediente.area_actual === areaDelUsuario;
 
-    // Resolver/cerrar: exclusivo de F2, solo Secretaría y solo cuando ya lo
-    // tiene de vuelta (Dirección ya lo procesó y devolvió).
+    // Resolver/cerrar (F2): permiso expedientes.change_estado (el que exige el
+    // backend). Flujo: solo cuando Dirección ya lo devolvió a Secretaría y el
+    // expediente está en el área del usuario.
     const puedeResolver =
         expediente &&
+        can("expedientes.change_estado") &&
         TIPOS_F2.includes(expediente.tipo) &&
         expediente.estado === "EN_PROCESO" &&
         expediente.area_actual === "SECRETARIA" &&
-        user?.role === "SECRETARIA";
+        expediente.area_actual === areaDelUsuario;
 
-    // Corregir y reenviar: exclusivo del propio solicitante, sobre su
-    // propio expediente observado.
+    // Corregir y reenviar: permiso expedientes.view_own (el que exige el
+    // backend) + propiedad exacta del expediente (solicitante_id) + estado
+    // OBSERVADO. Ya no depende del nombre del rol: la propiedad y el permiso
+    // lo determinan.
     const puedeCorregir =
         expediente &&
+        can("expedientes.view_own") &&
         expediente.estado === "OBSERVADO" &&
-        user?.role === "SOLICITANTE" &&
         expediente.solicitante_id === user?.id;
 
     return (
@@ -264,7 +287,7 @@ function ExpedienteDetail() {
                                     <dt>Tipo</dt>
                                     <dd>{tipoLabel(expediente.tipo)}</dd>
                                 </div>
-                                {canViewDerivaciones && (
+                                {canViewDerivacionesGeneral && (
                                     <div>
                                         <dt>Área actual</dt>
                                         <dd>{roleLabel(expediente.area_actual)}</dd>

@@ -95,6 +95,12 @@ const PATHS = {
         </>
     ),
     close: <path d="M6 6l12 12M18 6L6 18" />,
+    search: (
+        <>
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="M20 20l-4.8-4.8" />
+        </>
+    ),
 };
 
 function Icon({ name, size = 18, className }) {

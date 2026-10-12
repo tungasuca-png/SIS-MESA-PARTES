@@ -37,7 +37,7 @@ func TestDocumentosIntegration(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -59,7 +59,12 @@ func TestDocumentosIntegration(t *testing.T) {
 		// Esta suite usa identidades sintéticas que no existen en auth_db
 		// — ver fake_authclient_test.go. El catálogo de permisos real se
 		// prueba en TestHasPermissionIntegration, en este mismo paquete.
-		AuthClient: newReplicaAuthClient(security.NewJWTValidator(testSecret)),
+		// Auth simulado sin catálogo: permite todo salvo lo que este escenario
+		// declara explícitamente — el solicitante solo tiene documentos.view_own
+		// (no la vista global ni la baja).
+		AuthClient: newScriptedAuthClient(map[string]map[string]bool{
+			solicitanteID: {"documentos.view": true, "documentos.delete": true},
+		}),
 		// ExpedientesClient (Paso 19C): mismo motivo — expedienteID/
 		// solicitanteID son sintéticos, sin relación con un Expedientes
 		// Service real. El ownership real se prueba en
@@ -243,11 +248,16 @@ func fixedUUID(testID int64, index int) string {
 	return fmt.Sprintf("00000000-0000-4000-8000-%012d", value)
 }
 
-func integrationDatabaseURL() string {
-	if value := os.Getenv("DOCUMENTOS_TEST_DATABASE_URL"); value != "" {
-		return value
+func integrationDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_DOCUMENTOS_DB_URL")
+	if url == "" {
+		t.Skip("TEST_DOCUMENTOS_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://documentos_user:documentos_password@127.0.0.1:5433/documentos_db?sslmode=disable"
+	return url
 }
 
 func cleanupIntegrationData(t *testing.T, pool *pgxpool.Pool, expedienteID string) {

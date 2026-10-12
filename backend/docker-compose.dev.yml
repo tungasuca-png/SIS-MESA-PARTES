@@ -1,0 +1,87 @@
+# Infraestructura de DESARROLLO (PostgreSQL, etcd y Adminer bajo demanda).
+#
+#   docker compose -f docker-compose.dev.yml up -d          # postgres + etcd
+#   docker compose -f docker-compose.dev.yml --profile tools up -d adminer   # solo cuando haga falta
+#   docker compose -f docker-compose.dev.yml --profile tools stop adminer
+#
+# Seguridad (FASE 6N-3, C3):
+# - Todos los puertos se publican SOLO en 127.0.0.1: nada es alcanzable desde la
+#   LAN. En producción PostgreSQL, etcd y Adminer NO se publican (ver
+#   docs/seguridad-infraestructura.md).
+# - Sin secretos en este archivo. El superusuario de administración se define
+#   con archivos fuera del repositorio (TG_SECRETS_DIR/pg_admin_user y
+#   TG_SECRETS_DIR/pg_admin_password); ningún servicio de la aplicación lo usa.
+# - Los datos viven en el volumen con nombre "pgdata".
+name: tungasuca-dev
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: tg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/pg_admin_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_admin_password
+      POSTGRES_DB: postgres
+    secrets:
+      - pg_admin_user
+      - pg_admin_password
+    ports:
+      - "127.0.0.1:${PG_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.21
+    container_name: tg-etcd
+    restart: unless-stopped
+    command:
+      - etcd
+      - --name=etcd0
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://127.0.0.1:2379
+      - --listen-peer-urls=http://127.0.0.1:2380
+      - --initial-advertise-peer-urls=http://127.0.0.1:2380
+      - --initial-cluster=etcd0=http://127.0.0.1:2380
+      - --initial-cluster-token=etcd-cluster
+      - --initial-cluster-state=new
+    ports:
+      # Solo el puerto de clientes y solo en loopback; el de pares (2380) no se publica.
+      - "127.0.0.1:2379:2379"
+    networks:
+      - backend-internal
+
+  adminer:
+    image: adminer
+    container_name: tg-adminer
+    profiles: ["tools"]
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "127.0.0.1:8081:8080"
+    networks:
+      - backend-internal
+    depends_on:
+      - postgres
+
+secrets:
+  pg_admin_user:
+    file: ${TG_SECRETS_DIR:?definir TG_SECRETS_DIR (carpeta fuera del repositorio)}/pg_admin_user
+  pg_admin_password:
+    file: ${TG_SECRETS_DIR:?definir TG_SECRETS_DIR (carpeta fuera del repositorio)}/pg_admin_password
+
+volumes:
+  pgdata:
+    name: pgdata
+
+networks:
+  backend-internal:
+    name: backend-internal

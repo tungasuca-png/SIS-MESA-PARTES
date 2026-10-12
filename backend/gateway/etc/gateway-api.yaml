@@ -1,5 +1,5 @@
 Name: gateway-api
-Host: 0.0.0.0
+Host: 127.0.0.1
 Port: 8888
 
 AuthRpc:
@@ -16,3 +16,17 @@ DocumentosRpc:
 
 DerivacionesRpc:
   Target: 127.0.0.1:8085
+
+PsicologiaRpc:
+  Target: 127.0.0.1:8086
+
+EstudiantesRpc:
+  Target: 127.0.0.1:8087
+
+# El LogHandler estándar de go-zero, ante un 5xx, vuelca el request completo
+# (cabeceras incluida Authorization y primer KB del cuerpo). Se desactiva y lo
+# reemplaza logsafe.AccessLog (método, ruta, código y duración; nada más).
+# Ver internal/logsafe. El contenido de las llamadas gRPC sensibles se oculta por
+# método en logsafe.ProtectSensitiveRPCLogs (se conservan los errores).
+Middlewares:
+  Log: false

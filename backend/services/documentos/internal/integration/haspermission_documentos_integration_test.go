@@ -34,7 +34,16 @@ import (
 // tiene que coincidir con el que usa el Auth Service real corriendo en
 // 127.0.0.1:8080, porque este test valida el flujo end-to-end real:
 // Documentos -> Auth.HasPermission -> PostgreSQL, no un doble de prueba.
-const realSharedJWTSecret = "41807ca75b3f05df6db6a17da41503e4b4fcb2521f6edf5e7651984e63db6d6c"
+var realSharedJWTSecret = os.Getenv("JWT_SECRET")
+
+// requireRealJWTSecret omite la prueba si JWT_SECRET no está en el entorno
+// (cargarlo desde backend/.env). El secreto real NUNCA se escribe en el código.
+func requireRealJWTSecret(t *testing.T) {
+	t.Helper()
+	if realSharedJWTSecret == "" {
+		t.Skip("JWT_SECRET no definido en el entorno: cargar backend/.env para ejecutar esta prueba")
+	}
+}
 
 // TestHasPermissionIntegration prueba la integración REAL (Paso 14B):
 // Documentos -> Auth.HasPermission (RPC real, contra un Auth Service real
@@ -42,6 +51,7 @@ const realSharedJWTSecret = "41807ca75b3f05df6db6a17da41503e4b4fcb2521f6edf5e765
 // (auth_db), combinada con las reglas de negocio existentes de Documentos
 // (CanUpload/CanDelete/CanViewAll y el filtro SubidoPor), que NO cambian.
 func TestHasPermissionIntegration(t *testing.T) {
+	requireRealJWTSecret(t)
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")
 	}
@@ -49,7 +59,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	documentosPool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	documentosPool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create documentos_db pool: %v", err)
 	}
@@ -58,7 +68,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		t.Fatalf("connect to documentos_db: %v", err)
 	}
 
-	authPool, err := pgxpool.New(ctx, authDatabaseURL())
+	authPool, err := pgxpool.New(ctx, authDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create auth_db pool: %v", err)
 	}
@@ -71,7 +81,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// REALES creados para probar el ownership de "documentos.view_own" —
 	// mismo patrón de cleanup ya usado por los propios tests de Expedientes
 	// (DELETE FROM directo, aunque en producción la baja sea lógica).
-	expedientesPool, err := pgxpool.New(ctx, expedientesDatabaseURL())
+	expedientesPool, err := pgxpool.New(ctx, expedientesDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create expedientes_db pool: %v", err)
 	}
@@ -175,6 +185,58 @@ func TestHasPermissionIntegration(t *testing.T) {
 		return resp.Expediente.Id
 	}
 
+	// createRealExpedienteInterno crea un expediente REAL con el JWT del
+	// PROPIO rol interno del actor (a diferencia de createRealExpediente,
+	// que fuerza el claim "SOLICITANTE" y por lo tanto exige
+	// solicitudes.create). Necesario para los casos "base de prueba"
+	// (subir un documento a un expediente que ya existe) donde el
+	// uploader es interno (SECRETARIA/DIRECTOR/etc.), ya que
+	// CreateExpedienteLogic decide expedientes.create vs solicitudes.create
+	// según IsInternal(role) — mismo criterio que el resto del proyecto
+	// (1 usuario = 1 rol: el JWT real de un usuario real nunca difiere de
+	// su rol real, esto solo evita que la prueba lo simule mal).
+	createRealExpedienteInterno := func(t *testing.T, userID, jwtRole string) string {
+		t.Helper()
+		resp, err := expedientesRealClient.CreateExpediente(authCtx(userID, jwtRole), &expedientesclient.CreateExpedienteRequest{
+			Tipo: "OTRO", Asunto: "Test base de prueba (Documentos)", Prioridad: "NORMAL",
+		})
+		if err != nil {
+			t.Fatalf("no se pudo crear el expediente real base (interno): %v", err)
+		}
+		createdExpedienteIDs = append(createdExpedienteIDs, resp.Expediente.Id)
+		return resp.Expediente.Id
+	}
+
+	// derivarExpedienteReal mueve un expediente real de área (vía
+	// Expedientes.DerivarExpediente, ya probado en Expedientes Service)
+	// usando un actor con CanViewAll (SECRETARIA) para no depender de las
+	// reglas de área en cada paso de preparación. Se declara temprano (no
+	// solo para DeleteDocumento, como antes de esta fase): UploadDocumento
+	// ahora también exige que el actor tenga alcance real sobre el área
+	// actual del expediente, así que cualquier "base de prueba" donde un
+	// interno SIN CanViewAll (p. ej. DIRECTOR) sube un documento necesita
+	// primero que el expediente esté genuinamente en su área.
+	derivarExpedienteReal := func(t *testing.T, secretariaID, expID, areaDestino string) {
+		t.Helper()
+		if _, err := expedientesRealClient.DerivarExpediente(authCtx(secretariaID, "SECRETARIA"), &expedientesclient.DerivarExpedienteRequest{
+			Id: expID, AreaDestino: areaDestino,
+		}); err != nil {
+			t.Fatalf("no se pudo derivar el expediente real a %s: %v", areaDestino, err)
+		}
+	}
+
+	// countDocumentosPorExpediente confirma el "test de no mutación": tras
+	// un Upload rechazado, no debe haber quedado ninguna fila nueva en
+	// documentos_db para ese expediente_id.
+	countDocumentosPorExpediente := func(t *testing.T, expedienteID string) int {
+		t.Helper()
+		var total int
+		if err := documentosPool.QueryRow(ctx, "SELECT COUNT(*) FROM documentos WHERE expediente_id = $1", expedienteID).Scan(&total); err != nil {
+			t.Fatalf("contar documentos de %s: %v", expedienteID, err)
+		}
+		return total
+	}
+
 	svcCtx := &svc.ServiceContext{
 		Config:              config.Config{JWTSecret: realSharedJWTSecret, AuthRpc: zrpc.RpcClientConf{Target: "127.0.0.1:8080"}},
 		DB:                  documentosPool,
@@ -208,10 +270,19 @@ func TestHasPermissionIntegration(t *testing.T) {
 	}
 
 	// Test — Upload: permiso concedido (SECRETARIA tiene documentos.create).
+	// Usa un expediente REAL (antes usaba expedienteID(1), un UUID
+	// sintético sin fila real) porque esta fase agregó a UploadDocumento la
+	// misma delegación a Expedientes.GetExpediente que ya usan
+	// Get/Download/Delete/List — el expediente ahora debe existir de
+	// verdad y estar en el alcance del actor. Se crea con el MISMO rol real
+	// del actor (SECRETARIA), no con el helper createRealExpediente (que
+	// fuerza el claim "SOLICITANTE" y por lo tanto exige solicitudes.create,
+	// que SECRETARIA no tiene).
 	t.Run("Upload_PermisoConcedido", func(t *testing.T) {
 		userID := createRealUser(t, "secretaria", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, userID, "SECRETARIA")
 		resp, err := client.UploadDocumento(authCtx(userID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(1), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("se esperaba éxito para SECRETARIA/documentos.create, got err=%v", err)
@@ -249,8 +320,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// Test — Get: permiso concedido (documentos.view, rol interno).
 	t.Run("Get_PermisoConcedido", func(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria2", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(4), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base: %v", err)
@@ -266,8 +338,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// Test — Get: permiso denegado (usuario sin ningún rol).
 	t.Run("Get_PermisoDenegado_SinRoles", func(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria3", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(5), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base: %v", err)
@@ -333,6 +406,14 @@ func TestHasPermissionIntegration(t *testing.T) {
 		solicitanteID := createRealUser(t, "solicitantee", "SOLICITANTE")
 		exp := createRealExpediente(t, solicitanteID)
 
+		// Deriva primero a DIRECTOR: esta fase agregó a UploadDocumento el
+		// mismo chequeo de área que ya usa GetExpediente, así que DIRECTOR
+		// (interno SIN CanViewAll) solo puede subir un documento a un
+		// expediente que esté genuinamente en su área — antes de esta fase,
+		// la falta de chequeo en Upload dejaba pasar esto igual.
+		secretariaID := createRealUser(t, "secretariapd1", "SECRETARIA")
+		derivarExpedienteReal(t, secretariaID, exp, "DIRECTOR")
+
 		direccionID := createRealUser(t, "direccion1", "DIRECTOR")
 		uploaded, err := client.UploadDocumento(authCtx(direccionID, "DIRECTOR"), &documentos.UploadDocumentoRequest{
 			ExpedienteId: exp, Nombre: "proveido.pdf", TipoDocumento: "PROVEIDO", Extension: "pdf", Contenido: []byte("x"),
@@ -350,25 +431,44 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 	})
 
-	// Test (Paso 19B, Caso 5) — expediente_id inexistente: Documentos no
-	// valida expediente_id contra Expedientes al subir (Paso 19, sección
-	// 9), así que puede existir un documento cuyo expediente_id no
-	// corresponde a ningún expediente real. Para "view_own", eso debe
-	// fallar como NotFound (mismo error que ya usa Expedientes.GetExpediente
-	// para un id inexistente), nunca como acceso permitido.
-	t.Run("Get_ViewOwn_ExpedienteInexistente_NotFound", func(t *testing.T) {
+	// Test (antes "Paso 19B, Caso 5"; reescrito en esta fase) — Upload ahora
+	// SÍ valida expediente_id contra Expedientes (antes de esta fase,
+	// Documentos aceptaba subir a un expediente_id inexistente sin
+	// validarlo — ver hallazgo "UploadDocumento nunca verifica ownership"
+	// de la auditoría de autorización). El caso ya no es "sube y luego
+	// falla al leer": ahora falla directamente al subir, con NotFound.
+	t.Run("Upload_ExpedienteInexistente_NotFound", func(t *testing.T) {
 		solicitanteID := createRealUser(t, "solicitantef", "SOLICITANTE")
-		uploaded, err := client.UploadDocumento(authCtx(solicitanteID, "SOLICITANTE"), &documentos.UploadDocumentoRequest{
+		antes := countDocumentosPorExpediente(t, "00000000-0000-4000-8000-000000000000")
+		_, err := client.UploadDocumento(authCtx(solicitanteID, "SOLICITANTE"), &documentos.UploadDocumentoRequest{
 			ExpedienteId: "00000000-0000-4000-8000-000000000000", Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
-		if err != nil {
-			t.Fatalf("no se pudo crear el documento base (expediente_id inexistente, permitido por diseño de Documentos): %v", err)
-		}
-		trackDoc(uploaded.Documento.Id)
-
-		_, err = client.GetDocumento(authCtx(solicitanteID, "SOLICITANTE"), &documentos.GetDocumentoRequest{Id: uploaded.Documento.Id})
 		if status.Code(err) != codes.NotFound {
 			t.Fatalf("se esperaba NotFound (expediente inexistente), got %v", err)
+		}
+		if despues := countDocumentosPorExpediente(t, "00000000-0000-4000-8000-000000000000"); despues != antes {
+			t.Fatalf("no debía crearse ningún documento: antes=%d despues=%d", antes, despues)
+		}
+	})
+
+	// Test nuevo (fase de autorización de Expedientes/Documentos/
+	// Derivaciones, Test 13 del brief) — expediente REAL pero ajeno: un
+	// SOLICITANTE con documentos.create no puede adjuntar un documento al
+	// expediente de OTRO solicitante con solo conocer su UUID real.
+	t.Run("Upload_ExpedienteAjeno_Denegado", func(t *testing.T) {
+		solicitanteA := createRealUser(t, "solicitanteupa", "SOLICITANTE")
+		expA := createRealExpediente(t, solicitanteA)
+		antes := countDocumentosPorExpediente(t, expA)
+
+		solicitanteB := createRealUser(t, "solicitanteupb", "SOLICITANTE")
+		_, err := client.UploadDocumento(authCtx(solicitanteB, "SOLICITANTE"), &documentos.UploadDocumentoRequest{
+			ExpedienteId: expA, Nombre: "intruso.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+		})
+		if status.Code(err) != codes.PermissionDenied {
+			t.Fatalf("se esperaba PermissionDenied: el expediente es de otro solicitante, got %v", err)
+		}
+		if despues := countDocumentosPorExpediente(t, expA); despues != antes {
+			t.Fatalf("no debía crearse ningún documento: antes=%d despues=%d", antes, despues)
 		}
 	})
 
@@ -427,8 +527,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// Test — Download: permiso concedido / denegado, mismo criterio que Get.
 	t.Run("Download_PermisoConcedido", func(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria4", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(7), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("contenido-real"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("contenido-real"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base: %v", err)
@@ -446,8 +547,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 	t.Run("Download_PermisoDenegado_SinRoles", func(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria5", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(8), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base: %v", err)
@@ -513,6 +615,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 	t.Run("Download_ViewOwn_ProveidoDeDireccion_Permitido", func(t *testing.T) {
 		solicitanteID := createRealUser(t, "solicitantep", "SOLICITANTE")
 		exp := createRealExpediente(t, solicitanteID)
+
+		secretariaID := createRealUser(t, "secretariapd2", "SECRETARIA")
+		derivarExpedienteReal(t, secretariaID, exp, "DIRECTOR")
 
 		direccionID := createRealUser(t, "direccion4", "DIRECTOR")
 		proveido, err := client.UploadDocumento(authCtx(direccionID, "DIRECTOR"), &documentos.UploadDocumentoRequest{
@@ -601,7 +706,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// aunque no los haya subido él.
 	t.Run("List_ViewGlobal", func(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria6", "SECRETARIA")
-		exp := expedienteID(9)
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
 			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
@@ -660,6 +765,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 		trackDoc(propio.Documento.Id)
 
+		secretariaID := createRealUser(t, "secretariapd3", "SECRETARIA")
+		derivarExpedienteReal(t, secretariaID, exp, "DIRECTOR")
+
 		direccionID := createRealUser(t, "direccion2", "DIRECTOR")
 		proveido, err := client.UploadDocumento(authCtx(direccionID, "DIRECTOR"), &documentos.UploadDocumentoRequest{
 			ExpedienteId: exp, Nombre: "proveido.pdf", TipoDocumento: "PROVEIDO", Extension: "pdf", Contenido: []byte("x"),
@@ -694,6 +802,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 			t.Fatalf("no se pudo crear el documento propio: %v", err)
 		}
 		trackDoc(propio.Documento.Id)
+
+		secretariaID := createRealUser(t, "secretariapd4", "SECRETARIA")
+		derivarExpedienteReal(t, secretariaID, exp, "DIRECTOR")
 
 		direccionID := createRealUser(t, "direccion3", "DIRECTOR")
 		proveido, err := client.UploadDocumento(authCtx(direccionID, "DIRECTOR"), &documentos.UploadDocumentoRequest{
@@ -812,20 +923,6 @@ func TestHasPermissionIntegration(t *testing.T) {
 			t.Fatalf("consultar estado de %s: %v", id, err)
 		}
 		return estado == "ACTIVO"
-	}
-
-	// derivarExpedienteReal mueve un expediente real de área (vía
-	// Expedientes.DerivarExpediente, ya probado en Expedientes Service)
-	// usando un actor con CanViewAll (SECRETARIA) para no depender de las
-	// reglas de área en cada paso de preparación — el foco de estos tests
-	// es DeleteDocumento, no el flujo de derivación en sí.
-	derivarExpedienteReal := func(t *testing.T, secretariaID, expID, areaDestino string) {
-		t.Helper()
-		if _, err := expedientesRealClient.DerivarExpediente(authCtx(secretariaID, "SECRETARIA"), &expedientesclient.DerivarExpedienteRequest{
-			Id: expID, AreaDestino: areaDestino,
-		}); err != nil {
-			t.Fatalf("no se pudo derivar el expediente real a %s: %v", areaDestino, err)
-		}
 	}
 
 	// Test (Paso 19E, Caso 1) — permitido: DIRECTOR (rol interno SIN
@@ -989,8 +1086,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// consultar ningún expediente.
 	t.Run("Delete_PermisoDenegado_Solicitante", func(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria8", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(13), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base: %v", err)
@@ -1040,8 +1138,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 		downExpClient := documentos.NewDocumentosClient(downExpConn)
 
 		secretariaID := createRealUser(t, "secretaria9f", "SECRETARIA")
+		exp := createRealExpedienteInterno(t, secretariaID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(secretariaID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(16), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: exp, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base: %v", err)
@@ -1108,8 +1207,9 @@ func TestHasPermissionIntegration(t *testing.T) {
 		// ("documentos.view") ya falla, sin llegar siquiera a
 		// ExpedientesClient (nil en downSvcCtx a propósito, para probar
 		// justamente que nunca se llega tan lejos).
+		expParaAuthDown := createRealExpedienteInterno(t, userID, "SECRETARIA")
 		uploaded, err := client.UploadDocumento(authCtx(userID, "SECRETARIA"), &documentos.UploadDocumentoRequest{
-			ExpedienteId: expedienteID(15), Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
+			ExpedienteId: expParaAuthDown, Nombre: "test.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear el documento base (con Auth arriba): %v", err)
@@ -1160,16 +1260,26 @@ func TestHasPermissionIntegration(t *testing.T) {
 	})
 }
 
-func authDatabaseURL() string {
-	if value := os.Getenv("AUTH_TEST_DATABASE_URL"); value != "" {
-		return value
+func authDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_AUTH_DB_URL")
+	if url == "" {
+		t.Skip("TEST_AUTH_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://auth_user:auth_password@127.0.0.1:5433/auth_db?sslmode=disable"
+	return url
 }
 
-func expedientesDatabaseURL() string {
-	if value := os.Getenv("EXPEDIENTES_TEST_DATABASE_URL"); value != "" {
-		return value
+func expedientesDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_EXPEDIENTES_DB_URL")
+	if url == "" {
+		t.Skip("TEST_EXPEDIENTES_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://expedientes_user:expedientes_password@127.0.0.1:5433/expedientes_db?sslmode=disable"
+	return url
 }

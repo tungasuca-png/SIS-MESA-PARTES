@@ -102,6 +102,27 @@
     padding-left: 22px;
 }
 
+.dp-nav-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Bandejas hijas de "Expedientes": sangradas, sin icono, con guía vertical. */
+.dp-nav-children {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0 0 4px 30px;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dp-nav-group--nested .dp-nav-item--child {
+    padding: 7px 10px;
+    font-size: 12.5px;
+}
+
 .dp-nav-item {
     display: flex;
     align-items: center;
@@ -135,6 +156,8 @@
 }
 
 .dp-nav-item--soon {
+    gap: 8px;
+    padding-right: 8px;
     color: rgba(255, 255, 255, 0.4);
     cursor: default;
 }
@@ -146,13 +169,13 @@
 
 .dp-nav-soon {
     margin-left: auto;
-    font-size: 9.5px;
+    font-size: 8.5px;
     font-weight: 700;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.45);
     background: rgba(255, 255, 255, 0.08);
-    padding: 3px 6px;
+    padding: 2px 5px;
     border-radius: 999px;
     white-space: nowrap;
 }

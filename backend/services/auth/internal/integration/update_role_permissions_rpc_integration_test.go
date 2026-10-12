@@ -43,8 +43,8 @@ import (
 // Todas las mutaciones se hacen exclusivamente sobre el rol SOLICITANTE
 // (el más pequeño: 6 permisos reales) y cada subtest que lo modifica lo
 // restaura a su estado real original antes de terminar (defer), para que
-// al final de la suite los conteos globales (7 roles / 20 permissions / 80
-// role_permissions) y por rol quedn exactamente iguales a los del Paso 21B.
+// al final de la suite los conteos globales (roles, permissions, role_permissions y el conjunto de permisos de CADA rol)
+// queden exactamente iguales a la línea base leída de la BD al empezar.
 func TestUpdateRolePermissionsRPC(t *testing.T) {
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")
@@ -52,7 +52,7 @@ func TestUpdateRolePermissionsRPC(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -172,6 +172,24 @@ func TestUpdateRolePermissionsRPC(t *testing.T) {
 
 	adminID := createUser(t, "admin", "ADMIN")
 	docenteID := createUser(t, "docente", "DOCENTE")
+
+	// Línea base viva (antes de cualquier mutación): conteos globales y el
+	// conjunto de permission_id de CADA rol. Los datos de role_permissions son
+	// editables desde la UI, así que no se fijan en el test.
+	countGlobal := func(t *testing.T, table string) int {
+		t.Helper()
+		var n int
+		if err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM "+table).Scan(&n); err != nil {
+			t.Fatalf("contar %s: %v", table, err)
+		}
+		return n
+	}
+	baseRoles, basePermissions, baseRolePermissions := countGlobal(t, "roles"), countGlobal(t, "permissions"), countGlobal(t, "role_permissions")
+	roleNames := []string{"ADMIN", "DIRECTOR", "SUBDIRECTOR", "SECRETARIA", "DOCENTE", "AUXILIAR", "SOLICITANTE"}
+	baseByRole := map[string][]string{}
+	for _, name := range roleNames {
+		baseByRole[name] = currentPermissionIDs(t, roleIDByName(t, name))
+	}
 	solicitanteRoleID := roleIDByName(t, "SOLICITANTE")
 	solicitanteOriginalIDs := currentPermissionIDs(t, solicitanteRoleID)
 	if len(solicitanteOriginalIDs) != 6 {
@@ -386,29 +404,21 @@ func TestUpdateRolePermissionsRPC(t *testing.T) {
 		// se ejecuta con -run apuntando solo a este subtest en el futuro.
 		restoreSolicitante(t)
 
-		var roles, permissions, rolePermissions int
-		if err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM roles").Scan(&roles); err != nil {
-			t.Fatalf("contar roles: %v", err)
+		if got := countGlobal(t, "roles"); got != baseRoles {
+			t.Fatalf("roles cambió: got %d, base %d", got, baseRoles)
 		}
-		if err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM permissions").Scan(&permissions); err != nil {
-			t.Fatalf("contar permissions: %v", err)
+		if got := countGlobal(t, "permissions"); got != basePermissions {
+			t.Fatalf("permissions cambió: got %d, base %d", got, basePermissions)
 		}
-		if err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM role_permissions").Scan(&rolePermissions); err != nil {
-			t.Fatalf("contar role_permissions: %v", err)
+		if got := countGlobal(t, "role_permissions"); got != baseRolePermissions {
+			t.Fatalf("role_permissions cambió: got %d, base %d", got, baseRolePermissions)
 		}
-		if roles != 7 {
-			t.Fatalf("roles cambió: got %d, se esperaban 7", roles)
-		}
-		if permissions != 20 {
-			t.Fatalf("permissions cambió: got %d, se esperaban 20", permissions)
-		}
-		if rolePermissions != 80 {
-			t.Fatalf("role_permissions cambió: got %d, se esperaban 80", rolePermissions)
-		}
-		for roleName, expectedCount := range catalogoRolPermisos {
-			got := currentPermissionIDs(t, roleIDByName(t, roleName))
-			if len(got) != expectedCount {
-				t.Fatalf("%s: se esperaban %d permisos tras restaurar, got %d", roleName, expectedCount, len(got))
+		// Ningún rol (incluido SOLICITANTE, el único mutado) debe quedar con
+		// un conjunto distinto al de la línea base.
+		for _, name := range roleNames {
+			got := currentPermissionIDs(t, roleIDByName(t, name))
+			if strings.Join(got, ",") != strings.Join(baseByRole[name], ",") {
+				t.Fatalf("%s: su conjunto de permisos cambió respecto de la línea base (base=%d, got=%d)", name, len(baseByRole[name]), len(got))
 			}
 		}
 	})

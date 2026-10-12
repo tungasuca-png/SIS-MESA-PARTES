@@ -40,7 +40,7 @@ func TestHasPermissionRPC(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -216,18 +216,16 @@ func TestHasPermissionRPC(t *testing.T) {
 		}
 	})
 
-	// Test 6 — usuario con múltiples roles (DOCENTE + AUXILIAR): si
-	// cualquiera de los dos tiene expedientes.view, debe ser true. Prueba
-	// que el RPC reutiliza el soporte multi-rol ya existente en
-	// AuthorizationService (no depende del único rol que llevaría un JWT).
+	// Test 6 — 1 usuario = 1 rol garantizado por la BD (migración 007): el
+	// segundo rol se rechaza y HasPermission solo ve los permisos del único rol.
 	t.Run("MultiRol", func(t *testing.T) {
-		userID := createUser(t, "multirol", "DOCENTE", "AUXILIAR")
-		resp, err := client.HasPermission(authCtx(userID), &auth.HasPermissionRequest{UserId: userID, Permission: "expedientes.view"})
-		if err != nil {
-			t.Fatalf("HasPermission devolvió error inesperado: %v", err)
+		userID := createUser(t, "multirol", "DOCENTE")
+		if _, err := pool.Exec(ctx, "INSERT INTO usuario_roles (usuario_id, rol_id) VALUES ($1, $2)", userID, roleID(t, "AUXILIAR")); err == nil {
+			t.Fatal("la BD debía rechazar un segundo rol para el mismo usuario")
 		}
-		if !resp.Allowed {
-			t.Fatalf("se esperaba allowed=true para un usuario DOCENTE+AUXILIAR consultando expedientes.view")
+		resp, err := client.HasPermission(authCtx(userID), &auth.HasPermissionRequest{UserId: userID, Permission: "expedientes.view"})
+		if err != nil || !resp.Allowed {
+			t.Fatalf("se esperaba allowed=true (DOCENTE tiene expedientes.view), err=%v", err)
 		}
 	})
 

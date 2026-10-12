@@ -24,26 +24,6 @@ func TestCanViewFullProfile_SolicitanteSoloElPropio(t *testing.T) {
 	}
 }
 
-func TestCanListOrSearch_SoloAdmin(t *testing.T) {
-	if !CanListOrSearch("ADMIN") {
-		t.Error("admin should list/search users")
-	}
-	for _, role := range []string{"DIRECTOR", "SECRETARIA", "DOCENTE", "SOLICITANTE"} {
-		if CanListOrSearch(role) {
-			t.Errorf("expected %s not to list/search users", role)
-		}
-	}
-}
-
-func TestCanUpsert_SoloAdmin(t *testing.T) {
-	if !CanUpsert("ADMIN") {
-		t.Error("admin should manage profiles")
-	}
-	if CanUpsert("SECRETARIA") || CanUpsert("SOLICITANTE") {
-		t.Error("non-admin roles should not manage profiles")
-	}
-}
-
 func TestCanViewBasic_CualquierAutenticado(t *testing.T) {
 	if !CanViewBasic() {
 		t.Error("any authenticated user should resolve basic user data")

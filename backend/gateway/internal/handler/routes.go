@@ -25,6 +25,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: LogoutHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodGet,
+				Path:    "/api/auth/me/permissions",
+				Handler: GetMyPermissionsHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/api/auth/refresh",
 				Handler: RefreshTokenHandler(serverCtx),
@@ -50,6 +55,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ListUsuariosHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/api/usuarios",
+				Handler: CreateUsuarioHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/api/usuarios/:id",
 				Handler: GetUsuarioHandler(serverCtx),
@@ -58,6 +68,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/api/usuarios/:id/basic",
 				Handler: GetUsuarioBasicHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/usuarios/:id/rol",
+				Handler: UpdateUserRoleHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
@@ -218,6 +233,181 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPut,
 				Path:    "/api/roles/:id/permissions",
 				Handler: UpdateRolePermissionsHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/estudiantes/:id/expediente",
+				Handler: GetPsicologiaExpedienteByEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/psicologia/estudiantes/:id/expediente",
+				Handler: OpenPsicologiaExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/expedientes",
+				Handler: ListPsicologiaExpedientesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/expedientes/:id",
+				Handler: GetPsicologiaExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/expedientes/:id",
+				Handler: UpdatePsicologiaExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/expedientes/:id/cerrar",
+				Handler: ClosePsicologiaExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/expedientes/:id/reabrir",
+				Handler: ReopenPsicologiaExpedienteHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/atenciones/:id",
+				Handler: GetPsicologiaAtencionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/atenciones/:id/anular",
+				Handler: AnnulPsicologiaAtencionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/atenciones/:id/borrador",
+				Handler: UpdatePsicologiaAtencionDraftHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/atenciones/:id/descartar",
+				Handler: DiscardPsicologiaAtencionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/atenciones/:id/pdf",
+				Handler: ExportPsicologiaAtencionPdfHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPut,
+				Path:    "/api/psicologia/atenciones/:id/registrar",
+				Handler: RegisterPsicologiaAtencionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/psicologia/atenciones/:id/versiones",
+				Handler: CorrectPsicologiaAtencionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/atenciones/:id/versiones",
+				Handler: ListPsicologiaAtencionVersionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/atenciones/:id/versiones/:version",
+				Handler: GetPsicologiaAtencionVersionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/psicologia/expedientes/:id/atenciones",
+				Handler: ListPsicologiaAtencionesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/psicologia/expedientes/:id/atenciones",
+				Handler: CreatePsicologiaAtencionHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes",
+				Handler: SearchEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes",
+				Handler: CreateEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/:id",
+				Handler: GetEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/:id",
+				Handler: UpdateEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/:id/estado",
+				Handler: ChangeEstadoEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/:id/familiares",
+				Handler: ListFamiliaresEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/:id/familiares",
+				Handler: VincularFamiliarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/:id/familiares/:relacion_id/desvincular",
+				Handler: DesvincularFamiliarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/:id/matriculas",
+				Handler: ListMatriculasEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/:id/personal",
+				Handler: GetEstudiantePersonalHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/:id/personal",
+				Handler: UpdateEstudiantePersonalHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/basic-batch",
+				Handler: GetEstudiantesBasicHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/duplicados",
+				Handler: ListPosiblesDuplicadosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/resolver",
+				Handler: ResolveEstudianteHandler(serverCtx),
 			},
 		},
 	)

@@ -10,8 +10,11 @@ import (
 	"documentos/internal/svc"
 	"documentos/internal/validation"
 
+	"expedientes/expedientesclient"
+
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -61,6 +64,26 @@ func (l *UploadDocumentoLogic) UploadDocumento(in *documentos.UploadDocumentoReq
 	}
 	if !authorization.CanUpload(role, tipoDocumento) {
 		return nil, status.Error(codes.PermissionDenied, "el rol no puede subir este tipo de documento")
+	}
+
+	// Alcance real sobre el expediente (antes ausente): "documentos.create"
+	// no bastaba por sí solo — sin esto, cualquier autenticado con ese
+	// permiso podía adjuntar un documento a un expediente_id ajeno con solo
+	// conocer/adivinar el UUID (no hay FK entre documentos y expedientes,
+	// ver migración 001). Mismo patrón de delegación ya usado en
+	// GetDocumento/DownloadDocumento/DeleteDocumento/ListDocumentos: se
+	// reenvía el MISMO JWT a Expedientes.GetExpediente, que ya aplica su
+	// propia regla de ownership (SOLICITANTE) o área (interno) — si el
+	// expediente no existe o no está en el alcance del actor, el error se
+	// propaga tal cual (fail-closed), sin duplicar esa comparación acá.
+	outCtx := l.ctx
+	if token, tokenOk := interceptor.TokenFromContext(l.ctx); tokenOk {
+		outCtx = metadata.AppendToOutgoingContext(l.ctx, "authorization", "Bearer "+token)
+	}
+	if _, err := l.svcCtx.ExpedientesClient.GetExpediente(outCtx, &expedientesclient.GetExpedienteRequest{
+		Id: expedienteID,
+	}); err != nil {
+		return nil, err
 	}
 
 	extension := strings.ToLower(strings.TrimSpace(in.Extension))

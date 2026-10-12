@@ -992,6 +992,107 @@ func (x *UpdateMyProfileResponse) GetUsuario() *Usuario {
 	return nil
 }
 
+// UpdateUsuarioRole sincroniza ÚNICAMENTE tipo_usuario tras un cambio de rol
+// YA confirmado por Auth Service (fuente de verdad real de "rol"). No es un
+// Upsert: no crea perfiles nuevos ni toca nombres/apellidos/dni/telefono/
+// correo/direccion — si el usuario no tiene perfil registrado en Usuarios
+// Service, no hay nada que sincronizar (NotFound).
+type UpdateUsuarioRoleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TipoUsuario   string                 `protobuf:"bytes,2,opt,name=tipo_usuario,json=tipoUsuario,proto3" json:"tipo_usuario,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateUsuarioRoleRequest) Reset() {
+	*x = UpdateUsuarioRoleRequest{}
+	mi := &file_usuarios_service_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateUsuarioRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUsuarioRoleRequest) ProtoMessage() {}
+
+func (x *UpdateUsuarioRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUsuarioRoleRequest.ProtoReflect.Descriptor instead.
+func (*UpdateUsuarioRoleRequest) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *UpdateUsuarioRoleRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateUsuarioRoleRequest) GetTipoUsuario() string {
+	if x != nil {
+		return x.TipoUsuario
+	}
+	return ""
+}
+
+type UpdateUsuarioRoleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Usuario       *Usuario               `protobuf:"bytes,1,opt,name=usuario,proto3" json:"usuario,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateUsuarioRoleResponse) Reset() {
+	*x = UpdateUsuarioRoleResponse{}
+	mi := &file_usuarios_service_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateUsuarioRoleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUsuarioRoleResponse) ProtoMessage() {}
+
+func (x *UpdateUsuarioRoleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUsuarioRoleResponse.ProtoReflect.Descriptor instead.
+func (*UpdateUsuarioRoleResponse) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpdateUsuarioRoleResponse) GetUsuario() *Usuario {
+	if x != nil {
+		return x.Usuario
+	}
+	return nil
+}
+
 var File_usuarios_service_proto protoreflect.FileDescriptor
 
 const file_usuarios_service_proto_rawDesc = "" +
@@ -1062,7 +1163,12 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\x06correo\x18\x02 \x01(\tR\x06correo\x12\x1c\n" +
 	"\tdireccion\x18\x03 \x01(\tR\tdireccion\"F\n" +
 	"\x17UpdateMyProfileResponse\x12+\n" +
-	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario2\xd4\x04\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario\"M\n" +
+	"\x18UpdateUsuarioRoleRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\ftipo_usuario\x18\x02 \x01(\tR\vtipoUsuario\"H\n" +
+	"\x19UpdateUsuarioRoleResponse\x12+\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario2\xb2\x05\n" +
 	"\bUsuarios\x12G\n" +
 	"\n" +
 	"GetUsuario\x12\x1b.usuarios.GetUsuarioRequest\x1a\x1c.usuarios.GetUsuarioResponse\x12V\n" +
@@ -1071,7 +1177,8 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\fListUsuarios\x12\x1d.usuarios.ListUsuariosRequest\x1a\x1e.usuarios.ListUsuariosResponse\x12S\n" +
 	"\x0eSearchUsuarios\x12\x1f.usuarios.SearchUsuariosRequest\x1a .usuarios.SearchUsuariosResponse\x12P\n" +
 	"\rUpsertUsuario\x12\x1e.usuarios.UpsertUsuarioRequest\x1a\x1f.usuarios.UpsertUsuarioResponse\x12V\n" +
-	"\x0fUpdateMyProfile\x12 .usuarios.UpdateMyProfileRequest\x1a!.usuarios.UpdateMyProfileResponseB\fZ\n" +
+	"\x0fUpdateMyProfile\x12 .usuarios.UpdateMyProfileRequest\x1a!.usuarios.UpdateMyProfileResponse\x12\\\n" +
+	"\x11UpdateUsuarioRole\x12\".usuarios.UpdateUsuarioRoleRequest\x1a#.usuarios.UpdateUsuarioRoleResponseB\fZ\n" +
 	"./usuariosb\x06proto3"
 
 var (
@@ -1086,24 +1193,26 @@ func file_usuarios_service_proto_rawDescGZIP() []byte {
 	return file_usuarios_service_proto_rawDescData
 }
 
-var file_usuarios_service_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_usuarios_service_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_usuarios_service_proto_goTypes = []any{
-	(*Usuario)(nil),                  // 0: usuarios.Usuario
-	(*UsuarioBasic)(nil),             // 1: usuarios.UsuarioBasic
-	(*GetUsuarioRequest)(nil),        // 2: usuarios.GetUsuarioRequest
-	(*GetUsuarioResponse)(nil),       // 3: usuarios.GetUsuarioResponse
-	(*GetUsuarioBasicRequest)(nil),   // 4: usuarios.GetUsuarioBasicRequest
-	(*GetUsuarioBasicResponse)(nil),  // 5: usuarios.GetUsuarioBasicResponse
-	(*GetUsuariosBasicRequest)(nil),  // 6: usuarios.GetUsuariosBasicRequest
-	(*GetUsuariosBasicResponse)(nil), // 7: usuarios.GetUsuariosBasicResponse
-	(*ListUsuariosRequest)(nil),      // 8: usuarios.ListUsuariosRequest
-	(*ListUsuariosResponse)(nil),     // 9: usuarios.ListUsuariosResponse
-	(*SearchUsuariosRequest)(nil),    // 10: usuarios.SearchUsuariosRequest
-	(*SearchUsuariosResponse)(nil),   // 11: usuarios.SearchUsuariosResponse
-	(*UpsertUsuarioRequest)(nil),     // 12: usuarios.UpsertUsuarioRequest
-	(*UpsertUsuarioResponse)(nil),    // 13: usuarios.UpsertUsuarioResponse
-	(*UpdateMyProfileRequest)(nil),   // 14: usuarios.UpdateMyProfileRequest
-	(*UpdateMyProfileResponse)(nil),  // 15: usuarios.UpdateMyProfileResponse
+	(*Usuario)(nil),                   // 0: usuarios.Usuario
+	(*UsuarioBasic)(nil),              // 1: usuarios.UsuarioBasic
+	(*GetUsuarioRequest)(nil),         // 2: usuarios.GetUsuarioRequest
+	(*GetUsuarioResponse)(nil),        // 3: usuarios.GetUsuarioResponse
+	(*GetUsuarioBasicRequest)(nil),    // 4: usuarios.GetUsuarioBasicRequest
+	(*GetUsuarioBasicResponse)(nil),   // 5: usuarios.GetUsuarioBasicResponse
+	(*GetUsuariosBasicRequest)(nil),   // 6: usuarios.GetUsuariosBasicRequest
+	(*GetUsuariosBasicResponse)(nil),  // 7: usuarios.GetUsuariosBasicResponse
+	(*ListUsuariosRequest)(nil),       // 8: usuarios.ListUsuariosRequest
+	(*ListUsuariosResponse)(nil),      // 9: usuarios.ListUsuariosResponse
+	(*SearchUsuariosRequest)(nil),     // 10: usuarios.SearchUsuariosRequest
+	(*SearchUsuariosResponse)(nil),    // 11: usuarios.SearchUsuariosResponse
+	(*UpsertUsuarioRequest)(nil),      // 12: usuarios.UpsertUsuarioRequest
+	(*UpsertUsuarioResponse)(nil),     // 13: usuarios.UpsertUsuarioResponse
+	(*UpdateMyProfileRequest)(nil),    // 14: usuarios.UpdateMyProfileRequest
+	(*UpdateMyProfileResponse)(nil),   // 15: usuarios.UpdateMyProfileResponse
+	(*UpdateUsuarioRoleRequest)(nil),  // 16: usuarios.UpdateUsuarioRoleRequest
+	(*UpdateUsuarioRoleResponse)(nil), // 17: usuarios.UpdateUsuarioRoleResponse
 }
 var file_usuarios_service_proto_depIdxs = []int32{
 	0,  // 0: usuarios.GetUsuarioResponse.usuario:type_name -> usuarios.Usuario
@@ -1113,25 +1222,28 @@ var file_usuarios_service_proto_depIdxs = []int32{
 	0,  // 4: usuarios.SearchUsuariosResponse.usuarios:type_name -> usuarios.Usuario
 	0,  // 5: usuarios.UpsertUsuarioResponse.usuario:type_name -> usuarios.Usuario
 	0,  // 6: usuarios.UpdateMyProfileResponse.usuario:type_name -> usuarios.Usuario
-	2,  // 7: usuarios.Usuarios.GetUsuario:input_type -> usuarios.GetUsuarioRequest
-	4,  // 8: usuarios.Usuarios.GetUsuarioBasic:input_type -> usuarios.GetUsuarioBasicRequest
-	6,  // 9: usuarios.Usuarios.GetUsuariosBasic:input_type -> usuarios.GetUsuariosBasicRequest
-	8,  // 10: usuarios.Usuarios.ListUsuarios:input_type -> usuarios.ListUsuariosRequest
-	10, // 11: usuarios.Usuarios.SearchUsuarios:input_type -> usuarios.SearchUsuariosRequest
-	12, // 12: usuarios.Usuarios.UpsertUsuario:input_type -> usuarios.UpsertUsuarioRequest
-	14, // 13: usuarios.Usuarios.UpdateMyProfile:input_type -> usuarios.UpdateMyProfileRequest
-	3,  // 14: usuarios.Usuarios.GetUsuario:output_type -> usuarios.GetUsuarioResponse
-	5,  // 15: usuarios.Usuarios.GetUsuarioBasic:output_type -> usuarios.GetUsuarioBasicResponse
-	7,  // 16: usuarios.Usuarios.GetUsuariosBasic:output_type -> usuarios.GetUsuariosBasicResponse
-	9,  // 17: usuarios.Usuarios.ListUsuarios:output_type -> usuarios.ListUsuariosResponse
-	11, // 18: usuarios.Usuarios.SearchUsuarios:output_type -> usuarios.SearchUsuariosResponse
-	13, // 19: usuarios.Usuarios.UpsertUsuario:output_type -> usuarios.UpsertUsuarioResponse
-	15, // 20: usuarios.Usuarios.UpdateMyProfile:output_type -> usuarios.UpdateMyProfileResponse
-	14, // [14:21] is the sub-list for method output_type
-	7,  // [7:14] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	0,  // 7: usuarios.UpdateUsuarioRoleResponse.usuario:type_name -> usuarios.Usuario
+	2,  // 8: usuarios.Usuarios.GetUsuario:input_type -> usuarios.GetUsuarioRequest
+	4,  // 9: usuarios.Usuarios.GetUsuarioBasic:input_type -> usuarios.GetUsuarioBasicRequest
+	6,  // 10: usuarios.Usuarios.GetUsuariosBasic:input_type -> usuarios.GetUsuariosBasicRequest
+	8,  // 11: usuarios.Usuarios.ListUsuarios:input_type -> usuarios.ListUsuariosRequest
+	10, // 12: usuarios.Usuarios.SearchUsuarios:input_type -> usuarios.SearchUsuariosRequest
+	12, // 13: usuarios.Usuarios.UpsertUsuario:input_type -> usuarios.UpsertUsuarioRequest
+	14, // 14: usuarios.Usuarios.UpdateMyProfile:input_type -> usuarios.UpdateMyProfileRequest
+	16, // 15: usuarios.Usuarios.UpdateUsuarioRole:input_type -> usuarios.UpdateUsuarioRoleRequest
+	3,  // 16: usuarios.Usuarios.GetUsuario:output_type -> usuarios.GetUsuarioResponse
+	5,  // 17: usuarios.Usuarios.GetUsuarioBasic:output_type -> usuarios.GetUsuarioBasicResponse
+	7,  // 18: usuarios.Usuarios.GetUsuariosBasic:output_type -> usuarios.GetUsuariosBasicResponse
+	9,  // 19: usuarios.Usuarios.ListUsuarios:output_type -> usuarios.ListUsuariosResponse
+	11, // 20: usuarios.Usuarios.SearchUsuarios:output_type -> usuarios.SearchUsuariosResponse
+	13, // 21: usuarios.Usuarios.UpsertUsuario:output_type -> usuarios.UpsertUsuarioResponse
+	15, // 22: usuarios.Usuarios.UpdateMyProfile:output_type -> usuarios.UpdateMyProfileResponse
+	17, // 23: usuarios.Usuarios.UpdateUsuarioRole:output_type -> usuarios.UpdateUsuarioRoleResponse
+	16, // [16:24] is the sub-list for method output_type
+	8,  // [8:16] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_usuarios_service_proto_init() }
@@ -1145,7 +1257,7 @@ func file_usuarios_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_usuarios_service_proto_rawDesc), len(file_usuarios_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

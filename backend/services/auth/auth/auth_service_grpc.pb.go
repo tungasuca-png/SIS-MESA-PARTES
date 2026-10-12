@@ -26,10 +26,13 @@ const (
 	Auth_Logout_FullMethodName                = "/auth.Auth/Logout"
 	Auth_ValidateToken_FullMethodName         = "/auth.Auth/ValidateToken"
 	Auth_HasPermission_FullMethodName         = "/auth.Auth/HasPermission"
+	Auth_GetMyPermissions_FullMethodName      = "/auth.Auth/GetMyPermissions"
 	Auth_ListRoles_FullMethodName             = "/auth.Auth/ListRoles"
 	Auth_ListPermissions_FullMethodName       = "/auth.Auth/ListPermissions"
 	Auth_GetRolePermissions_FullMethodName    = "/auth.Auth/GetRolePermissions"
 	Auth_UpdateRolePermissions_FullMethodName = "/auth.Auth/UpdateRolePermissions"
+	Auth_UpdateUserRole_FullMethodName        = "/auth.Auth/UpdateUserRole"
+	Auth_CreateUser_FullMethodName            = "/auth.Auth/CreateUser"
 )
 
 // AuthClient is the client API for Auth service.
@@ -43,10 +46,13 @@ type AuthClient interface {
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error)
 	HasPermission(ctx context.Context, in *HasPermissionRequest, opts ...grpc.CallOption) (*HasPermissionResponse, error)
+	GetMyPermissions(ctx context.Context, in *GetMyPermissionsRequest, opts ...grpc.CallOption) (*GetMyPermissionsResponse, error)
 	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
 	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
 	GetRolePermissions(ctx context.Context, in *GetRolePermissionsRequest, opts ...grpc.CallOption) (*GetRolePermissionsResponse, error)
 	UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
+	UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error)
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 }
 
 type authClient struct {
@@ -127,6 +133,16 @@ func (c *authClient) HasPermission(ctx context.Context, in *HasPermissionRequest
 	return out, nil
 }
 
+func (c *authClient) GetMyPermissions(ctx context.Context, in *GetMyPermissionsRequest, opts ...grpc.CallOption) (*GetMyPermissionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMyPermissionsResponse)
+	err := c.cc.Invoke(ctx, Auth_GetMyPermissions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authClient) ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListRolesResponse)
@@ -167,6 +183,26 @@ func (c *authClient) UpdateRolePermissions(ctx context.Context, in *UpdateRolePe
 	return out, nil
 }
 
+func (c *authClient) UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserRoleResponse)
+	err := c.cc.Invoke(ctx, Auth_UpdateUserRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateUserResponse)
+	err := c.cc.Invoke(ctx, Auth_CreateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility.
@@ -178,10 +214,13 @@ type AuthServer interface {
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	ValidateToken(context.Context, *ValidateTokenRequest) (*ValidateTokenResponse, error)
 	HasPermission(context.Context, *HasPermissionRequest) (*HasPermissionResponse, error)
+	GetMyPermissions(context.Context, *GetMyPermissionsRequest) (*GetMyPermissionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
 	GetRolePermissions(context.Context, *GetRolePermissionsRequest) (*GetRolePermissionsResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
+	UpdateUserRole(context.Context, *UpdateUserRoleRequest) (*UpdateUserRoleResponse, error)
+	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -213,6 +252,9 @@ func (UnimplementedAuthServer) ValidateToken(context.Context, *ValidateTokenRequ
 func (UnimplementedAuthServer) HasPermission(context.Context, *HasPermissionRequest) (*HasPermissionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method HasPermission not implemented")
 }
+func (UnimplementedAuthServer) GetMyPermissions(context.Context, *GetMyPermissionsRequest) (*GetMyPermissionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyPermissions not implemented")
+}
 func (UnimplementedAuthServer) ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListRoles not implemented")
 }
@@ -224,6 +266,12 @@ func (UnimplementedAuthServer) GetRolePermissions(context.Context, *GetRolePermi
 }
 func (UnimplementedAuthServer) UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateRolePermissions not implemented")
+}
+func (UnimplementedAuthServer) UpdateUserRole(context.Context, *UpdateUserRoleRequest) (*UpdateUserRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUserRole not implemented")
+}
+func (UnimplementedAuthServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -372,6 +420,24 @@ func _Auth_HasPermission_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_GetMyPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyPermissionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GetMyPermissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GetMyPermissions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GetMyPermissions(ctx, req.(*GetMyPermissionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Auth_ListRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRolesRequest)
 	if err := dec(in); err != nil {
@@ -444,6 +510,42 @@ func _Auth_UpdateRolePermissions_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_UpdateUserRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).UpdateUserRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_UpdateUserRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).UpdateUserRole(ctx, req.(*UpdateUserRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_CreateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).CreateUser(ctx, req.(*CreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -480,6 +582,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Auth_HasPermission_Handler,
 		},
 		{
+			MethodName: "GetMyPermissions",
+			Handler:    _Auth_GetMyPermissions_Handler,
+		},
+		{
 			MethodName: "ListRoles",
 			Handler:    _Auth_ListRoles_Handler,
 		},
@@ -494,6 +600,14 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateRolePermissions",
 			Handler:    _Auth_UpdateRolePermissions_Handler,
+		},
+		{
+			MethodName: "UpdateUserRole",
+			Handler:    _Auth_UpdateUserRole_Handler,
+		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _Auth_CreateUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

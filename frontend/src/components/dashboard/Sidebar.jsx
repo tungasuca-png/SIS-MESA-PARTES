@@ -13,7 +13,11 @@ import "./Sidebar.css";
 function isItemActive(item, location) {
     const [itemPath, itemSearch] = item.path.split("?");
     if (location.pathname !== itemPath) return false;
-    if (!itemSearch) return true;
+    if (!itemSearch) {
+        // "Expedientes" (sin filtro) no se resalta cuando está activa una de
+        // sus bandejas hijas (misma ruta, distinto "?estado=").
+        return !(item.children ?? []).some((child) => isItemActive(child, location));
+    }
     return new URLSearchParams(location.search).toString() === new URLSearchParams(itemSearch).toString();
 }
 
@@ -62,8 +66,39 @@ function Sidebar({ open, onClose }) {
 
     const groups = NAV_GROUPS.map((group) => ({
         ...group,
-        items: group.items.filter((item) => can(item.permission)),
+        items: group.items
+            .filter((item) => can(item.permission))
+            .map((item) => ({
+                ...item,
+                children: item.children?.filter((child) => can(child.permission)),
+            })),
     })).filter((group) => group.items.length > 0);
+
+    const renderItem = (item, isChild = false) => {
+        const childClass = isChild ? " dp-nav-item--child" : "";
+        return item.path ? (
+            <Link
+                key={item.key}
+                to={item.path}
+                className={`dp-nav-item${childClass} ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
+                onClick={onClose}
+            >
+                {!isChild && <Icon name={item.icon} size={18} />}
+                <span>{item.label}</span>
+            </Link>
+        ) : (
+            <button
+                key={item.key}
+                type="button"
+                className={`dp-nav-item dp-nav-item--soon${childClass}`}
+                aria-disabled="true"
+            >
+                {!isChild && <Icon name={item.icon} size={18} />}
+                <span>{item.label}</span>
+                <span className="dp-nav-soon">Próximamente</span>
+            </button>
+        );
+    };
 
     return (
         <aside className={`dp-sidebar ${open ? "dp-sidebar--open" : ""}`}>
@@ -83,7 +118,7 @@ function Sidebar({ open, onClose }) {
                     const isOpen = !group.label || !closedGroups.has(group.label);
                     return (
                         <div
-                            key={group.label ?? "top"}
+                            key={group.id}
                             className={`dp-nav-group ${group.label ? "dp-nav-group--nested" : ""}`}
                         >
                             {group.label && (
@@ -102,30 +137,16 @@ function Sidebar({ open, onClose }) {
                                 </button>
                             )}
                             {isOpen &&
-                                group.items.map((item) =>
-                                    item.path ? (
-                                        <Link
-                                            key={item.key}
-                                            to={item.path}
-                                            className={`dp-nav-item ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
-                                            onClick={onClose}
-                                        >
-                                            <Icon name={item.icon} size={18} />
-                                            <span>{item.label}</span>
-                                        </Link>
-                                    ) : (
-                                        <button
-                                            key={item.key}
-                                            type="button"
-                                            className="dp-nav-item dp-nav-item--soon"
-                                            aria-disabled="true"
-                                        >
-                                            <Icon name={item.icon} size={18} />
-                                            <span>{item.label}</span>
-                                            <span className="dp-nav-soon">Próximamente</span>
-                                        </button>
-                                    )
-                                )}
+                                group.items.map((item) => (
+                                    <div key={item.key} className="dp-nav-entry">
+                                        {renderItem(item)}
+                                        {item.children?.length > 0 && (
+                                            <div className="dp-nav-children">
+                                                {item.children.map((child) => renderItem(child, true))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                         </div>
                     );
                 })}

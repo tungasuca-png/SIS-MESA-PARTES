@@ -17,7 +17,7 @@ Postgres:
   Host: 127.0.0.1
   Port: 5433
   User: derivaciones_user
-  Password: derivaciones_password
+  Password: ${DERIVACIONES_DB_PASSWORD}
   Database: derivaciones_db
   SSLMode: disable
 
@@ -33,3 +33,7 @@ Middlewares:
   StatConf:
     IgnoreContentMethods:
       - /derivaciones.Derivaciones/CrearDerivacion
+      - /derivaciones.Derivaciones/GetDerivacion
+      - /derivaciones.Derivaciones/ListDerivaciones
+
+

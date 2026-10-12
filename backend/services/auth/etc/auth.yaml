@@ -1,5 +1,5 @@
 Name: auth.rpc
-ListenOn: 0.0.0.0:8080
+ListenOn: 127.0.0.1:8080
 Mode: dev
 
 Etcd:
@@ -10,8 +10,8 @@ Etcd:
 Postgres:
   Host: 127.0.0.1
   Port: 5433
-  User: auth_user
-  Password: auth_password
+  User: auth_app
+  Password: ${AUTH_DB_PASSWORD}
   Database: auth_db
   SSLMode: disable
 
@@ -25,3 +25,6 @@ Middlewares:
       - /auth.Auth/Register
       - /auth.Auth/Login
       - /auth.Auth/RefreshToken
+      - /auth.Auth/CreateUser
+      - /auth.Auth/Logout
+      - /auth.Auth/ValidateToken

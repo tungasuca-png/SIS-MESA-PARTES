@@ -8,7 +8,7 @@ function Login() {
     const navigate = useNavigate();
     const { login: loginUser } = useAuth();
 
-    const [username, setUsername] = useState("");
+    const [dni, setDni] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -17,22 +17,33 @@ function Login() {
         e.preventDefault();
         setError("");
 
-        if (!username.trim() || !password.trim()) {
-            setError("Ingresa tu usuario y contraseña");
+        const dniLimpio = dni.trim();
+        if (!dniLimpio || !password) {
+            setError("Ingresa tu DNI y tu clave");
+            return;
+        }
+        if (!/^[0-9]{8}$/.test(dniLimpio)) {
+            setError("El DNI debe tener 8 dígitos numéricos");
             return;
         }
 
         setLoading(true);
 
         try {
-            const loggedInUser = await loginUser(username, password);
+            const loggedInUser = await loginUser(dniLimpio, password);
             // El SOLICITANTE entra a su propio portal (Mesa de Partes
             // Virtual, sin sidebar administrativo); el resto de roles sigue
             // entrando al Dashboard de siempre.
             navigate(loggedInUser.role === "SOLICITANTE" ? "/mesa-de-partes" : "/dashboard");
         } catch (err) {
-            console.error(err);
-            setError("Usuario o contraseña incorrectos");
+            // Mensaje genérico: no revela si el DNI existe.
+            if (!err?.response) {
+                setError("No se pudo conectar con el servidor. Inténtalo nuevamente.");
+            } else if (err.response.status === 400) {
+                setError("El DNI debe tener 8 dígitos numéricos");
+            } else {
+                setError("DNI o clave incorrectos");
+            }
         } finally {
             setLoading(false);
         }
@@ -115,11 +126,11 @@ function Login() {
 
                         <form onSubmit={handleSubmit}>
 
-                            {/* USUARIO */}
+                            {/* DNI */}
                             <div className="form-group">
 
-                                <label htmlFor="username">
-                                    Usuario
+                                <label htmlFor="dni">
+                                    DNI
                                 </label>
 
                                 <div className="input-box">
@@ -129,13 +140,15 @@ function Login() {
                                     </span>
 
                                     <input
-                                        id="username"
+                                        id="dni"
                                         type="text"
-                                        value={username}
+                                        inputMode="numeric"
+                                        maxLength={8}
+                                        value={dni}
                                         onChange={(e) =>
-                                            setUsername(e.target.value)
+                                            setDni(e.target.value.replace(/[^0-9]/g, ""))
                                         }
-                                        placeholder="Ingrese su usuario"
+                                        placeholder="Ingrese su DNI"
                                         autoComplete="username"
                                         disabled={loading}
                                     />
@@ -149,7 +162,7 @@ function Login() {
                             <div className="form-group">
 
                                 <label htmlFor="password">
-                                    Contraseña
+                                    Clave
                                 </label>
 
                                 <div className="input-box">
@@ -165,7 +178,7 @@ function Login() {
                                         onChange={(e) =>
                                             setPassword(e.target.value)
                                         }
-                                        placeholder="Ingrese su contraseña"
+                                        placeholder="Ingrese su clave"
                                         autoComplete="current-password"
                                         disabled={loading}
                                     />

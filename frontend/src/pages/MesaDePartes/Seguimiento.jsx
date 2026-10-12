@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import PortalLayout from "../../components/portal/PortalLayout";
+import { Link } from "react-router-dom";
+import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
-import { useAuth } from "../../hooks/useAuth";
 import { getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
@@ -15,8 +14,13 @@ import "./mesaDePartes.css";
 // a "los del usuario autenticado" — ver ListExpedientesLogic de Expedientes
 // Service). El detalle del seguimiento (línea de tiempo) vive en
 // SeguimientoDetalle.jsx.
+//
+// El acceso ya no depende de user.role (Paso 8): la ruta está protegida por
+// PermissionRoute con expedientes.view/expedientes.view_own en App.jsx, así
+// que este componente ya no necesita (ni debe) repetir esa decisión — usa
+// RoleLayout para que un usuario interno vea su sidebar normal en vez del
+// portal de SOLICITANTE.
 function Seguimiento() {
-    const { user } = useAuth();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -44,12 +48,8 @@ function Seguimiento() {
         };
     }, []);
 
-    if (user && user.role !== "SOLICITANTE") {
-        return <Navigate to="/dashboard" replace />;
-    }
-
     return (
-        <PortalLayout title="Seguimiento">
+        <RoleLayout title="Seguimiento">
             <section className="dp-panel">
                 <h2 className="dp-panel-title">Seguimiento de mis solicitudes</h2>
 
@@ -97,7 +97,7 @@ function Seguimiento() {
                     </div>
                 )}
             </section>
-        </PortalLayout>
+        </RoleLayout>
     );
 }
 

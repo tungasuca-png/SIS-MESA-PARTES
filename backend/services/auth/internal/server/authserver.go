@@ -58,6 +58,16 @@ func (s *AuthServer) HasPermission(ctx context.Context, in *auth.HasPermissionRe
 	return l.HasPermission(in)
 }
 
+func (s *AuthServer) GetMyPermissions(ctx context.Context, in *auth.GetMyPermissionsRequest) (*auth.GetMyPermissionsResponse, error) {
+	l := logic.NewGetMyPermissionsLogic(ctx, s.svcCtx)
+	return l.GetMyPermissions(in)
+}
+
+func (s *AuthServer) UpdateUserRole(ctx context.Context, in *auth.UpdateUserRoleRequest) (*auth.UpdateUserRoleResponse, error) {
+	l := logic.NewUpdateUserRoleLogic(ctx, s.svcCtx)
+	return l.UpdateUserRole(in)
+}
+
 func (s *AuthServer) ListRoles(ctx context.Context, in *auth.ListRolesRequest) (*auth.ListRolesResponse, error) {
 	l := logic.NewListRolesLogic(ctx, s.svcCtx)
 	return l.ListRoles(in)
@@ -76,4 +86,9 @@ func (s *AuthServer) GetRolePermissions(ctx context.Context, in *auth.GetRolePer
 func (s *AuthServer) UpdateRolePermissions(ctx context.Context, in *auth.UpdateRolePermissionsRequest) (*auth.UpdateRolePermissionsResponse, error) {
 	l := logic.NewUpdateRolePermissionsLogic(ctx, s.svcCtx)
 	return l.UpdateRolePermissions(in)
+}
+
+func (s *AuthServer) CreateUser(ctx context.Context, in *auth.CreateUserRequest) (*auth.CreateUserResponse, error) {
+	l := logic.NewCreateUserLogic(ctx, s.svcCtx)
+	return l.CreateUser(in)
 }

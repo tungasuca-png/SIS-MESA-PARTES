@@ -1,0 +1,276 @@
+syntax = "proto3";
+
+package psicologia;
+option go_package="./psicologia";
+
+// ExpedientePsicologico NO es el expediente administrativo de Mesa de Partes:
+// es la carpeta permanente y única de un estudiante en el módulo de Psicología.
+// estudiante_id es solo una referencia lógica (UUID): el dueño de los datos del
+// estudiante será un Estudiantes Service que todavía no existe.
+message ExpedientePsicologico {
+  string id = 1;
+  string estudiante_id = 2;
+  string codigo = 3;
+  string estado = 4;
+  string responsable_id = 5;
+  string abierto_por = 6;
+  string fecha_apertura = 7;
+  string fecha_cierre = 8;
+  string motivo_cierre = 9;
+  string resumen_caso = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message OpenExpedienteRequest {
+  string estudiante_id = 1;
+  // Opcional: si viene vacío, el responsable es el usuario autenticado.
+  string responsable_id = 2;
+  string resumen_caso = 3;
+}
+
+message OpenExpedienteResponse {
+  ExpedientePsicologico expediente = 1;
+}
+
+message GetExpedienteRequest {
+  string id = 1;
+}
+
+message GetExpedienteResponse {
+  ExpedientePsicologico expediente = 1;
+}
+
+message GetExpedienteByEstudianteRequest {
+  string estudiante_id = 1;
+}
+
+message GetExpedienteByEstudianteResponse {
+  ExpedientePsicologico expediente = 1;
+}
+
+message ListExpedientesRequest {
+  string estado = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListExpedientesResponse {
+  // El listado NO incluye resumen_caso (dato clínico): solo el detalle.
+  repeated ExpedientePsicologico expedientes = 1;
+  int32 total = 2;
+}
+
+message UpdateExpedienteRequest {
+  string id = 1;
+  // Campos ausentes no se modifican.
+  optional string resumen_caso = 2;
+  optional string responsable_id = 3;
+  // Solo ABIERTO o EN_SEGUIMIENTO; CERRADO se logra con CloseExpediente.
+  optional string estado = 4;
+}
+
+message UpdateExpedienteResponse {
+  ExpedientePsicologico expediente = 1;
+}
+
+message CloseExpedienteRequest {
+  string id = 1;
+  string motivo = 2;
+}
+
+message CloseExpedienteResponse {
+  ExpedientePsicologico expediente = 1;
+}
+
+message ReopenExpedienteRequest {
+  string id = 1;
+  // ABIERTO (por defecto) o EN_SEGUIMIENTO.
+  string estado = 2;
+}
+
+message ReopenExpedienteResponse {
+  ExpedientePsicologico expediente = 1;
+}
+
+// ---------------------------------------------------------------------------
+// Atenciones psicológicas (Hoja de Atención). Una atención pertenece a un
+// expediente psicológico; un expediente tiene N atenciones (sin límite).
+// Estados: BORRADOR (solo su autor), REGISTRADA, ANULADA. El contenido de una
+// atención registrada nunca se sobrescribe: se corrige con una versión nueva.
+// El alcance (qué expedientes) sale de psicologia.expedientes.view/view_own.
+// ---------------------------------------------------------------------------
+
+// AtencionContenido es un bloque de la Hoja de Atención.
+message AtencionContenido {
+  string fecha_atencion = 1;          // YYYY-MM-DD
+  string hora_atencion = 2;           // HH:MM
+  repeated string realizada_por = 3;  // DOCENTE, AUXILIAR, DIRECTIVO, PSICOLOGO
+  string realizada_por_otros = 4;
+  repeated string motivos = 5;        // códigos de catalogo_motivos_atencion
+  string motivo_otros = 6;
+  string descripcion_motivo = 7;
+  string analisis_integral = 8;
+  string estrategias = 9;
+  repeated string derivaciones = 10;  // códigos de catalogo_destinos_derivacion
+  string derivacion_otro = 11;
+  string seguimiento_resultados = 12;
+  string acuerdos = 13;
+  string compromiso_estudiante = 14;
+  string compromiso_familia = 15;
+}
+
+// OpcionCatalogo conserva la etiqueta congelada al momento de guardar.
+message OpcionCatalogo {
+  string codigo = 1;
+  string etiqueta = 2;
+}
+
+message AtencionVersion {
+  int32 numero_version = 1;           // 0 = borrador
+  AtencionContenido contenido = 2;
+  repeated OpcionCatalogo motivos = 3;
+  repeated OpcionCatalogo derivaciones = 4;
+  string motivo_correccion = 5;
+  string creada_por = 6;
+  string creada_en = 7;
+}
+
+message AtencionPsicologica {
+  string id = 1;
+  string expediente_id = 2;
+  int32 numero = 3;                   // 0 mientras es borrador
+  string estado = 4;
+  string autor_id = 5;
+  string registrada_por = 6;
+  string registrada_en = 7;
+  int32 version_vigente = 8;
+  int32 revision = 9;
+  string anulada_por = 10;
+  string anulada_en = 11;
+  string motivo_anulacion = 12;
+  string created_at = 13;
+  string updated_at = 14;
+  AtencionVersion version = 15;       // versión solicitada (vigente o borrador)
+}
+
+// AtencionResumen: fila del listado. NUNCA incluye contenido clínico.
+message AtencionResumen {
+  string id = 1;
+  int32 numero = 2;
+  string estado = 3;
+  string fecha_atencion = 4;
+  string hora_atencion = 5;
+  repeated OpcionCatalogo motivos = 6;
+  string autor_id = 7;
+  string registrada_por = 8;
+  string registrada_en = 9;
+  int32 version_vigente = 10;
+}
+
+message AtencionVersionResumen {
+  int32 numero_version = 1;
+  string motivo_correccion = 2;
+  string creada_por = 3;
+  string creada_en = 4;
+}
+
+message AtencionResponse {
+  AtencionPsicologica atencion = 1;
+}
+
+message CreateAtencionDraftRequest {
+  string expediente_id = 1;
+  AtencionContenido contenido = 2;
+}
+
+message UpdateAtencionDraftRequest {
+  string id = 1;
+  int32 revision = 2;
+  AtencionContenido contenido = 3;
+}
+
+message RegisterAtencionRequest {
+  string id = 1;
+  int32 revision = 2;
+}
+
+message DiscardAtencionDraftRequest {
+  string id = 1;
+  int32 revision = 2;
+}
+
+message DiscardAtencionDraftResponse {}
+
+message GetAtencionRequest {
+  string id = 1;
+}
+
+message ListAtencionesRequest {
+  string expediente_id = 1;
+  string estado = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message ListAtencionesResponse {
+  repeated AtencionResumen atenciones = 1;
+  int32 total = 2;
+}
+
+message CorrectAtencionRequest {
+  string id = 1;
+  int32 version_base = 2;
+  string motivo_correccion = 3;
+  AtencionContenido contenido = 4;
+}
+
+message ListAtencionVersionsRequest {
+  string id = 1;
+}
+
+message ListAtencionVersionsResponse {
+  repeated AtencionVersionResumen versiones = 1;
+}
+
+message GetAtencionVersionRequest {
+  string id = 1;
+  int32 numero_version = 2;
+}
+
+message AnnulAtencionRequest {
+  string id = 1;
+  string motivo = 2;
+}
+
+message ExportAtencionPdfRequest {
+  string id = 1;
+  int32 numero_version = 2;           // 0 = versión vigente
+}
+
+message ExportAtencionPdfResponse {
+  string nombre = 1;
+  bytes contenido = 2;
+}
+
+service Psicologia {
+  rpc OpenExpediente(OpenExpedienteRequest) returns (OpenExpedienteResponse);
+  rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
+  rpc GetExpedienteByEstudiante(GetExpedienteByEstudianteRequest) returns (GetExpedienteByEstudianteResponse);
+  rpc ListExpedientes(ListExpedientesRequest) returns (ListExpedientesResponse);
+  rpc UpdateExpediente(UpdateExpedienteRequest) returns (UpdateExpedienteResponse);
+  rpc CloseExpediente(CloseExpedienteRequest) returns (CloseExpedienteResponse);
+  rpc ReopenExpediente(ReopenExpedienteRequest) returns (ReopenExpedienteResponse);
+
+  rpc CreateAtencionDraft(CreateAtencionDraftRequest) returns (AtencionResponse);
+  rpc UpdateAtencionDraft(UpdateAtencionDraftRequest) returns (AtencionResponse);
+  rpc RegisterAtencion(RegisterAtencionRequest) returns (AtencionResponse);
+  rpc DiscardAtencionDraft(DiscardAtencionDraftRequest) returns (DiscardAtencionDraftResponse);
+  rpc GetAtencion(GetAtencionRequest) returns (AtencionResponse);
+  rpc ListAtenciones(ListAtencionesRequest) returns (ListAtencionesResponse);
+  rpc CorrectAtencion(CorrectAtencionRequest) returns (AtencionResponse);
+  rpc ListAtencionVersions(ListAtencionVersionsRequest) returns (ListAtencionVersionsResponse);
+  rpc GetAtencionVersion(GetAtencionVersionRequest) returns (AtencionResponse);
+  rpc AnnulAtencion(AnnulAtencionRequest) returns (AtencionResponse);
+  rpc ExportAtencionPdf(ExportAtencionPdfRequest) returns (ExportAtencionPdfResponse);
+}

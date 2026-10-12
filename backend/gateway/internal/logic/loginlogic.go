@@ -29,7 +29,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 	authResp, err := l.svcCtx.AuthClient.Login(
 		l.ctx,
 		&authclient.LoginRequest{
-			Username: req.Username,
+			Dni:      req.Dni,
 			Password: req.Password,
 		},
 	)

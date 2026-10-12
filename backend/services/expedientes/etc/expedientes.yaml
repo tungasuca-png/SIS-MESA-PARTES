@@ -1,5 +1,5 @@
 Name: expedientes.rpc
-ListenOn: 0.0.0.0:8082
+ListenOn: 127.0.0.1:8082
 Mode: dev
 
 Etcd:
@@ -11,7 +11,7 @@ Postgres:
   Host: 127.0.0.1
   Port: 5433
   User: expedientes_user
-  Password: expedientes_password
+  Password: ${EXPEDIENTES_DB_PASSWORD}
   Database: expedientes_db
   SSLMode: disable
 
@@ -24,3 +24,14 @@ Middlewares:
   StatConf:
     IgnoreContentMethods:
       - /expedientes.Expedientes/CreateExpediente
+      - /expedientes.Expedientes/GetExpediente
+      - /expedientes.Expedientes/ListExpedientes
+      - /expedientes.Expedientes/UpdateExpediente
+      - /expedientes.Expedientes/ChangeEstado
+      - /expedientes.Expedientes/DeleteExpediente
+      - /expedientes.Expedientes/UpdateArea
+      - /expedientes.Expedientes/DerivarExpediente
+      - /expedientes.Expedientes/RechazarExpediente
+      - /expedientes.Expedientes/CorregirExpediente
+      - /expedientes.Expedientes/ResolverExpediente
+      - /expedientes.Expedientes/ValidateDerivacion

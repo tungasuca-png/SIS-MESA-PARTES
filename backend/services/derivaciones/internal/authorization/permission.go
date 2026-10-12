@@ -45,8 +45,8 @@ func HasPermission(ctx context.Context, client PermissionClient, userID, permiss
 
 // RequirePermission exige un único permiso: allowed=false se traduce en
 // PermissionDenied; cualquier error de Auth se propaga tal cual. No
-// reemplaza ninguna regla de negocio existente (CanCreate/CanViewAll
-// siguen aplicándose en cada Logic, después de esta llamada).
+// reemplaza el alcance de datos (ownership/área), que se delega en
+// Expedientes y se aplica después de esta llamada.
 func RequirePermission(ctx context.Context, client PermissionClient, userID, permission string) error {
 	allowed, err := HasPermission(ctx, client, userID, permission)
 	if err != nil {

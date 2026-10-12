@@ -42,7 +42,7 @@ func TestPermissionsSeedIntegration(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -197,7 +197,9 @@ func TestPermissionsSeedIntegration(t *testing.T) {
 	// Prueba 5: Login sigue funcionando después de la migración de datos.
 	t.Run("LoginSigueFuncionando", func(t *testing.T) {
 		username := usernamePrefix + "login"
+		dni := nextTestDNI()
 		registerResp, err := client.Register(ctx, &auth.RegisterRequest{
+			Dni:      dni,
 			Username: username,
 			Email:    username + "@test.local",
 			Password: "permission-seed-password",
@@ -208,7 +210,7 @@ func TestPermissionsSeedIntegration(t *testing.T) {
 		}
 		createdUserIDs = append(createdUserIDs, registerResp.Id)
 
-		loginResp, err := client.Login(ctx, &auth.LoginRequest{Username: username, Password: "permission-seed-password"})
+		loginResp, err := client.Login(ctx, &auth.LoginRequest{Dni: dni, Password: "permission-seed-password"})
 		if err != nil {
 			t.Fatalf("Login falló tras poblar permissions/role_permissions: %v", err)
 		}
@@ -221,6 +223,7 @@ func TestPermissionsSeedIntegration(t *testing.T) {
 	t.Run("RegisterBloqueaRolesInternos", func(t *testing.T) {
 		username := usernamePrefix + "register-director"
 		resp, err := client.Register(ctx, &auth.RegisterRequest{
+			Dni:      nextTestDNI(),
 			Username: username,
 			Email:    username + "@test.local",
 			Password: "permission-seed-password",

@@ -38,6 +38,12 @@ type (
 	GetRolePermissionsResponse    = auth.GetRolePermissionsResponse
 	UpdateRolePermissionsRequest  = auth.UpdateRolePermissionsRequest
 	UpdateRolePermissionsResponse = auth.UpdateRolePermissionsResponse
+	GetMyPermissionsRequest       = auth.GetMyPermissionsRequest
+	GetMyPermissionsResponse      = auth.GetMyPermissionsResponse
+	UpdateUserRoleRequest         = auth.UpdateUserRoleRequest
+	UpdateUserRoleResponse        = auth.UpdateUserRoleResponse
+	CreateUserRequest             = auth.CreateUserRequest
+	CreateUserResponse            = auth.CreateUserResponse
 
 	Auth interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
@@ -51,6 +57,9 @@ type (
 		ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
 		GetRolePermissions(ctx context.Context, in *GetRolePermissionsRequest, opts ...grpc.CallOption) (*GetRolePermissionsResponse, error)
 		UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
+		GetMyPermissions(ctx context.Context, in *GetMyPermissionsRequest, opts ...grpc.CallOption) (*GetMyPermissionsResponse, error)
+		UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error)
+		CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	}
 
 	defaultAuth struct {
@@ -97,6 +106,21 @@ func (m *defaultAuth) ValidateToken(ctx context.Context, in *ValidateTokenReques
 func (m *defaultAuth) HasPermission(ctx context.Context, in *HasPermissionRequest, opts ...grpc.CallOption) (*HasPermissionResponse, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.HasPermission(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GetMyPermissions(ctx context.Context, in *GetMyPermissionsRequest, opts ...grpc.CallOption) (*GetMyPermissionsResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GetMyPermissions(ctx, in, opts...)
+}
+
+func (m *defaultAuth) UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.UpdateUserRole(ctx, in, opts...)
+}
+
+func (m *defaultAuth) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.CreateUser(ctx, in, opts...)
 }
 
 func (m *defaultAuth) ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error) {

@@ -8,6 +8,7 @@ export const ROLE_LABELS = {
     SECRETARIA: "Secretaría",
     DOCENTE: "Docente",
     AUXILIAR: "Auxiliar",
+    PSICOLOGO: "Psicología",
     SOLICITANTE: "Solicitante",
 };
 

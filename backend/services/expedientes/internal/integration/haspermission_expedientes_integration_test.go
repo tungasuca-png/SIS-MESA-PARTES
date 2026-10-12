@@ -33,7 +33,16 @@ import (
 // tiene que coincidir con el que usa el Auth Service real corriendo en
 // 127.0.0.1:8080, porque este test valida el flujo end-to-end real:
 // Expedientes -> Auth.HasPermission -> PostgreSQL, no un doble de prueba.
-const realSharedJWTSecret = "41807ca75b3f05df6db6a17da41503e4b4fcb2521f6edf5e7651984e63db6d6c"
+var realSharedJWTSecret = os.Getenv("JWT_SECRET")
+
+// requireRealJWTSecret omite la prueba si JWT_SECRET no está en el entorno
+// (cargarlo desde backend/.env). El secreto real NUNCA se escribe en el código.
+func requireRealJWTSecret(t *testing.T) {
+	t.Helper()
+	if realSharedJWTSecret == "" {
+		t.Skip("JWT_SECRET no definido en el entorno: cargar backend/.env para ejecutar esta prueba")
+	}
+}
 
 // TestHasPermissionIntegration prueba la integración REAL (Paso 13B):
 // Expedientes -> Auth.HasPermission (RPC real, contra un Auth Service real
@@ -47,6 +56,7 @@ const realSharedJWTSecret = "41807ca75b3f05df6db6a17da41503e4b4fcb2521f6edf5e765
 // verifica como caso esperado (fail-closed), y los demás casos fallarían
 // con un error de conexión claro, no con un falso "permitido".
 func TestHasPermissionIntegration(t *testing.T) {
+	requireRealJWTSecret(t)
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")
 	}
@@ -54,7 +64,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	expedientesPool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	expedientesPool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create expedientes_db pool: %v", err)
 	}
@@ -63,7 +73,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		t.Fatalf("connect to expedientes_db: %v", err)
 	}
 
-	authPool, err := pgxpool.New(ctx, authDatabaseURL())
+	authPool, err := pgxpool.New(ctx, authDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create auth_db pool: %v", err)
 	}
@@ -202,19 +212,17 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 	})
 
-	// Test C — multi-rol: usuario con DOCENTE (sin expedientes.create) +
-	// SECRETARIA (con expedientes.create) asignados de verdad en
-	// usuario_roles. El JWT lleva SOLO "DOCENTE" como claim (igual que un
-	// login real solo llevaría un rol) — si el resultado depende del JWT,
-	// esto fallaría; si depende de Auth (todos sus roles reales), debe
-	// permitir.
+	// Test C — el permiso lo decide Auth por el rol REAL, no el claim del JWT:
+	// el usuario es SECRETARIA (con expedientes.create) en usuario_roles y el
+	// JWT lleva "DOCENTE". (1 usuario = 1 rol: la BD ya no admite un segundo
+	// rol, así que este caso ya no usa dos roles.)
 	t.Run("MultiRol", func(t *testing.T) {
-		userID := createRealUser(t, "multirol", "DOCENTE", "SECRETARIA")
+		userID := createRealUser(t, "multirol", "SECRETARIA")
 		resp, err := client.CreateExpediente(authCtx(userID, "DOCENTE"), &expedientes.CreateExpedienteRequest{
 			Tipo: "CERTIFICADO", Asunto: "Test multi-rol", Prioridad: "NORMAL",
 		})
 		if err != nil {
-			t.Fatalf("se esperaba éxito (multi-rol incluye SECRETARIA con expedientes.create), got err=%v", err)
+			t.Fatalf("se esperaba éxito (el rol real SECRETARIA tiene expedientes.create), got err=%v", err)
 		}
 		trackExpediente(resp.Expediente.Id)
 	})
@@ -979,9 +987,14 @@ func TestHasPermissionIntegration(t *testing.T) {
 	})
 }
 
-func authDatabaseURL() string {
-	if value := os.Getenv("AUTH_TEST_DATABASE_URL"); value != "" {
-		return value
+func authDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_AUTH_DB_URL")
+	if url == "" {
+		t.Skip("TEST_AUTH_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://auth_user:auth_password@127.0.0.1:5433/auth_db?sslmode=disable"
+	return url
 }

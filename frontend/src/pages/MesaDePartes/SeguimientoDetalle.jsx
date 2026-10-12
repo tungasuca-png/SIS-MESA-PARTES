@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
-import PortalLayout from "../../components/portal/PortalLayout";
+import { Link, useParams } from "react-router-dom";
+import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
-import { useAuth } from "../../hooks/useAuth";
 import { getExpediente } from "../../services/expedientesService";
 import { getDerivacionesByExpediente } from "../../services/derivacionesService";
+import { usePermissions } from "../../hooks/usePermissions";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { tipoLabel } from "../../constants/expedientes";
@@ -28,9 +28,14 @@ const TIPO_DERIVACION_LABEL = {
 // Expedientes Service no guarda un historial propio de cambios de estado
 // (solo el estado vigente) — si en el futuro existe ese historial, cada
 // cambio podría agregarse acá como un paso más.
+// El acceso ya no depende de user.role (Paso 8): la ruta está protegida por
+// PermissionRoute con expedientes.view/expedientes.view_own en App.jsx.
 function SeguimientoDetalle() {
-    const { user } = useAuth();
     const { id } = useParams();
+    const { can } = usePermissions();
+    // Las derivaciones se consultan solo con permiso (view_own para expedientes
+    // propios, view general); sin ninguno no se pide ni se muestra nada.
+    const puedeVerDerivaciones = can(["derivaciones.view", "derivaciones.view_own"]);
 
     const [expediente, setExpediente] = useState(null);
     const [derivaciones, setDerivaciones] = useState([]);
@@ -48,9 +53,13 @@ function SeguimientoDetalle() {
                 if (!active) return;
                 setExpediente(expData.expediente);
 
-                const derivData = await getDerivacionesByExpediente(expData.expediente.id);
-                if (!active) return;
-                setDerivaciones(derivData.derivaciones || []);
+                if (puedeVerDerivaciones) {
+                    const derivData = await getDerivacionesByExpediente(expData.expediente.id);
+                    if (!active) return;
+                    setDerivaciones(derivData.derivaciones || []);
+                } else {
+                    setDerivaciones([]);
+                }
             } catch (err) {
                 if (active) setError(friendlyErrorMessage(err));
             } finally {
@@ -62,18 +71,14 @@ function SeguimientoDetalle() {
         return () => {
             active = false;
         };
-    }, [id]);
-
-    if (user && user.role !== "SOLICITANTE") {
-        return <Navigate to="/dashboard" replace />;
-    }
+    }, [id, puedeVerDerivaciones]);
 
     // El backend devuelve las derivaciones más recientes primero; para una
     // línea de tiempo se necesita orden cronológico ascendente.
     const derivacionesOrdenadas = [...derivaciones].reverse();
 
     return (
-        <PortalLayout title="Seguimiento del expediente">
+        <RoleLayout title="Seguimiento del expediente">
             <Link to="/mesa-de-partes/seguimiento" className="dp-back-link">
                 ← Volver a seguimiento
             </Link>
@@ -108,10 +113,12 @@ function SeguimientoDetalle() {
                                     {TIPO_DERIVACION_LABEL[item.tipo] ?? item.tipo}: {item.origen} → {item.destino}
                                 </p>
                                 <p className="mdp-timeline-meta">{formatDateTime(item.fecha_registro)}</p>
-                                <p className="mdp-timeline-desc">
-                                    {item.motivo}
-                                    {item.condicion ? ` — ${item.condicion}` : ""}
-                                </p>
+                                {(item.motivo || item.condicion) && (
+                                    <p className="mdp-timeline-desc">
+                                        {item.motivo}
+                                        {item.condicion ? ` — ${item.condicion}` : ""}
+                                    </p>
+                                )}
                             </li>
                         ))}
 
@@ -125,7 +132,7 @@ function SeguimientoDetalle() {
                     </ul>
                 </section>
             )}
-        </PortalLayout>
+        </RoleLayout>
     );
 }
 

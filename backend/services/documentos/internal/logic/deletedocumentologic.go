@@ -45,26 +45,24 @@ func NewDeleteDocumentoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *D
 }
 
 func (l *DeleteDocumentoLogic) DeleteDocumento(in *documentos.DeleteDocumentoRequest) (*documentos.DeleteDocumentoResponse, error) {
-	userID, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, _, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	// Permiso real (Paso 14B) + regla de negocio existente (CanDelete),
-	// ambas deben cumplirse — mismo alcance que UpdateExpediente/
-	// DeleteExpediente en Expedientes (Paso 13B).
+	// La autoridad es el permiso real: Auth.HasPermission("documentos.delete").
+	// Ya no se exige además un rol "interno" (antes CanDelete(role)): era la
+	// misma decisión que el permiso, duplicada por nombre de rol. Las reglas
+	// de negocio independientes siguen abajo: área/ownership del expediente
+	// (delegadas en Expedientes.GetExpediente) y estado PENDIENTE.
 	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "documentos.delete"); err != nil {
 		return nil, err
-	}
-	if !authorization.CanDelete(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede eliminar documentos")
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")
 	}
 
-	// Área y estado (Paso 19E): el permiso ya confirmó que el rol puede
-	// eliminar EN GENERAL (solo lo tienen los 6 roles internos — ningún
-	// SOLICITANTE llega hasta aquí); falta confirmar que ESTE documento,
+	// Área y estado (Paso 19E): el permiso ya confirmó que el usuario puede
+	// eliminar EN GENERAL; falta confirmar que ESTE documento,
 	// vía el expediente al que pertenece, le corresponde a este actor y
 	// que el expediente sigue en un estado que permite eliminarlo.
 	//
@@ -82,10 +80,9 @@ func (l *DeleteDocumentoLogic) DeleteDocumento(in *documentos.DeleteDocumentoReq
 
 	// Área: se delega en Expedientes.GetExpediente, reenviando el mismo
 	// JWT — mismo patrón exacto ya usado para ownership en GetDocumento/
-	// DownloadDocumento/ListDocumentos (Pasos 19B/19C/19D). El llamador
-	// aquí SIEMPRE es un rol interno (es la única forma de tener
-	// "documentos.delete"), así que GetExpediente aplica exactamente la
-	// misma regla pedida: CanViewAll (ADMIN, y también SECRETARIA por ser
+	// DownloadDocumento/ListDocumentos (Pasos 19B/19C/19D). GetExpediente aplica
+	// la regla de alcance de Expedientes (ownership para un usuario externo,
+	// área para uno interno): CanViewAll (ADMIN, y también SECRETARIA por ser
 	// la mesa de partes — mismo criterio ya vigente en TODAS las demás
 	// operaciones de Expedientes sobre expedientes, ver Pasos 13B/18B/18C)
 	// ve/edita cualquier área; el resto de internos solo si

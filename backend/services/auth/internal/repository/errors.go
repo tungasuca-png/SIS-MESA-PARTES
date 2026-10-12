@@ -11,9 +11,12 @@ var (
 	ErrUserNotFound      = errors.New("user not found")
 	ErrUsernameExists    = errors.New("username already exists")
 	ErrEmailExists       = errors.New("email already exists")
+	ErrDNIExists         = errors.New("dni already exists")
 	ErrRoleNotFound      = errors.New("role not found")
 	ErrRoleAssignment    = errors.New("role assignment failed")
 	ErrPermissionNotFound = errors.New("permission not found")
+	ErrUserInactive      = errors.New("user inactive")
+	ErrRoleInactive      = errors.New("role inactive")
 )
 
 func classifyUniqueViolation(err error) error {
@@ -27,6 +30,8 @@ func classifyUniqueViolation(err error) error {
 		return ErrUsernameExists
 	case "uq_usuarios_email":
 		return ErrEmailExists
+	case "uq_usuarios_dni":
+		return ErrDNIExists
 	default:
 		return err
 	}

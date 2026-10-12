@@ -36,14 +36,3 @@ func CanViewFullProfile(role, requesterID, targetID string) bool {
 	return IsInternal(role) || requesterID == targetID
 }
 
-// CanListOrSearch: el listado/búsqueda administrativa de usuarios queda
-// restringido a ADMIN para no exponer datos personales de forma masiva.
-func CanListOrSearch(role string) bool {
-	return role == RoleAdmin
-}
-
-// CanUpsert: solo ADMIN administra perfiles en esta etapa. La edición del
-// perfil propio por parte del usuario no está definida todavía.
-func CanUpsert(role string) bool {
-	return role == RoleAdmin
-}

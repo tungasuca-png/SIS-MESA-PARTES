@@ -1,0 +1,49 @@
+Name: estudiantes.rpc
+# Solo loopback: en esta fase no hay Gateway (ni ningún otro llamador)
+# apuntando aquí todavía, y los datos son de menores de edad — mismo
+# criterio de precaución que Derivaciones/Psicología.
+ListenOn: 127.0.0.1:8087
+Mode: dev
+
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: estudiantes.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: estudiantes_user
+  # Secreto por variable de entorno (backend/.env); nunca en este archivo.
+  Password: ${ESTUDIANTES_DB_PASSWORD}
+  Database: estudiantes_db
+  SSLMode: disable
+
+JWTSecret: ${JWT_SECRET}
+
+AuthRpc:
+  Target: 127.0.0.1:8080
+
+# go-zero registra el contenido de las solicitudes (stat log). Todo RPC de
+# este servicio lleva datos personales de menores (nombres, DNI, fecha de
+# nacimiento): se excluye el contenido de TODOS los métodos. FASE E-05: una
+# prueba (internal/config) falla si un RPC del proto no está en esta lista.
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /estudiantes.Estudiantes/GetEstudiante
+      - /estudiantes.Estudiantes/SearchEstudiantes
+      - /estudiantes.Estudiantes/GetEstudiantesBasic
+      - /estudiantes.Estudiantes/CreateEstudiante
+      - /estudiantes.Estudiantes/UpdateEstudiante
+      - /estudiantes.Estudiantes/ChangeEstadoEstudiante
+      # FASE E-08: datos personales.
+      - /estudiantes.Estudiantes/GetEstudiantePersonal
+      - /estudiantes.Estudiantes/UpdateEstudiantePersonal
+      # Modelo maestro: resolución, duplicados, matrícula y familia.
+      - /estudiantes.Estudiantes/ResolveEstudiante
+      - /estudiantes.Estudiantes/ListPosiblesDuplicados
+      - /estudiantes.Estudiantes/ListMatriculasEstudiante
+      - /estudiantes.Estudiantes/ListFamiliaresEstudiante
+      - /estudiantes.Estudiantes/VincularFamiliar
+      - /estudiantes.Estudiantes/DesvincularFamiliar

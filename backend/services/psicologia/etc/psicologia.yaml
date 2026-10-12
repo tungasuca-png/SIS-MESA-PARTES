@@ -1,0 +1,66 @@
+Name: psicologia.rpc
+# Solo loopback: el único llamador legítimo es el Gateway (127.0.0.1). Los
+# datos son sensibles y el servicio no debe ser alcanzable desde otra máquina.
+ListenOn: 127.0.0.1:8086
+Mode: dev
+
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: psicologia.rpc
+
+Postgres:
+  Host: 127.0.0.1
+  Port: 5433
+  User: psicologia_user
+  # Secreto por variable de entorno (backend/.env); nunca en este archivo.
+  Password: ${PSICOLOGIA_DB_PASSWORD}
+  Database: psicologia_db
+  SSLMode: disable
+
+JWTSecret: ${JWT_SECRET}
+
+# Cifrado del contenido clínico (AES-256-GCM, FASE 6N-3). Solo por variables de
+# entorno (backend/.env o secreto del orquestador); nunca un valor aquí. Sin una
+# clave válida que descifre su canario, el servicio no inicia.
+ClinicalData:
+  EncryptionKey: ${CLINICAL_DATA_ENCRYPTION_KEY}
+  KeyID: ${CLINICAL_DATA_KEY_ID}
+  PreviousKeys: ${CLINICAL_DATA_PREVIOUS_KEYS}
+
+AuthRpc:
+  Target: 127.0.0.1:8080
+
+UsuariosRpc:
+  Target: 127.0.0.1:8083
+
+# EstudiantesRpc (FASE 5C): svc.EstudianteVerifier consulta aquí si
+# estudiante_id existe antes de abrir un expediente.
+EstudiantesRpc:
+  Target: 127.0.0.1:8087
+
+# go-zero registra el contenido de las solicitudes lentas/fallidas. Todo RPC
+# de Psicología puede llevar información clínica o identificadores de
+# estudiantes: se excluye el contenido de TODOS los métodos del log.
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /psicologia.Psicologia/OpenExpediente
+      - /psicologia.Psicologia/GetExpediente
+      - /psicologia.Psicologia/GetExpedienteByEstudiante
+      - /psicologia.Psicologia/ListExpedientes
+      - /psicologia.Psicologia/UpdateExpediente
+      - /psicologia.Psicologia/CloseExpediente
+      - /psicologia.Psicologia/ReopenExpediente
+      # Atenciones psicológicas (Hoja de Atención): contenido clínico.
+      - /psicologia.Psicologia/CreateAtencionDraft
+      - /psicologia.Psicologia/UpdateAtencionDraft
+      - /psicologia.Psicologia/RegisterAtencion
+      - /psicologia.Psicologia/DiscardAtencionDraft
+      - /psicologia.Psicologia/GetAtencion
+      - /psicologia.Psicologia/ListAtenciones
+      - /psicologia.Psicologia/CorrectAtencion
+      - /psicologia.Psicologia/ListAtencionVersions
+      - /psicologia.Psicologia/GetAtencionVersion
+      - /psicologia.Psicologia/AnnulAtencion
+      - /psicologia.Psicologia/ExportAtencionPdf

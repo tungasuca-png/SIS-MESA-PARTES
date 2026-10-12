@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import PortalLayout from "../../components/portal/PortalLayout";
 import Icon from "../../components/dashboard/Icon";
 import { useAuth } from "../../hooks/useAuth";
+import { usePermissions } from "../../hooks/usePermissions";
 import { getExpedientes } from "../../services/expedientesService";
 import { getDerivacionesByExpediente } from "../../services/derivacionesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
@@ -25,7 +26,7 @@ function tipoDerivacionLabel(value) {
 // día X" salvo el desenlace final — ver docs/etapa-12-especificacion-
 // funcional.md sección 17 (Notificaciones), que ya deja esto documentado
 // como pendiente de un canal/servicio real.
-async function construirNotificaciones() {
+async function construirNotificaciones(puedeVerDerivaciones) {
     const { expedientes } = await getExpedientes({ page: 1, pageSize: 50 });
     const items = [];
 
@@ -51,9 +52,10 @@ async function construirNotificaciones() {
         }
     }
 
+    // Sin derivaciones.view / derivaciones.view_own no se consultan derivaciones.
     const derivacionesPorExpediente = await Promise.all(
         (expedientes || []).map((exp) =>
-            getDerivacionesByExpediente(exp.id)
+            (puedeVerDerivaciones ? getDerivacionesByExpediente(exp.id) : Promise.resolve({ derivaciones: [] }))
                 .then((data) => ({ exp, derivaciones: data.derivaciones || [] }))
                 .catch(() => ({ exp, derivaciones: [] }))
         )
@@ -67,7 +69,7 @@ async function construirNotificaciones() {
                 tipoVisual: "proceso",
                 titulo: tipoDerivacionLabel(item.tipo),
                 codigo: exp.codigo,
-                mensaje: `${item.origen} → ${item.destino}: ${item.motivo}`,
+                mensaje: item.motivo ? `${item.origen} → ${item.destino}: ${item.motivo}` : `${item.origen} → ${item.destino}`,
             });
         }
     }
@@ -78,6 +80,8 @@ async function construirNotificaciones() {
 
 function Notificaciones() {
     const { user } = useAuth();
+    const { can } = usePermissions();
+    const puedeVerDerivaciones = can(["derivaciones.view", "derivaciones.view_own"]);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -89,7 +93,7 @@ function Notificaciones() {
             setLoading(true);
             setError("");
             try {
-                const data = await construirNotificaciones();
+                const data = await construirNotificaciones(puedeVerDerivaciones);
                 if (active) setItems(data);
             } catch (err) {
                 if (active) setError(friendlyErrorMessage(err));
@@ -102,7 +106,7 @@ function Notificaciones() {
         return () => {
             active = false;
         };
-    }, []);
+    }, [puedeVerDerivaciones]);
 
     if (user && user.role !== "SOLICITANTE") {
         return <Navigate to="/dashboard" replace />;

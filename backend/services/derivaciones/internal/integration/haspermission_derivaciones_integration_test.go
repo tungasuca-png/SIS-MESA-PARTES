@@ -38,7 +38,16 @@ import (
 // No existía ningún test de integración previo para Derivaciones (Paso 15
 // lo confirmó: internal/integration/ estaba vacía) — este archivo es
 // nuevo por completo, no una actualización.
-const realSharedJWTSecret = "41807ca75b3f05df6db6a17da41503e4b4fcb2521f6edf5e7651984e63db6d6c"
+var realSharedJWTSecret = os.Getenv("JWT_SECRET")
+
+// requireRealJWTSecret omite la prueba si JWT_SECRET no está en el entorno
+// (cargarlo desde backend/.env). El secreto real NUNCA se escribe en el código.
+func requireRealJWTSecret(t *testing.T) {
+	t.Helper()
+	if realSharedJWTSecret == "" {
+		t.Skip("JWT_SECRET no definido en el entorno: cargar backend/.env para ejecutar esta prueba")
+	}
+}
 
 func fixedUUID(base int64, index int) string {
 	value := (base%10_000_000_000)*10 + int64(index)
@@ -51,6 +60,7 @@ func fixedUUID(base int64, index int) string {
 // real (auth_db), combinada con las reglas de negocio existentes de
 // Derivaciones (CanCreate/CanViewAll), que NO cambian.
 func TestHasPermissionIntegration(t *testing.T) {
+	requireRealJWTSecret(t)
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")
 	}
@@ -58,7 +68,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	derivacionesPool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	derivacionesPool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create derivaciones_db pool: %v", err)
 	}
@@ -67,7 +77,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		t.Fatalf("connect to derivaciones_db: %v", err)
 	}
 
-	authPool, err := pgxpool.New(ctx, authDatabaseURL())
+	authPool, err := pgxpool.New(ctx, authDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create auth_db pool: %v", err)
 	}
@@ -79,7 +89,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// expedientesPool (Paso 20A): limpieza directa de los expedientes
 	// REALES creados para probar el ownership/área real de
 	// ListDerivaciones — mismo patrón ya usado en Documentos (Paso 19E).
-	expedientesPool, err := pgxpool.New(ctx, expedientesDatabaseURL())
+	expedientesPool, err := pgxpool.New(ctx, expedientesDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create expedientes_db pool: %v", err)
 	}
@@ -389,8 +399,13 @@ func TestHasPermissionIntegration(t *testing.T) {
 		_, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
 			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "AREA_INVENTADA", Motivo: "test",
 		})
-		if status.Code(err) != codes.PermissionDenied {
-			t.Fatalf("se esperaba PermissionDenied: AREA_INVENTADA no es un área real, got %v", err)
+		// InvalidArgument (no PermissionDenied): fase de autorización/reglas
+		// de negocio de Expedientes+Documentos+Derivaciones cerró el hueco
+		// de que "destino" solo se validaba por longitud, nunca contra el
+		// catálogo real de áreas (validation.IsValidArea) — se rechaza antes
+		// de siquiera comparar contra el área real del expediente.
+		if status.Code(err) != codes.InvalidArgument {
+			t.Fatalf("se esperaba InvalidArgument: AREA_INVENTADA no está en el catálogo real de áreas, got %v", err)
 		}
 		if despues := countDerivaciones(t, exp); despues != antes {
 			t.Fatalf("no debía insertarse ningún registro: antes=%d despues=%d", antes, despues)
@@ -734,25 +749,22 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 	})
 
-	// Test — Listar: SOLICITANTE sin expediente_id sigue denegado
-	// (InvalidArgument, mismo comportamiento de siempre — no se convirtió
-	// en PermissionDenied ni se abrió el listado global).
+	// Test — Listar: SOLICITANTE sin derivaciones.view ni
+	// derivaciones.view_own (estado inicial del catálogo) -> PermissionDenied,
+	// también sin expediente_id: primero se evalúa el permiso.
 	t.Run("Listar_SinExpedienteId_Solicitante", func(t *testing.T) {
 		solicitanteID := createRealUser(t, "solicitante3", "SOLICITANTE")
 		_, err := client.ListDerivaciones(authCtx(solicitanteID, "SOLICITANTE"), &derivaciones.ListDerivacionesRequest{})
-		if status.Code(err) != codes.InvalidArgument {
-			t.Fatalf("se esperaba InvalidArgument (mismo comportamiento previo), got %v", err)
+		if status.Code(err) != codes.PermissionDenied {
+			t.Fatalf("se esperaba PermissionDenied (sin view ni view_own), got %v", err)
 		}
 	})
 
-	// Test (Paso 20A, Caso 2) — SOLICITANTE CON expediente_id PROPIO sigue
-	// funcionando — el uso legítimo se conserva, pero ahora requiere un
-	// expediente REAL cuyo SolicitanteID sea, de verdad, el que consulta
-	// (antes de este paso, cualquier UUID bastaba — ver vulnerabilidad
-	// crítica del Paso 20). El permiso "derivaciones.view" sigue sin
-	// exigírsele al SOLICITANTE (no existe "view_own" en el catálogo);
-	// el ownership real es lo que ahora decide.
-	t.Run("Listar_ConExpedienteId_SolicitantePropio_Permitido", func(t *testing.T) {
+	// Test — SOLICITANTE con expediente PROPIO pero sin
+	// derivaciones.view ni derivaciones.view_own: ya no hay excepción por
+	// ownership; el permiso es la autoridad. La variante CON view_own se
+	// prueba en TestVisibilidadDerivacionesPermisoEsLaAutoridad.
+	t.Run("Listar_ConExpedienteId_SolicitantePropio_SinPermisos_Denegado", func(t *testing.T) {
 		solicitanteID := createRealUser(t, "solicitante4", "SOLICITANTE")
 		exp := createRealExpediente(t, solicitanteID)
 
@@ -766,11 +778,8 @@ func TestHasPermissionIntegration(t *testing.T) {
 		trackDerivacion(created.Derivacion.Id)
 
 		resp, err := client.ListDerivaciones(authCtx(solicitanteID, "SOLICITANTE"), &derivaciones.ListDerivacionesRequest{ExpedienteId: exp})
-		if err != nil {
-			t.Fatalf("se esperaba éxito: el expediente es realmente del solicitante, got err=%v", err)
-		}
-		if resp.Total != 1 {
-			t.Fatalf("se esperaba ver la derivación de ese expediente, total=%d", resp.Total)
+		if status.Code(err) != codes.PermissionDenied || resp != nil {
+			t.Fatalf("se esperaba PermissionDenied: sin view/view_own no hay acceso ni a expedientes propios, got %v", err)
 		}
 	})
 
@@ -1035,23 +1044,38 @@ func TestHasPermissionIntegration(t *testing.T) {
 	})
 }
 
-func integrationDatabaseURL() string {
-	if value := os.Getenv("DERIVACIONES_TEST_DATABASE_URL"); value != "" {
-		return value
+func integrationDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_DERIVACIONES_DB_URL")
+	if url == "" {
+		t.Skip("TEST_DERIVACIONES_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://derivaciones_user:derivaciones_password@127.0.0.1:5433/derivaciones_db?sslmode=disable"
+	return url
 }
 
-func authDatabaseURL() string {
-	if value := os.Getenv("AUTH_TEST_DATABASE_URL"); value != "" {
-		return value
+func authDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_AUTH_DB_URL")
+	if url == "" {
+		t.Skip("TEST_AUTH_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://auth_user:auth_password@127.0.0.1:5433/auth_db?sslmode=disable"
+	return url
 }
 
-func expedientesDatabaseURL() string {
-	if value := os.Getenv("EXPEDIENTES_TEST_DATABASE_URL"); value != "" {
-		return value
+func expedientesDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_EXPEDIENTES_DB_URL")
+	if url == "" {
+		t.Skip("TEST_EXPEDIENTES_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://expedientes_user:expedientes_password@127.0.0.1:5433/expedientes_db?sslmode=disable"
+	return url
 }

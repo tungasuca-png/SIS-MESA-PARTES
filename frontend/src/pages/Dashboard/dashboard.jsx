@@ -4,6 +4,7 @@ import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatCard from "../../components/dashboard/StatCard";
 import RecentExpedientes from "../../components/dashboard/RecentExpedientes";
 import QuickActions from "../../components/dashboard/QuickActions";
+import ModuleCards from "../../components/dashboard/ModuleCards";
 import "../../components/dashboard/forms.css";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -84,6 +85,8 @@ function Dashboard() {
 
     return (
         <DashboardLayout title="Dashboard">
+            <ModuleCards />
+
             {loading && <p className="dp-table-empty">Cargando información...</p>}
 
             {!loading && error && <p className="dp-form-error">{error}</p>}
@@ -91,8 +94,8 @@ function Dashboard() {
             {!loading && !error && (
                 <>
                     <div className="dp-stats-grid">
-                        {stats.map((stat) => (
-                            <StatCard key={stat.key} {...stat} />
+                        {stats.map(({ key, ...stat }) => (
+                            <StatCard key={key} {...stat} />
                         ))}
                     </div>
 

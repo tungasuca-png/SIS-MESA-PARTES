@@ -38,7 +38,7 @@ func TestExpedientesIntegration(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestExpedientesIntegration(t *testing.T) {
 		// F2/F4) con identidades sintéticas que no existen en auth_db — ver
 		// fake_authclient_test.go. El catálogo de permisos real se prueba
 		// en TestHasPermissionIntegration, en este mismo paquete.
-		AuthClient: newReplicaAuthClient(security.NewJWTValidator(testSecret)),
+		AuthClient: newScriptedAuthClient(nil),
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
@@ -748,11 +748,16 @@ func fixedUUID(testID int64, index int) string {
 	return fmt.Sprintf("00000000-0000-4000-8000-%012d", value)
 }
 
-func integrationDatabaseURL() string {
-	if value := os.Getenv("EXPEDIENTES_TEST_DATABASE_URL"); value != "" {
-		return value
+func integrationDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_EXPEDIENTES_DB_URL")
+	if url == "" {
+		t.Skip("TEST_EXPEDIENTES_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://expedientes_user:expedientes_password@127.0.0.1:5433/expedientes_db?sslmode=disable"
+	return url
 }
 
 func cleanupIntegrationData(t *testing.T, pool *pgxpool.Pool, solicitanteIDs ...string) {

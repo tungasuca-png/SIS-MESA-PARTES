@@ -179,6 +179,27 @@ func (r *UsuarioRepository) UpdateOwnProfile(ctx context.Context, id, telefono, 
 	return found, nil
 }
 
+// UpdateTipoUsuario (sincronización Usuario -> Rol) actualiza ÚNICAMENTE
+// tipo_usuario — a propósito NO es un Upsert: no crea perfiles nuevos ni
+// toca nombres/apellidos/dni/telefono/correo/direccion/activo. Auth Service
+// sigue siendo la fuente de verdad real del rol; este método solo refleja
+// ese resultado YA confirmado en la copia denormalizada de este servicio.
+// Si el id no tiene perfil registrado, la sentencia no afecta ninguna fila
+// y se traduce en ErrUsuarioNotFound, igual que UpdateOwnProfile.
+func (r *UsuarioRepository) UpdateTipoUsuario(ctx context.Context, id, tipoUsuario string) (*Usuario, error) {
+	found, err := scanUsuario(r.db.QueryRow(ctx, `
+		UPDATE usuarios
+		SET tipo_usuario = $2, updated_at = NOW()
+		WHERE id = $1
+		RETURNING `+usuarioColumns,
+		id, tipoUsuario,
+	))
+	if err != nil {
+		return nil, classifyNotFound(err, ErrUsuarioNotFound)
+	}
+	return found, nil
+}
+
 func collectUsuarios(rows pgx.Rows) ([]*Usuario, error) {
 	items := make([]*Usuario, 0)
 	for rows.Next() {

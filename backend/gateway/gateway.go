@@ -9,6 +9,7 @@ import (
 
 	"gateway/internal/config"
 	"gateway/internal/handler"
+	"gateway/internal/logsafe"
 	"gateway/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -23,6 +24,10 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
 
+	// Antes de crear los clientes gRPC: oculta el contenido (no los errores) de las
+	// llamadas con contraseñas, tokens o datos clínicos.
+	logsafe.ProtectSensitiveRPCLogs()
+
 	server := rest.MustNewServer(
 		c.RestConf,
 		rest.WithCors("http://localhost:5173"),
@@ -33,6 +38,9 @@ func main() {
 	)
 
 	defer server.Stop()
+
+	// Reemplaza al LogHandler estándar (Middlewares.Log=false en el YAML).
+	server.Use(logsafe.AccessLog)
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)

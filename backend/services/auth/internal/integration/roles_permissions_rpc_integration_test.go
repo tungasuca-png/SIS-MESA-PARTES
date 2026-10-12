@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -27,31 +28,33 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 )
 
-// catalogoRolPermisos (Paso 21B) replica el conteo REAL de relaciones ya
-// sembradas por la migración 005_seed_permissions_and_role_permissions —
-// no es una regla nueva, es el mismo catálogo ya verificado en vivo
-// (Paso 21A) contra auth_db. Se usa para probar que GetRolePermissions
-// devuelve EXACTAMENTE lo que ya existe, no una lista inventada.
-var catalogoRolPermisos = map[string]int{
-	"ADMIN":       16,
-	"DIRECTOR":    12,
-	"SUBDIRECTOR": 12,
-	"SECRETARIA":  12,
-	"DOCENTE":     11,
-	"AUXILIAR":    11,
-	"SOLICITANTE": 6,
-}
-
-// catalogoPermisosReales (Paso 21B) son los 20 códigos reales ya sembrados
-// (mismo catálogo verificado en el Paso 21A) — ListPermissions debe
-// devolver exactamente estos 20, ni uno más ni uno menos.
+// catalogoPermisosReales son los 40 códigos del catálogo (migración 005 + los
+// permisos de las migraciones 006, 008, 010, 012, 014, 015, 016 y 017) —
+// ListPermissions debe devolver exactamente estos 40, ni uno más ni uno menos. Los permisos ASIGNADOS
+// a cada rol (role_permissions) NO se fijan acá: son datos editables desde la
+// pantalla Roles y permisos, así que los tests los comparan contra la BD viva.
 var catalogoPermisosReales = []string{
 	"dashboard.view", "expedientes.view", "expedientes.view_own", "expedientes.create",
 	"expedientes.update", "expedientes.change_estado", "expedientes.delete",
 	"documentos.view", "documentos.view_own", "documentos.create", "documentos.delete",
-	"derivaciones.view", "derivaciones.create",
+	"derivaciones.view", "derivaciones.view_own", "derivaciones.create",
 	"seguimiento.view", "seguimiento.view_own",
 	"reportes.view", "solicitudes.create", "usuarios.view", "roles.view", "configuracion.view",
+	"usuarios.change_role",
+	// Psicología (migración 010): solo registrados, sin asignar a ningún rol.
+	"psicologia.view", "psicologia.estudiantes.view", "psicologia.expedientes.view",
+	"psicologia.expedientes.view_own", "psicologia.expedientes.create", "psicologia.expedientes.update",
+	// Estudiantes (migración 012): solo registrado, sin asignar a ningún rol.
+	"estudiantes.view",
+	// Atenciones psicológicas (migración 014): solo registrados, sin asignar.
+	"psicologia.atenciones.view", "psicologia.atenciones.create",
+	"psicologia.atenciones.correct", "psicologia.atenciones.annul",
+	// Escritura del maestro de estudiantes (migración 015): solo registrados, sin asignar.
+	"estudiantes.create", "estudiantes.update", "estudiantes.change_estado",
+	// Datos personales del estudiante (migración 016): solo registrados, sin asignar.
+	"estudiantes.personal.view", "estudiantes.personal.update",
+	// Familiares del estudiante (migración 017): solo registrados, sin asignar.
+	"estudiantes.familia.view", "estudiantes.familia.update",
 }
 
 // TestRolesPermissionsRPC prueba ListRoles/ListPermissions/GetRolePermissions
@@ -68,7 +71,7 @@ func TestRolesPermissionsRPC(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -179,8 +182,10 @@ func TestRolesPermissionsRPC(t *testing.T) {
 	}
 
 	rolesAntes, permissionsAntes, rolePermissionsAntes := countAll(t)
-	if rolesAntes != 7 || permissionsAntes != 20 || rolePermissionsAntes != 80 {
-		t.Fatalf("precondición inesperada: roles=%d permissions=%d role_permissions=%d (se esperaba 7/20/80)", rolesAntes, permissionsAntes, rolePermissionsAntes)
+	// roles y permissions son catálogo fijo (migraciones); role_permissions es
+	// dato editable (Roles y permisos), por eso solo se exige que no cambie.
+	if rolesAntes != 8 || permissionsAntes != len(catalogoPermisosReales) {
+		t.Fatalf("precondición inesperada: roles=%d permissions=%d (se esperaba 8/%d)", rolesAntes, permissionsAntes, len(catalogoPermisosReales))
 	}
 
 	// ---- ListRoles ----
@@ -191,8 +196,8 @@ func TestRolesPermissionsRPC(t *testing.T) {
 		if err != nil {
 			t.Fatalf("se esperaba éxito para ADMIN/roles.view, got err=%v", err)
 		}
-		if len(resp.Roles) != 7 {
-			t.Fatalf("se esperaban 7 roles, got %d", len(resp.Roles))
+		if len(resp.Roles) != 8 {
+			t.Fatalf("se esperaban 8 roles, got %d", len(resp.Roles))
 		}
 		found := map[string]bool{}
 		for _, r := range resp.Roles {
@@ -231,8 +236,8 @@ func TestRolesPermissionsRPC(t *testing.T) {
 		if err != nil {
 			t.Fatalf("se esperaba éxito para ADMIN/roles.view, got err=%v", err)
 		}
-		if len(resp.Permissions) != 20 {
-			t.Fatalf("se esperaban 20 permisos, got %d", len(resp.Permissions))
+		if len(resp.Permissions) != len(catalogoPermisosReales) {
+			t.Fatalf("se esperaban %d permisos, got %d", len(catalogoPermisosReales), len(resp.Permissions))
 		}
 		found := map[string]bool{}
 		for _, p := range resp.Permissions {
@@ -265,12 +270,16 @@ func TestRolesPermissionsRPC(t *testing.T) {
 
 	// ---- GetRolePermissions ----
 
-	// Caso obligatorio (sección 18): los 7 roles reales, cada uno con el
-	// conteo EXACTO ya sembrado por la migración 005.
+	// Caso obligatorio (sección 18): los 8 roles reales; GetRolePermissions
+	// debe devolver EXACTAMENTE las filas que hay hoy en role_permissions.
 	adminID := createUser(t, "admin3", "ADMIN")
-	for roleName, expectedCount := range catalogoRolPermisos {
-		roleName, expectedCount := roleName, expectedCount
+	for _, roleName := range []string{"ADMIN", "DIRECTOR", "SUBDIRECTOR", "SECRETARIA", "DOCENTE", "AUXILIAR", "PSICOLOGO", "SOLICITANTE"} {
+		roleName := roleName
 		t.Run("GetRolePermissions_"+roleName, func(t *testing.T) {
+			var expectedCount int
+			if err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM role_permissions WHERE role_id = $1", roleIDByName(t, roleName)).Scan(&expectedCount); err != nil {
+				t.Fatalf("contar role_permissions de %s: %v", roleName, err)
+			}
 			resp, err := client.GetRolePermissions(authCtx(adminID), &auth.GetRolePermissionsRequest{RoleId: roleIDByName(t, roleName)})
 			if err != nil {
 				t.Fatalf("se esperaba éxito consultando permisos de %s, got err=%v", roleName, err)
@@ -281,35 +290,44 @@ func TestRolesPermissionsRPC(t *testing.T) {
 		})
 	}
 
-	// Caso obligatorio (sección 19): aislamiento explícito por role_id —
-	// "solicitudes.create" es EXCLUSIVO de SOLICITANTE en el catálogo real
-	// (ver migración 005): ningún otro rol debe traerlo mezclado.
+	// Caso obligatorio (sección 19): aislamiento explícito por role_id — lo que
+	// devuelve el RPC para un rol debe ser EXACTAMENTE el conjunto de códigos
+	// que la BD tiene para ese role_id (ni filas de otro rol, ni faltantes),
+	// comparado contra SQL directo en vez de contra una asignación fija: las
+	// asignaciones son editables desde Roles y permisos.
 	t.Run("GetRolePermissions_Aislamiento", func(t *testing.T) {
-		adminResp, err := client.GetRolePermissions(authCtx(adminID), &auth.GetRolePermissionsRequest{RoleId: roleIDByName(t, "ADMIN")})
-		if err != nil {
-			t.Fatalf("no se pudo consultar permisos de ADMIN: %v", err)
-		}
-		for _, p := range adminResp.Permissions {
-			if p.Codigo == "solicitudes.create" {
-				t.Fatal("ADMIN no debía traer 'solicitudes.create' (exclusivo de SOLICITANTE) — posible mezcla de relaciones por role_id")
+		codesFromDB := func(roleName string) string {
+			rows, err := pool.Query(ctx, `
+				SELECT p.codigo FROM role_permissions rp
+				JOIN permissions p ON p.id = rp.permission_id
+				WHERE rp.role_id = $1 ORDER BY p.codigo`, roleIDByName(t, roleName))
+			if err != nil {
+				t.Fatalf("consultar códigos de %s: %v", roleName, err)
 			}
-		}
-
-		solicitanteResp, err := client.GetRolePermissions(authCtx(adminID), &auth.GetRolePermissionsRequest{RoleId: roleIDByName(t, "SOLICITANTE")})
-		if err != nil {
-			t.Fatalf("no se pudo consultar permisos de SOLICITANTE: %v", err)
-		}
-		hasSolicitudesCreate := false
-		for _, p := range solicitanteResp.Permissions {
-			if p.Codigo == "expedientes.view" {
-				t.Fatal("SOLICITANTE no debía traer 'expedientes.view' (exclusivo de roles internos) — posible mezcla de relaciones por role_id")
+			defer rows.Close()
+			var codes []string
+			for rows.Next() {
+				var c string
+				if err := rows.Scan(&c); err != nil {
+					t.Fatalf("leer código: %v", err)
+				}
+				codes = append(codes, c)
 			}
-			if p.Codigo == "solicitudes.create" {
-				hasSolicitudesCreate = true
-			}
+			return strings.Join(codes, ",")
 		}
-		if !hasSolicitudesCreate {
-			t.Fatal("SOLICITANTE debía traer 'solicitudes.create'")
+		for _, roleName := range []string{"ADMIN", "SOLICITANTE", "DOCENTE"} {
+			resp, err := client.GetRolePermissions(authCtx(adminID), &auth.GetRolePermissionsRequest{RoleId: roleIDByName(t, roleName)})
+			if err != nil {
+				t.Fatalf("no se pudo consultar permisos de %s: %v", roleName, err)
+			}
+			got := make([]string, 0, len(resp.Permissions))
+			for _, p := range resp.Permissions {
+				got = append(got, p.Codigo)
+			}
+			sort.Strings(got)
+			if joined := strings.Join(got, ","); joined != codesFromDB(roleName) {
+				t.Fatalf("%s: el RPC devolvió %q pero la BD tiene %q — posible mezcla de relaciones por role_id", roleName, joined, codesFromDB(roleName))
+			}
 		}
 	})
 

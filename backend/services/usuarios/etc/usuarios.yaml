@@ -1,5 +1,5 @@
 Name: usuarios.rpc
-ListenOn: 0.0.0.0:8083
+ListenOn: 127.0.0.1:8083
 Mode: dev
 
 Etcd:
@@ -11,7 +11,7 @@ Postgres:
   Host: 127.0.0.1
   Port: 5433
   User: usuarios_user
-  Password: usuarios_password
+  Password: ${USUARIOS_DB_PASSWORD}
   Database: usuarios_db
   SSLMode: disable
 
@@ -19,3 +19,15 @@ JWTSecret: ${JWT_SECRET}
 
 AuthRpc:
   Target: 127.0.0.1:8080
+
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /usuarios.Usuarios/GetUsuario
+      - /usuarios.Usuarios/GetUsuarioBasic
+      - /usuarios.Usuarios/GetUsuariosBasic
+      - /usuarios.Usuarios/ListUsuarios
+      - /usuarios.Usuarios/SearchUsuarios
+      - /usuarios.Usuarios/UpsertUsuario
+      - /usuarios.Usuarios/UpdateMyProfile
+      - /usuarios.Usuarios/UpdateUsuarioRole

@@ -35,7 +35,7 @@ func main() {
 	})
 	policies := interceptor.DefaultMethodPolicies()
 	s.AddUnaryInterceptors(
-		interceptor.AuthenticationInterceptor(ctx.JWTManager, policies),
+		interceptor.AuthenticationInterceptor(ctx.JWTManager, policies, ctx.UserRepository),
 		interceptor.AuthorizationInterceptor(ctx.AuthorizationService, policies),
 	)
 	defer s.Stop()

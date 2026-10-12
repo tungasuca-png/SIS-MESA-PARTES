@@ -41,6 +41,11 @@ func (l *RegisterLogic) Register(in *auth.RegisterRequest) (*auth.RegisterRespon
 	password := in.Password
 	role := strings.TrimSpace(strings.ToUpper(in.Role))
 
+	dni, err := normalizeDNI(in.Dni)
+	if err != nil {
+		return nil, err
+	}
+
 	if username == "" {
 		return nil, status.Error(codes.InvalidArgument, "el username es obligatorio")
 	}
@@ -69,7 +74,7 @@ func (l *RegisterLogic) Register(in *auth.RegisterRequest) (*auth.RegisterRespon
 
 	switch role {
 	case "SOLICITANTE":
-	case "ADMIN", "DIRECTOR", "SUBDIRECTOR", "SECRETARIA", "DOCENTE", "AUXILIAR":
+	case "ADMIN", "DIRECTOR", "SUBDIRECTOR", "SECRETARIA", "DOCENTE", "AUXILIAR", "PSICOLOGO":
 		return nil, status.Error(codes.PermissionDenied, "no se permite registrar ese rol públicamente")
 	default:
 		return nil, status.Error(codes.InvalidArgument, "el rol indicado no existe")
@@ -90,6 +95,7 @@ func (l *RegisterLogic) Register(in *auth.RegisterRequest) (*auth.RegisterRespon
 		l.ctx,
 		&repository.User{
 			Username:     username,
+			DNI:          dni,
 			Email:        email,
 			PasswordHash: string(passwordHash),
 		},
@@ -99,6 +105,8 @@ func (l *RegisterLogic) Register(in *auth.RegisterRequest) (*auth.RegisterRespon
 		switch {
 		case errors.Is(err, repository.ErrUsernameExists):
 			return nil, status.Error(codes.AlreadyExists, "el username ya existe")
+		case errors.Is(err, repository.ErrDNIExists):
+			return nil, status.Error(codes.AlreadyExists, "el DNI ya existe")
 		case errors.Is(err, repository.ErrEmailExists):
 			return nil, status.Error(codes.AlreadyExists, "el email ya existe")
 		case errors.Is(err, repository.ErrRoleNotFound):

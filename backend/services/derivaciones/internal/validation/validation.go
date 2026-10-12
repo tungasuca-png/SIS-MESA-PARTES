@@ -36,3 +36,22 @@ var tiposDerivacion = map[string]bool{
 func IsValidTipo(value string) bool {
 	return tiposDerivacion[value]
 }
+
+// areasValidas refleja el mismo catálogo de áreas de Expedientes Service
+// (internal/estados.IsValidArea) — no importable directamente (paquete
+// "internal" de otro módulo Go), así que se duplica el valor, no la
+// lógica, igual que "estadoPendienteExpediente" en Documentos Service.
+// Cierra un hueco real: antes "origen"/"destino" solo se validaban por
+// longitud, nunca contra el catálogo real de áreas.
+var areasValidas = map[string]bool{
+	"SECRETARIA":  true,
+	"DIRECTOR":    true,
+	"SUBDIRECTOR": true,
+	"DOCENTE":     true,
+	"AUXILIAR":    true,
+	"ADMIN":       true,
+}
+
+func IsValidArea(value string) bool {
+	return areasValidas[value]
+}

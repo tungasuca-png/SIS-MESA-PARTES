@@ -3,7 +3,7 @@
 // (no JSON). Esta función nunca muestra ese texto crudo al usuario: solo
 // extrae el mensaje humano después de "desc =" cuando existe y lo usa como
 // mensaje de validación; para todo lo demás usa mensajes fijos en español.
-function extractBackendMessage(rawBody) {
+export function extractBackendMessage(rawBody) {
     if (typeof rawBody !== "string") return null;
     // http.Error (Go) agrega un salto de línea final; se recorta antes de
     // anclar "$" o la coincidencia falla porque "." no cruza saltos de línea.
@@ -28,6 +28,13 @@ export function friendlyErrorMessage(error, notFoundMessage = "El expediente no 
             return backendMessage || "No tienes permisos para realizar esta acción.";
         case 404:
             return notFoundMessage;
+        case 409:
+            // Conflicto (AlreadyExists/Aborted del backend, p. ej. "el
+            // estudiante ya tiene un expediente psicológico"): cada servicio
+            // ya envía un mensaje humano propio en "desc =" — mismo criterio
+            // que Usuarios.jsx (createUserErrorMessage). El respaldo es
+            // neutro a propósito: el 409 no es exclusivo de un módulo.
+            return backendMessage || "La operación no se pudo completar porque entra en conflicto con datos existentes.";
         default:
             return "Ocurrió un error en el servidor. Intenta nuevamente más tarde.";
     }

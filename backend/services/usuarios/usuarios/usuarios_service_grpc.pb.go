@@ -19,13 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Usuarios_GetUsuario_FullMethodName       = "/usuarios.Usuarios/GetUsuario"
-	Usuarios_GetUsuarioBasic_FullMethodName  = "/usuarios.Usuarios/GetUsuarioBasic"
-	Usuarios_GetUsuariosBasic_FullMethodName = "/usuarios.Usuarios/GetUsuariosBasic"
-	Usuarios_ListUsuarios_FullMethodName     = "/usuarios.Usuarios/ListUsuarios"
-	Usuarios_SearchUsuarios_FullMethodName   = "/usuarios.Usuarios/SearchUsuarios"
-	Usuarios_UpsertUsuario_FullMethodName    = "/usuarios.Usuarios/UpsertUsuario"
-	Usuarios_UpdateMyProfile_FullMethodName  = "/usuarios.Usuarios/UpdateMyProfile"
+	Usuarios_GetUsuario_FullMethodName        = "/usuarios.Usuarios/GetUsuario"
+	Usuarios_GetUsuarioBasic_FullMethodName   = "/usuarios.Usuarios/GetUsuarioBasic"
+	Usuarios_GetUsuariosBasic_FullMethodName  = "/usuarios.Usuarios/GetUsuariosBasic"
+	Usuarios_ListUsuarios_FullMethodName      = "/usuarios.Usuarios/ListUsuarios"
+	Usuarios_SearchUsuarios_FullMethodName    = "/usuarios.Usuarios/SearchUsuarios"
+	Usuarios_UpsertUsuario_FullMethodName     = "/usuarios.Usuarios/UpsertUsuario"
+	Usuarios_UpdateMyProfile_FullMethodName   = "/usuarios.Usuarios/UpdateMyProfile"
+	Usuarios_UpdateUsuarioRole_FullMethodName = "/usuarios.Usuarios/UpdateUsuarioRole"
 )
 
 // UsuariosClient is the client API for Usuarios service.
@@ -39,6 +40,7 @@ type UsuariosClient interface {
 	SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 	UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
 	UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
+	UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error)
 }
 
 type usuariosClient struct {
@@ -119,6 +121,16 @@ func (c *usuariosClient) UpdateMyProfile(ctx context.Context, in *UpdateMyProfil
 	return out, nil
 }
 
+func (c *usuariosClient) UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUsuarioRoleResponse)
+	err := c.cc.Invoke(ctx, Usuarios_UpdateUsuarioRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsuariosServer is the server API for Usuarios service.
 // All implementations must embed UnimplementedUsuariosServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type UsuariosServer interface {
 	SearchUsuarios(context.Context, *SearchUsuariosRequest) (*SearchUsuariosResponse, error)
 	UpsertUsuario(context.Context, *UpsertUsuarioRequest) (*UpsertUsuarioResponse, error)
 	UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error)
+	UpdateUsuarioRole(context.Context, *UpdateUsuarioRoleRequest) (*UpdateUsuarioRoleResponse, error)
 	mustEmbedUnimplementedUsuariosServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedUsuariosServer) UpsertUsuario(context.Context, *UpsertUsuario
 }
 func (UnimplementedUsuariosServer) UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMyProfile not implemented")
+}
+func (UnimplementedUsuariosServer) UpdateUsuarioRole(context.Context, *UpdateUsuarioRoleRequest) (*UpdateUsuarioRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUsuarioRole not implemented")
 }
 func (UnimplementedUsuariosServer) mustEmbedUnimplementedUsuariosServer() {}
 func (UnimplementedUsuariosServer) testEmbeddedByValue()                  {}
@@ -308,6 +324,24 @@ func _Usuarios_UpdateMyProfile_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Usuarios_UpdateUsuarioRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUsuarioRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).UpdateUsuarioRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_UpdateUsuarioRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).UpdateUsuarioRole(ctx, req.(*UpdateUsuarioRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Usuarios_ServiceDesc is the grpc.ServiceDesc for Usuarios service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var Usuarios_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMyProfile",
 			Handler:    _Usuarios_UpdateMyProfile_Handler,
+		},
+		{
+			MethodName: "UpdateUsuarioRole",
+			Handler:    _Usuarios_UpdateUsuarioRole_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

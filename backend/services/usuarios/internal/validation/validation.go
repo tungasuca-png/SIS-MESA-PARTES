@@ -24,6 +24,7 @@ var tiposUsuario = map[string]bool{
 	"SECRETARIA":  true,
 	"DOCENTE":     true,
 	"AUXILIAR":    true,
+	"PSICOLOGO":   true,
 	"SOLICITANTE": true,
 }
 

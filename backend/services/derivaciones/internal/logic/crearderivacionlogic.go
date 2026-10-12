@@ -33,17 +33,17 @@ func NewCrearDerivacionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 }
 
 func (l *CrearDerivacionLogic) CrearDerivacion(in *derivaciones.CrearDerivacionRequest) (*derivaciones.CrearDerivacionResponse, error) {
-	userID, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, _, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	// Permiso real (Paso 15B) + regla de negocio existente (CanCreate),
-	// ambas deben cumplirse.
+	// La autoridad es el permiso real: Auth.HasPermission("derivaciones.create").
+	// Ya no se exige además un rol "interno" (antes CanCreate(role)): era la
+	// misma decisión que el permiso, duplicada por nombre de rol. Las reglas
+	// de negocio independientes siguen abajo: expediente real, alcance
+	// (Expedientes.GetExpediente), origen/destino y transición válida.
 	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "derivaciones.create"); err != nil {
 		return nil, err
-	}
-	if !authorization.CanCreate(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede registrar derivaciones")
 	}
 	if in == nil {
 		return nil, status.Error(codes.InvalidArgument, "la solicitud es obligatoria")
@@ -59,20 +59,30 @@ func (l *CrearDerivacionLogic) CrearDerivacion(in *derivaciones.CrearDerivacionR
 		return nil, status.Error(codes.InvalidArgument, "el tipo de derivación no es válido")
 	}
 
-	origen := strings.TrimSpace(in.Origen)
+	// origen/destino siempre representan áreas (la comparación contra
+	// areaActual, más abajo, ya lo asume así para CUALQUIER tipo) — antes
+	// solo se validaba longitud, nunca contra el catálogo real de áreas
+	// (mismo catálogo que Expedientes.estados.IsValidArea).
+	origen := strings.ToUpper(strings.TrimSpace(in.Origen))
 	if origen == "" {
 		return nil, status.Error(codes.InvalidArgument, "el origen es obligatorio")
 	}
 	if len(origen) > 100 {
 		return nil, status.Error(codes.InvalidArgument, "el origen no puede superar los 100 caracteres")
 	}
+	if !validation.IsValidArea(origen) {
+		return nil, status.Error(codes.InvalidArgument, "el origen no corresponde a un área válida")
+	}
 
-	destino := strings.TrimSpace(in.Destino)
+	destino := strings.ToUpper(strings.TrimSpace(in.Destino))
 	if destino == "" {
 		return nil, status.Error(codes.InvalidArgument, "el destino es obligatorio")
 	}
 	if len(destino) > 100 {
 		return nil, status.Error(codes.InvalidArgument, "el destino no puede superar los 100 caracteres")
+	}
+	if !validation.IsValidArea(destino) {
+		return nil, status.Error(codes.InvalidArgument, "el destino no corresponde a un área válida")
 	}
 
 	motivo := strings.TrimSpace(in.Motivo)

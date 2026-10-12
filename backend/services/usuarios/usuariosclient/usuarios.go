@@ -14,22 +14,24 @@ import (
 )
 
 type (
-	GetUsuarioBasicRequest   = usuarios.GetUsuarioBasicRequest
-	GetUsuarioBasicResponse  = usuarios.GetUsuarioBasicResponse
-	GetUsuarioRequest        = usuarios.GetUsuarioRequest
-	GetUsuarioResponse       = usuarios.GetUsuarioResponse
-	GetUsuariosBasicRequest  = usuarios.GetUsuariosBasicRequest
-	GetUsuariosBasicResponse = usuarios.GetUsuariosBasicResponse
-	ListUsuariosRequest      = usuarios.ListUsuariosRequest
-	ListUsuariosResponse     = usuarios.ListUsuariosResponse
-	SearchUsuariosRequest    = usuarios.SearchUsuariosRequest
-	SearchUsuariosResponse   = usuarios.SearchUsuariosResponse
-	UpsertUsuarioRequest     = usuarios.UpsertUsuarioRequest
-	UpsertUsuarioResponse    = usuarios.UpsertUsuarioResponse
-	UpdateMyProfileRequest   = usuarios.UpdateMyProfileRequest
-	UpdateMyProfileResponse  = usuarios.UpdateMyProfileResponse
-	Usuario                  = usuarios.Usuario
-	UsuarioBasic             = usuarios.UsuarioBasic
+	GetUsuarioBasicRequest    = usuarios.GetUsuarioBasicRequest
+	GetUsuarioBasicResponse   = usuarios.GetUsuarioBasicResponse
+	GetUsuarioRequest         = usuarios.GetUsuarioRequest
+	GetUsuarioResponse        = usuarios.GetUsuarioResponse
+	GetUsuariosBasicRequest   = usuarios.GetUsuariosBasicRequest
+	GetUsuariosBasicResponse  = usuarios.GetUsuariosBasicResponse
+	ListUsuariosRequest       = usuarios.ListUsuariosRequest
+	ListUsuariosResponse      = usuarios.ListUsuariosResponse
+	SearchUsuariosRequest     = usuarios.SearchUsuariosRequest
+	SearchUsuariosResponse    = usuarios.SearchUsuariosResponse
+	UpsertUsuarioRequest      = usuarios.UpsertUsuarioRequest
+	UpsertUsuarioResponse     = usuarios.UpsertUsuarioResponse
+	UpdateMyProfileRequest    = usuarios.UpdateMyProfileRequest
+	UpdateMyProfileResponse   = usuarios.UpdateMyProfileResponse
+	UpdateUsuarioRoleRequest  = usuarios.UpdateUsuarioRoleRequest
+	UpdateUsuarioRoleResponse = usuarios.UpdateUsuarioRoleResponse
+	Usuario                   = usuarios.Usuario
+	UsuarioBasic              = usuarios.UsuarioBasic
 
 	Usuarios interface {
 		GetUsuario(ctx context.Context, in *GetUsuarioRequest, opts ...grpc.CallOption) (*GetUsuarioResponse, error)
@@ -39,6 +41,7 @@ type (
 		SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 		UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
 		UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
+		UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error)
 	}
 
 	defaultUsuarios struct {
@@ -85,4 +88,9 @@ func (m *defaultUsuarios) UpsertUsuario(ctx context.Context, in *UpsertUsuarioRe
 func (m *defaultUsuarios) UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error) {
 	client := usuarios.NewUsuariosClient(m.cli.Conn())
 	return client.UpdateMyProfile(ctx, in, opts...)
+}
+
+func (m *defaultUsuarios) UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.UpdateUsuarioRole(ctx, in, opts...)
 }

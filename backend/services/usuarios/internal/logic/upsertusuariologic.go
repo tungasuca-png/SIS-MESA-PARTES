@@ -33,12 +33,15 @@ func NewUpsertUsuarioLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ups
 }
 
 func (l *UpsertUsuarioLogic) UpsertUsuario(in *usuarios.UpsertUsuarioRequest) (*usuarios.UpsertUsuarioResponse, error) {
-	_, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, _, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	if !authorization.CanUpsert(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede administrar perfiles de usuario")
+	// Administrar perfiles es parte de crear/administrar usuarios: mismo permiso
+	// real que UpdateUsuarioRole y Auth.CreateUser ("usuarios.change_role"). Ya
+	// no se exige el nombre del rol (antes: role == ADMIN).
+	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "usuarios.change_role"); err != nil {
+		return nil, err
 	}
 	if in == nil {
 		return nil, status.Error(codes.InvalidArgument, "la solicitud es obligatoria")

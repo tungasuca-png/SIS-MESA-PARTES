@@ -33,11 +33,17 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 }
 
 func (l *LoginLogic) Login(in *auth.LoginRequest) (*auth.LoginResponse, error) {
-	if in == nil || in.Username == "" || in.Password == "" {
-		return nil, status.Error(codes.InvalidArgument, "username y password son obligatorios")
+	if in == nil || in.Password == "" {
+		return nil, status.Error(codes.InvalidArgument, "DNI y password son obligatorios")
+	}
+	// Formato inválido -> InvalidArgument (no revela nada sobre existencia).
+	// Un DNI con formato válido pero inexistente cae en credenciales inválidas.
+	dni, err := normalizeDNI(in.Dni)
+	if err != nil {
+		return nil, err
 	}
 
-	user, err := l.svcCtx.UserRepository.FindByUsername(l.ctx, in.Username)
+	user, err := l.svcCtx.UserRepository.FindByDNI(l.ctx, dni)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			_ = bcrypt.CompareHashAndPassword([]byte(dummyPasswordHash), []byte(in.Password))

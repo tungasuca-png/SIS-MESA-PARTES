@@ -2,159 +2,92 @@ package integration
 
 import (
 	"context"
-	"strings"
 
 	"auth/authclient"
-	"documentos/internal/security"
 	"expedientes/expedientesclient"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
-// rolePermissionsReplica es una copia de la MISMA matriz rol->permiso ya
-// sembrada en auth_db por la migración
-// 005_seed_permissions_and_role_permissions.sql (Paso 9) — no se inventa
-// ninguna regla nueva acá, solo se refleja la existente para poder probar
-// esta suite (identidades sintéticas que no existen en auth_db) sin
-// depender de un Auth Service real corriendo. Mismo patrón ya usado en
-// Expedientes (Paso 13B).
-var rolePermissionsReplica = map[string]map[string]bool{
-	"ADMIN": set(
-		"dashboard.view", "expedientes.view", "expedientes.create", "expedientes.update",
-		"expedientes.change_estado", "expedientes.delete", "documentos.view", "documentos.create",
-		"documentos.delete", "derivaciones.view", "derivaciones.create", "seguimiento.view",
-		"reportes.view", "usuarios.view", "roles.view", "configuracion.view",
-	),
-	"DIRECTOR": set(
-		"dashboard.view", "expedientes.view", "expedientes.update", "expedientes.change_estado",
-		"expedientes.delete", "documentos.view", "documentos.create", "documentos.delete",
-		"derivaciones.view", "derivaciones.create", "seguimiento.view", "reportes.view",
-	),
-	"SUBDIRECTOR": set(
-		"dashboard.view", "expedientes.view", "expedientes.update", "expedientes.change_estado",
-		"expedientes.delete", "documentos.view", "documentos.create", "documentos.delete",
-		"derivaciones.view", "derivaciones.create", "seguimiento.view", "reportes.view",
-	),
-	"SECRETARIA": set(
-		"dashboard.view", "expedientes.view", "expedientes.create", "expedientes.update",
-		"expedientes.change_estado", "expedientes.delete", "documentos.view", "documentos.create",
-		"documentos.delete", "derivaciones.view", "derivaciones.create", "seguimiento.view",
-	),
-	"DOCENTE": set(
-		"dashboard.view", "expedientes.view", "expedientes.update", "expedientes.change_estado",
-		"expedientes.delete", "documentos.view", "documentos.create", "documentos.delete",
-		"derivaciones.view", "derivaciones.create", "seguimiento.view",
-	),
-	"AUXILIAR": set(
-		"dashboard.view", "expedientes.view", "expedientes.update", "expedientes.change_estado",
-		"expedientes.delete", "documentos.view", "documentos.create", "documentos.delete",
-		"derivaciones.view", "derivaciones.create", "seguimiento.view",
-	),
-	"SOLICITANTE": set(
-		"dashboard.view", "solicitudes.create", "expedientes.view_own", "documentos.view_own",
-		"documentos.create", "seguimiento.view_own",
-	),
+// scriptedAuthClient es un doble de Auth SOLO para las suites de REGLAS DE
+// NEGOCIO de documentos (área/ownership/estado/etc.), que usan identidades
+// sintéticas (fixedUUID) inexistentes en auth_db: un Auth real respondería
+// siempre allowed=false. NO conoce ningún catálogo rol->permiso: responde
+// allowed=true salvo que el propio test declare una negación puntual
+// (userID -> permiso). Qué permisos tiene realmente cada rol se prueba contra
+// el Auth Service real en TestHasPermissionIntegration (mismo paquete).
+type scriptedAuthClient struct {
+	denied map[string]map[string]bool
 }
 
-func set(codes ...string) map[string]bool {
-	m := make(map[string]bool, len(codes))
-	for _, c := range codes {
-		m[c] = true
-	}
-	return m
+func newScriptedAuthClient(denied map[string]map[string]bool) authclient.Auth {
+	return &scriptedAuthClient{denied: denied}
 }
 
-// replicaAuthClient es un doble de prueba SOLO para
-// TestDocumentosIntegration: esa suite usa identidades sintéticas
-// (fixedUUID) que nunca existen en auth_db, así que un AuthClient real
-// respondería siempre allowed=false por "usuario inexistente". En vez de
-// "permitir siempre" (lo que ocultaría casos reales, como que un
-// SOLICITANTE no debe poder subir PROVEIDO ni eliminar), este doble lee
-// el MISMO JWT que ya autenticó la llamada (reenviado como metadata
-// saliente por authorization.HasPermission/RequirePermission) y aplica
-// rolePermissionsReplica — la misma matriz real, no una regla inventada.
-type replicaAuthClient struct {
-	validator *security.JWTValidator
+func (c *scriptedAuthClient) HasPermission(_ context.Context, in *authclient.HasPermissionRequest, _ ...grpc.CallOption) (*authclient.HasPermissionResponse, error) {
+	return &authclient.HasPermissionResponse{Allowed: !c.denied[in.UserId][in.Permission]}, nil
 }
 
-func newReplicaAuthClient(validator *security.JWTValidator) authclient.Auth {
-	return &replicaAuthClient{validator: validator}
-}
-
-func (c *replicaAuthClient) HasPermission(ctx context.Context, in *authclient.HasPermissionRequest, _ ...grpc.CallOption) (*authclient.HasPermissionResponse, error) {
-	role, err := roleFromOutgoingToken(ctx, c.validator)
-	if err != nil {
-		return nil, err
-	}
-	return &authclient.HasPermissionResponse{Allowed: rolePermissionsReplica[role][in.Permission]}, nil
-}
-
-func roleFromOutgoingToken(ctx context.Context, validator *security.JWTValidator) (string, error) {
-	values, ok := metadata.FromOutgoingContext(ctx)
-	if !ok {
-		return "", status.Error(codes.Unauthenticated, "falta el token de acceso")
-	}
-	authValues := values.Get("authorization")
-	if len(authValues) == 0 {
-		return "", status.Error(codes.Unauthenticated, "falta el token de acceso")
-	}
-	parts := strings.Fields(authValues[0])
-	if len(parts) != 2 {
-		return "", status.Error(codes.Unauthenticated, "token de acceso inválido")
-	}
-	claims, err := validator.Validate(parts[1])
-	if err != nil {
-		return "", status.Error(codes.Unauthenticated, "token de acceso inválido")
-	}
-	return claims.Role, nil
-}
-
-func (c *replicaAuthClient) Ping(context.Context, *authclient.Request, ...grpc.CallOption) (*authclient.Response, error) {
+func (c *scriptedAuthClient) Ping(context.Context, *authclient.Request, ...grpc.CallOption) (*authclient.Response, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) Register(context.Context, *authclient.RegisterRequest, ...grpc.CallOption) (*authclient.RegisterResponse, error) {
+func (c *scriptedAuthClient) Register(context.Context, *authclient.RegisterRequest, ...grpc.CallOption) (*authclient.RegisterResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) Login(context.Context, *authclient.LoginRequest, ...grpc.CallOption) (*authclient.LoginResponse, error) {
+func (c *scriptedAuthClient) Login(context.Context, *authclient.LoginRequest, ...grpc.CallOption) (*authclient.LoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) RefreshToken(context.Context, *authclient.RefreshTokenRequest, ...grpc.CallOption) (*authclient.RefreshTokenResponse, error) {
+func (c *scriptedAuthClient) RefreshToken(context.Context, *authclient.RefreshTokenRequest, ...grpc.CallOption) (*authclient.RefreshTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) Logout(context.Context, *authclient.LogoutRequest, ...grpc.CallOption) (*authclient.LogoutResponse, error) {
+func (c *scriptedAuthClient) Logout(context.Context, *authclient.LogoutRequest, ...grpc.CallOption) (*authclient.LogoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) ValidateToken(context.Context, *authclient.ValidateTokenRequest, ...grpc.CallOption) (*authclient.ValidateTokenResponse, error) {
+func (c *scriptedAuthClient) ValidateToken(context.Context, *authclient.ValidateTokenRequest, ...grpc.CallOption) (*authclient.ValidateTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
 // ListRoles/ListPermissions/GetRolePermissions (Paso 21B): añadidos a
 // authclient.Auth -- no usados por esta suite, solo necesarios para que
 // este doble siga satisfaciendo la interfaz completa.
-func (c *replicaAuthClient) ListRoles(context.Context, *authclient.ListRolesRequest, ...grpc.CallOption) (*authclient.ListRolesResponse, error) {
+func (c *scriptedAuthClient) ListRoles(context.Context, *authclient.ListRolesRequest, ...grpc.CallOption) (*authclient.ListRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) ListPermissions(context.Context, *authclient.ListPermissionsRequest, ...grpc.CallOption) (*authclient.ListPermissionsResponse, error) {
+func (c *scriptedAuthClient) ListPermissions(context.Context, *authclient.ListPermissionsRequest, ...grpc.CallOption) (*authclient.ListPermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) GetRolePermissions(context.Context, *authclient.GetRolePermissionsRequest, ...grpc.CallOption) (*authclient.GetRolePermissionsResponse, error) {
+func (c *scriptedAuthClient) GetRolePermissions(context.Context, *authclient.GetRolePermissionsRequest, ...grpc.CallOption) (*authclient.GetRolePermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
 // UpdateRolePermissions (Paso 21C): añadido a authclient.Auth -- no usado
 // por esta suite, solo necesario para que este doble siga satisfaciendo la
 // interfaz completa.
-func (c *replicaAuthClient) UpdateRolePermissions(context.Context, *authclient.UpdateRolePermissionsRequest, ...grpc.CallOption) (*authclient.UpdateRolePermissionsResponse, error) {
+func (c *scriptedAuthClient) UpdateRolePermissions(context.Context, *authclient.UpdateRolePermissionsRequest, ...grpc.CallOption) (*authclient.UpdateRolePermissionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+// GetMyPermissions: añadido a authclient.Auth -- no usado por esta suite,
+// solo necesario para que este doble siga satisfaciendo la interfaz
+// completa.
+func (c *scriptedAuthClient) GetMyPermissions(context.Context, *authclient.GetMyPermissionsRequest, ...grpc.CallOption) (*authclient.GetMyPermissionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) UpdateUserRole(context.Context, *authclient.UpdateUserRoleRequest, ...grpc.CallOption) (*authclient.UpdateUserRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) CreateUser(context.Context, *authclient.CreateUserRequest, ...grpc.CallOption) (*authclient.CreateUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 

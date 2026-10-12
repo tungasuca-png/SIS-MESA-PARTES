@@ -4,8 +4,10 @@ import (
 	"auth/authclient"
 	"derivaciones/derivacionesclient"
 	"documentos/documentosclient"
+	"estudiantes/estudiantesclient"
 	"expedientes/expedientesclient"
 	"gateway/internal/config"
+	"psicologia/psicologiaclient"
 	"usuarios/usuariosclient"
 
 	"github.com/zeromicro/go-zero/zrpc"
@@ -19,6 +21,8 @@ type ServiceContext struct {
 	UsuariosClient     usuariosclient.Usuarios
 	DocumentosClient   documentosclient.Documentos
 	DerivacionesClient derivacionesclient.Derivaciones
+	PsicologiaClient   psicologiaclient.Psicologia
+	EstudiantesClient  estudiantesclient.Estudiantes
 }
 
 // documentosMaxMsgSize deja margen sobre el limite de archivo de Documentos
@@ -46,6 +50,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		),
 		DerivacionesClient: derivacionesclient.NewDerivaciones(
 			zrpc.MustNewClient(c.DerivacionesRpc),
+		),
+		PsicologiaClient: psicologiaclient.NewPsicologia(
+			zrpc.MustNewClient(c.PsicologiaRpc),
+		),
+		EstudiantesClient: estudiantesclient.NewEstudiantes(
+			zrpc.MustNewClient(c.EstudiantesRpc),
 		),
 	}
 }

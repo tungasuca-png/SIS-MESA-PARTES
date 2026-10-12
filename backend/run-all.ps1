@@ -1,5 +1,5 @@
-# Levanta los 6 procesos del backend (Auth, Expedientes, Usuarios,
-# Documentos, Derivaciones, Gateway) con un solo comando, todos con el mismo
+# Levanta los 7 procesos del backend (Auth, Expedientes, Usuarios,
+# Documentos, Derivaciones, Psicologia, Gateway) con un solo comando, todos con el mismo
 # JWT_SECRET.
 #
 # Uso:
@@ -28,6 +28,15 @@ if (-not $jwtLine) {
 }
 $env:JWT_SECRET = ($jwtLine -replace "^JWT_SECRET=", "").Trim()
 
+# Otras variables de entorno de backend/.env (p. ej. PSICOLOGIA_DB_PASSWORD, el
+# secreto de la base de Psicologia, que nunca se escribe en un YAML). JWT_SECRET
+# ya se cargo arriba.
+foreach ($line in (Get-Content $envFile)) {
+    if ($line -match '^\s*([A-Z][A-Z0-9_]*)=(.*)$' -and $Matches[1] -ne "JWT_SECRET") {
+        Set-Item -Path "Env:$($Matches[1])" -Value $Matches[2].Trim()
+    }
+}
+
 $logsDir = Join-Path $root "logs"
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
 
@@ -39,6 +48,8 @@ $services = @(
     @{ Name = "usuarios";     Dir = "services/usuarios";     Main = "usuarios.go";     Yaml = "etc/usuarios.yaml";     Port = 8083 }
     @{ Name = "documentos";   Dir = "services/documentos";   Main = "documentos.go";   Yaml = "etc/documentos.yaml";   Port = 8084 }
     @{ Name = "derivaciones"; Dir = "services/derivaciones"; Main = "derivaciones.go"; Yaml = "etc/derivaciones.yaml"; Port = 8085 }
+    @{ Name = "estudiantes";  Dir = "services/estudiantes";  Main = "estudiantes.go";  Yaml = "etc/estudiantes.yaml";  Port = 8087 }
+    @{ Name = "psicologia";   Dir = "services/psicologia";   Main = "psicologia.go";   Yaml = "etc/psicologia.yaml";   Port = 8086 }
     @{ Name = "gateway";      Dir = "gateway";               Main = "gateway.go";      Yaml = "etc/gateway-api.yaml";  Port = 8888 }
 )
 
@@ -65,6 +76,6 @@ foreach ($svc in $services) {
 $started | ConvertTo-Json | Out-File -FilePath $pidsFile -Encoding utf8
 
 Write-Host ""
-Write-Host "Los 6 procesos se lanzaron (compilando con 'go run', puede tardar unos segundos)." -ForegroundColor Green
+Write-Host "Los 7 procesos se lanzaron (compilando con 'go run', puede tardar unos segundos)." -ForegroundColor Green
 Write-Host "Logs en backend\logs\<servicio>.log - para bajarlos todos: .\stop-all.ps1" -ForegroundColor Green
 $started | Format-Table -AutoSize

@@ -30,106 +30,83 @@ import (
 
 const testSecret = "usuarios-integration-test-secret"
 
-// rolePermissionsReplica es una copia de la MISMA matriz rol->permiso ya
-// sembrada en auth_db por la migración
-// 005_seed_permissions_and_role_permissions.sql (Paso 9) — no se inventa
-// ninguna regla nueva acá, solo se refleja la existente para poder probar
-// esta suite (identidades sintéticas que no existen en auth_db) sin
-// depender de un Auth Service real corriendo. Mismo patrón ya usado en
-// Expedientes/Documentos/Derivaciones. Solo se listan los permisos que
-// esta suite necesita distinguir (usuarios.view: ADMIN sí, SOLICITANTE no).
-var rolePermissionsReplica = map[string]map[string]bool{
-	"ADMIN":       {"usuarios.view": true},
-	"SOLICITANTE": {},
-	// DIRECTOR es personal interno (CanViewFullProfile/IsInternal lo
-	// permitiría solo), pero el catálogo real (migración 005) NO le da
-	// usuarios.view — solo ADMIN lo tiene. Se usa para probar que, tras
-	// este paso, un interno no-ADMIN queda DENEGADO en GetUsuario sobre
-	// el perfil de otro (cambio de comportamiento real, ver informe).
-	"DIRECTOR": {},
-}
-
 // failingAuthClient simula "Auth no disponible": HasPermission siempre
 // devuelve un error de comunicación (nunca allowed=true ni
 // PermissionDenied) — para probar que el fallo se propaga (fail-closed)
 // en vez de permitir la operación.
-type failingAuthClient struct{ *replicaAuthClient }
+type failingAuthClient struct{ *scriptedAuthClient }
 
 func (c *failingAuthClient) HasPermission(context.Context, *authclient.HasPermissionRequest, ...grpc.CallOption) (*authclient.HasPermissionResponse, error) {
 	return nil, status.Error(codes.Unavailable, "auth service no disponible (simulado)")
 }
 
-// replicaAuthClient es un doble de prueba SOLO para TestUsuariosIntegration:
-// esa suite usa identidades sintéticas (testUUID) que nunca existen en
-// auth_db, así que un AuthClient real respondería siempre allowed=false
-// por "usuario inexistente" — impidiendo probar las reglas de negocio
-// (CanViewFullProfile/CanListOrSearch/CanUpsert) que esta suite en
-// realidad verifica. En vez de "permitir siempre", este doble lee el
-// MISMO JWT que ya autenticó la llamada (reenviado como metadata saliente
-// por authorization.HasPermission/RequirePermission) y aplica
-// rolePermissionsReplica — la misma matriz real, no una regla inventada.
-type replicaAuthClient struct {
-	validator *security.JWTValidator
+// scriptedAuthClient es un doble de Auth SOLO para TestUsuariosIntegration:
+// esa suite usa identidades sintéticas (testUUID) inexistentes en auth_db,
+// así que un Auth real respondería siempre allowed=false. NO conoce ningún
+// catálogo rol->permiso: responde allowed=true salvo que el propio test
+// declare una negación puntual (userID -> permiso). Qué permisos tiene
+// realmente cada rol se prueba contra el Auth Service real.
+type scriptedAuthClient struct {
+	denied map[string]map[string]bool
 }
 
-func (c *replicaAuthClient) HasPermission(ctx context.Context, in *authclient.HasPermissionRequest, _ ...grpc.CallOption) (*authclient.HasPermissionResponse, error) {
-	values, ok := metadata.FromOutgoingContext(ctx)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "falta el token de acceso")
-	}
-	authValues := values.Get("authorization")
-	if len(authValues) == 0 {
-		return nil, status.Error(codes.Unauthenticated, "falta el token de acceso")
-	}
-	parts := strings.Fields(authValues[0])
-	if len(parts) != 2 {
-		return nil, status.Error(codes.Unauthenticated, "token de acceso inválido")
-	}
-	claims, err := c.validator.Validate(parts[1])
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "token de acceso inválido")
-	}
-	return &authclient.HasPermissionResponse{Allowed: rolePermissionsReplica[claims.Role][in.Permission]}, nil
+func (c *scriptedAuthClient) HasPermission(_ context.Context, in *authclient.HasPermissionRequest, _ ...grpc.CallOption) (*authclient.HasPermissionResponse, error) {
+	return &authclient.HasPermissionResponse{Allowed: !c.denied[in.UserId][in.Permission]}, nil
 }
 
-func (c *replicaAuthClient) Ping(context.Context, *authclient.Request, ...grpc.CallOption) (*authclient.Response, error) {
+func (c *scriptedAuthClient) Ping(context.Context, *authclient.Request, ...grpc.CallOption) (*authclient.Response, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
-func (c *replicaAuthClient) Register(context.Context, *authclient.RegisterRequest, ...grpc.CallOption) (*authclient.RegisterResponse, error) {
+func (c *scriptedAuthClient) Register(context.Context, *authclient.RegisterRequest, ...grpc.CallOption) (*authclient.RegisterResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
-func (c *replicaAuthClient) Login(context.Context, *authclient.LoginRequest, ...grpc.CallOption) (*authclient.LoginResponse, error) {
+func (c *scriptedAuthClient) Login(context.Context, *authclient.LoginRequest, ...grpc.CallOption) (*authclient.LoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
-func (c *replicaAuthClient) RefreshToken(context.Context, *authclient.RefreshTokenRequest, ...grpc.CallOption) (*authclient.RefreshTokenResponse, error) {
+func (c *scriptedAuthClient) RefreshToken(context.Context, *authclient.RefreshTokenRequest, ...grpc.CallOption) (*authclient.RefreshTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
-func (c *replicaAuthClient) Logout(context.Context, *authclient.LogoutRequest, ...grpc.CallOption) (*authclient.LogoutResponse, error) {
+func (c *scriptedAuthClient) Logout(context.Context, *authclient.LogoutRequest, ...grpc.CallOption) (*authclient.LogoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
-func (c *replicaAuthClient) ValidateToken(context.Context, *authclient.ValidateTokenRequest, ...grpc.CallOption) (*authclient.ValidateTokenResponse, error) {
+func (c *scriptedAuthClient) ValidateToken(context.Context, *authclient.ValidateTokenRequest, ...grpc.CallOption) (*authclient.ValidateTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
 // ListRoles/ListPermissions/GetRolePermissions (Paso 21B): añadidos a
 // authclient.Auth -- no usados por esta suite, solo necesarios para que
 // este doble siga satisfaciendo la interfaz completa.
-func (c *replicaAuthClient) ListRoles(context.Context, *authclient.ListRolesRequest, ...grpc.CallOption) (*authclient.ListRolesResponse, error) {
+func (c *scriptedAuthClient) ListRoles(context.Context, *authclient.ListRolesRequest, ...grpc.CallOption) (*authclient.ListRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) ListPermissions(context.Context, *authclient.ListPermissionsRequest, ...grpc.CallOption) (*authclient.ListPermissionsResponse, error) {
+func (c *scriptedAuthClient) ListPermissions(context.Context, *authclient.ListPermissionsRequest, ...grpc.CallOption) (*authclient.ListPermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
-func (c *replicaAuthClient) GetRolePermissions(context.Context, *authclient.GetRolePermissionsRequest, ...grpc.CallOption) (*authclient.GetRolePermissionsResponse, error) {
+func (c *scriptedAuthClient) GetRolePermissions(context.Context, *authclient.GetRolePermissionsRequest, ...grpc.CallOption) (*authclient.GetRolePermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
 // UpdateRolePermissions (Paso 21C): añadido a authclient.Auth -- no usado
 // por esta suite, solo necesario para que este doble siga satisfaciendo la
 // interfaz completa.
-func (c *replicaAuthClient) UpdateRolePermissions(context.Context, *authclient.UpdateRolePermissionsRequest, ...grpc.CallOption) (*authclient.UpdateRolePermissionsResponse, error) {
+func (c *scriptedAuthClient) UpdateRolePermissions(context.Context, *authclient.UpdateRolePermissionsRequest, ...grpc.CallOption) (*authclient.UpdateRolePermissionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+// GetMyPermissions: añadido a authclient.Auth -- no usado por esta suite,
+// solo necesario para que este doble siga satisfaciendo la interfaz
+// completa.
+func (c *scriptedAuthClient) GetMyPermissions(context.Context, *authclient.GetMyPermissionsRequest, ...grpc.CallOption) (*authclient.GetMyPermissionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) UpdateUserRole(context.Context, *authclient.UpdateUserRoleRequest, ...grpc.CallOption) (*authclient.UpdateUserRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) CreateUser(context.Context, *authclient.CreateUserRequest, ...grpc.CallOption) (*authclient.CreateUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
@@ -141,7 +118,7 @@ func TestUsuariosIntegration(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -156,15 +133,21 @@ func TestUsuariosIntegration(t *testing.T) {
 	otroSolicitanteID := testUUID(testID, 3)
 	defer cleanup(t, pool, adminID, solicitanteID, otroSolicitanteID)
 
+	// Auth simulado sin catálogo: permite todo salvo lo que este escenario
+	// declara explícitamente — el solicitante no tiene permisos de usuarios.
+	denied := map[string]map[string]bool{
+		solicitanteID: {"usuarios.view": true, "usuarios.change_role": true},
+	}
+
 	svcCtx := &svc.ServiceContext{
 		Config:            config.Config{JWTSecret: testSecret},
 		DB:                pool,
 		UsuarioRepository: repository.NewUsuarioRepository(pool),
 		JWTValidator:      security.NewJWTValidator(testSecret),
 		// Esta suite usa identidades sintéticas que no existen en auth_db
-		// — ver replicaAuthClient más arriba. El flujo real contra Auth
+		// — ver scriptedAuthClient más arriba. El flujo real contra Auth
 		// Service se prueba por separado (ver informe del Paso 16B).
-		AuthClient: &replicaAuthClient{validator: security.NewJWTValidator(testSecret)},
+		AuthClient: &scriptedAuthClient{denied: denied},
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
@@ -313,6 +296,8 @@ func TestUsuariosIntegration(t *testing.T) {
 	// antes CanViewFullProfile (IsInternal) alcanzaba; ahora también se
 	// exige usuarios.view, y el catálogo real solo se lo da a ADMIN. ---
 	directorID := testUUID(testID, 4)
+	// El DIRECTOR de este escenario no tiene permisos de usuarios (solo lo tendría un rol al que ADMIN se los asigne).
+	denied[directorID] = map[string]bool{"usuarios.view": true, "usuarios.change_role": true}
 	defer cleanup(t, pool, directorID)
 	if _, err := client.UpsertUsuario(ctxAdmin, &usuarios.UpsertUsuarioRequest{
 		Id: directorID, Nombres: "TEST USER Director", Apellidos: "TEST Director", TipoUsuario: "DIRECTOR",
@@ -337,6 +322,54 @@ func TestUsuariosIntegration(t *testing.T) {
 		t.Fatalf("expected PermissionDenied listing as DIRECTOR, got %v", err)
 	}
 
+	// --- UpdateUsuarioRole (sincronización Usuario -> Rol): solo refleja
+	// tipo_usuario, nunca decide el rol ni toca el resto del perfil. ---
+	if _, err := client.UpdateUsuarioRole(ctxAdmin, &usuarios.UpdateUsuarioRoleRequest{
+		Id: solicitanteID, TipoUsuario: "DOCENTE",
+	}); err != nil {
+		t.Fatalf("sync tipo_usuario como ADMIN: %v", err)
+	}
+	afterSync, err := client.GetUsuario(ctxAdmin, &usuarios.GetUsuarioRequest{Id: solicitanteID})
+	if err != nil {
+		t.Fatalf("get usuario tras sincronizar: %v", err)
+	}
+	if afterSync.Usuario.TipoUsuario != "DOCENTE" {
+		t.Fatalf("esperado tipo_usuario=DOCENTE tras sync, got %q", afterSync.Usuario.TipoUsuario)
+	}
+	if afterSync.Usuario.Telefono != "999000111" {
+		t.Fatalf("UpdateUsuarioRole no debe tocar otros campos del perfil, telefono cambió a %q", afterSync.Usuario.Telefono)
+	}
+
+	// Sin "usuarios.change_role" (SOLICITANTE): PermissionDenied, sin tocar
+	// el perfil.
+	if _, err := client.UpdateUsuarioRole(ctxSolicitante, &usuarios.UpdateUsuarioRoleRequest{
+		Id: solicitanteID, TipoUsuario: "AUXILIAR",
+	}); status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("expected PermissionDenied sincronizando sin usuarios.change_role, got %v", err)
+	}
+	unchanged, err := client.GetUsuario(ctxAdmin, &usuarios.GetUsuarioRequest{Id: solicitanteID})
+	if err != nil {
+		t.Fatalf("get usuario tras intento sin permiso: %v", err)
+	}
+	if unchanged.Usuario.TipoUsuario != "DOCENTE" {
+		t.Fatalf("el perfil no debía cambiar sin permiso, got tipo_usuario=%q", unchanged.Usuario.TipoUsuario)
+	}
+
+	// Usuario sin perfil registrado en Usuarios Service: NotFound (no hay
+	// nada que sincronizar, no es un fallo de este RPC).
+	if _, err := client.UpdateUsuarioRole(ctxAdmin, &usuarios.UpdateUsuarioRoleRequest{
+		Id: otroSolicitanteID, TipoUsuario: "DOCENTE",
+	}); status.Code(err) != codes.NotFound {
+		t.Fatalf("expected NotFound sincronizando un usuario sin perfil, got %v", err)
+	}
+
+	// tipo_usuario inválido: InvalidArgument, sin tocar el perfil.
+	if _, err := client.UpdateUsuarioRole(ctxAdmin, &usuarios.UpdateUsuarioRoleRequest{
+		Id: solicitanteID, TipoUsuario: "NO_EXISTE",
+	}); status.Code(err) != codes.InvalidArgument {
+		t.Fatalf("expected InvalidArgument para tipo_usuario inválido, got %v", err)
+	}
+
 	// --- Auth no disponible: fail-closed, nunca se permite la operación
 	// protegida por un error de comunicación con Auth. ---
 	downSvcCtx := &svc.ServiceContext{
@@ -344,7 +377,7 @@ func TestUsuariosIntegration(t *testing.T) {
 		DB:                pool,
 		UsuarioRepository: repository.NewUsuarioRepository(pool),
 		JWTValidator:      security.NewJWTValidator(testSecret),
-		AuthClient:        &failingAuthClient{&replicaAuthClient{validator: security.NewJWTValidator(testSecret)}},
+		AuthClient:        &failingAuthClient{&scriptedAuthClient{denied: denied}},
 	}
 	downListener := bufconn.Listen(1024 * 1024)
 	downServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
@@ -371,6 +404,9 @@ func TestUsuariosIntegration(t *testing.T) {
 	if _, err := downClient.GetUsuario(ctxAdmin, &usuarios.GetUsuarioRequest{Id: solicitanteID}); err == nil {
 		t.Fatal("se esperaba un error (fail-closed) en GetUsuario cuando Auth Service no está disponible, la operación se permitió")
 	}
+	if _, err := downClient.UpdateUsuarioRole(ctxAdmin, &usuarios.UpdateUsuarioRoleRequest{Id: solicitanteID, TipoUsuario: "DOCENTE"}); err == nil {
+		t.Fatal("se esperaba un error (fail-closed) en UpdateUsuarioRole cuando Auth Service no está disponible, la operación se permitió")
+	}
 }
 
 func authContext(userID, role string) context.Context {
@@ -393,11 +429,16 @@ func testUUID(testID int64, index int) string {
 	return fmt.Sprintf("00000000-0000-4000-8000-%012d", value)
 }
 
-func integrationDatabaseURL() string {
-	if value := os.Getenv("USUARIOS_TEST_DATABASE_URL"); value != "" {
-		return value
+func integrationDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_USUARIOS_DB_URL")
+	if url == "" {
+		t.Skip("TEST_USUARIOS_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://usuarios_user:usuarios_password@127.0.0.1:5433/usuarios_db?sslmode=disable"
+	return url
 }
 
 func cleanup(t *testing.T, pool *pgxpool.Pool, ids ...string) {

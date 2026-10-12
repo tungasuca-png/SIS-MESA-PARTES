@@ -37,7 +37,7 @@ func TestAuthIntegration(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	pool, err := pgxpool.New(ctx, integrationDatabaseURL())
+	pool, err := pgxpool.New(ctx, integrationDatabaseURL(t))
 	if err != nil {
 		t.Fatalf("create PostgreSQL pool: %v", err)
 	}
@@ -119,7 +119,8 @@ func TestAuthIntegration(t *testing.T) {
 	defer conn.Close()
 	client := auth.NewAuthClient(conn)
 
-	registerResponse, err := client.Register(clientCtx, &auth.RegisterRequest{Username: username, Email: email, Password: "integration-password", Role: ""})
+	dni := nextTestDNI()
+	registerResponse, err := client.Register(clientCtx, &auth.RegisterRequest{Dni: dni, Username: username, Email: email, Password: "integration-password", Role: ""})
 	if err != nil {
 		t.Fatalf("register integration user: %v", err)
 	}
@@ -141,16 +142,22 @@ func TestAuthIntegration(t *testing.T) {
 	}
 
 	for _, roleName := range []string{"ADMIN", "DIRECTOR", "SUBDIRECTOR", "SECRETARIA", "DOCENTE", "AUXILIAR"} {
-		response, err := client.Register(clientCtx, &auth.RegisterRequest{Username: integrationUserPrefix + roleName + "_" + testID, Email: strings.ToLower(roleName) + "_" + testID + "@test.local", Password: "integration-password", Role: roleName})
+		response, err := client.Register(clientCtx, &auth.RegisterRequest{Dni: nextTestDNI(), Username: integrationUserPrefix + roleName + "_" + testID, Email: strings.ToLower(roleName) + "_" + testID + "@test.local", Password: "integration-password", Role: roleName})
 		if status.Code(err) != codes.PermissionDenied || response != nil {
 			t.Fatalf("expected public registration of %s to be denied, response=%v err=%v", roleName, response, err)
 		}
 	}
 
-	if _, err := pool.Exec(ctx, "INSERT INTO usuario_roles (usuario_id, rol_id) VALUES ($1, $2), ($1, $3)", registerResponse.Id, roles["DOCENTE"], roles["AUXILIAR"]); err != nil {
-		t.Fatalf("assign multiple roles: %v", err)
+	// 1 usuario = 1 rol: PostgreSQL (migración 007) rechaza un segundo rol.
+	if _, err := pool.Exec(ctx, "INSERT INTO usuario_roles (usuario_id, rol_id) VALUES ($1, $2)", registerResponse.Id, roles["DOCENTE"]); err == nil {
+		t.Fatal("expected the database to reject a second role for the same user")
 	}
-	loginResponse, err := client.Login(clientCtx, &auth.LoginRequest{Username: username, Password: "integration-password"})
+	// Cambio de rol (1 usuario = 1 rol): SOLICITANTE -> DOCENTE, que es el rol
+	// al que este test le asignó el permiso de integración.
+	if _, err := pool.Exec(ctx, "UPDATE usuario_roles SET rol_id = $2 WHERE usuario_id = $1", registerResponse.Id, roles["DOCENTE"]); err != nil {
+		t.Fatalf("change role to DOCENTE: %v", err)
+	}
+	loginResponse, err := client.Login(clientCtx, &auth.LoginRequest{Dni: dni, Password: "integration-password"})
 	if err != nil || loginResponse.AccessToken == "" || loginResponse.RefreshToken == "" {
 		t.Fatalf("expected real login tokens, response=%v err=%v", loginResponse, err)
 	}
@@ -164,10 +171,10 @@ func TestAuthIntegration(t *testing.T) {
 	if _, err := client.ValidateToken(clientCtx, &auth.ValidateTokenRequest{}); status.Code(err) != codes.Unauthenticated {
 		t.Fatalf("expected empty ValidateToken request to be Unauthenticated, got %v", err)
 	}
-	if _, err := client.Login(clientCtx, &auth.LoginRequest{Username: username, Password: "wrong-password"}); status.Code(err) != codes.Unauthenticated {
+	if _, err := client.Login(clientCtx, &auth.LoginRequest{Dni: dni, Password: "wrong-password"}); status.Code(err) != codes.Unauthenticated {
 		t.Fatalf("expected wrong password to be Unauthenticated, got %v", err)
 	}
-	if _, err := client.Login(clientCtx, &auth.LoginRequest{Username: "missing_" + testID, Password: "wrong-password"}); status.Code(err) != codes.Unauthenticated {
+	if _, err := client.Login(clientCtx, &auth.LoginRequest{Dni: nextTestDNI(), Password: "wrong-password"}); status.Code(err) != codes.Unauthenticated {
 		t.Fatalf("expected missing user to be Unauthenticated, got %v", err)
 	}
 
@@ -208,7 +215,7 @@ func TestAuthIntegration(t *testing.T) {
 		t.Fatalf("expected permission from DOCENTE role to allow protected RPC: %v", err)
 	}
 	if _, err := client.Ping(metadata.AppendToOutgoingContext(clientCtx, "authorization", "Bearer "+mustToken(t, jwtManager, registerResponse.Id)), &auth.Request{Ping: "protected"}); err != nil {
-		t.Fatalf("expected multiple-role authorization: %v", err)
+		t.Fatalf("expected role-based authorization: %v", err)
 	}
 	if _, err := client.Ping(clientCtx, &auth.Request{Ping: "protected"}); status.Code(err) != codes.Unauthenticated {
 		t.Fatalf("expected missing JWT to be Unauthenticated, got %v", err)
@@ -259,11 +266,16 @@ func TestAuthIntegration(t *testing.T) {
 	}
 }
 
-func integrationDatabaseURL() string {
-	if value := os.Getenv("AUTH_TEST_DATABASE_URL"); value != "" {
-		return value
+func integrationDatabaseURL(t *testing.T) string {
+	t.Helper()
+	// Credenciales de PRUEBA desde el entorno (backend/.env.test, fuera de
+	// Git). Sin la variable la prueba se omite: nunca hay credenciales
+	// escritas en el código ni un superusuario de respaldo.
+	url := os.Getenv("TEST_AUTH_DB_URL")
+	if url == "" {
+		t.Skip("TEST_AUTH_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
-	return "postgres://auth_user:auth_password@127.0.0.1:5433/auth_db?sslmode=disable"
+	return url
 }
 
 func cleanupIntegrationData(t *testing.T, pool *pgxpool.Pool, username string, permissionCodes []string) {

@@ -1,0 +1,136 @@
+/* Maestro de Estudiantes (FASE E-06). Reutiliza las clases dp-* del
+   dashboard; aquí solo lo propio del módulo. */
+
+.est-subtitle {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--dp-text-secondary);
+}
+
+.est-search {
+    margin-top: 14px;
+}
+
+.est-search input,
+.est-filters input,
+.est-filters select {
+    border: 1px solid var(--dp-border);
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--dp-text-primary);
+    background: var(--dp-bg);
+}
+
+.est-search input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.est-hint {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    color: var(--dp-text-secondary);
+}
+
+.est-filters input {
+    width: 130px;
+}
+
+.est-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.est-badge--activo {
+    background: var(--dp-badge-done-bg);
+    color: var(--dp-badge-done-text);
+}
+
+.est-badge--inactivo {
+    background: var(--dp-badge-observed-bg);
+    color: var(--dp-badge-observed-text);
+}
+
+.est-row-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.est-link-button {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+.est-banner-success {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: var(--dp-badge-done-bg);
+    color: var(--dp-badge-done-text);
+    font-size: 13px;
+}
+
+.est-modal {
+    max-width: 620px;
+}
+
+.est-modal--sm {
+    max-width: 440px;
+}
+
+.est-form-section {
+    margin: 8px 0 0;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--dp-text-secondary);
+}
+
+.est-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.est-form-note {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--dp-text-secondary);
+}
+
+.est-submit-error {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.est-detail-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.est-detail-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .est-filters input {
+        width: 100%;
+    }
+}

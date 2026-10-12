@@ -1,5 +1,5 @@
 Name: documentos.rpc
-ListenOn: 0.0.0.0:8084
+ListenOn: 127.0.0.1:8084
 Mode: dev
 
 Etcd:
@@ -11,7 +11,7 @@ Postgres:
   Host: 127.0.0.1
   Port: 5433
   User: documentos_user
-  Password: documentos_password
+  Password: ${DOCUMENTOS_DB_PASSWORD}
   Database: documentos_db
   SSLMode: disable
 
@@ -22,3 +22,12 @@ AuthRpc:
 
 ExpedientesRpc:
   Target: 127.0.0.1:8082
+
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /documentos.Documentos/UploadDocumento
+      - /documentos.Documentos/GetDocumento
+      - /documentos.Documentos/DownloadDocumento
+      - /documentos.Documentos/ListDocumentos
+      - /documentos.Documentos/DeleteDocumento

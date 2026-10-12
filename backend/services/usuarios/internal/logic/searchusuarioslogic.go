@@ -36,17 +36,13 @@ func NewSearchUsuariosLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Se
 }
 
 func (l *SearchUsuariosLogic) SearchUsuarios(in *usuarios.SearchUsuariosRequest) (*usuarios.SearchUsuariosResponse, error) {
-	userID, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, _, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	// Permiso real (Paso 16B) + regla de negocio existente (CanListOrSearch),
-	// AMBAS deben cumplirse — mismo criterio y misma razón que ListUsuarios.
+	// Misma autoridad que ListUsuarios: solo el permiso real "usuarios.view".
 	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "usuarios.view"); err != nil {
 		return nil, err
-	}
-	if !authorization.CanListOrSearch(role) {
-		return nil, status.Error(codes.PermissionDenied, "el rol no puede buscar usuarios")
 	}
 
 	query := strings.TrimSpace(in.GetQuery())

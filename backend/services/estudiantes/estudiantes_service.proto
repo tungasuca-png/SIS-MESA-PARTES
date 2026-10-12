@@ -1,0 +1,409 @@
+syntax = "proto3";
+
+package estudiantes;
+option go_package="./estudiantes";
+
+// Estudiantes Service es la fuente básica de estudiantes del sistema: id,
+// código, nombres, nivel/grado/sección/turno y estado de matrícula. NO
+// contiene historial académico, notas, asistencia, apoderados, documentos ni
+// ningún dato clínico (eso pertenece a otros servicios, p. ej. Psicología,
+// que solo guarda estudiante_id como UUID sin FK y consulta aquí lo mínimo
+// para mostrarlo).
+message Estudiante {
+  string id = 1;
+  string codigo = 2;
+  string nombres = 3;
+  string apellidos = 4;
+  string nivel = 5;
+  string grado = 6;
+  string seccion = 7;
+  string turno = 8;
+  string estado_matricula = 9;
+  // FASE E-05: versión del registro para el control de concurrencia
+  // (UpdateEstudiante/ChangeEstadoEstudiante exigen expected_version).
+  int32 version = 10;
+}
+
+// EstudianteBasico es la vista mínima para listas/selección (búsqueda y
+// resolución por lote). FASE 5D: agrega numero_documento (DNI) — el
+// selector de estudiantes del frontend lo necesita para que quien busca
+// confirme que eligió al estudiante correcto (nombres repetidos son
+// comunes); sigue sin fecha_nacimiento ni ningún otro dato del documento.
+message EstudianteBasico {
+  string id = 1;
+  string codigo = 2;
+  string nombre_completo = 3;
+  string nivel = 4;
+  string grado = 5;
+  string seccion = 6;
+  string estado_matricula = 7;
+  string numero_documento = 8;
+  // FASE E-04: identificación completa para listados (solo datos BÁSICOS; los
+  // personales y sensibles tendrán RPC y permisos propios en fases posteriores).
+  string nombres = 9;
+  string apellidos = 10;
+  string apellido_paterno = 11;
+  string apellido_materno = 12;
+  string codigo_siagie = 13;
+  string tipo_documento = 14;
+  string estado = 15;          // estado del REGISTRO (ACTIVO/INACTIVO), no de la matrícula
+  string turno = 16;
+  int32 version = 17;          // FASE E-05: ver Estudiante.version
+}
+
+message GetEstudianteRequest {
+  string id = 1;
+}
+
+message GetEstudianteResponse {
+  Estudiante estudiante = 1;
+}
+
+// FASE E-04: q vacío = listado general; si se envía, mínimo 2 caracteres.
+// Busca por código, código SIAGIE, documento, nombres y apellidos en cualquier
+// orden, sin distinguir mayúsculas ni tildes. Filtros opcionales (vacío = sin
+// filtro); nivel/grado/seccion/turno son temporales hasta el dominio Matrícula.
+message SearchEstudiantesRequest {
+  string q = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  string estado = 4;
+  string nivel = 5;
+  string grado = 6;
+  string seccion = 7;
+  string turno = 8;
+}
+
+message SearchEstudiantesResponse {
+  repeated EstudianteBasico estudiantes = 1;
+  int32 total = 2;
+}
+
+message GetEstudiantesBasicRequest {
+  repeated string ids = 1;
+}
+
+message GetEstudiantesBasicResponse {
+  repeated EstudianteBasico estudiantes = 1;
+}
+
+// ---- FASE E-05: escritura del maestro ----
+// Solo el registro maestro básico (identidad). Nivel/grado/sección/turno y
+// estado_matricula NO se escriben aquí: pasarán al dominio Matrícula. No hay
+// borrado físico: para retirar un registro se usa ChangeEstadoEstudiante.
+// Errores: el mensaje empieza con un código estable (validation_error,
+// invalid_document, invalid_state, duplicate_codigo, duplicate_document,
+// duplicate_codigo_siagie, student_not_found, version_conflict,
+// permission_denied) seguido de ":" y un texto que nunca incluye valores.
+
+// CreateEstudianteRequest: obligatorios codigo y nombres, y apellido_paterno o
+// (si no se separan) apellidos. Con apellido_paterno, apellidos se deriva
+// (paterno + " " + materno); si también se envía debe coincidir. Vacío =
+// no informado (NULL). tipo_documento vacío = SIN_DOCUMENTO; estado vacío =
+// ACTIVO. fecha_nacimiento en formato AAAA-MM-DD.
+// FASE E-08: los DATOS PERSONALES (fecha_nacimiento, sexo, pais_nacimiento,
+// ubigeo_nacimiento, lengua_materna, segunda_lengua) solo se aceptan si quien
+// llama tiene TAMBIÉN "estudiantes.personal.update"; si no, permission_denied
+// y no se crea nada. foto_ref no es dato personal en E-08 (sin cambios).
+message CreateEstudianteRequest {
+  string codigo = 1;
+  string codigo_siagie = 2;
+  string tipo_documento = 3;
+  string numero_documento = 4;
+  string nombres = 5;
+  string apellido_paterno = 6;
+  string apellido_materno = 7;
+  string apellidos = 8;
+  string fecha_nacimiento = 9;
+  string sexo = 10;
+  string pais_nacimiento = 11;
+  string ubigeo_nacimiento = 12;
+  string lengua_materna = 13;
+  string segunda_lengua = 14;
+  string foto_ref = 15;
+  string estado = 16;
+}
+
+message CreateEstudianteResponse {
+  EstudianteBasico estudiante = 1;
+}
+
+// UpdateEstudianteRequest: actualización PARCIAL. Solo cambian los campos
+// presentes; un campo presente con "" lo deja en NULL (los obligatorios no
+// admiten ""). tipo_documento y numero_documento se validan juntos sobre el
+// resultado final: cambiar a SIN_DOCUMENTO exige enviar numero_documento = "".
+// El código institucional no se modifica. expected_version es obligatorio:
+// si el registro cambió desde que el cliente lo leyó, falla con
+// version_conflict (ABORTED) y no sobrescribe nada.
+// FASE E-08: los seis campos de DATOS PERSONALES (fecha_nacimiento, sexo,
+// pais_nacimiento, ubigeo_nacimiento, lengua_materna, segunda_lengua) ya NO se
+// modifican aquí: si alguno está presente la solicitud completa se rechaza
+// (validation_error) sin tocar nada; se usa UpdateEstudiantePersonal. Los
+// campos siguen en el mensaje solo por compatibilidad.
+message UpdateEstudianteRequest {
+  string id = 1;
+  int32 expected_version = 2;
+  optional string codigo_siagie = 3;
+  optional string tipo_documento = 4;
+  optional string numero_documento = 5;
+  optional string nombres = 6;
+  optional string apellido_paterno = 7;
+  optional string apellido_materno = 8;
+  optional string apellidos = 9;
+  optional string fecha_nacimiento = 10;
+  optional string sexo = 11;
+  optional string pais_nacimiento = 12;
+  optional string ubigeo_nacimiento = 13;
+  optional string lengua_materna = 14;
+  optional string segunda_lengua = 15;
+  optional string foto_ref = 16;
+}
+
+message UpdateEstudianteResponse {
+  EstudianteBasico estudiante = 1;
+}
+
+// ChangeEstadoEstudianteRequest: estado del REGISTRO, solo ACTIVO/INACTIVO
+// (RETIRADO/TRASLADADO/CONCLUIDO pertenecen a la futura Matrícula).
+message ChangeEstadoEstudianteRequest {
+  string id = 1;
+  int32 expected_version = 2;
+  string estado = 3;
+}
+
+message ChangeEstadoEstudianteResponse {
+  EstudianteBasico estudiante = 1;
+}
+
+// ---- FASE E-08: datos personales (dominio separado) ----
+// Solo estos seis campos. Nunca foto_ref, identidad, estado ni datos
+// académicos. Lectura con "estudiantes.personal.view" (cada lectura se
+// audita como PERSONAL_VIEW, sin valores); edición con
+// "estudiantes.personal.update" (PERSONAL_UPDATE). GetEstudiante,
+// EstudianteBasico y SearchEstudiantes NO exponen estos campos.
+
+// EstudiantePersonal: "" = no registrado. version = versión del registro
+// observada (la misma que usa expected_version).
+message EstudiantePersonal {
+  string id = 1;
+  int32 version = 2;
+  string fecha_nacimiento = 3;   // AAAA-MM-DD
+  string sexo = 4;               // M | F
+  string pais_nacimiento = 5;    // ISO 3166-1 alfa-2
+  string ubigeo_nacimiento = 6;  // 6 dígitos, solo con país PE
+  string lengua_materna = 7;
+  string segunda_lengua = 8;
+  // Modelo maestro, etapa 2: DOMICILIO y CONTACTO (dominio personal, E-02).
+  // Un solo domicilio vigente. "" = no registrado.
+  string domicilio_direccion = 9;
+  string domicilio_departamento = 10;
+  string domicilio_provincia = 11;
+  string domicilio_distrito = 12;
+  string domicilio_ubigeo = 13;
+  string correo = 14;
+  string telefono = 15;
+  // EDAD calculada (nunca almacenada) a la fecha de referencia de la
+  // solicitud; ausente si no hay fecha de nacimiento o si la referencia es
+  // anterior al nacimiento.
+  optional int32 edad = 16;
+}
+
+message GetEstudiantePersonalRequest {
+  string id = 1;
+  // Fecha de referencia para la edad (AAAA-MM-DD). Vacía = hoy (Lima).
+  string fecha_referencia = 2;
+}
+
+message GetEstudiantePersonalResponse {
+  EstudiantePersonal personal = 1;
+}
+
+// UpdateEstudiantePersonalRequest: PATCH parcial con control de versión.
+// Ausente = no cambia; presente con "" = se deja en NULL.
+message UpdateEstudiantePersonalRequest {
+  string id = 1;
+  int32 expected_version = 2;
+  optional string fecha_nacimiento = 3;
+  optional string sexo = 4;
+  optional string pais_nacimiento = 5;
+  optional string ubigeo_nacimiento = 6;
+  optional string lengua_materna = 7;
+  optional string segunda_lengua = 8;
+  optional string domicilio_direccion = 9;
+  optional string domicilio_departamento = 10;
+  optional string domicilio_provincia = 11;
+  optional string domicilio_distrito = 12;
+  optional string domicilio_ubigeo = 13;
+  optional string correo = 14;
+  optional string telefono = 15;
+}
+
+// Devuelve solo el registro BÁSICO con la versión nueva: quien edita con
+// "estudiantes.personal.update" no recibe por esta vía una lectura personal.
+message UpdateEstudiantePersonalResponse {
+  EstudianteBasico estudiante = 1;
+}
+
+// ---- Modelo maestro: resolución e integridad (etapa 1) ----
+
+// ResolveEstudianteRequest: resolución EXACTA para sistemas consumidores.
+// Exactamente un criterio: codigo, o tipo_documento + numero_documento.
+// Requiere "estudiantes.view". Viaja en el cuerpo (POST) para que el número
+// de documento nunca quede en URLs ni en logs de acceso.
+message ResolveEstudianteRequest {
+  string codigo = 1;
+  string tipo_documento = 2;
+  string numero_documento = 3;
+}
+
+message ResolveEstudianteResponse {
+  EstudianteBasico estudiante = 1;
+}
+
+// Posibles duplicados para REVISIÓN HUMANA (nunca se fusiona nada
+// automáticamente). criterio: MISMO_NOMBRE_Y_FECHA (mismo nombre completo
+// normalizado y misma fecha de nacimiento) o MISMO_NOMBRE_SIN_DOCUMENTO
+// (mismo nombre y al menos uno sin documento, donde la unicidad por
+// documento no protege). Requiere "estudiantes.update".
+message GrupoPosibleDuplicado {
+  string criterio = 1;
+  repeated EstudianteBasico estudiantes = 2;
+}
+
+message ListPosiblesDuplicadosRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ListPosiblesDuplicadosResponse {
+  repeated GrupoPosibleDuplicado grupos = 1;
+  int32 total = 2;
+}
+
+// ---- Modelo maestro: MATRÍCULA (etapa 3, solo lectura) ----
+// Historial académico: una matrícula por periodo; los cambios dentro del
+// periodo en movimientos. Requiere "estudiantes.view". No incluye el motivo
+// de retiro (texto libre, se minimiza).
+
+message PeriodoAcademico {
+  string id = 1;
+  int32 anio = 2;
+  string nombre = 3;
+  string estado = 4;
+}
+
+message SeccionAcademica {
+  string id = 1;
+  string nivel = 2;
+  string grado = 3;
+  string seccion = 4;
+  string turno = 5;
+  string aula = 6;
+}
+
+message MovimientoMatricula {
+  string tipo = 1;
+  string fecha = 2;
+  string seccion_anterior_id = 3;
+  string seccion_nueva_id = 4;
+}
+
+message Matricula {
+  string id = 1;
+  PeriodoAcademico periodo = 2;
+  SeccionAcademica seccion = 3;   // ausente si no tiene sección asignada
+  string estado_matricula = 4;    // MATRICULADO | RETIRADO | TRASLADADO | CONCLUIDO
+  string fecha_matricula = 5;
+  string fecha_retiro = 6;
+  string origen = 7;              // REGISTRO | MIGRACION_LEGADO
+  int32 version = 8;
+  repeated MovimientoMatricula movimientos = 9;
+}
+
+message ListMatriculasEstudianteRequest {
+  string estudiante_id = 1;
+}
+
+message ListMatriculasEstudianteResponse {
+  repeated Matricula matriculas = 1;
+}
+
+// ---- Modelo maestro: FAMILIA (etapa 4) ----
+// Lectura con "estudiantes.familia.view" (auditada como FAMILIA_VIEW);
+// vinculación con "estudiantes.familia.update" (FAMILIA_UPDATE). Nunca se
+// expone por las consultas de identidad.
+
+message Persona {
+  string id = 1;
+  string tipo_documento = 2;
+  string numero_documento = 3;
+  string nombres = 4;
+  string apellido_paterno = 5;
+  string apellido_materno = 6;
+}
+
+message Familiar {
+  string relacion_id = 1;
+  Persona persona = 2;
+  string parentesco = 3;
+  bool es_apoderado = 4;
+  bool vigente = 5;
+  string desde = 6;
+  string hasta = 7;
+}
+
+message ListFamiliaresEstudianteRequest {
+  string estudiante_id = 1;
+  bool incluir_historial = 2;     // false = solo relaciones vigentes
+}
+
+message ListFamiliaresEstudianteResponse {
+  repeated Familiar familiares = 1;
+}
+
+// VincularFamiliarRequest: persona_id (persona ya registrada) O los datos de
+// la persona. Con documento, si la persona ya existe se reutiliza (una sola
+// persona para varios estudiantes); si los nombres no coinciden se rechaza
+// (no se sobrescribe ni se fusiona). Sin documento se registra una persona
+// nueva.
+message VincularFamiliarRequest {
+  string estudiante_id = 1;
+  string persona_id = 2;
+  Persona persona = 3;
+  string parentesco = 4;
+  bool es_apoderado = 5;
+  string desde = 6;               // AAAA-MM-DD, opcional
+}
+
+message VincularFamiliarResponse {
+  Familiar familiar = 1;
+}
+
+// DesvincularFamiliarRequest: cierra la relación (vigente = false, hasta);
+// no borra nada, el historial se conserva.
+message DesvincularFamiliarRequest {
+  string estudiante_id = 1;
+  string relacion_id = 2;
+  string hasta = 3;               // AAAA-MM-DD, vacío = hoy (Lima)
+}
+
+message DesvincularFamiliarResponse {
+  Familiar familiar = 1;
+}
+
+service Estudiantes {
+  rpc GetEstudiante(GetEstudianteRequest) returns (GetEstudianteResponse);
+  rpc SearchEstudiantes(SearchEstudiantesRequest) returns (SearchEstudiantesResponse);
+  rpc GetEstudiantesBasic(GetEstudiantesBasicRequest) returns (GetEstudiantesBasicResponse);
+  rpc CreateEstudiante(CreateEstudianteRequest) returns (CreateEstudianteResponse);
+  rpc UpdateEstudiante(UpdateEstudianteRequest) returns (UpdateEstudianteResponse);
+  rpc ChangeEstadoEstudiante(ChangeEstadoEstudianteRequest) returns (ChangeEstadoEstudianteResponse);
+  rpc GetEstudiantePersonal(GetEstudiantePersonalRequest) returns (GetEstudiantePersonalResponse);
+  rpc UpdateEstudiantePersonal(UpdateEstudiantePersonalRequest) returns (UpdateEstudiantePersonalResponse);
+  rpc ResolveEstudiante(ResolveEstudianteRequest) returns (ResolveEstudianteResponse);
+  rpc ListPosiblesDuplicados(ListPosiblesDuplicadosRequest) returns (ListPosiblesDuplicadosResponse);
+  rpc ListMatriculasEstudiante(ListMatriculasEstudianteRequest) returns (ListMatriculasEstudianteResponse);
+  rpc ListFamiliaresEstudiante(ListFamiliaresEstudianteRequest) returns (ListFamiliaresEstudianteResponse);
+  rpc VincularFamiliar(VincularFamiliarRequest) returns (VincularFamiliarResponse);
+  rpc DesvincularFamiliar(DesvincularFamiliarRequest) returns (DesvincularFamiliarResponse);
+}

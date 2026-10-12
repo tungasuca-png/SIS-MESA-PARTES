@@ -198,7 +198,8 @@ function DerivacionesPanel({ expedienteId }) {
                                                 {item.origen} → {item.destino}
                                             </p>
                                             <p className="dp-documentos-meta">
-                                                {tipoLabel(item.tipo)} · {item.motivo}
+                                                {tipoLabel(item.tipo)}
+                                                {item.motivo ? ` · ${item.motivo}` : ""}
                                                 {item.condicion ? ` · ${item.condicion}` : ""} ·{" "}
                                                 {formatDateTime(item.fecha_registro)}
                                             </p>

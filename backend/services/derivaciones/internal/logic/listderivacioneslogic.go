@@ -5,17 +5,13 @@ import (
 	"strings"
 
 	"derivaciones/derivaciones"
-	"derivaciones/internal/authorization"
 	"derivaciones/internal/interceptor"
 	"derivaciones/internal/repository"
 	"derivaciones/internal/svc"
 	"derivaciones/internal/validation"
 
-	"expedientes/expedientesclient"
-
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -39,7 +35,7 @@ func NewListDerivacionesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *ListDerivacionesLogic) ListDerivaciones(in *derivaciones.ListDerivacionesRequest) (*derivaciones.ListDerivacionesResponse, error) {
-	userID, role, ok := interceptor.UserFromContext(l.ctx)
+	userID, _, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -64,49 +60,18 @@ func (l *ListDerivacionesLogic) ListDerivaciones(in *derivaciones.ListDerivacion
 		filter.PageSize = defaultPageSize
 	}
 
-	// Permiso real (Paso 15B), en el MISMO lugar donde ya decidía
-	// CanViewAll(role) — sin cambios en esta rama (sección 2.A del Paso
-	// 20A: "no cambiar innecesariamente"). El catálogo actual solo tiene
-	// "derivaciones.view" (no existe un equivalente a "view_own"), y un
-	// SOLICITANTE nunca lo tiene.
-	hasViewAll, err := authorization.HasPermission(l.ctx, l.svcCtx.AuthClient, userID, "derivaciones.view")
+	// Permiso (Auth) y alcance (Expedientes) son responsabilidades separadas:
+	// "derivaciones.view" -> alcance general; "derivaciones.view_own" -> solo
+	// expedientes propios; ninguno -> PermissionDenied (sin importar el rol).
+	vis, err := resolverVisibilidad(l.ctx, l.svcCtx, userID)
 	if err != nil {
 		return nil, err
 	}
-	if filter.ExpedienteID == "" && !hasViewAll {
+	if filter.ExpedienteID == "" && !vis.general {
 		return nil, status.Error(codes.InvalidArgument, "el expediente_id es obligatorio")
 	}
-
-	// Ownership/área real (Paso 20A): cierra la vulnerabilidad CRÍTICA del
-	// Paso 20 — antes, con expediente_id presente, no se exigía NINGÚN
-	// permiso ni verificación de pertenencia; cualquier autenticado (
-	// incluso sin ningún rol) podía listar el historial de cualquier
-	// expediente. Ahora:
-	//   - Un rol INTERNO (IsInternal) además necesita "derivaciones.view"
-	//     (Caso 6 del Paso 20A) — sin esto, ni siquiera se consulta el
-	//     expediente.
-	//   - CUALQUIER caller (interno o no) debe demostrar acceso real al
-	//     expediente, delegado en Expedientes.GetExpediente reenviando el
-	//     mismo JWT: ese RPC ya aplica su propia regla de ownership
-	//     (SolicitanteID == usuario, para un rol no interno) y de área
-	//     (CanViewAll/AreaDelRol, para un rol interno) — no se duplica esa
-	//     lógica acá, ni se importa (AreaDelRol vive en
-	//     expedientes/internal/authorization, inalcanzable desde este
-	//     módulo — mismo hallazgo ya documentado en Documentos, Paso 19E).
-	//     Si el expediente no existe, no pertenece al actor, o Expedientes
-	//     no responde, el error se propaga tal cual (fail-closed) — nunca
-	//     se traduce en una lista vacía ni en acceso permitido.
 	if filter.ExpedienteID != "" {
-		if authorization.IsInternal(role) && !hasViewAll {
-			return nil, status.Error(codes.PermissionDenied, "el usuario no tiene el permiso requerido")
-		}
-		outCtx := l.ctx
-		if token, tokenOk := interceptor.TokenFromContext(l.ctx); tokenOk {
-			outCtx = metadata.AppendToOutgoingContext(l.ctx, "authorization", "Bearer "+token)
-		}
-		if _, err := l.svcCtx.ExpedientesClient.GetExpediente(outCtx, &expedientesclient.GetExpedienteRequest{
-			Id: filter.ExpedienteID,
-		}); err != nil {
+		if err := vis.verificarExpediente(l.ctx, l.svcCtx, userID, filter.ExpedienteID); err != nil {
 			return nil, err
 		}
 	}
@@ -118,7 +83,7 @@ func (l *ListDerivacionesLogic) ListDerivaciones(in *derivaciones.ListDerivacion
 
 	protoItems := make([]*derivaciones.Derivacion, 0, len(items))
 	for _, item := range items {
-		protoItems = append(protoItems, toProto(item))
+		protoItems = append(protoItems, vis.proyectar(toProto(item)))
 	}
 
 	return &derivaciones.ListDerivacionesResponse{Derivaciones: protoItems, Total: int32(total)}, nil

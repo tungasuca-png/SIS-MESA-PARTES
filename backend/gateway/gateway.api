@@ -8,6 +8,7 @@ info (
 
 type RegisterRequest {
 	Username string `json:"username"`
+	Dni      string `json:"dni"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Role     string `json:"role,optional"`
@@ -22,7 +23,7 @@ type RegisterResponse {
 }
 
 type LoginRequest {
-	Username string `json:"username"`
+	Dni      string `json:"dni"`
 	Password string `json:"password"`
 }
 
@@ -58,6 +59,18 @@ type LogoutResponse {
 
 type ValidateTokenRequest {
 	Authorization string `header:"Authorization,optional"`
+}
+
+// GetMyPermissions: lista de permisos efectivos del usuario AUTENTICADO
+// (union de todos sus roles reales) — sin user_id en el request, a
+// propósito: la identidad sale exclusivamente del JWT reenviado a Auth
+// Service, nunca de un parámetro controlable por el cliente.
+type GetMyPermissionsRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type GetMyPermissionsResponse {
+	Permissions []string `json:"permissions"`
 }
 
 type ValidateTokenResponse {
@@ -249,6 +262,9 @@ service gateway-api {
 
 	@handler ValidateToken
 	get /api/auth/validate (ValidateTokenRequest) returns (ValidateTokenResponse)
+
+	@handler GetMyPermissions
+	get /api/auth/me/permissions (GetMyPermissionsRequest) returns (GetMyPermissionsResponse)
 }
 
 type UsuarioDTO {
@@ -329,9 +345,67 @@ type UpdateMyProfileResponse {
 	Usuario UsuarioDTO `json:"usuario"`
 }
 
+// UpdateUserRole (Usuario -> Rol, administrativo): reemplaza el ÚNICO rol
+// de un usuario existente. Distinto de PUT /api/roles/:id/permissions
+// (Rol -> Permisos) — el :id de esta ruta es el usuario, no el rol.
+type UpdateUserRoleRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	RoleId        string `json:"role_id"`
+}
+
+type UpdateUserRoleResponse {
+	UserId     string `json:"user_id"`
+	RoleId     string `json:"role_id"`
+	RoleNombre string `json:"role_nombre"`
+	// UsuariosSyncOk: Auth Service es la única fuente de verdad del rol (ya
+	// confirmado arriba); esto solo informa si la copia denormalizada de
+	// Usuarios Service (tipo_usuario, usada por GET /api/usuarios) quedó
+	// sincronizada. false NUNCA significa que el rol no cambió — solo que
+	// esa copia puede haber quedado desactualizada.
+	UsuariosSyncOk bool `json:"usuarios_sync_ok"`
+}
+
+// CreateUsuario (administrativo): crea la identidad real en Auth Service
+// (usuario + credenciales + rol único vía role_id) y sincroniza el perfil
+// en Usuarios Service (UpsertUsuario, ya existente) usando el role_nombre
+// que Auth YA confirmó — nunca un nombre de rol enviado por el frontend.
+// Distinto de POST /api/auth/register (público, self-service, solo crea
+// SOLICITANTE): esta ruta la protege "usuarios.change_role" (igual que
+// PUT /api/usuarios/:id/rol) porque crear un usuario implica decidir su
+// rol inicial.
+type CreateUsuarioRequest {
+	Authorization string `header:"Authorization,optional"`
+	Username      string `json:"username"`
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	RoleId        string `json:"role_id"`
+	Nombres       string `json:"nombres"`
+	Apellidos     string `json:"apellidos"`
+	Dni           string `json:"dni"`
+	Telefono      string `json:"telefono,optional"`
+	Direccion     string `json:"direccion,optional"`
+}
+
+type CreateUsuarioResponse {
+	Id         string `json:"id"`
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	RoleId     string `json:"role_id"`
+	RoleNombre string `json:"role_nombre"`
+	// UsuariosSyncOk: mismo criterio ya usado por UpdateUserRoleResponse —
+	// Auth Service ya creó la identidad real (fuente de verdad); esto solo
+	// informa si el perfil de Usuarios Service (tipo_usuario/nombres/etc.,
+	// usado por GET /api/usuarios) quedó sincronizado.
+	UsuariosSyncOk bool `json:"usuarios_sync_ok"`
+}
+
 service gateway-api {
 	@handler ListUsuarios
 	get /api/usuarios (ListUsuariosRequest) returns (ListUsuariosResponse)
+
+	@handler CreateUsuario
+	post /api/usuarios (CreateUsuarioRequest) returns (CreateUsuarioResponse)
 
 	@handler GetUsuariosBasic
 	post /api/usuarios/basic-batch (GetUsuariosBasicRequest) returns (GetUsuariosBasicResponse)
@@ -344,6 +418,9 @@ service gateway-api {
 
 	@handler UpdateMyProfile
 	put /api/usuarios/me (UpdateMyProfileRequest) returns (UpdateMyProfileResponse)
+
+	@handler UpdateUserRole
+	put /api/usuarios/:id/rol (UpdateUserRoleRequest) returns (UpdateUserRoleResponse)
 }
 
 service gateway-api {
@@ -620,5 +697,668 @@ service gateway-api {
 
 	@handler UpdateRolePermissions
 	put /api/roles/:id/permissions (UpdateRolePermissionsRequest) returns (UpdateRolePermissionsResponse)
+}
+
+// Psicología (FASE 1): transporte HTTP puro hacia Psicología Service. Igual
+// que el resto del Gateway: se reenvía el header Authorization y NO se valida
+// ningún rol ni permiso aquí — JWT, Auth.HasPermission y el alcance de datos
+// se resuelven por completo en Psicología Service.
+type ExpedientePsicologicoDTO {
+	Id            string `json:"id"`
+	EstudianteId  string `json:"estudiante_id"`
+	Codigo        string `json:"codigo"`
+	Estado        string `json:"estado"`
+	ResponsableId string `json:"responsable_id"`
+	AbiertoPor    string `json:"abierto_por"`
+	FechaApertura string `json:"fecha_apertura"`
+	FechaCierre   string `json:"fecha_cierre"`
+	MotivoCierre  string `json:"motivo_cierre"`
+	ResumenCaso   string `json:"resumen_caso"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+}
+
+type PsicologiaExpedienteResponse {
+	Expediente ExpedientePsicologicoDTO `json:"expediente"`
+}
+
+type GetPsicologiaExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetPsicologiaExpedienteByEstudianteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type ListPsicologiaExpedientesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListPsicologiaExpedientesResponse {
+	Expedientes []ExpedientePsicologicoDTO `json:"expedientes"`
+	Total       int32                      `json:"total"`
+}
+
+type OpenPsicologiaExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	ResponsableId string `json:"responsable_id,optional"`
+	ResumenCaso   string `json:"resumen_caso,optional"`
+}
+
+type UpdatePsicologiaExpedienteRequest {
+	Authorization string  `header:"Authorization,optional"`
+	Id            string  `path:"id"`
+	ResumenCaso   *string `json:"resumen_caso,optional"`
+	ResponsableId *string `json:"responsable_id,optional"`
+	Estado        *string `json:"estado,optional"`
+}
+
+type ClosePsicologiaExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type ReopenPsicologiaExpedienteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Estado        string `json:"estado,optional"`
+}
+
+service gateway-api {
+	@handler GetPsicologiaExpediente
+	get /api/psicologia/expedientes/:id (GetPsicologiaExpedienteRequest) returns (PsicologiaExpedienteResponse)
+
+	@handler GetPsicologiaExpedienteByEstudiante
+	get /api/psicologia/estudiantes/:id/expediente (GetPsicologiaExpedienteByEstudianteRequest) returns (PsicologiaExpedienteResponse)
+
+	@handler ListPsicologiaExpedientes
+	get /api/psicologia/expedientes (ListPsicologiaExpedientesRequest) returns (ListPsicologiaExpedientesResponse)
+
+	@handler OpenPsicologiaExpediente
+	post /api/psicologia/estudiantes/:id/expediente (OpenPsicologiaExpedienteRequest) returns (PsicologiaExpedienteResponse)
+
+	@handler UpdatePsicologiaExpediente
+	put /api/psicologia/expedientes/:id (UpdatePsicologiaExpedienteRequest) returns (PsicologiaExpedienteResponse)
+
+	@handler ClosePsicologiaExpediente
+	put /api/psicologia/expedientes/:id/cerrar (ClosePsicologiaExpedienteRequest) returns (PsicologiaExpedienteResponse)
+
+	@handler ReopenPsicologiaExpediente
+	put /api/psicologia/expedientes/:id/reabrir (ReopenPsicologiaExpedienteRequest) returns (PsicologiaExpedienteResponse)
+}
+
+// Atenciones psicológicas (Hoja de Atención): transporte HTTP puro hacia
+// Psicología Service, igual que los expedientes. Permisos
+// (psicologia.atenciones.*), alcance del expediente, versionado, anulación,
+// auditoría y generación del PDF se resuelven por completo en Psicología
+// Service. El Gateway nunca registra el contenido (logsafe).
+type AtencionContenidoDTO {
+	FechaAtencion         string   `json:"fecha_atencion,optional"`
+	HoraAtencion          string   `json:"hora_atencion,optional"`
+	RealizadaPor          []string `json:"realizada_por,optional"`
+	RealizadaPorOtros     string   `json:"realizada_por_otros,optional"`
+	Motivos               []string `json:"motivos,optional"`
+	MotivoOtros           string   `json:"motivo_otros,optional"`
+	DescripcionMotivo     string   `json:"descripcion_motivo,optional"`
+	AnalisisIntegral      string   `json:"analisis_integral,optional"`
+	Estrategias           string   `json:"estrategias,optional"`
+	Derivaciones          []string `json:"derivaciones,optional"`
+	DerivacionOtro        string   `json:"derivacion_otro,optional"`
+	SeguimientoResultados string   `json:"seguimiento_resultados,optional"`
+	Acuerdos              string   `json:"acuerdos,optional"`
+	CompromisoEstudiante  string   `json:"compromiso_estudiante,optional"`
+	CompromisoFamilia     string   `json:"compromiso_familia,optional"`
+}
+
+type OpcionCatalogoDTO {
+	Codigo   string `json:"codigo"`
+	Etiqueta string `json:"etiqueta"`
+}
+
+type AtencionVersionDTO {
+	NumeroVersion    int32                `json:"numero_version"`
+	Contenido        AtencionContenidoDTO `json:"contenido"`
+	Motivos          []OpcionCatalogoDTO  `json:"motivos"`
+	Derivaciones     []OpcionCatalogoDTO  `json:"derivaciones"`
+	MotivoCorreccion string               `json:"motivo_correccion"`
+	CreadaPor        string               `json:"creada_por"`
+	CreadaEn         string               `json:"creada_en"`
+}
+
+type AtencionPsicologicaDTO {
+	Id              string             `json:"id"`
+	ExpedienteId    string             `json:"expediente_id"`
+	Numero          int32              `json:"numero"`
+	Estado          string             `json:"estado"`
+	AutorId         string             `json:"autor_id"`
+	RegistradaPor   string             `json:"registrada_por"`
+	RegistradaEn    string             `json:"registrada_en"`
+	VersionVigente  int32              `json:"version_vigente"`
+	Revision        int32              `json:"revision"`
+	AnuladaPor      string             `json:"anulada_por"`
+	AnuladaEn       string             `json:"anulada_en"`
+	MotivoAnulacion string             `json:"motivo_anulacion"`
+	CreatedAt       string             `json:"created_at"`
+	UpdatedAt       string             `json:"updated_at"`
+	Version         AtencionVersionDTO `json:"version"`
+}
+
+// AtencionResumenDTO: fila del listado, sin contenido clínico.
+type AtencionResumenDTO {
+	Id             string              `json:"id"`
+	Numero         int32               `json:"numero"`
+	Estado         string              `json:"estado"`
+	FechaAtencion  string              `json:"fecha_atencion"`
+	HoraAtencion   string              `json:"hora_atencion"`
+	Motivos        []OpcionCatalogoDTO `json:"motivos"`
+	AutorId        string              `json:"autor_id"`
+	RegistradaPor  string              `json:"registrada_por"`
+	RegistradaEn   string              `json:"registrada_en"`
+	VersionVigente int32               `json:"version_vigente"`
+}
+
+type AtencionVersionResumenDTO {
+	NumeroVersion    int32  `json:"numero_version"`
+	MotivoCorreccion string `json:"motivo_correccion"`
+	CreadaPor        string `json:"creada_por"`
+	CreadaEn         string `json:"creada_en"`
+}
+
+type PsicologiaAtencionResponse {
+	Atencion AtencionPsicologicaDTO `json:"atencion"`
+}
+
+type CreatePsicologiaAtencionRequest {
+	Authorization string               `header:"Authorization,optional"`
+	Id            string               `path:"id"`
+	Contenido     AtencionContenidoDTO `json:"contenido,optional"`
+}
+
+type ListPsicologiaAtencionesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Estado        string `form:"estado,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListPsicologiaAtencionesResponse {
+	Atenciones []AtencionResumenDTO `json:"atenciones"`
+	Total      int32                `json:"total"`
+}
+
+type GetPsicologiaAtencionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type UpdatePsicologiaAtencionDraftRequest {
+	Authorization string               `header:"Authorization,optional"`
+	Id            string               `path:"id"`
+	Revision      int32                `json:"revision"`
+	Contenido     AtencionContenidoDTO `json:"contenido"`
+}
+
+type RevisionPsicologiaAtencionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Revision      int32  `json:"revision"`
+}
+
+type DiscardPsicologiaAtencionResponse {}
+
+type CorrectPsicologiaAtencionRequest {
+	Authorization    string               `header:"Authorization,optional"`
+	Id               string               `path:"id"`
+	VersionBase      int32                `json:"version_base"`
+	MotivoCorreccion string               `json:"motivo_correccion"`
+	Contenido        AtencionContenidoDTO `json:"contenido"`
+}
+
+type ListPsicologiaAtencionVersionsResponse {
+	Versiones []AtencionVersionResumenDTO `json:"versiones"`
+}
+
+type GetPsicologiaAtencionVersionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Version       int32  `path:"version"`
+}
+
+type AnnulPsicologiaAtencionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type ExportPsicologiaAtencionPdfRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Version       int32  `form:"version,optional"`
+}
+
+// Mismo contrato que el FUT de Mesa de Partes ({nombre, contenido_base64}),
+// pero generado en Psicología Service.
+type ExportPsicologiaAtencionPdfResponse {
+	Nombre          string `json:"nombre"`
+	ContenidoBase64 string `json:"contenido_base64"`
+}
+
+service gateway-api {
+	@handler ListPsicologiaAtenciones
+	get /api/psicologia/expedientes/:id/atenciones (ListPsicologiaAtencionesRequest) returns (ListPsicologiaAtencionesResponse)
+
+	@handler CreatePsicologiaAtencion
+	post /api/psicologia/expedientes/:id/atenciones (CreatePsicologiaAtencionRequest) returns (PsicologiaAtencionResponse)
+
+	@handler GetPsicologiaAtencion
+	get /api/psicologia/atenciones/:id (GetPsicologiaAtencionRequest) returns (PsicologiaAtencionResponse)
+
+	@handler UpdatePsicologiaAtencionDraft
+	put /api/psicologia/atenciones/:id/borrador (UpdatePsicologiaAtencionDraftRequest) returns (PsicologiaAtencionResponse)
+
+	@handler RegisterPsicologiaAtencion
+	put /api/psicologia/atenciones/:id/registrar (RevisionPsicologiaAtencionRequest) returns (PsicologiaAtencionResponse)
+
+	@handler DiscardPsicologiaAtencion
+	put /api/psicologia/atenciones/:id/descartar (RevisionPsicologiaAtencionRequest) returns (DiscardPsicologiaAtencionResponse)
+
+	@handler CorrectPsicologiaAtencion
+	post /api/psicologia/atenciones/:id/versiones (CorrectPsicologiaAtencionRequest) returns (PsicologiaAtencionResponse)
+
+	@handler ListPsicologiaAtencionVersions
+	get /api/psicologia/atenciones/:id/versiones (GetPsicologiaAtencionRequest) returns (ListPsicologiaAtencionVersionsResponse)
+
+	@handler GetPsicologiaAtencionVersion
+	get /api/psicologia/atenciones/:id/versiones/:version (GetPsicologiaAtencionVersionRequest) returns (PsicologiaAtencionResponse)
+
+	@handler AnnulPsicologiaAtencion
+	put /api/psicologia/atenciones/:id/anular (AnnulPsicologiaAtencionRequest) returns (PsicologiaAtencionResponse)
+
+	@handler ExportPsicologiaAtencionPdf
+	get /api/psicologia/atenciones/:id/pdf (ExportPsicologiaAtencionPdfRequest) returns (ExportPsicologiaAtencionPdfResponse)
+}
+
+// Estudiantes (FASE 5B): transporte HTTP puro hacia Estudiantes Service.
+// Igual que el resto del Gateway: se reenvía el header Authorization y NO se
+// valida ningún permiso aquí — JWT y "estudiantes.view" (vía
+// Auth.HasPermission) se resuelven por completo en Estudiantes Service. Sin
+// dato de documento ni fecha de nacimiento en ningún DTO (el propio proto de
+// Estudiantes Service no los expone).
+type EstudianteDTO {
+	Id              string `json:"id"`
+	Codigo          string `json:"codigo"`
+	Nombres         string `json:"nombres"`
+	Apellidos       string `json:"apellidos"`
+	Nivel           string `json:"nivel"`
+	Grado           string `json:"grado"`
+	Seccion         string `json:"seccion"`
+	Turno           string `json:"turno"`
+	EstadoMatricula string `json:"estado_matricula"`
+	Version         int32  `json:"version"` // FASE E-05
+}
+
+// EstudianteBasicoDTO (FASE 5D): agrega numero_documento (DNI) — lo
+// necesita el selector de estudiantes del frontend, para que quien busca
+// confirme que eligió al estudiante correcto. Sigue sin fecha_nacimiento ni
+// ningún otro dato del documento.
+type EstudianteBasicoDTO {
+	Id              string `json:"id"`
+	Codigo          string `json:"codigo"`
+	NombreCompleto  string `json:"nombre_completo"`
+	Nivel           string `json:"nivel"`
+	Grado           string `json:"grado"`
+	Seccion         string `json:"seccion"`
+	EstadoMatricula string `json:"estado_matricula"`
+	NumeroDocumento string `json:"numero_documento"`
+	// FASE E-04: identificación básica (sin datos personales ni sensibles).
+	Nombres         string `json:"nombres"`
+	Apellidos       string `json:"apellidos"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno"`
+	CodigoSiagie    string `json:"codigo_siagie"`
+	TipoDocumento   string `json:"tipo_documento"`
+	Estado          string `json:"estado"`
+	Turno           string `json:"turno"`
+	Version         int32  `json:"version"` // FASE E-05
+}
+
+type GetEstudianteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type GetEstudianteResponse {
+	Estudiante EstudianteDTO `json:"estudiante"`
+}
+
+type SearchEstudiantesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `form:"q,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+	// FASE E-04: filtros opcionales (vacío = sin filtro). estado es el del
+	// registro (ACTIVO/INACTIVO), no el de matrícula.
+	Estado  string `form:"estado,optional"`
+	Nivel   string `form:"nivel,optional"`
+	Grado   string `form:"grado,optional"`
+	Seccion string `form:"seccion,optional"`
+	Turno   string `form:"turno,optional"`
+}
+
+type SearchEstudiantesResponse {
+	Estudiantes []EstudianteBasicoDTO `json:"estudiantes"`
+	Total       int32                 `json:"total"`
+}
+
+type GetEstudiantesBasicRequest {
+	Authorization string   `header:"Authorization,optional"`
+	Ids           []string `json:"ids"`
+}
+
+type GetEstudiantesBasicResponse {
+	Estudiantes []EstudianteBasicoDTO `json:"estudiantes"`
+}
+
+// FASE E-05 — escritura del maestro. Transporte HTTP puro: la autenticación
+// (JWT), los permisos (estudiantes.create/update/change_estado vía
+// Auth.HasPermission), las validaciones y la auditoría se resuelven en
+// Estudiantes Service. El usuario que queda en la auditoría sale del JWT; la
+// solicitud no tiene ningún campo para indicarlo.
+type CreateEstudianteRequest {
+	Authorization    string `header:"Authorization,optional"`
+	Codigo           string `json:"codigo,optional"`
+	CodigoSiagie     string `json:"codigo_siagie,optional"`
+	TipoDocumento    string `json:"tipo_documento,optional"`
+	NumeroDocumento  string `json:"numero_documento,optional"`
+	Nombres          string `json:"nombres,optional"`
+	ApellidoPaterno  string `json:"apellido_paterno,optional"`
+	ApellidoMaterno  string `json:"apellido_materno,optional"`
+	Apellidos        string `json:"apellidos,optional"`
+	FechaNacimiento  string `json:"fecha_nacimiento,optional"`
+	Sexo             string `json:"sexo,optional"`
+	PaisNacimiento   string `json:"pais_nacimiento,optional"`
+	UbigeoNacimiento string `json:"ubigeo_nacimiento,optional"`
+	LenguaMaterna    string `json:"lengua_materna,optional"`
+	SegundaLengua    string `json:"segunda_lengua,optional"`
+	FotoRef          string `json:"foto_ref,optional"`
+	Estado           string `json:"estado,optional"`
+}
+
+// UpdateEstudianteRequest: PATCH parcial — un campo ausente no cambia; un
+// campo presente con "" lo deja vacío (NULL). Por eso son punteros.
+type UpdateEstudianteRequest {
+	Authorization    string  `header:"Authorization,optional"`
+	Id               string  `path:"id"`
+	ExpectedVersion  int32   `json:"expected_version,optional"`
+	CodigoSiagie     *string `json:"codigo_siagie,optional"`
+	TipoDocumento    *string `json:"tipo_documento,optional"`
+	NumeroDocumento  *string `json:"numero_documento,optional"`
+	Nombres          *string `json:"nombres,optional"`
+	ApellidoPaterno  *string `json:"apellido_paterno,optional"`
+	ApellidoMaterno  *string `json:"apellido_materno,optional"`
+	Apellidos        *string `json:"apellidos,optional"`
+	FechaNacimiento  *string `json:"fecha_nacimiento,optional"`
+	Sexo             *string `json:"sexo,optional"`
+	PaisNacimiento   *string `json:"pais_nacimiento,optional"`
+	UbigeoNacimiento *string `json:"ubigeo_nacimiento,optional"`
+	LenguaMaterna    *string `json:"lengua_materna,optional"`
+	SegundaLengua    *string `json:"segunda_lengua,optional"`
+	FotoRef          *string `json:"foto_ref,optional"`
+}
+
+type ChangeEstadoEstudianteRequest {
+	Authorization   string `header:"Authorization,optional"`
+	Id              string `path:"id"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+	Estado          string `json:"estado,optional"`
+}
+
+// Las respuestas de escritura devuelven solo el registro BÁSICO.
+type EstudianteWriteResponse {
+	Estudiante EstudianteBasicoDTO `json:"estudiante"`
+}
+
+// FASE E-08 — DATOS PERSONALES (dominio separado). Transporte puro: permisos
+// (estudiantes.personal.view/.update), validación, versión y auditoría se
+// resuelven en Estudiantes Service. Solo seis campos; nunca foto_ref,
+// identidad, estado ni datos académicos. "" = no registrado.
+type EstudiantePersonalDTO {
+	Id               string `json:"id"`
+	Version          int32  `json:"version"`
+	FechaNacimiento  string `json:"fecha_nacimiento"`
+	Sexo             string `json:"sexo"`
+	PaisNacimiento   string `json:"pais_nacimiento"`
+	UbigeoNacimiento string `json:"ubigeo_nacimiento"`
+	LenguaMaterna    string `json:"lengua_materna"`
+	SegundaLengua    string `json:"segunda_lengua"`
+	// Modelo maestro, etapa 2: domicilio vigente y contacto (dominio personal).
+	DomicilioDireccion    string `json:"domicilio_direccion"`
+	DomicilioDepartamento string `json:"domicilio_departamento"`
+	DomicilioProvincia    string `json:"domicilio_provincia"`
+	DomicilioDistrito     string `json:"domicilio_distrito"`
+	DomicilioUbigeo       string `json:"domicilio_ubigeo"`
+	Correo                string `json:"correo"`
+	Telefono              string `json:"telefono"`
+	// Edad calculada a la fecha de referencia (null si no se puede calcular).
+	Edad *int32 `json:"edad"`
+}
+
+type GetEstudiantePersonalRequest {
+	Authorization   string `header:"Authorization,optional"`
+	Id              string `path:"id"`
+	FechaReferencia string `form:"fecha_referencia,optional"`
+}
+
+type GetEstudiantePersonalResponse {
+	Personal EstudiantePersonalDTO `json:"personal"`
+}
+
+// PATCH parcial: ausente (nil) = no cambia; "" = se deja vacío.
+type UpdateEstudiantePersonalRequest {
+	Authorization         string  `header:"Authorization,optional"`
+	Id                    string  `path:"id"`
+	ExpectedVersion       int32   `json:"expected_version,optional"`
+	FechaNacimiento       *string `json:"fecha_nacimiento,optional"`
+	Sexo                  *string `json:"sexo,optional"`
+	PaisNacimiento        *string `json:"pais_nacimiento,optional"`
+	UbigeoNacimiento      *string `json:"ubigeo_nacimiento,optional"`
+	LenguaMaterna         *string `json:"lengua_materna,optional"`
+	SegundaLengua         *string `json:"segunda_lengua,optional"`
+	DomicilioDireccion    *string `json:"domicilio_direccion,optional"`
+	DomicilioDepartamento *string `json:"domicilio_departamento,optional"`
+	DomicilioProvincia    *string `json:"domicilio_provincia,optional"`
+	DomicilioDistrito     *string `json:"domicilio_distrito,optional"`
+	DomicilioUbigeo       *string `json:"domicilio_ubigeo,optional"`
+	Correo                *string `json:"correo,optional"`
+	Telefono              *string `json:"telefono,optional"`
+}
+
+// ---- Modelo maestro: resolución exacta y posibles duplicados ----
+// Resolución por código O por tipo + número de documento (exactos). POST:
+// el documento viaja en el cuerpo, nunca en la URL ni en logs de acceso.
+type ResolveEstudianteRequest {
+	Authorization   string `header:"Authorization,optional"`
+	Codigo          string `json:"codigo,optional"`
+	TipoDocumento   string `json:"tipo_documento,optional"`
+	NumeroDocumento string `json:"numero_documento,optional"`
+}
+
+type ResolveEstudianteResponse {
+	Estudiante EstudianteBasicoDTO `json:"estudiante"`
+}
+
+type GrupoPosibleDuplicadoDTO {
+	Criterio    string                `json:"criterio"`
+	Estudiantes []EstudianteBasicoDTO `json:"estudiantes"`
+}
+
+type ListPosiblesDuplicadosRequest {
+	Authorization string `header:"Authorization,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListPosiblesDuplicadosResponse {
+	Grupos []GrupoPosibleDuplicadoDTO `json:"grupos"`
+	Total  int32                      `json:"total"`
+}
+
+// ---- Modelo maestro: matrícula (solo lectura) ----
+type PeriodoAcademicoDTO {
+	Id     string `json:"id"`
+	Anio   int32  `json:"anio"`
+	Nombre string `json:"nombre"`
+	Estado string `json:"estado"`
+}
+
+type SeccionAcademicaDTO {
+	Id      string `json:"id"`
+	Nivel   string `json:"nivel"`
+	Grado   string `json:"grado"`
+	Seccion string `json:"seccion"`
+	Turno   string `json:"turno"`
+	Aula    string `json:"aula"`
+}
+
+type MovimientoMatriculaDTO {
+	Tipo              string `json:"tipo"`
+	Fecha             string `json:"fecha"`
+	SeccionAnteriorId string `json:"seccion_anterior_id"`
+	SeccionNuevaId    string `json:"seccion_nueva_id"`
+}
+
+type MatriculaDTO {
+	Id              string                   `json:"id"`
+	Periodo         PeriodoAcademicoDTO      `json:"periodo"`
+	Seccion         *SeccionAcademicaDTO     `json:"seccion"`
+	EstadoMatricula string                   `json:"estado_matricula"`
+	FechaMatricula  string                   `json:"fecha_matricula"`
+	FechaRetiro     string                   `json:"fecha_retiro"`
+	Origen          string                   `json:"origen"`
+	Version         int32                    `json:"version"`
+	Movimientos     []MovimientoMatriculaDTO `json:"movimientos"`
+}
+
+type ListMatriculasEstudianteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+}
+
+type ListMatriculasEstudianteResponse {
+	Matriculas []MatriculaDTO `json:"matriculas"`
+}
+
+// ---- Modelo maestro: familia (permisos estudiantes.familia.*) ----
+type PersonaDTO {
+	Id              string `json:"id"`
+	TipoDocumento   string `json:"tipo_documento"`
+	NumeroDocumento string `json:"numero_documento"`
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno"`
+}
+
+type PersonaInputDTO {
+	TipoDocumento   string `json:"tipo_documento,optional"`
+	NumeroDocumento string `json:"numero_documento,optional"`
+	Nombres         string `json:"nombres,optional"`
+	ApellidoPaterno string `json:"apellido_paterno,optional"`
+	ApellidoMaterno string `json:"apellido_materno,optional"`
+}
+
+type FamiliarDTO {
+	RelacionId  string     `json:"relacion_id"`
+	Persona     PersonaDTO `json:"persona"`
+	Parentesco  string     `json:"parentesco"`
+	EsApoderado bool       `json:"es_apoderado"`
+	Vigente     bool       `json:"vigente"`
+	Desde       string     `json:"desde"`
+	Hasta       string     `json:"hasta"`
+}
+
+type ListFamiliaresEstudianteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Historial     bool   `form:"historial,optional"`
+}
+
+type ListFamiliaresEstudianteResponse {
+	Familiares []FamiliarDTO `json:"familiares"`
+}
+
+type VincularFamiliarRequest {
+	Authorization string           `header:"Authorization,optional"`
+	Id            string           `path:"id"`
+	PersonaId     string           `json:"persona_id,optional"`
+	Persona       *PersonaInputDTO `json:"persona,optional"`
+	Parentesco    string           `json:"parentesco,optional"`
+	EsApoderado   bool             `json:"es_apoderado,optional"`
+	Desde         string           `json:"desde,optional"`
+}
+
+type DesvincularFamiliarRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	RelacionId    string `path:"relacion_id"`
+	Hasta         string `json:"hasta,optional"`
+}
+
+type FamiliarResponse {
+	Familiar FamiliarDTO `json:"familiar"`
+}
+
+service gateway-api {
+	@handler SearchEstudiantes
+	get /api/estudiantes (SearchEstudiantesRequest) returns (SearchEstudiantesResponse)
+
+	@handler GetEstudiantesBasic
+	post /api/estudiantes/basic-batch (GetEstudiantesBasicRequest) returns (GetEstudiantesBasicResponse)
+
+	@handler GetEstudiante
+	get /api/estudiantes/:id (GetEstudianteRequest) returns (GetEstudianteResponse)
+
+	// FASE E-05: escritura del maestro (sin DELETE: no hay borrado físico).
+	@handler CreateEstudiante
+	post /api/estudiantes (CreateEstudianteRequest) returns (EstudianteWriteResponse)
+
+	@handler UpdateEstudiante
+	patch /api/estudiantes/:id (UpdateEstudianteRequest) returns (EstudianteWriteResponse)
+
+	@handler ChangeEstadoEstudiante
+	patch /api/estudiantes/:id/estado (ChangeEstadoEstudianteRequest) returns (EstudianteWriteResponse)
+
+	// FASE E-08: datos personales.
+	@handler GetEstudiantePersonal
+	get /api/estudiantes/:id/personal (GetEstudiantePersonalRequest) returns (GetEstudiantePersonalResponse)
+
+	@handler UpdateEstudiantePersonal
+	patch /api/estudiantes/:id/personal (UpdateEstudiantePersonalRequest) returns (EstudianteWriteResponse)
+
+	// Modelo maestro.
+	@handler ResolveEstudiante
+	post /api/estudiantes/resolver (ResolveEstudianteRequest) returns (ResolveEstudianteResponse)
+
+	@handler ListPosiblesDuplicados
+	get /api/estudiantes/duplicados (ListPosiblesDuplicadosRequest) returns (ListPosiblesDuplicadosResponse)
+
+	@handler ListMatriculasEstudiante
+	get /api/estudiantes/:id/matriculas (ListMatriculasEstudianteRequest) returns (ListMatriculasEstudianteResponse)
+
+	@handler ListFamiliaresEstudiante
+	get /api/estudiantes/:id/familiares (ListFamiliaresEstudianteRequest) returns (ListFamiliaresEstudianteResponse)
+
+	@handler VincularFamiliar
+	post /api/estudiantes/:id/familiares (VincularFamiliarRequest) returns (FamiliarResponse)
+
+	@handler DesvincularFamiliar
+	patch /api/estudiantes/:id/familiares/:relacion_id/desvincular (DesvincularFamiliarRequest) returns (FamiliarResponse)
 }
 
