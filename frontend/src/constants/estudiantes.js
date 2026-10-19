@@ -95,46 +95,4 @@ export const ESTADOS_PERIODO = {
     CERRADO: { label: "Cerrado", siguiente: null, accion: null },
 };
 
-// Acciones del historial de cambios (auditoría, solo eventos de cambio).
-export const ACCIONES_HISTORIAL = {
-    CREATE: "Registro del estudiante",
-    UPDATE: "Actualización de datos de identidad",
-    CHANGE_ESTADO: "Cambio de estado del registro",
-    PERSONAL_UPDATE: "Actualización de datos personales",
-    FAMILIA_UPDATE: "Cambio en padres y apoderados",
-    MATRICULA_UPDATE: "Cambio de matrícula",
-};
-
-// Nombres de campos de la auditoría -> etiqueta (nunca valores).
-export const CAMPOS_HISTORIAL = {
-    codigo: "código",
-    codigo_siagie: "código SIAGIE",
-    tipo_documento: "tipo de documento",
-    numero_documento: "número de documento",
-    nombres: "nombres",
-    apellido_paterno: "apellido paterno",
-    apellido_materno: "apellido materno",
-    apellidos: "apellidos",
-    fecha_nacimiento: "fecha de nacimiento",
-    sexo: "sexo",
-    pais_nacimiento: "país de nacimiento",
-    ubigeo_nacimiento: "ubigeo de nacimiento",
-    lengua_materna: "lengua materna",
-    segunda_lengua: "segunda lengua",
-    foto_ref: "foto",
-    estado: "estado",
-    domicilio_direccion: "dirección",
-    domicilio_departamento: "departamento",
-    domicilio_provincia: "provincia",
-    domicilio_distrito: "distrito",
-    domicilio_ubigeo: "ubigeo del domicilio",
-    correo: "correo",
-    telefono: "teléfono",
-    familiares: "familiares",
-    es_apoderado: "rol de apoderado",
-    matricula: "matrícula",
-    seccion: "sección",
-    estado_matricula: "estado de matrícula",
-};
-
 export const MAX_MOTIVO = 200;

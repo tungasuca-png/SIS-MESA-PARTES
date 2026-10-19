@@ -108,62 +108,116 @@ describe("Ficha integral — pestañas", () => {
         expect(within(panel).queryByRole("table")).toBeNull();
     });
 
-    it("abre la pestaña indicada en la URL (?tab=)", async () => {
+    it("abre la pestaña indicada en la URL (?tab=) sin consultar la auditoría", async () => {
         renderEstudiantes(`${ruta}?tab=historial`);
-        expect(await screen.findByText("Cambios en el registro")).toBeTruthy();
-        expect(service.getHistorialEstudiante).toHaveBeenCalledWith(basico.id, { page: 1, pageSize: 20 });
+        expect(await screen.findByRole("heading", { name: "Trayectoria académica" })).toBeTruthy();
+        expect(service.getHistorialEstudiante).not.toHaveBeenCalled();
+        expect(usuarios.getUsuariosBasic).not.toHaveBeenCalled();
     });
 
-    it("«Ver historial» de la cabecera abre la pestaña de historial", async () => {
+    it("«Ver historial» de la cabecera abre directamente la trayectoria académica", async () => {
         renderEstudiantes(ruta);
         fireEvent.click(await screen.findByRole("button", { name: "Ver historial" }));
-        expect(await screen.findByText("Cambios en el registro")).toBeTruthy();
+        expect(await screen.findByRole("heading", { name: "Trayectoria académica" })).toBeTruthy();
+        expect(screen.getByRole("tab", { name: "Historial del estudiante" }).getAttribute("aria-selected")).toBe("true");
     });
 });
 
-describe("Ficha integral — historial del estudiante", () => {
-    it("muestra trayectoria académica y cambios del registro, solo con nombres de campos", async () => {
-        service.getMatriculasEstudiante.mockResolvedValue({
-            matriculas: [
-                matricula({
-                    movimientos: [
-                        { tipo: "CAMBIO_SECCION", fecha: "2026-05-02", seccion_anterior_id: "s-b", seccion_nueva_id: "s-a" },
-                        { tipo: "RETIRO", fecha: "2026-06-10", seccion_anterior_id: "s-a" },
-                    ],
-                }),
+describe("Ficha integral — historial del estudiante (trayectoria académica)", () => {
+    const trayectoria = () => [
+        matricula({
+            id: "m-2026",
+            fecha_matricula: "2026-03-01",
+            estado_matricula: "TRASLADADO",
+            fecha_retiro: "2026-07-01",
+            movimientos: [
+                { tipo: "CAMBIO_TURNO", fecha: "2026-04-01", seccion_anterior_id: "s-b", seccion_nueva_id: "s-a" },
+                { tipo: "RETIRO", fecha: "2026-05-10", seccion_anterior_id: "s-a" },
+                { tipo: "REINGRESO", fecha: "2026-06-01", seccion_nueva_id: "s-a" },
+                { tipo: "TRASLADO_SALIDA", fecha: "2026-07-01", seccion_anterior_id: "s-a" },
             ],
-        });
-        service.getHistorialEstudiante.mockResolvedValue({
-            total: 2,
-            eventos: [
-                { id: "e2", accion: "CHANGE_ESTADO", fecha_hora: "2026-06-01T15:00:00Z", usuario_id: "u-1", campos: ["estado"], estado_anterior: "ACTIVO", estado_nuevo: "INACTIVO" },
-                { id: "e1", accion: "UPDATE", fecha_hora: "2026-05-01T15:00:00Z", usuario_id: "u-1", campos: ["nombres", "numero_documento"] },
-            ],
-        });
+        }),
+        matricula({
+            id: "m-2025",
+            periodo: P2025,
+            seccion: SEC_B,
+            fecha_matricula: "2025-03-03",
+            estado_matricula: "CONCLUIDO",
+            movimientos: [{ tipo: "CONCLUSION", fecha: "2025-12-19", seccion_anterior_id: "s-b" }],
+        }),
+    ];
+
+    it("muestra matrículas y movimientos en orden cronológico con fecha, tipo, periodo y detalle", async () => {
+        service.getMatriculasEstudiante.mockResolvedValue({ matriculas: trayectoria() });
         renderEstudiantes(`${ruta}?tab=historial`);
+        const lista = await screen.findByRole("list", { name: "Trayectoria académica" });
+        // Las etiquetas de sección (anterior/nueva) llegan de las secciones del periodo.
+        await waitFor(() => expect(within(lista).getByText("De PRIMARIA · 3° · «B» · MAÑANA a PRIMARIA · 3° · «A» · MAÑANA")).toBeTruthy());
 
-        const trayectoria = await screen.findByRole("list", { name: "Trayectoria académica" });
-        expect(within(trayectoria).getByText("Retiro")).toBeTruthy();
-        expect(within(trayectoria).getByText("Matrícula en Año escolar 2026")).toBeTruthy();
-        await waitFor(() => expect(within(trayectoria).getByText(/de PRIMARIA · 3° · «B» · MAÑANA a PRIMARIA · 3° · «A» · MAÑANA/)).toBeTruthy());
-
-        const cambios = await screen.findByRole("list", { name: "Cambios en el registro" });
-        expect(within(cambios).getByText("Cambio de estado del registro")).toBeTruthy();
-        expect(within(cambios).getByText("De activo a inactivo")).toBeTruthy();
-        expect(within(cambios).getByText("Campos: nombres, número de documento")).toBeTruthy();
-        expect(await within(cambios).findAllByText("Por Secretaría Uno")).toHaveLength(2);
+        const items = within(lista).getAllByRole("listitem");
+        expect(items.map((li) => li.querySelector(".est-timeline-date").textContent)).toEqual([
+            "2025-03-03",
+            "2025-12-19",
+            "2026-03-01",
+            "2026-04-01",
+            "2026-05-10",
+            "2026-06-01",
+            "2026-07-01",
+        ]);
+        expect(items.map((li) => li.querySelector(".est-timeline-title").textContent)).toEqual([
+            "Matrícula · Año escolar 2025",
+            "Conclusión del periodo · Año escolar 2025",
+            "Matrícula · Año escolar 2026",
+            "Cambio de turno · Año escolar 2026",
+            "Retiro · Año escolar 2026",
+            "Reingreso · Año escolar 2026",
+            "Traslado (salida) · Año escolar 2026",
+        ]);
+        expect(within(items[0]).getByText("PRIMARIA · 3° · «B» · MAÑANA")).toBeTruthy();
+        expect(within(items[0]).getByText("Situación actual de esta matrícula: Concluido")).toBeTruthy();
+        expect(within(items[1]).getByText("Concluyó el periodo en PRIMARIA · 3° · «B» · MAÑANA")).toBeTruthy();
+        expect(within(items[4]).getByText("Se retiró de PRIMARIA · 3° · «A» · MAÑANA")).toBeTruthy();
+        expect(within(items[5]).getByText("Reingresó a PRIMARIA · 3° · «A» · MAÑANA")).toBeTruthy();
+        expect(within(items[6]).getByText("Trasladado(a) a otra institución desde PRIMARIA · 3° · «A» · MAÑANA")).toBeTruthy();
     });
 
-    it("pagina los cambios anteriores", async () => {
-        const evento = (i) => ({ id: `e${i}`, accion: "UPDATE", fecha_hora: "2026-05-01T15:00:00Z", usuario_id: "u-1", campos: ["nombres"] });
-        service.getHistorialEstudiante
-            .mockResolvedValueOnce({ total: 21, eventos: Array.from({ length: 20 }, (_, i) => evento(i)) })
-            .mockResolvedValueOnce({ total: 21, eventos: [evento(20)] });
+    it("no presenta auditoría técnica: ni campos modificados ni quién editó", async () => {
+        service.getMatriculasEstudiante.mockResolvedValue({ matriculas: trayectoria() });
+        service.getHistorialEstudiante.mockResolvedValue({
+            total: 1,
+            eventos: [{ id: "e1", accion: "UPDATE", fecha_hora: "2026-05-01T15:00:00Z", usuario_id: "u-1", campos: ["nombres"] }],
+        });
         renderEstudiantes(`${ruta}?tab=historial`);
-        fireEvent.click(await screen.findByRole("button", { name: "Ver cambios anteriores" }));
-        await waitFor(() => expect(service.getHistorialEstudiante).toHaveBeenLastCalledWith(basico.id, { page: 2, pageSize: 20 }));
-        await waitFor(() => expect(screen.queryByRole("button", { name: "Ver cambios anteriores" })).toBeNull());
-        expect(screen.getAllByText("Campos: nombres")).toHaveLength(21);
+        await screen.findByRole("list", { name: "Trayectoria académica" });
+        expect(screen.queryByText(/Cambios en el registro/)).toBeNull();
+        expect(screen.queryByText(/Campos:/)).toBeNull();
+        expect(screen.queryByText(/Secretaría Uno/)).toBeNull();
+        expect(screen.queryByText(/^Por /)).toBeNull();
+        expect(screen.queryByRole("button", { name: /cambios anteriores/ })).toBeNull();
+        expect(service.getHistorialEstudiante).not.toHaveBeenCalled();
+    });
+
+    it("una matrícula sin fecha se ubica al inicio de su año y lo indica", async () => {
+        service.getMatriculasEstudiante.mockResolvedValue({
+            matriculas: [matricula({ id: "m-sin", fecha_matricula: "", seccion: null, movimientos: [{ tipo: "CAMBIO_SECCION", fecha: "2026-02-10", seccion_nueva_id: "s-a" }] })],
+        });
+        renderEstudiantes(`${ruta}?tab=historial`);
+        const lista = await screen.findByRole("list", { name: "Trayectoria académica" });
+        const items = within(lista).getAllByRole("listitem");
+        expect(within(items[0]).getByText("Sin fecha registrada")).toBeTruthy();
+        expect(within(items[0]).getByText("Sin sección asignada")).toBeTruthy();
+        await waitFor(() => expect(within(items[1]).getByText("Sección asignada: PRIMARIA · 3° · «A» · MAÑANA")).toBeTruthy());
+    });
+
+    it("sin matrículas lo indica, y un error se muestra sin inventar eventos", async () => {
+        renderEstudiantes(`${ruta}?tab=historial`);
+        expect(await screen.findByText("Sin matrículas ni movimientos registrados.")).toBeTruthy();
+        cleanup();
+
+        service.getMatriculasEstudiante.mockRejectedValue(httpError(500, "x"));
+        renderEstudiantes(`${ruta}?tab=historial`);
+        expect(await screen.findByText(/Ocurrió un error en el servidor/)).toBeTruthy();
+        expect(screen.queryByRole("list", { name: "Trayectoria académica" })).toBeNull();
     });
 });
 

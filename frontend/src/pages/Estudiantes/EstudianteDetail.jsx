@@ -385,7 +385,7 @@ function EstudianteDetail() {
 
                     {tab === "psicologia" && <PsicologiaTab estudianteId={estudiante.id} />}
 
-                    {tab === "historial" && <HistorialTab key={`his-${reloadToken}-${matToken}`} estudianteId={estudiante.id} matriculasEstado={matriculas} />}
+                    {tab === "historial" && <HistorialTab matriculasEstado={matriculas} />}
 
                     {PROXIMAMENTE[tab] && <ProximamenteTab {...PROXIMAMENTE[tab]} />}
                 </div>
