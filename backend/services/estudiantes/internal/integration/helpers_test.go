@@ -251,7 +251,8 @@ func (h *harness) cleanup() {
 		return
 	}
 	defer func() { _, _ = conn.Exec(context.Background(), "RESET session_replication_role") }()
-	if _, err := conn.Exec(ctx, "DELETE FROM auditoria_estudiantes WHERE estudiante_id = ANY($1)", h.created); err != nil {
+	// Etapa 5: también la auditoría de las personas de prueba (persona_id).
+	if _, err := conn.Exec(ctx, "DELETE FROM auditoria_estudiantes WHERE estudiante_id = ANY($1) OR persona_id = ANY($2)", h.created, h.personas); err != nil {
 		h.t.Errorf("no se pudo limpiar la auditoría de prueba: %v", err)
 	}
 	// Modelo maestro: matrícula (movimientos -> matrículas -> secciones ->

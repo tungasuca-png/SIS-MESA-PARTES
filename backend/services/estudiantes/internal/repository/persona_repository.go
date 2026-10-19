@@ -191,10 +191,11 @@ func (r *EstudianteRepository) SearchPersonas(ctx context.Context, s PersonaSear
 		return nil, 0, err
 	}
 	args = append(args, s.PageSize, (s.Page-1)*s.PageSize)
-	rows, err := r.db.Query(ctx, fmt.Sprintf(`
+	// where ya contiene '%' literales: no pasa por Sprintf.
+	rows, err := r.db.Query(ctx, `
 		SELECT `+personaColumns+` FROM personas `+where+`
 		ORDER BY apellido_paterno NULLS LAST, apellido_materno NULLS LAST, nombres, id
-		LIMIT $%d OFFSET $%d`, len(args)-1, len(args)), args...)
+		`+fmt.Sprintf("LIMIT $%d OFFSET $%d", len(args)-1, len(args)), args...)
 	if err != nil {
 		return nil, 0, err
 	}

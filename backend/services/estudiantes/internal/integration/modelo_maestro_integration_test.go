@@ -315,9 +315,13 @@ func TestModeloMaestro(t *testing.T) {
 		if _, err := h.admin.Exec(h.ctx, `UPDATE matricula_movimientos SET motivo = 'x' WHERE matricula_id = $1`, m2); err == nil || !strings.Contains(err.Error(), "append-only") {
 			t.Fatalf("los movimientos son append-only: %v", err)
 		}
-		// Mínimo privilegio: la aplicación no escribe matrículas en esta etapa.
-		if _, err := h.app.Exec(h.ctx, `INSERT INTO matriculas (estudiante_id, periodo_id) VALUES ($1, $2)`, otro.Id, p2); err == nil {
-			t.Fatal("estudiantes_user no debe poder insertar matrículas")
+		// Mínimo privilegio (etapa 5, migración 009): la aplicación escribe
+		// matrículas por los RPC, pero nunca borra el historial académico.
+		if _, err := h.app.Exec(h.ctx, `DELETE FROM matriculas WHERE id = $1`, m1); err == nil || !strings.Contains(err.Error(), "permission denied") {
+			t.Fatalf("estudiantes_user no debe poder borrar matrículas: %v", err)
+		}
+		if _, err := h.app.Exec(h.ctx, `DELETE FROM matricula_movimientos WHERE matricula_id = $1`, m2); err == nil || !strings.Contains(err.Error(), "permission denied") {
+			t.Fatalf("estudiantes_user no debe poder borrar movimientos: %v", err)
 		}
 
 		vacio, err := h.client.ListMatriculasEstudiante(h.as(lector), &estudiantes.ListMatriculasEstudianteRequest{EstudianteId: otro.Id})
