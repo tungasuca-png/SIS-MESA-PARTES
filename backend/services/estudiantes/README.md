@@ -84,7 +84,9 @@ exigen `expected_version`; si el registro cambió, responden `version_conflict`.
 
 | RPC | REST (`/api/estudiantes…`) | Permiso |
 |---|---|---|
-| SearchEstudiantes | `GET /` | `estudiantes.view` |
+| SearchEstudiantes | `GET /` (`orden`: apellidos, codigo o recientes) | `estudiantes.view` |
+| ListHistorialEstudiante | `GET /:id/historial` (solo eventos de cambio, nombres de campos, sin valores) | `estudiantes.view` |
+| CambiarParentescoFamiliar *(W)* | `POST /:id/familiares/:relacion_id/parentesco` (cierra la relación y crea otra en una transacción) | `estudiantes.familia.update` |
 | GetEstudiante | `GET /:id` | `estudiantes.view` |
 | GetEstudiantesBasic | `POST /basic-batch` | `estudiantes.view` |
 | ResolveEstudiante | `POST /resolver` (código, código SIAGIE o documento) | `estudiantes.view` |
@@ -163,7 +165,7 @@ valores.
     `PERSONAL_UPDATE`, `FAMILIA_VIEW`, `FAMILIA_UPDATE`, `MATRICULA_UPDATE`,
     `PERSONA_VIEW`, `PERSONA_UPDATE`.
 - **Logs:**
-  - El contenido de los 30 RPC está excluido de los logs:
+  - El contenido de los 32 RPC está excluido de los logs:
     `IgnoreContentMethods` en el servicio y `logsafe` en el Gateway.
   - Una prueba falla si algún RPC queda fuera de esa lista.
 
