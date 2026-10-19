@@ -3,6 +3,13 @@
 
 package types
 
+type ActualizarFamiliarRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	RelacionId    string `path:"relacion_id"`
+	EsApoderado   bool   `json:"es_apoderado"`
+}
+
 type AnnulPsicologiaAtencionRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -75,11 +82,26 @@ type AtencionVersionResumenDTO struct {
 	CreadaEn         string `json:"creada_en"`
 }
 
+type CambiarSeccionMatriculaRequest struct {
+	Authorization   string `header:"Authorization,optional"`
+	MatriculaId     string `path:"matricula_id"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+	SeccionId       string `json:"seccion_id,optional"`
+	Fecha           string `json:"fecha,optional"`
+	Motivo          string `json:"motivo,optional"`
+}
+
 type ChangeEstadoEstudianteRequest struct {
 	Authorization   string `header:"Authorization,optional"`
 	Id              string `path:"id"`
 	ExpectedVersion int32  `json:"expected_version,optional"`
 	Estado          string `json:"estado,optional"`
+}
+
+type ChangeEstadoPeriodoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	PeriodoId     string `path:"periodo_id"`
+	Estado        string `json:"estado,optional"`
 }
 
 type ChangeEstadoRequest struct {
@@ -96,6 +118,13 @@ type ClosePsicologiaExpedienteRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
 	Motivo        string `json:"motivo"`
+}
+
+type ConcluirMatriculaRequest struct {
+	Authorization   string `header:"Authorization,optional"`
+	MatriculaId     string `path:"matricula_id"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+	Fecha           string `json:"fecha,optional"`
 }
 
 type CorrectPsicologiaAtencionRequest struct {
@@ -162,10 +191,34 @@ type CreateExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
 }
 
+type CreatePeriodoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Anio          int32  `json:"anio,optional"`
+	Nombre        string `json:"nombre,optional"`
+	FechaInicio   string `json:"fecha_inicio,optional"`
+	FechaFin      string `json:"fecha_fin,optional"`
+}
+
+type CreatePersonaRequest struct {
+	Authorization string          `header:"Authorization,optional"`
+	Persona       PersonaInputDTO `json:"persona"`
+}
+
 type CreatePsicologiaAtencionRequest struct {
 	Authorization string               `header:"Authorization,optional"`
 	Id            string               `path:"id"`
 	Contenido     AtencionContenidoDTO `json:"contenido,optional"`
+}
+
+type CreateSeccionRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	PeriodoId     string `path:"periodo_id"`
+	Nivel         string `json:"nivel,optional"`
+	Grado         string `json:"grado,optional"`
+	Seccion       string `json:"seccion,optional"`
+	Turno         string `json:"turno,optional"`
+	Aula          string `json:"aula,optional"`
+	Vacantes      *int32 `json:"vacantes,optional"`
 }
 
 type CreateUsuarioRequest struct {
@@ -449,6 +502,17 @@ type GetMyPermissionsResponse struct {
 	Permissions []string `json:"permissions"`
 }
 
+type GetPersonaRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	PersonaId     string `path:"persona_id"`
+	Historial     bool   `form:"historial,optional"`
+}
+
+type GetPersonaResponse struct {
+	Persona  PersonaDTO          `json:"persona"`
+	Vinculos []VinculoPersonaDTO `json:"vinculos"`
+}
+
 type GetPsicologiaAtencionRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -584,6 +648,28 @@ type ListMatriculasEstudianteResponse struct {
 	Matriculas []MatriculaDTO `json:"matriculas"`
 }
 
+type ListMatriculasPeriodoRequest struct {
+	Authorization   string `header:"Authorization,optional"`
+	PeriodoId       string `path:"periodo_id"`
+	SeccionId       string `form:"seccion_id,optional"`
+	EstadoMatricula string `form:"estado_matricula,optional"`
+	Page            int32  `form:"page,optional"`
+	PageSize        int32  `form:"page_size,optional"`
+}
+
+type ListMatriculasPeriodoResponse struct {
+	Matriculas []MatriculaNominaDTO `json:"matriculas"`
+	Total      int32                `json:"total"`
+}
+
+type ListPeriodosRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ListPeriodosResponse struct {
+	Periodos []PeriodoAcademicoDTO `json:"periodos"`
+}
+
 type ListPermissionsRequest struct {
 	Authorization string `header:"Authorization,optional"`
 }
@@ -640,6 +726,15 @@ type ListRolesResponse struct {
 	Roles []RoleDTO `json:"roles"`
 }
 
+type ListSeccionesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	PeriodoId     string `path:"periodo_id"`
+}
+
+type ListSeccionesResponse struct {
+	Secciones []SeccionAcademicaDTO `json:"secciones"`
+}
+
 type ListUsuariosRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Q             string `form:"q,optional"`
@@ -680,6 +775,7 @@ type LogoutResponse struct {
 
 type MatriculaDTO struct {
 	Id              string                   `json:"id"`
+	EstudianteId    string                   `json:"estudiante_id"`
 	Periodo         PeriodoAcademicoDTO      `json:"periodo"`
 	Seccion         *SeccionAcademicaDTO     `json:"seccion"`
 	EstadoMatricula string                   `json:"estado_matricula"`
@@ -688,6 +784,23 @@ type MatriculaDTO struct {
 	Origen          string                   `json:"origen"`
 	Version         int32                    `json:"version"`
 	Movimientos     []MovimientoMatriculaDTO `json:"movimientos"`
+}
+
+type MatriculaNominaDTO struct {
+	Matricula  MatriculaDTO         `json:"matricula"`
+	Estudiante *EstudianteBasicoDTO `json:"estudiante"`
+}
+
+type MatriculaResponse struct {
+	Matricula MatriculaDTO `json:"matricula"`
+}
+
+type MatricularEstudianteRequest struct {
+	Authorization  string `header:"Authorization,optional"`
+	Id             string `path:"id"`
+	PeriodoId      string `json:"periodo_id,optional"`
+	SeccionId      string `json:"seccion_id,optional"`
+	FechaMatricula string `json:"fecha_matricula,optional"`
 }
 
 type MovimientoMatriculaDTO struct {
@@ -710,10 +823,16 @@ type OpenPsicologiaExpedienteRequest struct {
 }
 
 type PeriodoAcademicoDTO struct {
-	Id     string `json:"id"`
-	Anio   int32  `json:"anio"`
-	Nombre string `json:"nombre"`
-	Estado string `json:"estado"`
+	Id          string `json:"id"`
+	Anio        int32  `json:"anio"`
+	Nombre      string `json:"nombre"`
+	Estado      string `json:"estado"`
+	FechaInicio string `json:"fecha_inicio"`
+	FechaFin    string `json:"fecha_fin"`
+}
+
+type PeriodoResponse struct {
+	Periodo PeriodoAcademicoDTO `json:"periodo"`
 }
 
 type PermissionDTO struct {
@@ -732,6 +851,7 @@ type PersonaDTO struct {
 	Nombres         string `json:"nombres"`
 	ApellidoPaterno string `json:"apellido_paterno"`
 	ApellidoMaterno string `json:"apellido_materno"`
+	Version         int32  `json:"version"`
 }
 
 type PersonaInputDTO struct {
@@ -740,6 +860,10 @@ type PersonaInputDTO struct {
 	Nombres         string `json:"nombres,optional"`
 	ApellidoPaterno string `json:"apellido_paterno,optional"`
 	ApellidoMaterno string `json:"apellido_materno,optional"`
+}
+
+type PersonaResponse struct {
+	Persona PersonaDTO `json:"persona"`
 }
 
 type PsicologiaAtencionResponse struct {
@@ -787,6 +911,14 @@ type RegisterResponse struct {
 	Message  string `json:"message"`
 }
 
+type ReingresarMatriculaRequest struct {
+	Authorization   string `header:"Authorization,optional"`
+	MatriculaId     string `path:"matricula_id"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+	Fecha           string `json:"fecha,optional"`
+	Motivo          string `json:"motivo,optional"`
+}
+
 type ReopenPsicologiaExpedienteRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -798,6 +930,7 @@ type ResolveEstudianteRequest struct {
 	Codigo          string `json:"codigo,optional"`
 	TipoDocumento   string `json:"tipo_documento,optional"`
 	NumeroDocumento string `json:"numero_documento,optional"`
+	CodigoSiagie    string `json:"codigo_siagie,optional"`
 }
 
 type ResolveEstudianteResponse struct {
@@ -811,6 +944,15 @@ type ResolverExpedienteRequest struct {
 
 type ResolverExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type RetirarMatriculaRequest struct {
+	Authorization   string `header:"Authorization,optional"`
+	MatriculaId     string `path:"matricula_id"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+	Tipo            string `json:"tipo,optional"`
+	Fecha           string `json:"fecha,optional"`
+	Motivo          string `json:"motivo,optional"`
 }
 
 type RevisionPsicologiaAtencionRequest struct {
@@ -843,13 +985,32 @@ type SearchEstudiantesResponse struct {
 	Total       int32                 `json:"total"`
 }
 
+type SearchPersonasRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `form:"q,optional"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type SearchPersonasResponse struct {
+	Personas []PersonaDTO `json:"personas"`
+	Total    int32        `json:"total"`
+}
+
 type SeccionAcademicaDTO struct {
-	Id      string `json:"id"`
-	Nivel   string `json:"nivel"`
-	Grado   string `json:"grado"`
-	Seccion string `json:"seccion"`
-	Turno   string `json:"turno"`
-	Aula    string `json:"aula"`
+	Id           string `json:"id"`
+	PeriodoId    string `json:"periodo_id"`
+	Nivel        string `json:"nivel"`
+	Grado        string `json:"grado"`
+	Seccion      string `json:"seccion"`
+	Turno        string `json:"turno"`
+	Aula         string `json:"aula"`
+	Vacantes     *int32 `json:"vacantes"`
+	Matriculados int32  `json:"matriculados"`
+}
+
+type SeccionResponse struct {
+	Seccion SeccionAcademicaDTO `json:"seccion"`
 }
 
 type UpdateAreaRequest struct {
@@ -922,6 +1083,17 @@ type UpdateMyProfileRequest struct {
 
 type UpdateMyProfileResponse struct {
 	Usuario UsuarioDTO `json:"usuario"`
+}
+
+type UpdatePersonaRequest struct {
+	Authorization   string  `header:"Authorization,optional"`
+	PersonaId       string  `path:"persona_id"`
+	ExpectedVersion int32   `json:"expected_version,optional"`
+	TipoDocumento   *string `json:"tipo_documento,optional"`
+	NumeroDocumento *string `json:"numero_documento,optional"`
+	Nombres         *string `json:"nombres,optional"`
+	ApellidoPaterno *string `json:"apellido_paterno,optional"`
+	ApellidoMaterno *string `json:"apellido_materno,optional"`
 }
 
 type UpdatePsicologiaAtencionDraftRequest struct {
@@ -1018,4 +1190,14 @@ type VincularFamiliarRequest struct {
 	Parentesco    string           `json:"parentesco,optional"`
 	EsApoderado   bool             `json:"es_apoderado,optional"`
 	Desde         string           `json:"desde,optional"`
+}
+
+type VinculoPersonaDTO struct {
+	RelacionId  string               `json:"relacion_id"`
+	Estudiante  *EstudianteBasicoDTO `json:"estudiante"`
+	Parentesco  string               `json:"parentesco"`
+	EsApoderado bool                 `json:"es_apoderado"`
+	Vigente     bool                 `json:"vigente"`
+	Desde       string               `json:"desde"`
+	Hasta       string               `json:"hasta"`
 }

@@ -34,6 +34,7 @@ func (l *ResolveEstudianteLogic) ResolveEstudiante(req *types.ResolveEstudianteR
 	ctx := withAuthorization(l.ctx, req.Authorization)
 	out, err := l.svcCtx.EstudiantesClient.ResolveEstudiante(ctx, &estudiantesclient.ResolveEstudianteRequest{
 		Codigo:          req.Codigo,
+		CodigoSiagie:    req.CodigoSiagie,
 		TipoDocumento:   req.TipoDocumento,
 		NumeroDocumento: req.NumeroDocumento,
 	})

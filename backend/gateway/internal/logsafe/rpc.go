@@ -68,6 +68,24 @@ var sensitiveRPCMethods = []string{
 	estudiantes.Estudiantes_ListFamiliaresEstudiante_FullMethodName,
 	estudiantes.Estudiantes_VincularFamiliar_FullMethodName,
 	estudiantes.Estudiantes_DesvincularFamiliar_FullMethodName,
+	// Etapa 5: personas (documento, nombres), apoderado, periodos, secciones
+	// y matrículas (estudiante, sección, motivos de retiro o traslado).
+	estudiantes.Estudiantes_ActualizarFamiliar_FullMethodName,
+	estudiantes.Estudiantes_CreatePersona_FullMethodName,
+	estudiantes.Estudiantes_GetPersona_FullMethodName,
+	estudiantes.Estudiantes_SearchPersonas_FullMethodName,
+	estudiantes.Estudiantes_UpdatePersona_FullMethodName,
+	estudiantes.Estudiantes_CreatePeriodo_FullMethodName,
+	estudiantes.Estudiantes_ListPeriodos_FullMethodName,
+	estudiantes.Estudiantes_ChangeEstadoPeriodo_FullMethodName,
+	estudiantes.Estudiantes_CreateSeccion_FullMethodName,
+	estudiantes.Estudiantes_ListSecciones_FullMethodName,
+	estudiantes.Estudiantes_MatricularEstudiante_FullMethodName,
+	estudiantes.Estudiantes_CambiarSeccionMatricula_FullMethodName,
+	estudiantes.Estudiantes_RetirarMatricula_FullMethodName,
+	estudiantes.Estudiantes_ReingresarMatricula_FullMethodName,
+	estudiantes.Estudiantes_ConcluirMatricula_FullMethodName,
+	estudiantes.Estudiantes_ListMatriculasPeriodo_FullMethodName,
 }
 
 // ProtectSensitiveRPCLogs debe llamarse una vez al arrancar, antes de crear los

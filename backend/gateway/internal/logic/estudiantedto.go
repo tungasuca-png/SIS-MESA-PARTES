@@ -54,13 +54,9 @@ func toFamiliarDTO(f *estudiantesclient.Familiar) types.FamiliarDTO {
 	if f == nil {
 		return types.FamiliarDTO{}
 	}
-	p := f.GetPersona()
 	return types.FamiliarDTO{
-		RelacionId: f.GetRelacionId(),
-		Persona: types.PersonaDTO{
-			Id: p.GetId(), TipoDocumento: p.GetTipoDocumento(), NumeroDocumento: p.GetNumeroDocumento(),
-			Nombres: p.GetNombres(), ApellidoPaterno: p.GetApellidoPaterno(), ApellidoMaterno: p.GetApellidoMaterno(),
-		},
+		RelacionId:  f.GetRelacionId(),
+		Persona:     toPersonaDTO(f.GetPersona()),
 		Parentesco:  f.GetParentesco(),
 		EsApoderado: f.GetEsApoderado(),
 		Vigente:     f.GetVigente(),
