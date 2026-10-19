@@ -19,6 +19,13 @@
 
     --dp-border: #E9EDF7;
 
+    /* Acento institucional turquesa/cian (pestañas, chips, línea de tiempo). */
+    --dp-accent: #0E9FB0;
+    --dp-accent-strong: #0B7F8D;
+    --dp-accent-soft: #E0F6F8;
+    --dp-danger: #C2410C;
+    --dp-danger-soft: #FFEDD5;
+
     --dp-badge-pending-bg: #FEF3C7;
     --dp-badge-pending-text: #D97706;
     --dp-badge-process-bg: #E0F2FE;

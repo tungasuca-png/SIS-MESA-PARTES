@@ -14,7 +14,7 @@ import { BANDEJAS_EXPEDIENTES } from "../../constants/bandejas";
 //   Mesa de Partes -> Expedientes (Por revisar, En proceso, Observados,
 //                     Finalizados), Derivados, Seguimiento
 //   Psicología -> Expedientes (Psicología Service, expedientes_psicologicos)
-//   Estudiantes -> Directorio (Estudiantes Service, FASE E-06)
+//   Estudiantes -> Directorio, Periodos y secciones (Estudiantes Service)
 //   Reportes
 //   Administración -> Usuarios, Roles y Permisos, Configuración
 //
@@ -97,6 +97,14 @@ export const NAV_GROUPS = [
                 description: "Maestro institucional de estudiantes.",
                 path: "/estudiantes",
                 icon: "users",
+                permission: "estudiantes.view",
+            },
+            {
+                key: "estudiantes-periodos",
+                label: "Periodos y secciones",
+                description: "Periodos académicos y secciones para la matrícula.",
+                path: "/estudiantes/periodos",
+                icon: "clock",
                 permission: "estudiantes.view",
             },
         ],

@@ -62,3 +62,37 @@
         display: none;
     }
 }
+
+/* Buscador global de estudiantes (solo con estudiantes.view). */
+.dp-header-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--dp-bg);
+    border: 1px solid var(--dp-border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    color: var(--dp-text-secondary);
+    min-width: 280px;
+}
+
+.dp-header-search:focus-within {
+    border-color: var(--dp-accent);
+    box-shadow: 0 0 0 3px var(--dp-accent-soft);
+}
+
+.dp-header-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font: inherit;
+    font-size: 13px;
+    color: var(--dp-text-primary);
+    width: 100%;
+}
+
+@media (max-width: 960px) {
+    .dp-header-search {
+        display: none;
+    }
+}

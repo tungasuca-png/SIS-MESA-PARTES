@@ -16,8 +16,12 @@ import Usuarios from "./pages/Configuracion/Usuarios/Usuarios";
 import PsicologiaExpedientesList from "./pages/Psicologia/PsicologiaExpedientesList";
 import PsicologiaExpedienteDetail from "./pages/Psicologia/PsicologiaExpedienteDetail";
 import PsicologiaAtencion from "./pages/Psicologia/PsicologiaAtencion";
-import EstudiantesList from "./pages/Estudiantes/EstudiantesList";
-import EstudianteDetail from "./pages/Estudiantes/EstudianteDetail";
+import { lazy, Suspense } from "react";
+// Módulo Estudiantes en un chunk propio (carga al entrar a /estudiantes).
+const EstudiantesList = lazy(() => import("./pages/Estudiantes/EstudiantesList"));
+const EstudianteDetail = lazy(() => import("./pages/Estudiantes/EstudianteDetail"));
+const PeriodosSecciones = lazy(() => import("./pages/Estudiantes/PeriodosSecciones"));
+const cargando = <p className="dp-table-empty">Cargando...</p>;
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
 
@@ -210,7 +214,19 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <PermissionRoute permission="estudiantes.view">
-                            <EstudiantesList />
+                            <Suspense fallback={cargando}><EstudiantesList /></Suspense>
+                        </PermissionRoute>
+                    </ProtectedRoute>
+                }
+            />
+            {/* Periodos y secciones (base de la matrícula): ver con
+                estudiantes.view; registrar con estudiantes.matricula.update. */}
+            <Route
+                path="/estudiantes/periodos"
+                element={
+                    <ProtectedRoute>
+                        <PermissionRoute permission="estudiantes.view">
+                            <Suspense fallback={cargando}><PeriodosSecciones /></Suspense>
                         </PermissionRoute>
                     </ProtectedRoute>
                 }
@@ -220,7 +236,7 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <PermissionRoute permission="estudiantes.view">
-                            <EstudianteDetail />
+                            <Suspense fallback={cargando}><EstudianteDetail /></Suspense>
                         </PermissionRoute>
                     </ProtectedRoute>
                 }
