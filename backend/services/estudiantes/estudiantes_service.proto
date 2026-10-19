@@ -3,12 +3,13 @@ syntax = "proto3";
 package estudiantes;
 option go_package="./estudiantes";
 
-// Estudiantes Service es la fuente básica de estudiantes del sistema: id,
-// código, nombres, nivel/grado/sección/turno y estado de matrícula. NO
-// contiene historial académico, notas, asistencia, apoderados, documentos ni
-// ningún dato clínico (eso pertenece a otros servicios, p. ej. Psicología,
-// que solo guarda estudiante_id como UUID sin FK y consulta aquí lo mínimo
-// para mostrarlo).
+// Estudiantes Service es el maestro escolar del sistema: identidad del
+// estudiante, datos personales, familia (personas, parentesco, apoderado),
+// periodos, secciones, matrículas y su historial. NO contiene notas,
+// asistencia, documentos ni ningún dato clínico (eso pertenece a otros
+// servicios, p. ej. Psicología, que solo guarda estudiante_id como UUID sin
+// FK y consulta aquí lo mínimo para mostrarlo). Los consumidores guardan
+// solo el UUID estable del estudiante.
 message Estudiante {
   string id = 1;
   string codigo = 2;
@@ -250,10 +251,12 @@ message UpdateEstudiantePersonalResponse {
 // Exactamente un criterio: codigo, o tipo_documento + numero_documento.
 // Requiere "estudiantes.view". Viaja en el cuerpo (POST) para que el número
 // de documento nunca quede en URLs ni en logs de acceso.
+// Etapa 5: también por codigo_siagie (14 dígitos, único).
 message ResolveEstudianteRequest {
   string codigo = 1;
   string tipo_documento = 2;
   string numero_documento = 3;
+  string codigo_siagie = 4;
 }
 
 message ResolveEstudianteResponse {
@@ -289,7 +292,9 @@ message PeriodoAcademico {
   string id = 1;
   int32 anio = 2;
   string nombre = 3;
-  string estado = 4;
+  string estado = 4;              // PLANIFICADO | EN_CURSO | CERRADO
+  string fecha_inicio = 5;        // AAAA-MM-DD o ""
+  string fecha_fin = 6;
 }
 
 message SeccionAcademica {
@@ -299,6 +304,9 @@ message SeccionAcademica {
   string seccion = 4;
   string turno = 5;
   string aula = 6;
+  string periodo_id = 7;
+  optional int32 vacantes = 8;    // ausente = sin límite registrado
+  int32 matriculados = 9;         // matrículas MATRICULADO (solo en ListSecciones)
 }
 
 message MovimientoMatricula {
@@ -318,6 +326,7 @@ message Matricula {
   string origen = 7;              // REGISTRO | MIGRACION_LEGADO
   int32 version = 8;
   repeated MovimientoMatricula movimientos = 9;
+  string estudiante_id = 10;
 }
 
 message ListMatriculasEstudianteRequest {
@@ -340,6 +349,7 @@ message Persona {
   string nombres = 4;
   string apellido_paterno = 5;
   string apellido_materno = 6;
+  int32 version = 7;              // etapa 5: para UpdatePersona (expected_version)
 }
 
 message Familiar {
@@ -391,6 +401,210 @@ message DesvincularFamiliarResponse {
   Familiar familiar = 1;
 }
 
+// ActualizarFamiliarRequest (etapa 5): cambia SOLO el rol de apoderado de
+// una relación vigente. El parentesco no se edita: se cierra la relación y
+// se registra otra, para conservar el historial. Sigue la regla de un solo
+// apoderado vigente (primero se quita al anterior).
+message ActualizarFamiliarRequest {
+  string estudiante_id = 1;
+  string relacion_id = 2;
+  bool es_apoderado = 3;
+}
+
+message ActualizarFamiliarResponse {
+  Familiar familiar = 1;
+}
+
+// ---- Modelo maestro, etapa 5: PERSONAS (padres, apoderados) ----
+// Lectura con "estudiantes.familia.view", escritura con
+// "estudiantes.familia.update". GetPersona se audita como PERSONA_VIEW y
+// UpdatePersona como PERSONA_UPDATE (nombres de campos, nunca valores).
+// Errores nuevos: persona_not_found, duplicate_persona, version_conflict.
+
+message VinculoPersona {
+  string relacion_id = 1;
+  EstudianteBasico estudiante = 2;
+  string parentesco = 3;
+  bool es_apoderado = 4;
+  bool vigente = 5;
+  string desde = 6;
+  string hasta = 7;
+}
+
+message CreatePersonaRequest {
+  Persona persona = 1;            // id y version se ignoran
+}
+
+message PersonaResponse {
+  Persona persona = 1;
+}
+
+message GetPersonaRequest {
+  string id = 1;
+  bool incluir_historial = 2;     // false = solo vínculos vigentes
+}
+
+message GetPersonaResponse {
+  Persona persona = 1;
+  repeated VinculoPersona vinculos = 2;
+}
+
+// SearchPersonasRequest: q de 2 a 100 caracteres; busca por número de
+// documento y por nombres y apellidos (cualquier orden, sin tildes).
+message SearchPersonasRequest {
+  string q = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message SearchPersonasResponse {
+  repeated Persona personas = 1;
+  int32 total = 2;
+}
+
+// UpdatePersonaRequest: PATCH parcial con control de versión. Ausente = no
+// cambia; presente con "" = NULL (nombres es obligatorio). El documento se
+// valida sobre el resultado final y no puede repetir el de otra persona.
+message UpdatePersonaRequest {
+  string id = 1;
+  int32 expected_version = 2;
+  optional string tipo_documento = 3;
+  optional string numero_documento = 4;
+  optional string nombres = 5;
+  optional string apellido_paterno = 6;
+  optional string apellido_materno = 7;
+}
+
+// ---- Modelo maestro, etapa 5: PERIODOS, SECCIONES y MATRÍCULAS ----
+// Lectura con "estudiantes.view"; escritura con
+// "estudiantes.matricula.update". Toda operación sobre una matrícula se
+// audita en el estudiante como MATRICULA_UPDATE. Reglas de integridad:
+//   - Periodo: PLANIFICADO -> EN_CURSO -> CERRADO (solo hacia adelante).
+//   - En un periodo CERRADO no se registran secciones ni matrículas ni se
+//     modifican, salvo ConcluirMatricula (cierre de fin de periodo).
+//   - Solo se matricula a un estudiante con registro ACTIVO; una matrícula
+//     por estudiante y periodo; la sección debe ser del mismo periodo y
+//     tener vacantes si su límite está registrado.
+//   - Transiciones de matrícula: MATRICULADO -> RETIRADO | TRASLADADO |
+//     CONCLUIDO; RETIRADO | TRASLADADO -> MATRICULADO (reingreso). Cada
+//     una deja un movimiento (append-only) y nunca borra la anterior.
+//   - Las fechas de los movimientos no pueden ser futuras.
+// Errores nuevos: periodo_not_found, duplicate_periodo, periodo_cerrado,
+// invalid_transition, seccion_not_found, duplicate_seccion, sin_vacantes,
+// matricula_not_found, duplicate_matricula, estudiante_inactivo,
+// version_conflict.
+
+message CreatePeriodoRequest {
+  int32 anio = 1;
+  string nombre = 2;
+  string fecha_inicio = 3;        // AAAA-MM-DD, opcional
+  string fecha_fin = 4;
+}
+
+message PeriodoResponse {
+  PeriodoAcademico periodo = 1;
+}
+
+message ListPeriodosRequest {}
+
+message ListPeriodosResponse {
+  repeated PeriodoAcademico periodos = 1;
+}
+
+message ChangeEstadoPeriodoRequest {
+  string id = 1;
+  string estado = 2;              // EN_CURSO | CERRADO
+}
+
+message CreateSeccionRequest {
+  string periodo_id = 1;
+  string nivel = 2;               // INICIAL | PRIMARIA | SECUNDARIA
+  string grado = 3;
+  string seccion = 4;
+  string turno = 5;               // opcional
+  string aula = 6;                // opcional
+  optional int32 vacantes = 7;
+}
+
+message SeccionResponse {
+  SeccionAcademica seccion = 1;
+}
+
+message ListSeccionesRequest {
+  string periodo_id = 1;
+}
+
+message ListSeccionesResponse {
+  repeated SeccionAcademica secciones = 1;
+}
+
+message MatriculaResponse {
+  Matricula matricula = 1;
+}
+
+message MatricularEstudianteRequest {
+  string estudiante_id = 1;
+  string periodo_id = 2;
+  string seccion_id = 3;          // opcional: puede asignarse después
+  string fecha_matricula = 4;     // AAAA-MM-DD, vacío = hoy (Lima)
+}
+
+// CambiarSeccionMatriculaRequest: asigna o cambia la sección dentro del
+// mismo periodo (movimiento CAMBIO_SECCION, o CAMBIO_TURNO si solo cambia
+// el turno).
+message CambiarSeccionMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string seccion_id = 3;
+  string fecha = 4;               // vacío = hoy (Lima)
+  string motivo = 5;              // opcional, máx. 200
+}
+
+// RetirarMatriculaRequest: tipo RETIRO (estado RETIRADO) o TRASLADO
+// (estado TRASLADADO, movimiento TRASLADO_SALIDA).
+message RetirarMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string tipo = 3;
+  string fecha = 4;               // vacío = hoy (Lima)
+  string motivo = 5;              // obligatorio, máx. 200
+}
+
+message ReingresarMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string fecha = 3;               // vacío = hoy; no anterior al retiro
+  string motivo = 4;              // opcional
+}
+
+// ConcluirMatriculaRequest: el estudiante terminó el periodo (CONCLUIDO).
+// Exige periodo EN_CURSO o CERRADO. No decide aprobación ni promoción: esas
+// reglas no están definidas por el colegio.
+message ConcluirMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string fecha = 3;               // vacío = hoy (Lima)
+}
+
+// Nómina de un periodo (opcionalmente de una sección o estado).
+message MatriculaNomina {
+  Matricula matricula = 1;        // sin movimientos
+  EstudianteBasico estudiante = 2;
+}
+
+message ListMatriculasPeriodoRequest {
+  string periodo_id = 1;
+  string seccion_id = 2;
+  string estado_matricula = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message ListMatriculasPeriodoResponse {
+  repeated MatriculaNomina matriculas = 1;
+  int32 total = 2;
+}
+
 service Estudiantes {
   rpc GetEstudiante(GetEstudianteRequest) returns (GetEstudianteResponse);
   rpc SearchEstudiantes(SearchEstudiantesRequest) returns (SearchEstudiantesResponse);
@@ -406,4 +620,22 @@ service Estudiantes {
   rpc ListFamiliaresEstudiante(ListFamiliaresEstudianteRequest) returns (ListFamiliaresEstudianteResponse);
   rpc VincularFamiliar(VincularFamiliarRequest) returns (VincularFamiliarResponse);
   rpc DesvincularFamiliar(DesvincularFamiliarRequest) returns (DesvincularFamiliarResponse);
+  // Etapa 5: familia y personas.
+  rpc ActualizarFamiliar(ActualizarFamiliarRequest) returns (ActualizarFamiliarResponse);
+  rpc CreatePersona(CreatePersonaRequest) returns (PersonaResponse);
+  rpc GetPersona(GetPersonaRequest) returns (GetPersonaResponse);
+  rpc SearchPersonas(SearchPersonasRequest) returns (SearchPersonasResponse);
+  rpc UpdatePersona(UpdatePersonaRequest) returns (PersonaResponse);
+  // Etapa 5: periodos, secciones y matrículas.
+  rpc CreatePeriodo(CreatePeriodoRequest) returns (PeriodoResponse);
+  rpc ListPeriodos(ListPeriodosRequest) returns (ListPeriodosResponse);
+  rpc ChangeEstadoPeriodo(ChangeEstadoPeriodoRequest) returns (PeriodoResponse);
+  rpc CreateSeccion(CreateSeccionRequest) returns (SeccionResponse);
+  rpc ListSecciones(ListSeccionesRequest) returns (ListSeccionesResponse);
+  rpc MatricularEstudiante(MatricularEstudianteRequest) returns (MatriculaResponse);
+  rpc CambiarSeccionMatricula(CambiarSeccionMatriculaRequest) returns (MatriculaResponse);
+  rpc RetirarMatricula(RetirarMatriculaRequest) returns (MatriculaResponse);
+  rpc ReingresarMatricula(ReingresarMatriculaRequest) returns (MatriculaResponse);
+  rpc ConcluirMatricula(ConcluirMatriculaRequest) returns (MatriculaResponse);
+  rpc ListMatriculasPeriodo(ListMatriculasPeriodoRequest) returns (ListMatriculasPeriodoResponse);
 }

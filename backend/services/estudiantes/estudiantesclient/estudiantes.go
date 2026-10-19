@@ -14,10 +14,18 @@ import (
 )
 
 type (
+	ActualizarFamiliarRequest        = estudiantes.ActualizarFamiliarRequest
+	ActualizarFamiliarResponse       = estudiantes.ActualizarFamiliarResponse
+	CambiarSeccionMatriculaRequest   = estudiantes.CambiarSeccionMatriculaRequest
 	ChangeEstadoEstudianteRequest    = estudiantes.ChangeEstadoEstudianteRequest
 	ChangeEstadoEstudianteResponse   = estudiantes.ChangeEstadoEstudianteResponse
+	ChangeEstadoPeriodoRequest       = estudiantes.ChangeEstadoPeriodoRequest
+	ConcluirMatriculaRequest         = estudiantes.ConcluirMatriculaRequest
 	CreateEstudianteRequest          = estudiantes.CreateEstudianteRequest
 	CreateEstudianteResponse         = estudiantes.CreateEstudianteResponse
+	CreatePeriodoRequest             = estudiantes.CreatePeriodoRequest
+	CreatePersonaRequest             = estudiantes.CreatePersonaRequest
+	CreateSeccionRequest             = estudiantes.CreateSeccionRequest
 	DesvincularFamiliarRequest       = estudiantes.DesvincularFamiliarRequest
 	DesvincularFamiliarResponse      = estudiantes.DesvincularFamiliarResponse
 	Estudiante                       = estudiantes.Estudiante
@@ -30,28 +38,48 @@ type (
 	GetEstudianteResponse            = estudiantes.GetEstudianteResponse
 	GetEstudiantesBasicRequest       = estudiantes.GetEstudiantesBasicRequest
 	GetEstudiantesBasicResponse      = estudiantes.GetEstudiantesBasicResponse
+	GetPersonaRequest                = estudiantes.GetPersonaRequest
+	GetPersonaResponse               = estudiantes.GetPersonaResponse
 	GrupoPosibleDuplicado            = estudiantes.GrupoPosibleDuplicado
 	ListFamiliaresEstudianteRequest  = estudiantes.ListFamiliaresEstudianteRequest
 	ListFamiliaresEstudianteResponse = estudiantes.ListFamiliaresEstudianteResponse
 	ListMatriculasEstudianteRequest  = estudiantes.ListMatriculasEstudianteRequest
 	ListMatriculasEstudianteResponse = estudiantes.ListMatriculasEstudianteResponse
+	ListMatriculasPeriodoRequest     = estudiantes.ListMatriculasPeriodoRequest
+	ListMatriculasPeriodoResponse    = estudiantes.ListMatriculasPeriodoResponse
+	ListPeriodosRequest              = estudiantes.ListPeriodosRequest
+	ListPeriodosResponse             = estudiantes.ListPeriodosResponse
 	ListPosiblesDuplicadosRequest    = estudiantes.ListPosiblesDuplicadosRequest
 	ListPosiblesDuplicadosResponse   = estudiantes.ListPosiblesDuplicadosResponse
+	ListSeccionesRequest             = estudiantes.ListSeccionesRequest
+	ListSeccionesResponse            = estudiantes.ListSeccionesResponse
 	Matricula                        = estudiantes.Matricula
+	MatriculaNomina                  = estudiantes.MatriculaNomina
+	MatriculaResponse                = estudiantes.MatriculaResponse
+	MatricularEstudianteRequest      = estudiantes.MatricularEstudianteRequest
 	MovimientoMatricula              = estudiantes.MovimientoMatricula
 	PeriodoAcademico                 = estudiantes.PeriodoAcademico
+	PeriodoResponse                  = estudiantes.PeriodoResponse
 	Persona                          = estudiantes.Persona
+	PersonaResponse                  = estudiantes.PersonaResponse
+	ReingresarMatriculaRequest       = estudiantes.ReingresarMatriculaRequest
 	ResolveEstudianteRequest         = estudiantes.ResolveEstudianteRequest
 	ResolveEstudianteResponse        = estudiantes.ResolveEstudianteResponse
+	RetirarMatriculaRequest          = estudiantes.RetirarMatriculaRequest
 	SearchEstudiantesRequest         = estudiantes.SearchEstudiantesRequest
 	SearchEstudiantesResponse        = estudiantes.SearchEstudiantesResponse
+	SearchPersonasRequest            = estudiantes.SearchPersonasRequest
+	SearchPersonasResponse           = estudiantes.SearchPersonasResponse
 	SeccionAcademica                 = estudiantes.SeccionAcademica
+	SeccionResponse                  = estudiantes.SeccionResponse
 	UpdateEstudiantePersonalRequest  = estudiantes.UpdateEstudiantePersonalRequest
 	UpdateEstudiantePersonalResponse = estudiantes.UpdateEstudiantePersonalResponse
 	UpdateEstudianteRequest          = estudiantes.UpdateEstudianteRequest
 	UpdateEstudianteResponse         = estudiantes.UpdateEstudianteResponse
+	UpdatePersonaRequest             = estudiantes.UpdatePersonaRequest
 	VincularFamiliarRequest          = estudiantes.VincularFamiliarRequest
 	VincularFamiliarResponse         = estudiantes.VincularFamiliarResponse
+	VinculoPersona                   = estudiantes.VinculoPersona
 
 	Estudiantes interface {
 		GetEstudiante(ctx context.Context, in *GetEstudianteRequest, opts ...grpc.CallOption) (*GetEstudianteResponse, error)
@@ -68,6 +96,24 @@ type (
 		ListFamiliaresEstudiante(ctx context.Context, in *ListFamiliaresEstudianteRequest, opts ...grpc.CallOption) (*ListFamiliaresEstudianteResponse, error)
 		VincularFamiliar(ctx context.Context, in *VincularFamiliarRequest, opts ...grpc.CallOption) (*VincularFamiliarResponse, error)
 		DesvincularFamiliar(ctx context.Context, in *DesvincularFamiliarRequest, opts ...grpc.CallOption) (*DesvincularFamiliarResponse, error)
+		// Etapa 5: familia y personas.
+		ActualizarFamiliar(ctx context.Context, in *ActualizarFamiliarRequest, opts ...grpc.CallOption) (*ActualizarFamiliarResponse, error)
+		CreatePersona(ctx context.Context, in *CreatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error)
+		GetPersona(ctx context.Context, in *GetPersonaRequest, opts ...grpc.CallOption) (*GetPersonaResponse, error)
+		SearchPersonas(ctx context.Context, in *SearchPersonasRequest, opts ...grpc.CallOption) (*SearchPersonasResponse, error)
+		UpdatePersona(ctx context.Context, in *UpdatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error)
+		// Etapa 5: periodos, secciones y matrículas.
+		CreatePeriodo(ctx context.Context, in *CreatePeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error)
+		ListPeriodos(ctx context.Context, in *ListPeriodosRequest, opts ...grpc.CallOption) (*ListPeriodosResponse, error)
+		ChangeEstadoPeriodo(ctx context.Context, in *ChangeEstadoPeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error)
+		CreateSeccion(ctx context.Context, in *CreateSeccionRequest, opts ...grpc.CallOption) (*SeccionResponse, error)
+		ListSecciones(ctx context.Context, in *ListSeccionesRequest, opts ...grpc.CallOption) (*ListSeccionesResponse, error)
+		MatricularEstudiante(ctx context.Context, in *MatricularEstudianteRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+		CambiarSeccionMatricula(ctx context.Context, in *CambiarSeccionMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+		RetirarMatricula(ctx context.Context, in *RetirarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+		ReingresarMatricula(ctx context.Context, in *ReingresarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+		ConcluirMatricula(ctx context.Context, in *ConcluirMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+		ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error)
 	}
 
 	defaultEstudiantes struct {
@@ -149,4 +195,86 @@ func (m *defaultEstudiantes) VincularFamiliar(ctx context.Context, in *VincularF
 func (m *defaultEstudiantes) DesvincularFamiliar(ctx context.Context, in *DesvincularFamiliarRequest, opts ...grpc.CallOption) (*DesvincularFamiliarResponse, error) {
 	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
 	return client.DesvincularFamiliar(ctx, in, opts...)
+}
+
+// Etapa 5: familia y personas.
+func (m *defaultEstudiantes) ActualizarFamiliar(ctx context.Context, in *ActualizarFamiliarRequest, opts ...grpc.CallOption) (*ActualizarFamiliarResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ActualizarFamiliar(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) CreatePersona(ctx context.Context, in *CreatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.CreatePersona(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) GetPersona(ctx context.Context, in *GetPersonaRequest, opts ...grpc.CallOption) (*GetPersonaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.GetPersona(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) SearchPersonas(ctx context.Context, in *SearchPersonasRequest, opts ...grpc.CallOption) (*SearchPersonasResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.SearchPersonas(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) UpdatePersona(ctx context.Context, in *UpdatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.UpdatePersona(ctx, in, opts...)
+}
+
+// Etapa 5: periodos, secciones y matrículas.
+func (m *defaultEstudiantes) CreatePeriodo(ctx context.Context, in *CreatePeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.CreatePeriodo(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ListPeriodos(ctx context.Context, in *ListPeriodosRequest, opts ...grpc.CallOption) (*ListPeriodosResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ListPeriodos(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ChangeEstadoPeriodo(ctx context.Context, in *ChangeEstadoPeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ChangeEstadoPeriodo(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) CreateSeccion(ctx context.Context, in *CreateSeccionRequest, opts ...grpc.CallOption) (*SeccionResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.CreateSeccion(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ListSecciones(ctx context.Context, in *ListSeccionesRequest, opts ...grpc.CallOption) (*ListSeccionesResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ListSecciones(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) MatricularEstudiante(ctx context.Context, in *MatricularEstudianteRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.MatricularEstudiante(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) CambiarSeccionMatricula(ctx context.Context, in *CambiarSeccionMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.CambiarSeccionMatricula(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) RetirarMatricula(ctx context.Context, in *RetirarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.RetirarMatricula(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ReingresarMatricula(ctx context.Context, in *ReingresarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ReingresarMatricula(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ConcluirMatricula(ctx context.Context, in *ConcluirMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ConcluirMatricula(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ListMatriculasPeriodo(ctx, in, opts...)
 }

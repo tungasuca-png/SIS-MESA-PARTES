@@ -199,6 +199,38 @@ func errorSeguro(log logx.Logger, op, mensajeInterno string, err error) error {
 		return status.Error(codes.FailedPrecondition, "relacion_no_vigente: la relación ya estaba cerrada")
 	case errors.Is(err, repository.ErrMismoEstado):
 		return status.Error(codes.FailedPrecondition, "invalid_state: el estudiante ya tiene ese estado")
+	// Etapa 5 — personas.
+	case errors.Is(err, repository.ErrPersonaDocumentoExiste):
+		return status.Error(codes.AlreadyExists, "duplicate_persona: ya existe una persona con ese tipo y número de documento")
+	case errors.Is(err, repository.ErrPersonaVersion):
+		return status.Error(codes.Aborted, "version_conflict: la persona fue modificada por otro usuario; vuelva a cargarla")
+	case errors.Is(err, repository.ErrSinCambios):
+		return status.Error(codes.FailedPrecondition, "no_changes: la solicitud no cambia nada")
+	// Etapa 5 — periodos, secciones y matrículas.
+	case errors.Is(err, repository.ErrPeriodoNotFound):
+		return status.Error(codes.NotFound, "periodo_not_found: el periodo académico no existe")
+	case errors.Is(err, repository.ErrPeriodoDuplicado):
+		return status.Error(codes.AlreadyExists, "duplicate_periodo: ya existe un periodo para ese año")
+	case errors.Is(err, repository.ErrPeriodoCerrado):
+		return status.Error(codes.FailedPrecondition, "periodo_cerrado: el periodo está cerrado y no admite cambios")
+	case errors.Is(err, repository.ErrTransicionInvalida):
+		return status.Error(codes.FailedPrecondition, "invalid_transition: el estado actual no permite esta operación")
+	case errors.Is(err, repository.ErrSeccionNotFound):
+		return status.Error(codes.NotFound, "seccion_not_found: la sección no existe en el periodo de la matrícula")
+	case errors.Is(err, repository.ErrSeccionDuplicada):
+		return status.Error(codes.AlreadyExists, "duplicate_seccion: ya existe esa sección (nivel, grado, sección y turno) en el periodo")
+	case errors.Is(err, repository.ErrSinVacantes):
+		return status.Error(codes.FailedPrecondition, "sin_vacantes: la sección no tiene vacantes")
+	case errors.Is(err, repository.ErrMatriculaNotFound):
+		return status.Error(codes.NotFound, "matricula_not_found: la matrícula no existe")
+	case errors.Is(err, repository.ErrMatriculaDuplicada):
+		return status.Error(codes.AlreadyExists, "duplicate_matricula: el estudiante ya tiene una matrícula en ese periodo")
+	case errors.Is(err, repository.ErrEstudianteInactivo):
+		return status.Error(codes.FailedPrecondition, "estudiante_inactivo: solo se matricula a estudiantes con registro ACTIVO")
+	case errors.Is(err, repository.ErrMatriculaVersion):
+		return status.Error(codes.Aborted, "version_conflict: la matrícula fue modificada por otro usuario; vuelva a cargarla")
+	case errors.Is(err, repository.ErrFechaInconsistente):
+		return status.Error(codes.InvalidArgument, "invalid_date: la fecha es anterior a la matrícula o al retiro registrado")
 	}
 	log.Errorf("%s estudiante: %s", op, repository.SafeErrorSummary(err))
 	return status.Error(codes.Internal, mensajeInterno)

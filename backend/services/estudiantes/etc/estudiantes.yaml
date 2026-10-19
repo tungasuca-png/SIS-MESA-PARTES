@@ -47,3 +47,20 @@ Middlewares:
       - /estudiantes.Estudiantes/ListFamiliaresEstudiante
       - /estudiantes.Estudiantes/VincularFamiliar
       - /estudiantes.Estudiantes/DesvincularFamiliar
+      # Etapa 5: familia, personas, periodos, secciones y matrículas.
+      - /estudiantes.Estudiantes/ActualizarFamiliar
+      - /estudiantes.Estudiantes/CreatePersona
+      - /estudiantes.Estudiantes/GetPersona
+      - /estudiantes.Estudiantes/SearchPersonas
+      - /estudiantes.Estudiantes/UpdatePersona
+      - /estudiantes.Estudiantes/CreatePeriodo
+      - /estudiantes.Estudiantes/ListPeriodos
+      - /estudiantes.Estudiantes/ChangeEstadoPeriodo
+      - /estudiantes.Estudiantes/CreateSeccion
+      - /estudiantes.Estudiantes/ListSecciones
+      - /estudiantes.Estudiantes/MatricularEstudiante
+      - /estudiantes.Estudiantes/CambiarSeccionMatricula
+      - /estudiantes.Estudiantes/RetirarMatricula
+      - /estudiantes.Estudiantes/ReingresarMatricula
+      - /estudiantes.Estudiantes/ConcluirMatricula
+      - /estudiantes.Estudiantes/ListMatriculasPeriodo
