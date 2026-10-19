@@ -594,3 +594,14 @@
         justify-content: flex-start;
     }
 }
+
+.est-otros {
+    margin: 10px 0 0;
+    padding: 0;
+}
+
+.est-otros-lista {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+}

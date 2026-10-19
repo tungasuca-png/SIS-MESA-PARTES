@@ -6,6 +6,7 @@ import EstadoEstudianteBadge from "../../components/estudiantes/EstadoEstudiante
 import EstudianteFormModal from "../../components/estudiantes/EstudianteFormModal";
 import CambiarEstadoModal from "../../components/estudiantes/CambiarEstadoModal";
 import NominaPeriodo from "../../components/estudiantes/NominaPeriodo";
+import PosiblesDuplicados from "../../components/estudiantes/PosiblesDuplicados";
 import { usePermissions } from "../../hooks/usePermissions";
 import { searchEstudiantes } from "../../services/estudiantesService";
 import {
@@ -169,9 +170,15 @@ function EstudiantesList() {
                     <button type="button" role="tab" aria-selected={vista === "nomina"} className={vista === "nomina" ? "is-active" : ""} onClick={() => setVista("nomina")}>
                         Por periodo y sección
                     </button>
+                    {canUpdate && (
+                        <button type="button" role="tab" aria-selected={vista === "duplicados"} className={vista === "duplicados" ? "is-active" : ""} onClick={() => setVista("duplicados")}>
+                            Posibles duplicados
+                        </button>
+                    )}
                 </div>
 
                 {vista === "nomina" && <NominaPeriodo />}
+                {vista === "duplicados" && canUpdate && <PosiblesDuplicados />}
                 {vista === "directorio" && (
                 <>
 

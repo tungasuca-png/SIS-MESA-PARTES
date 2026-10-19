@@ -281,3 +281,13 @@ export const concluirMatricula = async (matriculaId, { expectedVersion, fecha })
     });
     return response.data;
 };
+
+// Posibles duplicados para REVISIÓN HUMANA (estudiantes.update): grupos de
+// estudiantes con el mismo nombre y fecha de nacimiento, o el mismo nombre
+// cuando falta el documento. El backend nunca fusiona nada.
+export const listPosiblesDuplicados = async ({ page, pageSize } = {}) => {
+    const response = await api.get("/api/estudiantes/duplicados", {
+        params: { page: page || undefined, page_size: pageSize || undefined },
+    });
+    return response.data;
+};

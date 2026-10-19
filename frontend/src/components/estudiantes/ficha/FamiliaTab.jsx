@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AccionModal from "../AccionModal";
 import { usePermissions } from "../../../hooks/usePermissions";
 import {
@@ -6,6 +7,7 @@ import {
     cambiarParentescoFamiliar,
     desvincularFamiliar,
     getFamiliaresEstudiante,
+    getPersona,
     searchPersonas,
     updatePersona,
     vincularFamiliar,
@@ -219,6 +221,49 @@ function VincularModal({ estudianteId, puedeBuscar, onClose, onDone }) {
     );
 }
 
+// Otros estudiantes con los que la persona tiene una relación vigente
+// (hermanos, por ejemplo), vía GET /api/estudiantes/personas/:id. Se consulta
+// solo a pedido porque cada lectura queda auditada (PERSONA_VIEW).
+function OtrosEstudiantes({ personaId, estudianteId }) {
+    const [estado, setEstado] = useState(null);
+
+    const consultar = async () => {
+        setEstado({ loading: true });
+        try {
+            const data = await getPersona(personaId);
+            const otros = (data.vinculos || []).filter((v) => v.vigente && v.estudiante && v.estudiante.id !== estudianteId);
+            setEstado({ otros });
+        } catch (err) {
+            setEstado({ error: estudianteError(err) });
+        }
+    };
+
+    if (!estado) {
+        return (
+            <button type="button" className="est-link-button est-reveal est-otros" onClick={consultar}>
+                Ver otros estudiantes a su cargo
+            </button>
+        );
+    }
+    if (estado.loading) return <p className="est-form-note">Consultando...</p>;
+    if (estado.error) return <p className="dp-form-error">{estado.error.message}</p>;
+    if (estado.otros.length === 0) return <p className="est-form-note">No tiene otros estudiantes vinculados.</p>;
+    return (
+        <ul className="est-otros-lista" aria-label="Otros estudiantes a su cargo">
+            {estado.otros.map((v) => (
+                <li key={v.relacion_id}>
+                    <Link to={`/estudiantes/${v.estudiante.id}`}>{v.estudiante.nombre_completo}</Link>
+                    <span className="est-muted">
+                        {" "}
+                        · {parentescoLabel(v.parentesco)}
+                        {v.es_apoderado ? " · apoderado" : ""}
+                    </span>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 function FamiliaTab({ estudianteId, onCambio }) {
     const { can } = usePermissions();
     const canUpdate = can("estudiantes.familia.update");
@@ -327,6 +372,7 @@ function FamiliaTab({ estudianteId, onCambio }) {
                                     <dd className="est-muted">No se registran todavía en el sistema</dd>
                                 </div>
                             </dl>
+                            {f.vigente && <OtrosEstudiantes personaId={f.persona.id} estudianteId={estudianteId} />}
                             {canUpdate && f.vigente && (
                                 <div className="est-card-actions">
                                     <button
