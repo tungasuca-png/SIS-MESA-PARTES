@@ -240,11 +240,10 @@
 
 .est-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 2px;
-    overflow-x: auto;
     margin: 18px 0 0;
     border-bottom: 1px solid var(--dp-border);
-    scrollbar-width: thin;
 }
 
 .est-tab {
@@ -570,6 +569,13 @@
 }
 
 @media (max-width: 760px) {
+    /* En móvil las pestañas se desplazan en una sola fila. */
+    .est-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
     .est-ficha-head {
         grid-template-columns: 1fr;
     }

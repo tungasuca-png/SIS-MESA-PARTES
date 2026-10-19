@@ -28,7 +28,8 @@ function BuscadorEstudiantes() {
             <input
                 type="search"
                 aria-label="Buscar estudiante"
-                placeholder="Buscar estudiante por código, DNI o nombre"
+                placeholder="Buscar estudiante..."
+                title="Por código, código SIAGIE, documento o nombre"
                 maxLength={100}
                 value={q}
                 onChange={(event) => setQ(event.target.value)}
