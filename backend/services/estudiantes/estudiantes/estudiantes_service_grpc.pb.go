@@ -19,36 +19,38 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Estudiantes_GetEstudiante_FullMethodName            = "/estudiantes.Estudiantes/GetEstudiante"
-	Estudiantes_SearchEstudiantes_FullMethodName        = "/estudiantes.Estudiantes/SearchEstudiantes"
-	Estudiantes_GetEstudiantesBasic_FullMethodName      = "/estudiantes.Estudiantes/GetEstudiantesBasic"
-	Estudiantes_CreateEstudiante_FullMethodName         = "/estudiantes.Estudiantes/CreateEstudiante"
-	Estudiantes_UpdateEstudiante_FullMethodName         = "/estudiantes.Estudiantes/UpdateEstudiante"
-	Estudiantes_ChangeEstadoEstudiante_FullMethodName   = "/estudiantes.Estudiantes/ChangeEstadoEstudiante"
-	Estudiantes_GetEstudiantePersonal_FullMethodName    = "/estudiantes.Estudiantes/GetEstudiantePersonal"
-	Estudiantes_UpdateEstudiantePersonal_FullMethodName = "/estudiantes.Estudiantes/UpdateEstudiantePersonal"
-	Estudiantes_ResolveEstudiante_FullMethodName        = "/estudiantes.Estudiantes/ResolveEstudiante"
-	Estudiantes_ListPosiblesDuplicados_FullMethodName   = "/estudiantes.Estudiantes/ListPosiblesDuplicados"
-	Estudiantes_ListMatriculasEstudiante_FullMethodName = "/estudiantes.Estudiantes/ListMatriculasEstudiante"
-	Estudiantes_ListFamiliaresEstudiante_FullMethodName = "/estudiantes.Estudiantes/ListFamiliaresEstudiante"
-	Estudiantes_VincularFamiliar_FullMethodName         = "/estudiantes.Estudiantes/VincularFamiliar"
-	Estudiantes_DesvincularFamiliar_FullMethodName      = "/estudiantes.Estudiantes/DesvincularFamiliar"
-	Estudiantes_ActualizarFamiliar_FullMethodName       = "/estudiantes.Estudiantes/ActualizarFamiliar"
-	Estudiantes_CreatePersona_FullMethodName            = "/estudiantes.Estudiantes/CreatePersona"
-	Estudiantes_GetPersona_FullMethodName               = "/estudiantes.Estudiantes/GetPersona"
-	Estudiantes_SearchPersonas_FullMethodName           = "/estudiantes.Estudiantes/SearchPersonas"
-	Estudiantes_UpdatePersona_FullMethodName            = "/estudiantes.Estudiantes/UpdatePersona"
-	Estudiantes_CreatePeriodo_FullMethodName            = "/estudiantes.Estudiantes/CreatePeriodo"
-	Estudiantes_ListPeriodos_FullMethodName             = "/estudiantes.Estudiantes/ListPeriodos"
-	Estudiantes_ChangeEstadoPeriodo_FullMethodName      = "/estudiantes.Estudiantes/ChangeEstadoPeriodo"
-	Estudiantes_CreateSeccion_FullMethodName            = "/estudiantes.Estudiantes/CreateSeccion"
-	Estudiantes_ListSecciones_FullMethodName            = "/estudiantes.Estudiantes/ListSecciones"
-	Estudiantes_MatricularEstudiante_FullMethodName     = "/estudiantes.Estudiantes/MatricularEstudiante"
-	Estudiantes_CambiarSeccionMatricula_FullMethodName  = "/estudiantes.Estudiantes/CambiarSeccionMatricula"
-	Estudiantes_RetirarMatricula_FullMethodName         = "/estudiantes.Estudiantes/RetirarMatricula"
-	Estudiantes_ReingresarMatricula_FullMethodName      = "/estudiantes.Estudiantes/ReingresarMatricula"
-	Estudiantes_ConcluirMatricula_FullMethodName        = "/estudiantes.Estudiantes/ConcluirMatricula"
-	Estudiantes_ListMatriculasPeriodo_FullMethodName    = "/estudiantes.Estudiantes/ListMatriculasPeriodo"
+	Estudiantes_GetEstudiante_FullMethodName             = "/estudiantes.Estudiantes/GetEstudiante"
+	Estudiantes_SearchEstudiantes_FullMethodName         = "/estudiantes.Estudiantes/SearchEstudiantes"
+	Estudiantes_GetEstudiantesBasic_FullMethodName       = "/estudiantes.Estudiantes/GetEstudiantesBasic"
+	Estudiantes_CreateEstudiante_FullMethodName          = "/estudiantes.Estudiantes/CreateEstudiante"
+	Estudiantes_UpdateEstudiante_FullMethodName          = "/estudiantes.Estudiantes/UpdateEstudiante"
+	Estudiantes_ChangeEstadoEstudiante_FullMethodName    = "/estudiantes.Estudiantes/ChangeEstadoEstudiante"
+	Estudiantes_GetEstudiantePersonal_FullMethodName     = "/estudiantes.Estudiantes/GetEstudiantePersonal"
+	Estudiantes_UpdateEstudiantePersonal_FullMethodName  = "/estudiantes.Estudiantes/UpdateEstudiantePersonal"
+	Estudiantes_ResolveEstudiante_FullMethodName         = "/estudiantes.Estudiantes/ResolveEstudiante"
+	Estudiantes_ListPosiblesDuplicados_FullMethodName    = "/estudiantes.Estudiantes/ListPosiblesDuplicados"
+	Estudiantes_ListMatriculasEstudiante_FullMethodName  = "/estudiantes.Estudiantes/ListMatriculasEstudiante"
+	Estudiantes_ListFamiliaresEstudiante_FullMethodName  = "/estudiantes.Estudiantes/ListFamiliaresEstudiante"
+	Estudiantes_VincularFamiliar_FullMethodName          = "/estudiantes.Estudiantes/VincularFamiliar"
+	Estudiantes_DesvincularFamiliar_FullMethodName       = "/estudiantes.Estudiantes/DesvincularFamiliar"
+	Estudiantes_ActualizarFamiliar_FullMethodName        = "/estudiantes.Estudiantes/ActualizarFamiliar"
+	Estudiantes_CreatePersona_FullMethodName             = "/estudiantes.Estudiantes/CreatePersona"
+	Estudiantes_GetPersona_FullMethodName                = "/estudiantes.Estudiantes/GetPersona"
+	Estudiantes_SearchPersonas_FullMethodName            = "/estudiantes.Estudiantes/SearchPersonas"
+	Estudiantes_UpdatePersona_FullMethodName             = "/estudiantes.Estudiantes/UpdatePersona"
+	Estudiantes_CreatePeriodo_FullMethodName             = "/estudiantes.Estudiantes/CreatePeriodo"
+	Estudiantes_ListPeriodos_FullMethodName              = "/estudiantes.Estudiantes/ListPeriodos"
+	Estudiantes_ChangeEstadoPeriodo_FullMethodName       = "/estudiantes.Estudiantes/ChangeEstadoPeriodo"
+	Estudiantes_CreateSeccion_FullMethodName             = "/estudiantes.Estudiantes/CreateSeccion"
+	Estudiantes_ListSecciones_FullMethodName             = "/estudiantes.Estudiantes/ListSecciones"
+	Estudiantes_MatricularEstudiante_FullMethodName      = "/estudiantes.Estudiantes/MatricularEstudiante"
+	Estudiantes_CambiarSeccionMatricula_FullMethodName   = "/estudiantes.Estudiantes/CambiarSeccionMatricula"
+	Estudiantes_RetirarMatricula_FullMethodName          = "/estudiantes.Estudiantes/RetirarMatricula"
+	Estudiantes_ReingresarMatricula_FullMethodName       = "/estudiantes.Estudiantes/ReingresarMatricula"
+	Estudiantes_ConcluirMatricula_FullMethodName         = "/estudiantes.Estudiantes/ConcluirMatricula"
+	Estudiantes_ListMatriculasPeriodo_FullMethodName     = "/estudiantes.Estudiantes/ListMatriculasPeriodo"
+	Estudiantes_CambiarParentescoFamiliar_FullMethodName = "/estudiantes.Estudiantes/CambiarParentescoFamiliar"
+	Estudiantes_ListHistorialEstudiante_FullMethodName   = "/estudiantes.Estudiantes/ListHistorialEstudiante"
 )
 
 // EstudiantesClient is the client API for Estudiantes service.
@@ -87,6 +89,9 @@ type EstudiantesClient interface {
 	ReingresarMatricula(ctx context.Context, in *ReingresarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
 	ConcluirMatricula(ctx context.Context, in *ConcluirMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
 	ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error)
+	// Etapa 6: parentesco con historial e historial de cambios.
+	CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error)
+	ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error)
 }
 
 type estudiantesClient struct {
@@ -397,6 +402,26 @@ func (c *estudiantesClient) ListMatriculasPeriodo(ctx context.Context, in *ListM
 	return out, nil
 }
 
+func (c *estudiantesClient) CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CambiarParentescoFamiliarResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CambiarParentescoFamiliar_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListHistorialEstudianteResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListHistorialEstudiante_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EstudiantesServer is the server API for Estudiantes service.
 // All implementations must embed UnimplementedEstudiantesServer
 // for forward compatibility.
@@ -433,6 +458,9 @@ type EstudiantesServer interface {
 	ReingresarMatricula(context.Context, *ReingresarMatriculaRequest) (*MatriculaResponse, error)
 	ConcluirMatricula(context.Context, *ConcluirMatriculaRequest) (*MatriculaResponse, error)
 	ListMatriculasPeriodo(context.Context, *ListMatriculasPeriodoRequest) (*ListMatriculasPeriodoResponse, error)
+	// Etapa 6: parentesco con historial e historial de cambios.
+	CambiarParentescoFamiliar(context.Context, *CambiarParentescoFamiliarRequest) (*CambiarParentescoFamiliarResponse, error)
+	ListHistorialEstudiante(context.Context, *ListHistorialEstudianteRequest) (*ListHistorialEstudianteResponse, error)
 	mustEmbedUnimplementedEstudiantesServer()
 }
 
@@ -532,6 +560,12 @@ func (UnimplementedEstudiantesServer) ConcluirMatricula(context.Context, *Conclu
 }
 func (UnimplementedEstudiantesServer) ListMatriculasPeriodo(context.Context, *ListMatriculasPeriodoRequest) (*ListMatriculasPeriodoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListMatriculasPeriodo not implemented")
+}
+func (UnimplementedEstudiantesServer) CambiarParentescoFamiliar(context.Context, *CambiarParentescoFamiliarRequest) (*CambiarParentescoFamiliarResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CambiarParentescoFamiliar not implemented")
+}
+func (UnimplementedEstudiantesServer) ListHistorialEstudiante(context.Context, *ListHistorialEstudianteRequest) (*ListHistorialEstudianteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHistorialEstudiante not implemented")
 }
 func (UnimplementedEstudiantesServer) mustEmbedUnimplementedEstudiantesServer() {}
 func (UnimplementedEstudiantesServer) testEmbeddedByValue()                     {}
@@ -1094,6 +1128,42 @@ func _Estudiantes_ListMatriculasPeriodo_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Estudiantes_CambiarParentescoFamiliar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CambiarParentescoFamiliarRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CambiarParentescoFamiliar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CambiarParentescoFamiliar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CambiarParentescoFamiliar(ctx, req.(*CambiarParentescoFamiliarRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListHistorialEstudiante_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListHistorialEstudianteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListHistorialEstudiante(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListHistorialEstudiante_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListHistorialEstudiante(ctx, req.(*ListHistorialEstudianteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Estudiantes_ServiceDesc is the grpc.ServiceDesc for Estudiantes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1220,6 +1290,14 @@ var Estudiantes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMatriculasPeriodo",
 			Handler:    _Estudiantes_ListMatriculasPeriodo_Handler,
+		},
+		{
+			MethodName: "CambiarParentescoFamiliar",
+			Handler:    _Estudiantes_CambiarParentescoFamiliar_Handler,
+		},
+		{
+			MethodName: "ListHistorialEstudiante",
+			Handler:    _Estudiantes_ListHistorialEstudiante_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

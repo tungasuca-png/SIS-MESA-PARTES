@@ -86,6 +86,9 @@ var sensitiveRPCMethods = []string{
 	estudiantes.Estudiantes_ReingresarMatricula_FullMethodName,
 	estudiantes.Estudiantes_ConcluirMatricula_FullMethodName,
 	estudiantes.Estudiantes_ListMatriculasPeriodo_FullMethodName,
+	// Etapa 6: parentesco con historial e historial de cambios.
+	estudiantes.Estudiantes_CambiarParentescoFamiliar_FullMethodName,
+	estudiantes.Estudiantes_ListHistorialEstudiante_FullMethodName,
 }
 
 // ProtectSensitiveRPCLogs debe llamarse una vez al arrancar, antes de crear los

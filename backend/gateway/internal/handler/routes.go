@@ -385,6 +385,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: DesvincularFamiliarHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/:id/familiares/:relacion_id/parentesco",
+				Handler: CambiarParentescoFamiliarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/:id/historial",
+				Handler: ListHistorialEstudianteHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/api/estudiantes/:id/matriculas",
 				Handler: ListMatriculasEstudianteHandler(serverCtx),

@@ -1051,6 +1051,8 @@ type SearchEstudiantesRequest {
 	Grado   string `form:"grado,optional"`
 	Seccion string `form:"seccion,optional"`
 	Turno   string `form:"turno,optional"`
+	// Etapa 6: apellidos (por defecto) | codigo | recientes.
+	Orden string `form:"orden,optional"`
 }
 
 type SearchEstudiantesResponse {
@@ -1493,6 +1495,44 @@ type ListMatriculasPeriodoRequest {
 	PageSize        int32  `form:"page_size,optional"`
 }
 
+// ---- Etapa 6: parentesco con historial e historial de cambios ----
+type CambiarParentescoFamiliarRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	RelacionId    string `path:"relacion_id"`
+	Parentesco    string `json:"parentesco,optional"`
+	Desde         string `json:"desde,optional"`
+}
+
+type CambiarParentescoFamiliarResponse {
+	Anterior FamiliarDTO `json:"anterior"`
+	Familiar FamiliarDTO `json:"familiar"`
+}
+
+type ListHistorialEstudianteRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+// Solo nombres de campos: nunca valores anteriores ni nuevos.
+type EventoHistorialDTO {
+	Id                string   `json:"id"`
+	Accion            string   `json:"accion"`
+	FechaHora         string   `json:"fecha_hora"`
+	UsuarioId         string   `json:"usuario_id"`
+	Campos            []string `json:"campos"`
+	EstadoAnterior    string   `json:"estado_anterior"`
+	EstadoNuevo       string   `json:"estado_nuevo"`
+	VersionResultante int32    `json:"version_resultante"`
+}
+
+type ListHistorialEstudianteResponse {
+	Eventos []EventoHistorialDTO `json:"eventos"`
+	Total   int32                `json:"total"`
+}
+
 type MatriculaNominaDTO {
 	Matricula  MatriculaDTO         `json:"matricula"`
 	Estudiante *EstudianteBasicoDTO `json:"estudiante"`
@@ -1598,5 +1638,12 @@ service gateway-api {
 
 	@handler ConcluirMatricula
 	patch /api/estudiantes/matriculas/:matricula_id/conclusion (ConcluirMatriculaRequest) returns (MatriculaResponse)
+
+	// Etapa 6.
+	@handler CambiarParentescoFamiliar
+	post /api/estudiantes/:id/familiares/:relacion_id/parentesco (CambiarParentescoFamiliarRequest) returns (CambiarParentescoFamiliarResponse)
+
+	@handler ListHistorialEstudiante
+	get /api/estudiantes/:id/historial (ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse)
 }
 

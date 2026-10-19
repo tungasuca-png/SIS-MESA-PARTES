@@ -63,6 +63,9 @@ func TestEtapa5_RutasResuelvenAlHandlerCorrecto(t *testing.T) {
 		{"PATCH", "/api/estudiantes/" + id + "/estado", "PATCH /api/estudiantes/:id/estado"},
 		{"GET", "/api/estudiantes/duplicados", "GET /api/estudiantes/duplicados"},
 		{"POST", "/api/estudiantes/resolver", "POST /api/estudiantes/resolver"},
+		// Etapa 6.
+		{"POST", "/api/estudiantes/" + id + "/familiares/" + id + "/parentesco", "POST /api/estudiantes/:id/familiares/:relacion_id/parentesco"},
+		{"GET", "/api/estudiantes/" + id + "/historial", "GET /api/estudiantes/:id/historial"},
 	} {
 		w := httptest.NewRecorder()
 		real.ServeHTTP(w, httptest.NewRequest(c.method, c.url, nil))

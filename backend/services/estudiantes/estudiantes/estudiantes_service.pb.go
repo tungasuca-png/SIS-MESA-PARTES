@@ -418,15 +418,18 @@ func (x *GetEstudianteResponse) GetEstudiante() *Estudiante {
 // orden, sin distinguir mayúsculas ni tildes. Filtros opcionales (vacío = sin
 // filtro); nivel/grado/seccion/turno son temporales hasta el dominio Matrícula.
 type SearchEstudiantesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Q             string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	Estado        string                 `protobuf:"bytes,4,opt,name=estado,proto3" json:"estado,omitempty"`
-	Nivel         string                 `protobuf:"bytes,5,opt,name=nivel,proto3" json:"nivel,omitempty"`
-	Grado         string                 `protobuf:"bytes,6,opt,name=grado,proto3" json:"grado,omitempty"`
-	Seccion       string                 `protobuf:"bytes,7,opt,name=seccion,proto3" json:"seccion,omitempty"`
-	Turno         string                 `protobuf:"bytes,8,opt,name=turno,proto3" json:"turno,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Q        string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
+	Page     int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Estado   string                 `protobuf:"bytes,4,opt,name=estado,proto3" json:"estado,omitempty"`
+	Nivel    string                 `protobuf:"bytes,5,opt,name=nivel,proto3" json:"nivel,omitempty"`
+	Grado    string                 `protobuf:"bytes,6,opt,name=grado,proto3" json:"grado,omitempty"`
+	Seccion  string                 `protobuf:"bytes,7,opt,name=seccion,proto3" json:"seccion,omitempty"`
+	Turno    string                 `protobuf:"bytes,8,opt,name=turno,proto3" json:"turno,omitempty"`
+	// Etapa 6: orden del listado (lista blanca): "" o "apellidos" (por defecto),
+	// "codigo", "recientes" (alta más reciente primero).
+	Orden         string `protobuf:"bytes,9,opt,name=orden,proto3" json:"orden,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -513,6 +516,13 @@ func (x *SearchEstudiantesRequest) GetSeccion() string {
 func (x *SearchEstudiantesRequest) GetTurno() string {
 	if x != nil {
 		return x.Turno
+	}
+	return ""
+}
+
+func (x *SearchEstudiantesRequest) GetOrden() string {
+	if x != nil {
+		return x.Orden
 	}
 	return ""
 }
@@ -3041,6 +3051,348 @@ func (x *ActualizarFamiliarResponse) GetFamiliar() *Familiar {
 	return nil
 }
 
+// CambiarParentescoFamiliarRequest (etapa 6): corrige el parentesco de una
+// relación vigente CONSERVANDO el historial, en UNA transacción: cierra la
+// relación actual (hasta = desde) y crea otra con la misma persona, el nuevo parentesco y el mismo
+// rol de apoderado. Si algo falla (p. ej. ya hay una MADRE vigente), no
+// cambia nada. "estudiantes.familia.update".
+type CambiarParentescoFamiliarRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EstudianteId  string                 `protobuf:"bytes,1,opt,name=estudiante_id,json=estudianteId,proto3" json:"estudiante_id,omitempty"`
+	RelacionId    string                 `protobuf:"bytes,2,opt,name=relacion_id,json=relacionId,proto3" json:"relacion_id,omitempty"`
+	Parentesco    string                 `protobuf:"bytes,3,opt,name=parentesco,proto3" json:"parentesco,omitempty"`
+	Desde         string                 `protobuf:"bytes,4,opt,name=desde,proto3" json:"desde,omitempty"` // AAAA-MM-DD, vacío = hoy (Lima); no futura
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CambiarParentescoFamiliarRequest) Reset() {
+	*x = CambiarParentescoFamiliarRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CambiarParentescoFamiliarRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CambiarParentescoFamiliarRequest) ProtoMessage() {}
+
+func (x *CambiarParentescoFamiliarRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CambiarParentescoFamiliarRequest.ProtoReflect.Descriptor instead.
+func (*CambiarParentescoFamiliarRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *CambiarParentescoFamiliarRequest) GetEstudianteId() string {
+	if x != nil {
+		return x.EstudianteId
+	}
+	return ""
+}
+
+func (x *CambiarParentescoFamiliarRequest) GetRelacionId() string {
+	if x != nil {
+		return x.RelacionId
+	}
+	return ""
+}
+
+func (x *CambiarParentescoFamiliarRequest) GetParentesco() string {
+	if x != nil {
+		return x.Parentesco
+	}
+	return ""
+}
+
+func (x *CambiarParentescoFamiliarRequest) GetDesde() string {
+	if x != nil {
+		return x.Desde
+	}
+	return ""
+}
+
+type CambiarParentescoFamiliarResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Anterior      *Familiar              `protobuf:"bytes,1,opt,name=anterior,proto3" json:"anterior,omitempty"` // relación cerrada (historial)
+	Familiar      *Familiar              `protobuf:"bytes,2,opt,name=familiar,proto3" json:"familiar,omitempty"` // relación nueva vigente
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CambiarParentescoFamiliarResponse) Reset() {
+	*x = CambiarParentescoFamiliarResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CambiarParentescoFamiliarResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CambiarParentescoFamiliarResponse) ProtoMessage() {}
+
+func (x *CambiarParentescoFamiliarResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CambiarParentescoFamiliarResponse.ProtoReflect.Descriptor instead.
+func (*CambiarParentescoFamiliarResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *CambiarParentescoFamiliarResponse) GetAnterior() *Familiar {
+	if x != nil {
+		return x.Anterior
+	}
+	return nil
+}
+
+func (x *CambiarParentescoFamiliarResponse) GetFamiliar() *Familiar {
+	if x != nil {
+		return x.Familiar
+	}
+	return nil
+}
+
+// ---- Etapa 6: HISTORIAL de cambios del estudiante ----
+// Eventos de CAMBIO registrados en la auditoría (nunca lecturas): alta,
+// edición, cambio de estado, datos personales, familia y matrícula. Solo
+// nombres de campos, NUNCA valores anteriores ni nuevos. Requiere
+// "estudiantes.view". Más reciente primero, paginado.
+type EventoHistorial struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Accion            string                 `protobuf:"bytes,2,opt,name=accion,proto3" json:"accion,omitempty"`                        // CREATE | UPDATE | CHANGE_ESTADO | PERSONAL_UPDATE | FAMILIA_UPDATE | MATRICULA_UPDATE
+	FechaHora         string                 `protobuf:"bytes,3,opt,name=fecha_hora,json=fechaHora,proto3" json:"fecha_hora,omitempty"` // RFC 3339
+	UsuarioId         string                 `protobuf:"bytes,4,opt,name=usuario_id,json=usuarioId,proto3" json:"usuario_id,omitempty"` // quien hizo el cambio (resolver con Usuarios)
+	Campos            []string               `protobuf:"bytes,5,rep,name=campos,proto3" json:"campos,omitempty"`
+	EstadoAnterior    string                 `protobuf:"bytes,6,opt,name=estado_anterior,json=estadoAnterior,proto3" json:"estado_anterior,omitempty"` // solo CHANGE_ESTADO (ACTIVO/INACTIVO)
+	EstadoNuevo       string                 `protobuf:"bytes,7,opt,name=estado_nuevo,json=estadoNuevo,proto3" json:"estado_nuevo,omitempty"`
+	VersionResultante int32                  `protobuf:"varint,8,opt,name=version_resultante,json=versionResultante,proto3" json:"version_resultante,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *EventoHistorial) Reset() {
+	*x = EventoHistorial{}
+	mi := &file_estudiantes_service_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EventoHistorial) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EventoHistorial) ProtoMessage() {}
+
+func (x *EventoHistorial) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EventoHistorial.ProtoReflect.Descriptor instead.
+func (*EventoHistorial) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *EventoHistorial) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *EventoHistorial) GetAccion() string {
+	if x != nil {
+		return x.Accion
+	}
+	return ""
+}
+
+func (x *EventoHistorial) GetFechaHora() string {
+	if x != nil {
+		return x.FechaHora
+	}
+	return ""
+}
+
+func (x *EventoHistorial) GetUsuarioId() string {
+	if x != nil {
+		return x.UsuarioId
+	}
+	return ""
+}
+
+func (x *EventoHistorial) GetCampos() []string {
+	if x != nil {
+		return x.Campos
+	}
+	return nil
+}
+
+func (x *EventoHistorial) GetEstadoAnterior() string {
+	if x != nil {
+		return x.EstadoAnterior
+	}
+	return ""
+}
+
+func (x *EventoHistorial) GetEstadoNuevo() string {
+	if x != nil {
+		return x.EstadoNuevo
+	}
+	return ""
+}
+
+func (x *EventoHistorial) GetVersionResultante() int32 {
+	if x != nil {
+		return x.VersionResultante
+	}
+	return 0
+}
+
+type ListHistorialEstudianteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EstudianteId  string                 `protobuf:"bytes,1,opt,name=estudiante_id,json=estudianteId,proto3" json:"estudiante_id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListHistorialEstudianteRequest) Reset() {
+	*x = ListHistorialEstudianteRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListHistorialEstudianteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListHistorialEstudianteRequest) ProtoMessage() {}
+
+func (x *ListHistorialEstudianteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListHistorialEstudianteRequest.ProtoReflect.Descriptor instead.
+func (*ListHistorialEstudianteRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *ListHistorialEstudianteRequest) GetEstudianteId() string {
+	if x != nil {
+		return x.EstudianteId
+	}
+	return ""
+}
+
+func (x *ListHistorialEstudianteRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListHistorialEstudianteRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListHistorialEstudianteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Eventos       []*EventoHistorial     `protobuf:"bytes,1,rep,name=eventos,proto3" json:"eventos,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListHistorialEstudianteResponse) Reset() {
+	*x = ListHistorialEstudianteResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListHistorialEstudianteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListHistorialEstudianteResponse) ProtoMessage() {}
+
+func (x *ListHistorialEstudianteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListHistorialEstudianteResponse.ProtoReflect.Descriptor instead.
+func (*ListHistorialEstudianteResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *ListHistorialEstudianteResponse) GetEventos() []*EventoHistorial {
+	if x != nil {
+		return x.Eventos
+	}
+	return nil
+}
+
+func (x *ListHistorialEstudianteResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 type VinculoPersona struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RelacionId    string                 `protobuf:"bytes,1,opt,name=relacion_id,json=relacionId,proto3" json:"relacion_id,omitempty"`
@@ -3056,7 +3408,7 @@ type VinculoPersona struct {
 
 func (x *VinculoPersona) Reset() {
 	*x = VinculoPersona{}
-	mi := &file_estudiantes_service_proto_msgTypes[40]
+	mi := &file_estudiantes_service_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3068,7 +3420,7 @@ func (x *VinculoPersona) String() string {
 func (*VinculoPersona) ProtoMessage() {}
 
 func (x *VinculoPersona) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[40]
+	mi := &file_estudiantes_service_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3081,7 +3433,7 @@ func (x *VinculoPersona) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VinculoPersona.ProtoReflect.Descriptor instead.
 func (*VinculoPersona) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{40}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *VinculoPersona) GetRelacionId() string {
@@ -3142,7 +3494,7 @@ type CreatePersonaRequest struct {
 
 func (x *CreatePersonaRequest) Reset() {
 	*x = CreatePersonaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[41]
+	mi := &file_estudiantes_service_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3154,7 +3506,7 @@ func (x *CreatePersonaRequest) String() string {
 func (*CreatePersonaRequest) ProtoMessage() {}
 
 func (x *CreatePersonaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[41]
+	mi := &file_estudiantes_service_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3167,7 +3519,7 @@ func (x *CreatePersonaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePersonaRequest.ProtoReflect.Descriptor instead.
 func (*CreatePersonaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{41}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *CreatePersonaRequest) GetPersona() *Persona {
@@ -3186,7 +3538,7 @@ type PersonaResponse struct {
 
 func (x *PersonaResponse) Reset() {
 	*x = PersonaResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[42]
+	mi := &file_estudiantes_service_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3198,7 +3550,7 @@ func (x *PersonaResponse) String() string {
 func (*PersonaResponse) ProtoMessage() {}
 
 func (x *PersonaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[42]
+	mi := &file_estudiantes_service_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3211,7 +3563,7 @@ func (x *PersonaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PersonaResponse.ProtoReflect.Descriptor instead.
 func (*PersonaResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{42}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *PersonaResponse) GetPersona() *Persona {
@@ -3231,7 +3583,7 @@ type GetPersonaRequest struct {
 
 func (x *GetPersonaRequest) Reset() {
 	*x = GetPersonaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[43]
+	mi := &file_estudiantes_service_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3243,7 +3595,7 @@ func (x *GetPersonaRequest) String() string {
 func (*GetPersonaRequest) ProtoMessage() {}
 
 func (x *GetPersonaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[43]
+	mi := &file_estudiantes_service_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3256,7 +3608,7 @@ func (x *GetPersonaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPersonaRequest.ProtoReflect.Descriptor instead.
 func (*GetPersonaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{43}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *GetPersonaRequest) GetId() string {
@@ -3283,7 +3635,7 @@ type GetPersonaResponse struct {
 
 func (x *GetPersonaResponse) Reset() {
 	*x = GetPersonaResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[44]
+	mi := &file_estudiantes_service_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3295,7 +3647,7 @@ func (x *GetPersonaResponse) String() string {
 func (*GetPersonaResponse) ProtoMessage() {}
 
 func (x *GetPersonaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[44]
+	mi := &file_estudiantes_service_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3308,7 +3660,7 @@ func (x *GetPersonaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPersonaResponse.ProtoReflect.Descriptor instead.
 func (*GetPersonaResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{44}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *GetPersonaResponse) GetPersona() *Persona {
@@ -3338,7 +3690,7 @@ type SearchPersonasRequest struct {
 
 func (x *SearchPersonasRequest) Reset() {
 	*x = SearchPersonasRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[45]
+	mi := &file_estudiantes_service_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3350,7 +3702,7 @@ func (x *SearchPersonasRequest) String() string {
 func (*SearchPersonasRequest) ProtoMessage() {}
 
 func (x *SearchPersonasRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[45]
+	mi := &file_estudiantes_service_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3363,7 +3715,7 @@ func (x *SearchPersonasRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchPersonasRequest.ProtoReflect.Descriptor instead.
 func (*SearchPersonasRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{45}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *SearchPersonasRequest) GetQ() string {
@@ -3397,7 +3749,7 @@ type SearchPersonasResponse struct {
 
 func (x *SearchPersonasResponse) Reset() {
 	*x = SearchPersonasResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[46]
+	mi := &file_estudiantes_service_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3409,7 +3761,7 @@ func (x *SearchPersonasResponse) String() string {
 func (*SearchPersonasResponse) ProtoMessage() {}
 
 func (x *SearchPersonasResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[46]
+	mi := &file_estudiantes_service_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3422,7 +3774,7 @@ func (x *SearchPersonasResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchPersonasResponse.ProtoReflect.Descriptor instead.
 func (*SearchPersonasResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{46}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *SearchPersonasResponse) GetPersonas() []*Persona {
@@ -3457,7 +3809,7 @@ type UpdatePersonaRequest struct {
 
 func (x *UpdatePersonaRequest) Reset() {
 	*x = UpdatePersonaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[47]
+	mi := &file_estudiantes_service_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3469,7 +3821,7 @@ func (x *UpdatePersonaRequest) String() string {
 func (*UpdatePersonaRequest) ProtoMessage() {}
 
 func (x *UpdatePersonaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[47]
+	mi := &file_estudiantes_service_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3482,7 +3834,7 @@ func (x *UpdatePersonaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePersonaRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePersonaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{47}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *UpdatePersonaRequest) GetId() string {
@@ -3546,7 +3898,7 @@ type CreatePeriodoRequest struct {
 
 func (x *CreatePeriodoRequest) Reset() {
 	*x = CreatePeriodoRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[48]
+	mi := &file_estudiantes_service_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3558,7 +3910,7 @@ func (x *CreatePeriodoRequest) String() string {
 func (*CreatePeriodoRequest) ProtoMessage() {}
 
 func (x *CreatePeriodoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[48]
+	mi := &file_estudiantes_service_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3571,7 +3923,7 @@ func (x *CreatePeriodoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePeriodoRequest.ProtoReflect.Descriptor instead.
 func (*CreatePeriodoRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{48}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *CreatePeriodoRequest) GetAnio() int32 {
@@ -3611,7 +3963,7 @@ type PeriodoResponse struct {
 
 func (x *PeriodoResponse) Reset() {
 	*x = PeriodoResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[49]
+	mi := &file_estudiantes_service_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3623,7 +3975,7 @@ func (x *PeriodoResponse) String() string {
 func (*PeriodoResponse) ProtoMessage() {}
 
 func (x *PeriodoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[49]
+	mi := &file_estudiantes_service_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3636,7 +3988,7 @@ func (x *PeriodoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PeriodoResponse.ProtoReflect.Descriptor instead.
 func (*PeriodoResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{49}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *PeriodoResponse) GetPeriodo() *PeriodoAcademico {
@@ -3654,7 +4006,7 @@ type ListPeriodosRequest struct {
 
 func (x *ListPeriodosRequest) Reset() {
 	*x = ListPeriodosRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[50]
+	mi := &file_estudiantes_service_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3666,7 +4018,7 @@ func (x *ListPeriodosRequest) String() string {
 func (*ListPeriodosRequest) ProtoMessage() {}
 
 func (x *ListPeriodosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[50]
+	mi := &file_estudiantes_service_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3679,7 +4031,7 @@ func (x *ListPeriodosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPeriodosRequest.ProtoReflect.Descriptor instead.
 func (*ListPeriodosRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{50}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{55}
 }
 
 type ListPeriodosResponse struct {
@@ -3691,7 +4043,7 @@ type ListPeriodosResponse struct {
 
 func (x *ListPeriodosResponse) Reset() {
 	*x = ListPeriodosResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[51]
+	mi := &file_estudiantes_service_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3703,7 +4055,7 @@ func (x *ListPeriodosResponse) String() string {
 func (*ListPeriodosResponse) ProtoMessage() {}
 
 func (x *ListPeriodosResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[51]
+	mi := &file_estudiantes_service_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3716,7 +4068,7 @@ func (x *ListPeriodosResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPeriodosResponse.ProtoReflect.Descriptor instead.
 func (*ListPeriodosResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{51}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *ListPeriodosResponse) GetPeriodos() []*PeriodoAcademico {
@@ -3736,7 +4088,7 @@ type ChangeEstadoPeriodoRequest struct {
 
 func (x *ChangeEstadoPeriodoRequest) Reset() {
 	*x = ChangeEstadoPeriodoRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[52]
+	mi := &file_estudiantes_service_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3748,7 +4100,7 @@ func (x *ChangeEstadoPeriodoRequest) String() string {
 func (*ChangeEstadoPeriodoRequest) ProtoMessage() {}
 
 func (x *ChangeEstadoPeriodoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[52]
+	mi := &file_estudiantes_service_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3761,7 +4113,7 @@ func (x *ChangeEstadoPeriodoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeEstadoPeriodoRequest.ProtoReflect.Descriptor instead.
 func (*ChangeEstadoPeriodoRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{52}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *ChangeEstadoPeriodoRequest) GetId() string {
@@ -3793,7 +4145,7 @@ type CreateSeccionRequest struct {
 
 func (x *CreateSeccionRequest) Reset() {
 	*x = CreateSeccionRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[53]
+	mi := &file_estudiantes_service_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3805,7 +4157,7 @@ func (x *CreateSeccionRequest) String() string {
 func (*CreateSeccionRequest) ProtoMessage() {}
 
 func (x *CreateSeccionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[53]
+	mi := &file_estudiantes_service_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3818,7 +4170,7 @@ func (x *CreateSeccionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSeccionRequest.ProtoReflect.Descriptor instead.
 func (*CreateSeccionRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{53}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *CreateSeccionRequest) GetPeriodoId() string {
@@ -3879,7 +4231,7 @@ type SeccionResponse struct {
 
 func (x *SeccionResponse) Reset() {
 	*x = SeccionResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[54]
+	mi := &file_estudiantes_service_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3891,7 +4243,7 @@ func (x *SeccionResponse) String() string {
 func (*SeccionResponse) ProtoMessage() {}
 
 func (x *SeccionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[54]
+	mi := &file_estudiantes_service_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3904,7 +4256,7 @@ func (x *SeccionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SeccionResponse.ProtoReflect.Descriptor instead.
 func (*SeccionResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{54}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *SeccionResponse) GetSeccion() *SeccionAcademica {
@@ -3923,7 +4275,7 @@ type ListSeccionesRequest struct {
 
 func (x *ListSeccionesRequest) Reset() {
 	*x = ListSeccionesRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[55]
+	mi := &file_estudiantes_service_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3935,7 +4287,7 @@ func (x *ListSeccionesRequest) String() string {
 func (*ListSeccionesRequest) ProtoMessage() {}
 
 func (x *ListSeccionesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[55]
+	mi := &file_estudiantes_service_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3948,7 +4300,7 @@ func (x *ListSeccionesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSeccionesRequest.ProtoReflect.Descriptor instead.
 func (*ListSeccionesRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{55}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *ListSeccionesRequest) GetPeriodoId() string {
@@ -3967,7 +4319,7 @@ type ListSeccionesResponse struct {
 
 func (x *ListSeccionesResponse) Reset() {
 	*x = ListSeccionesResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[56]
+	mi := &file_estudiantes_service_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3979,7 +4331,7 @@ func (x *ListSeccionesResponse) String() string {
 func (*ListSeccionesResponse) ProtoMessage() {}
 
 func (x *ListSeccionesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[56]
+	mi := &file_estudiantes_service_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3992,7 +4344,7 @@ func (x *ListSeccionesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSeccionesResponse.ProtoReflect.Descriptor instead.
 func (*ListSeccionesResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{56}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *ListSeccionesResponse) GetSecciones() []*SeccionAcademica {
@@ -4011,7 +4363,7 @@ type MatriculaResponse struct {
 
 func (x *MatriculaResponse) Reset() {
 	*x = MatriculaResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[57]
+	mi := &file_estudiantes_service_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4023,7 +4375,7 @@ func (x *MatriculaResponse) String() string {
 func (*MatriculaResponse) ProtoMessage() {}
 
 func (x *MatriculaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[57]
+	mi := &file_estudiantes_service_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4036,7 +4388,7 @@ func (x *MatriculaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MatriculaResponse.ProtoReflect.Descriptor instead.
 func (*MatriculaResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{57}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *MatriculaResponse) GetMatricula() *Matricula {
@@ -4058,7 +4410,7 @@ type MatricularEstudianteRequest struct {
 
 func (x *MatricularEstudianteRequest) Reset() {
 	*x = MatricularEstudianteRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[58]
+	mi := &file_estudiantes_service_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4070,7 +4422,7 @@ func (x *MatricularEstudianteRequest) String() string {
 func (*MatricularEstudianteRequest) ProtoMessage() {}
 
 func (x *MatricularEstudianteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[58]
+	mi := &file_estudiantes_service_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4083,7 +4435,7 @@ func (x *MatricularEstudianteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MatricularEstudianteRequest.ProtoReflect.Descriptor instead.
 func (*MatricularEstudianteRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{58}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *MatricularEstudianteRequest) GetEstudianteId() string {
@@ -4130,7 +4482,7 @@ type CambiarSeccionMatriculaRequest struct {
 
 func (x *CambiarSeccionMatriculaRequest) Reset() {
 	*x = CambiarSeccionMatriculaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[59]
+	mi := &file_estudiantes_service_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4142,7 +4494,7 @@ func (x *CambiarSeccionMatriculaRequest) String() string {
 func (*CambiarSeccionMatriculaRequest) ProtoMessage() {}
 
 func (x *CambiarSeccionMatriculaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[59]
+	mi := &file_estudiantes_service_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4155,7 +4507,7 @@ func (x *CambiarSeccionMatriculaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CambiarSeccionMatriculaRequest.ProtoReflect.Descriptor instead.
 func (*CambiarSeccionMatriculaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{59}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *CambiarSeccionMatriculaRequest) GetMatriculaId() string {
@@ -4208,7 +4560,7 @@ type RetirarMatriculaRequest struct {
 
 func (x *RetirarMatriculaRequest) Reset() {
 	*x = RetirarMatriculaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[60]
+	mi := &file_estudiantes_service_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4220,7 +4572,7 @@ func (x *RetirarMatriculaRequest) String() string {
 func (*RetirarMatriculaRequest) ProtoMessage() {}
 
 func (x *RetirarMatriculaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[60]
+	mi := &file_estudiantes_service_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4233,7 +4585,7 @@ func (x *RetirarMatriculaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RetirarMatriculaRequest.ProtoReflect.Descriptor instead.
 func (*RetirarMatriculaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{60}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *RetirarMatriculaRequest) GetMatriculaId() string {
@@ -4283,7 +4635,7 @@ type ReingresarMatriculaRequest struct {
 
 func (x *ReingresarMatriculaRequest) Reset() {
 	*x = ReingresarMatriculaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[61]
+	mi := &file_estudiantes_service_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4295,7 +4647,7 @@ func (x *ReingresarMatriculaRequest) String() string {
 func (*ReingresarMatriculaRequest) ProtoMessage() {}
 
 func (x *ReingresarMatriculaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[61]
+	mi := &file_estudiantes_service_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4308,7 +4660,7 @@ func (x *ReingresarMatriculaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReingresarMatriculaRequest.ProtoReflect.Descriptor instead.
 func (*ReingresarMatriculaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{61}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *ReingresarMatriculaRequest) GetMatriculaId() string {
@@ -4353,7 +4705,7 @@ type ConcluirMatriculaRequest struct {
 
 func (x *ConcluirMatriculaRequest) Reset() {
 	*x = ConcluirMatriculaRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[62]
+	mi := &file_estudiantes_service_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4365,7 +4717,7 @@ func (x *ConcluirMatriculaRequest) String() string {
 func (*ConcluirMatriculaRequest) ProtoMessage() {}
 
 func (x *ConcluirMatriculaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[62]
+	mi := &file_estudiantes_service_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4378,7 +4730,7 @@ func (x *ConcluirMatriculaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConcluirMatriculaRequest.ProtoReflect.Descriptor instead.
 func (*ConcluirMatriculaRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{62}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ConcluirMatriculaRequest) GetMatriculaId() string {
@@ -4413,7 +4765,7 @@ type MatriculaNomina struct {
 
 func (x *MatriculaNomina) Reset() {
 	*x = MatriculaNomina{}
-	mi := &file_estudiantes_service_proto_msgTypes[63]
+	mi := &file_estudiantes_service_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4425,7 +4777,7 @@ func (x *MatriculaNomina) String() string {
 func (*MatriculaNomina) ProtoMessage() {}
 
 func (x *MatriculaNomina) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[63]
+	mi := &file_estudiantes_service_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4438,7 +4790,7 @@ func (x *MatriculaNomina) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MatriculaNomina.ProtoReflect.Descriptor instead.
 func (*MatriculaNomina) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{63}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *MatriculaNomina) GetMatricula() *Matricula {
@@ -4468,7 +4820,7 @@ type ListMatriculasPeriodoRequest struct {
 
 func (x *ListMatriculasPeriodoRequest) Reset() {
 	*x = ListMatriculasPeriodoRequest{}
-	mi := &file_estudiantes_service_proto_msgTypes[64]
+	mi := &file_estudiantes_service_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4480,7 +4832,7 @@ func (x *ListMatriculasPeriodoRequest) String() string {
 func (*ListMatriculasPeriodoRequest) ProtoMessage() {}
 
 func (x *ListMatriculasPeriodoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[64]
+	mi := &file_estudiantes_service_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4493,7 +4845,7 @@ func (x *ListMatriculasPeriodoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMatriculasPeriodoRequest.ProtoReflect.Descriptor instead.
 func (*ListMatriculasPeriodoRequest) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{64}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *ListMatriculasPeriodoRequest) GetPeriodoId() string {
@@ -4541,7 +4893,7 @@ type ListMatriculasPeriodoResponse struct {
 
 func (x *ListMatriculasPeriodoResponse) Reset() {
 	*x = ListMatriculasPeriodoResponse{}
-	mi := &file_estudiantes_service_proto_msgTypes[65]
+	mi := &file_estudiantes_service_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4553,7 +4905,7 @@ func (x *ListMatriculasPeriodoResponse) String() string {
 func (*ListMatriculasPeriodoResponse) ProtoMessage() {}
 
 func (x *ListMatriculasPeriodoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_estudiantes_service_proto_msgTypes[65]
+	mi := &file_estudiantes_service_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4566,7 +4918,7 @@ func (x *ListMatriculasPeriodoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMatriculasPeriodoResponse.ProtoReflect.Descriptor instead.
 func (*ListMatriculasPeriodoResponse) Descriptor() ([]byte, []int) {
-	return file_estudiantes_service_proto_rawDescGZIP(), []int{65}
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *ListMatriculasPeriodoResponse) GetMatriculas() []*MatriculaNomina {
@@ -4625,7 +4977,7 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x15GetEstudianteResponse\x127\n" +
 	"\n" +
 	"estudiante\x18\x01 \x01(\v2\x17.estudiantes.EstudianteR\n" +
-	"estudiante\"\xcd\x01\n" +
+	"estudiante\"\xe3\x01\n" +
 	"\x18SearchEstudiantesRequest\x12\f\n" +
 	"\x01q\x18\x01 \x01(\tR\x01q\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
@@ -4634,7 +4986,8 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x05nivel\x18\x05 \x01(\tR\x05nivel\x12\x14\n" +
 	"\x05grado\x18\x06 \x01(\tR\x05grado\x12\x18\n" +
 	"\aseccion\x18\a \x01(\tR\aseccion\x12\x14\n" +
-	"\x05turno\x18\b \x01(\tR\x05turno\"r\n" +
+	"\x05turno\x18\b \x01(\tR\x05turno\x12\x14\n" +
+	"\x05orden\x18\t \x01(\tR\x05orden\"r\n" +
 	"\x19SearchEstudiantesResponse\x12?\n" +
 	"\vestudiantes\x18\x01 \x03(\v2\x1d.estudiantes.EstudianteBasicoR\vestudiantes\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\".\n" +
@@ -4881,7 +5234,36 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"relacionId\x12!\n" +
 	"\fes_apoderado\x18\x03 \x01(\bR\vesApoderado\"O\n" +
 	"\x1aActualizarFamiliarResponse\x121\n" +
-	"\bfamiliar\x18\x01 \x01(\v2\x15.estudiantes.FamiliarR\bfamiliar\"\xf9\x01\n" +
+	"\bfamiliar\x18\x01 \x01(\v2\x15.estudiantes.FamiliarR\bfamiliar\"\x9e\x01\n" +
+	" CambiarParentescoFamiliarRequest\x12#\n" +
+	"\restudiante_id\x18\x01 \x01(\tR\festudianteId\x12\x1f\n" +
+	"\vrelacion_id\x18\x02 \x01(\tR\n" +
+	"relacionId\x12\x1e\n" +
+	"\n" +
+	"parentesco\x18\x03 \x01(\tR\n" +
+	"parentesco\x12\x14\n" +
+	"\x05desde\x18\x04 \x01(\tR\x05desde\"\x89\x01\n" +
+	"!CambiarParentescoFamiliarResponse\x121\n" +
+	"\banterior\x18\x01 \x01(\v2\x15.estudiantes.FamiliarR\banterior\x121\n" +
+	"\bfamiliar\x18\x02 \x01(\v2\x15.estudiantes.FamiliarR\bfamiliar\"\x8a\x02\n" +
+	"\x0fEventoHistorial\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
+	"\x06accion\x18\x02 \x01(\tR\x06accion\x12\x1d\n" +
+	"\n" +
+	"fecha_hora\x18\x03 \x01(\tR\tfechaHora\x12\x1d\n" +
+	"\n" +
+	"usuario_id\x18\x04 \x01(\tR\tusuarioId\x12\x16\n" +
+	"\x06campos\x18\x05 \x03(\tR\x06campos\x12'\n" +
+	"\x0festado_anterior\x18\x06 \x01(\tR\x0eestadoAnterior\x12!\n" +
+	"\festado_nuevo\x18\a \x01(\tR\vestadoNuevo\x12-\n" +
+	"\x12version_resultante\x18\b \x01(\x05R\x11versionResultante\"v\n" +
+	"\x1eListHistorialEstudianteRequest\x12#\n" +
+	"\restudiante_id\x18\x01 \x01(\tR\festudianteId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"o\n" +
+	"\x1fListHistorialEstudianteResponse\x126\n" +
+	"\aeventos\x18\x01 \x03(\v2\x1c.estudiantes.EventoHistorialR\aeventos\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\xf9\x01\n" +
 	"\x0eVinculoPersona\x12\x1f\n" +
 	"\vrelacion_id\x18\x01 \x01(\tR\n" +
 	"relacionId\x12=\n" +
@@ -5004,7 +5386,7 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\n" +
 	"matriculas\x18\x01 \x03(\v2\x1c.estudiantes.MatriculaNominaR\n" +
 	"matriculas\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total2\x99\x17\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total2\x8b\x19\n" +
 	"\vEstudiantes\x12V\n" +
 	"\rGetEstudiante\x12!.estudiantes.GetEstudianteRequest\x1a\".estudiantes.GetEstudianteResponse\x12b\n" +
 	"\x11SearchEstudiantes\x12%.estudiantes.SearchEstudiantesRequest\x1a&.estudiantes.SearchEstudiantesResponse\x12h\n" +
@@ -5036,7 +5418,9 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x10RetirarMatricula\x12$.estudiantes.RetirarMatriculaRequest\x1a\x1e.estudiantes.MatriculaResponse\x12^\n" +
 	"\x13ReingresarMatricula\x12'.estudiantes.ReingresarMatriculaRequest\x1a\x1e.estudiantes.MatriculaResponse\x12Z\n" +
 	"\x11ConcluirMatricula\x12%.estudiantes.ConcluirMatriculaRequest\x1a\x1e.estudiantes.MatriculaResponse\x12n\n" +
-	"\x15ListMatriculasPeriodo\x12).estudiantes.ListMatriculasPeriodoRequest\x1a*.estudiantes.ListMatriculasPeriodoResponseB\x0fZ\r./estudiantesb\x06proto3"
+	"\x15ListMatriculasPeriodo\x12).estudiantes.ListMatriculasPeriodoRequest\x1a*.estudiantes.ListMatriculasPeriodoResponse\x12z\n" +
+	"\x19CambiarParentescoFamiliar\x12-.estudiantes.CambiarParentescoFamiliarRequest\x1a..estudiantes.CambiarParentescoFamiliarResponse\x12t\n" +
+	"\x17ListHistorialEstudiante\x12+.estudiantes.ListHistorialEstudianteRequest\x1a,.estudiantes.ListHistorialEstudianteResponseB\x0fZ\r./estudiantesb\x06proto3"
 
 var (
 	file_estudiantes_service_proto_rawDescOnce sync.Once
@@ -5050,74 +5434,79 @@ func file_estudiantes_service_proto_rawDescGZIP() []byte {
 	return file_estudiantes_service_proto_rawDescData
 }
 
-var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 66)
+var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 71)
 var file_estudiantes_service_proto_goTypes = []any{
-	(*Estudiante)(nil),                       // 0: estudiantes.Estudiante
-	(*EstudianteBasico)(nil),                 // 1: estudiantes.EstudianteBasico
-	(*GetEstudianteRequest)(nil),             // 2: estudiantes.GetEstudianteRequest
-	(*GetEstudianteResponse)(nil),            // 3: estudiantes.GetEstudianteResponse
-	(*SearchEstudiantesRequest)(nil),         // 4: estudiantes.SearchEstudiantesRequest
-	(*SearchEstudiantesResponse)(nil),        // 5: estudiantes.SearchEstudiantesResponse
-	(*GetEstudiantesBasicRequest)(nil),       // 6: estudiantes.GetEstudiantesBasicRequest
-	(*GetEstudiantesBasicResponse)(nil),      // 7: estudiantes.GetEstudiantesBasicResponse
-	(*CreateEstudianteRequest)(nil),          // 8: estudiantes.CreateEstudianteRequest
-	(*CreateEstudianteResponse)(nil),         // 9: estudiantes.CreateEstudianteResponse
-	(*UpdateEstudianteRequest)(nil),          // 10: estudiantes.UpdateEstudianteRequest
-	(*UpdateEstudianteResponse)(nil),         // 11: estudiantes.UpdateEstudianteResponse
-	(*ChangeEstadoEstudianteRequest)(nil),    // 12: estudiantes.ChangeEstadoEstudianteRequest
-	(*ChangeEstadoEstudianteResponse)(nil),   // 13: estudiantes.ChangeEstadoEstudianteResponse
-	(*EstudiantePersonal)(nil),               // 14: estudiantes.EstudiantePersonal
-	(*GetEstudiantePersonalRequest)(nil),     // 15: estudiantes.GetEstudiantePersonalRequest
-	(*GetEstudiantePersonalResponse)(nil),    // 16: estudiantes.GetEstudiantePersonalResponse
-	(*UpdateEstudiantePersonalRequest)(nil),  // 17: estudiantes.UpdateEstudiantePersonalRequest
-	(*UpdateEstudiantePersonalResponse)(nil), // 18: estudiantes.UpdateEstudiantePersonalResponse
-	(*ResolveEstudianteRequest)(nil),         // 19: estudiantes.ResolveEstudianteRequest
-	(*ResolveEstudianteResponse)(nil),        // 20: estudiantes.ResolveEstudianteResponse
-	(*GrupoPosibleDuplicado)(nil),            // 21: estudiantes.GrupoPosibleDuplicado
-	(*ListPosiblesDuplicadosRequest)(nil),    // 22: estudiantes.ListPosiblesDuplicadosRequest
-	(*ListPosiblesDuplicadosResponse)(nil),   // 23: estudiantes.ListPosiblesDuplicadosResponse
-	(*PeriodoAcademico)(nil),                 // 24: estudiantes.PeriodoAcademico
-	(*SeccionAcademica)(nil),                 // 25: estudiantes.SeccionAcademica
-	(*MovimientoMatricula)(nil),              // 26: estudiantes.MovimientoMatricula
-	(*Matricula)(nil),                        // 27: estudiantes.Matricula
-	(*ListMatriculasEstudianteRequest)(nil),  // 28: estudiantes.ListMatriculasEstudianteRequest
-	(*ListMatriculasEstudianteResponse)(nil), // 29: estudiantes.ListMatriculasEstudianteResponse
-	(*Persona)(nil),                          // 30: estudiantes.Persona
-	(*Familiar)(nil),                         // 31: estudiantes.Familiar
-	(*ListFamiliaresEstudianteRequest)(nil),  // 32: estudiantes.ListFamiliaresEstudianteRequest
-	(*ListFamiliaresEstudianteResponse)(nil), // 33: estudiantes.ListFamiliaresEstudianteResponse
-	(*VincularFamiliarRequest)(nil),          // 34: estudiantes.VincularFamiliarRequest
-	(*VincularFamiliarResponse)(nil),         // 35: estudiantes.VincularFamiliarResponse
-	(*DesvincularFamiliarRequest)(nil),       // 36: estudiantes.DesvincularFamiliarRequest
-	(*DesvincularFamiliarResponse)(nil),      // 37: estudiantes.DesvincularFamiliarResponse
-	(*ActualizarFamiliarRequest)(nil),        // 38: estudiantes.ActualizarFamiliarRequest
-	(*ActualizarFamiliarResponse)(nil),       // 39: estudiantes.ActualizarFamiliarResponse
-	(*VinculoPersona)(nil),                   // 40: estudiantes.VinculoPersona
-	(*CreatePersonaRequest)(nil),             // 41: estudiantes.CreatePersonaRequest
-	(*PersonaResponse)(nil),                  // 42: estudiantes.PersonaResponse
-	(*GetPersonaRequest)(nil),                // 43: estudiantes.GetPersonaRequest
-	(*GetPersonaResponse)(nil),               // 44: estudiantes.GetPersonaResponse
-	(*SearchPersonasRequest)(nil),            // 45: estudiantes.SearchPersonasRequest
-	(*SearchPersonasResponse)(nil),           // 46: estudiantes.SearchPersonasResponse
-	(*UpdatePersonaRequest)(nil),             // 47: estudiantes.UpdatePersonaRequest
-	(*CreatePeriodoRequest)(nil),             // 48: estudiantes.CreatePeriodoRequest
-	(*PeriodoResponse)(nil),                  // 49: estudiantes.PeriodoResponse
-	(*ListPeriodosRequest)(nil),              // 50: estudiantes.ListPeriodosRequest
-	(*ListPeriodosResponse)(nil),             // 51: estudiantes.ListPeriodosResponse
-	(*ChangeEstadoPeriodoRequest)(nil),       // 52: estudiantes.ChangeEstadoPeriodoRequest
-	(*CreateSeccionRequest)(nil),             // 53: estudiantes.CreateSeccionRequest
-	(*SeccionResponse)(nil),                  // 54: estudiantes.SeccionResponse
-	(*ListSeccionesRequest)(nil),             // 55: estudiantes.ListSeccionesRequest
-	(*ListSeccionesResponse)(nil),            // 56: estudiantes.ListSeccionesResponse
-	(*MatriculaResponse)(nil),                // 57: estudiantes.MatriculaResponse
-	(*MatricularEstudianteRequest)(nil),      // 58: estudiantes.MatricularEstudianteRequest
-	(*CambiarSeccionMatriculaRequest)(nil),   // 59: estudiantes.CambiarSeccionMatriculaRequest
-	(*RetirarMatriculaRequest)(nil),          // 60: estudiantes.RetirarMatriculaRequest
-	(*ReingresarMatriculaRequest)(nil),       // 61: estudiantes.ReingresarMatriculaRequest
-	(*ConcluirMatriculaRequest)(nil),         // 62: estudiantes.ConcluirMatriculaRequest
-	(*MatriculaNomina)(nil),                  // 63: estudiantes.MatriculaNomina
-	(*ListMatriculasPeriodoRequest)(nil),     // 64: estudiantes.ListMatriculasPeriodoRequest
-	(*ListMatriculasPeriodoResponse)(nil),    // 65: estudiantes.ListMatriculasPeriodoResponse
+	(*Estudiante)(nil),                        // 0: estudiantes.Estudiante
+	(*EstudianteBasico)(nil),                  // 1: estudiantes.EstudianteBasico
+	(*GetEstudianteRequest)(nil),              // 2: estudiantes.GetEstudianteRequest
+	(*GetEstudianteResponse)(nil),             // 3: estudiantes.GetEstudianteResponse
+	(*SearchEstudiantesRequest)(nil),          // 4: estudiantes.SearchEstudiantesRequest
+	(*SearchEstudiantesResponse)(nil),         // 5: estudiantes.SearchEstudiantesResponse
+	(*GetEstudiantesBasicRequest)(nil),        // 6: estudiantes.GetEstudiantesBasicRequest
+	(*GetEstudiantesBasicResponse)(nil),       // 7: estudiantes.GetEstudiantesBasicResponse
+	(*CreateEstudianteRequest)(nil),           // 8: estudiantes.CreateEstudianteRequest
+	(*CreateEstudianteResponse)(nil),          // 9: estudiantes.CreateEstudianteResponse
+	(*UpdateEstudianteRequest)(nil),           // 10: estudiantes.UpdateEstudianteRequest
+	(*UpdateEstudianteResponse)(nil),          // 11: estudiantes.UpdateEstudianteResponse
+	(*ChangeEstadoEstudianteRequest)(nil),     // 12: estudiantes.ChangeEstadoEstudianteRequest
+	(*ChangeEstadoEstudianteResponse)(nil),    // 13: estudiantes.ChangeEstadoEstudianteResponse
+	(*EstudiantePersonal)(nil),                // 14: estudiantes.EstudiantePersonal
+	(*GetEstudiantePersonalRequest)(nil),      // 15: estudiantes.GetEstudiantePersonalRequest
+	(*GetEstudiantePersonalResponse)(nil),     // 16: estudiantes.GetEstudiantePersonalResponse
+	(*UpdateEstudiantePersonalRequest)(nil),   // 17: estudiantes.UpdateEstudiantePersonalRequest
+	(*UpdateEstudiantePersonalResponse)(nil),  // 18: estudiantes.UpdateEstudiantePersonalResponse
+	(*ResolveEstudianteRequest)(nil),          // 19: estudiantes.ResolveEstudianteRequest
+	(*ResolveEstudianteResponse)(nil),         // 20: estudiantes.ResolveEstudianteResponse
+	(*GrupoPosibleDuplicado)(nil),             // 21: estudiantes.GrupoPosibleDuplicado
+	(*ListPosiblesDuplicadosRequest)(nil),     // 22: estudiantes.ListPosiblesDuplicadosRequest
+	(*ListPosiblesDuplicadosResponse)(nil),    // 23: estudiantes.ListPosiblesDuplicadosResponse
+	(*PeriodoAcademico)(nil),                  // 24: estudiantes.PeriodoAcademico
+	(*SeccionAcademica)(nil),                  // 25: estudiantes.SeccionAcademica
+	(*MovimientoMatricula)(nil),               // 26: estudiantes.MovimientoMatricula
+	(*Matricula)(nil),                         // 27: estudiantes.Matricula
+	(*ListMatriculasEstudianteRequest)(nil),   // 28: estudiantes.ListMatriculasEstudianteRequest
+	(*ListMatriculasEstudianteResponse)(nil),  // 29: estudiantes.ListMatriculasEstudianteResponse
+	(*Persona)(nil),                           // 30: estudiantes.Persona
+	(*Familiar)(nil),                          // 31: estudiantes.Familiar
+	(*ListFamiliaresEstudianteRequest)(nil),   // 32: estudiantes.ListFamiliaresEstudianteRequest
+	(*ListFamiliaresEstudianteResponse)(nil),  // 33: estudiantes.ListFamiliaresEstudianteResponse
+	(*VincularFamiliarRequest)(nil),           // 34: estudiantes.VincularFamiliarRequest
+	(*VincularFamiliarResponse)(nil),          // 35: estudiantes.VincularFamiliarResponse
+	(*DesvincularFamiliarRequest)(nil),        // 36: estudiantes.DesvincularFamiliarRequest
+	(*DesvincularFamiliarResponse)(nil),       // 37: estudiantes.DesvincularFamiliarResponse
+	(*ActualizarFamiliarRequest)(nil),         // 38: estudiantes.ActualizarFamiliarRequest
+	(*ActualizarFamiliarResponse)(nil),        // 39: estudiantes.ActualizarFamiliarResponse
+	(*CambiarParentescoFamiliarRequest)(nil),  // 40: estudiantes.CambiarParentescoFamiliarRequest
+	(*CambiarParentescoFamiliarResponse)(nil), // 41: estudiantes.CambiarParentescoFamiliarResponse
+	(*EventoHistorial)(nil),                   // 42: estudiantes.EventoHistorial
+	(*ListHistorialEstudianteRequest)(nil),    // 43: estudiantes.ListHistorialEstudianteRequest
+	(*ListHistorialEstudianteResponse)(nil),   // 44: estudiantes.ListHistorialEstudianteResponse
+	(*VinculoPersona)(nil),                    // 45: estudiantes.VinculoPersona
+	(*CreatePersonaRequest)(nil),              // 46: estudiantes.CreatePersonaRequest
+	(*PersonaResponse)(nil),                   // 47: estudiantes.PersonaResponse
+	(*GetPersonaRequest)(nil),                 // 48: estudiantes.GetPersonaRequest
+	(*GetPersonaResponse)(nil),                // 49: estudiantes.GetPersonaResponse
+	(*SearchPersonasRequest)(nil),             // 50: estudiantes.SearchPersonasRequest
+	(*SearchPersonasResponse)(nil),            // 51: estudiantes.SearchPersonasResponse
+	(*UpdatePersonaRequest)(nil),              // 52: estudiantes.UpdatePersonaRequest
+	(*CreatePeriodoRequest)(nil),              // 53: estudiantes.CreatePeriodoRequest
+	(*PeriodoResponse)(nil),                   // 54: estudiantes.PeriodoResponse
+	(*ListPeriodosRequest)(nil),               // 55: estudiantes.ListPeriodosRequest
+	(*ListPeriodosResponse)(nil),              // 56: estudiantes.ListPeriodosResponse
+	(*ChangeEstadoPeriodoRequest)(nil),        // 57: estudiantes.ChangeEstadoPeriodoRequest
+	(*CreateSeccionRequest)(nil),              // 58: estudiantes.CreateSeccionRequest
+	(*SeccionResponse)(nil),                   // 59: estudiantes.SeccionResponse
+	(*ListSeccionesRequest)(nil),              // 60: estudiantes.ListSeccionesRequest
+	(*ListSeccionesResponse)(nil),             // 61: estudiantes.ListSeccionesResponse
+	(*MatriculaResponse)(nil),                 // 62: estudiantes.MatriculaResponse
+	(*MatricularEstudianteRequest)(nil),       // 63: estudiantes.MatricularEstudianteRequest
+	(*CambiarSeccionMatriculaRequest)(nil),    // 64: estudiantes.CambiarSeccionMatriculaRequest
+	(*RetirarMatriculaRequest)(nil),           // 65: estudiantes.RetirarMatriculaRequest
+	(*ReingresarMatriculaRequest)(nil),        // 66: estudiantes.ReingresarMatriculaRequest
+	(*ConcluirMatriculaRequest)(nil),          // 67: estudiantes.ConcluirMatriculaRequest
+	(*MatriculaNomina)(nil),                   // 68: estudiantes.MatriculaNomina
+	(*ListMatriculasPeriodoRequest)(nil),      // 69: estudiantes.ListMatriculasPeriodoRequest
+	(*ListMatriculasPeriodoResponse)(nil),     // 70: estudiantes.ListMatriculasPeriodoResponse
 }
 var file_estudiantes_service_proto_depIdxs = []int32{
 	0,  // 0: estudiantes.GetEstudianteResponse.estudiante:type_name -> estudiantes.Estudiante
@@ -5141,85 +5530,92 @@ var file_estudiantes_service_proto_depIdxs = []int32{
 	31, // 18: estudiantes.VincularFamiliarResponse.familiar:type_name -> estudiantes.Familiar
 	31, // 19: estudiantes.DesvincularFamiliarResponse.familiar:type_name -> estudiantes.Familiar
 	31, // 20: estudiantes.ActualizarFamiliarResponse.familiar:type_name -> estudiantes.Familiar
-	1,  // 21: estudiantes.VinculoPersona.estudiante:type_name -> estudiantes.EstudianteBasico
-	30, // 22: estudiantes.CreatePersonaRequest.persona:type_name -> estudiantes.Persona
-	30, // 23: estudiantes.PersonaResponse.persona:type_name -> estudiantes.Persona
-	30, // 24: estudiantes.GetPersonaResponse.persona:type_name -> estudiantes.Persona
-	40, // 25: estudiantes.GetPersonaResponse.vinculos:type_name -> estudiantes.VinculoPersona
-	30, // 26: estudiantes.SearchPersonasResponse.personas:type_name -> estudiantes.Persona
-	24, // 27: estudiantes.PeriodoResponse.periodo:type_name -> estudiantes.PeriodoAcademico
-	24, // 28: estudiantes.ListPeriodosResponse.periodos:type_name -> estudiantes.PeriodoAcademico
-	25, // 29: estudiantes.SeccionResponse.seccion:type_name -> estudiantes.SeccionAcademica
-	25, // 30: estudiantes.ListSeccionesResponse.secciones:type_name -> estudiantes.SeccionAcademica
-	27, // 31: estudiantes.MatriculaResponse.matricula:type_name -> estudiantes.Matricula
-	27, // 32: estudiantes.MatriculaNomina.matricula:type_name -> estudiantes.Matricula
-	1,  // 33: estudiantes.MatriculaNomina.estudiante:type_name -> estudiantes.EstudianteBasico
-	63, // 34: estudiantes.ListMatriculasPeriodoResponse.matriculas:type_name -> estudiantes.MatriculaNomina
-	2,  // 35: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
-	4,  // 36: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
-	6,  // 37: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
-	8,  // 38: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
-	10, // 39: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
-	12, // 40: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
-	15, // 41: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
-	17, // 42: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
-	19, // 43: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
-	22, // 44: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
-	28, // 45: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
-	32, // 46: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
-	34, // 47: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
-	36, // 48: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
-	38, // 49: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
-	41, // 50: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
-	43, // 51: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
-	45, // 52: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
-	47, // 53: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
-	48, // 54: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
-	50, // 55: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
-	52, // 56: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
-	53, // 57: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
-	55, // 58: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
-	58, // 59: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
-	59, // 60: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
-	60, // 61: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
-	61, // 62: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
-	62, // 63: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
-	64, // 64: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
-	3,  // 65: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
-	5,  // 66: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
-	7,  // 67: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
-	9,  // 68: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
-	11, // 69: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
-	13, // 70: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
-	16, // 71: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
-	18, // 72: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
-	20, // 73: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
-	23, // 74: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
-	29, // 75: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
-	33, // 76: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
-	35, // 77: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
-	37, // 78: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
-	39, // 79: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
-	42, // 80: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
-	44, // 81: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
-	46, // 82: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
-	42, // 83: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
-	49, // 84: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
-	51, // 85: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
-	49, // 86: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
-	54, // 87: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
-	56, // 88: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
-	57, // 89: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
-	57, // 90: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
-	57, // 91: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
-	57, // 92: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
-	57, // 93: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
-	65, // 94: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
-	65, // [65:95] is the sub-list for method output_type
-	35, // [35:65] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	31, // 21: estudiantes.CambiarParentescoFamiliarResponse.anterior:type_name -> estudiantes.Familiar
+	31, // 22: estudiantes.CambiarParentescoFamiliarResponse.familiar:type_name -> estudiantes.Familiar
+	42, // 23: estudiantes.ListHistorialEstudianteResponse.eventos:type_name -> estudiantes.EventoHistorial
+	1,  // 24: estudiantes.VinculoPersona.estudiante:type_name -> estudiantes.EstudianteBasico
+	30, // 25: estudiantes.CreatePersonaRequest.persona:type_name -> estudiantes.Persona
+	30, // 26: estudiantes.PersonaResponse.persona:type_name -> estudiantes.Persona
+	30, // 27: estudiantes.GetPersonaResponse.persona:type_name -> estudiantes.Persona
+	45, // 28: estudiantes.GetPersonaResponse.vinculos:type_name -> estudiantes.VinculoPersona
+	30, // 29: estudiantes.SearchPersonasResponse.personas:type_name -> estudiantes.Persona
+	24, // 30: estudiantes.PeriodoResponse.periodo:type_name -> estudiantes.PeriodoAcademico
+	24, // 31: estudiantes.ListPeriodosResponse.periodos:type_name -> estudiantes.PeriodoAcademico
+	25, // 32: estudiantes.SeccionResponse.seccion:type_name -> estudiantes.SeccionAcademica
+	25, // 33: estudiantes.ListSeccionesResponse.secciones:type_name -> estudiantes.SeccionAcademica
+	27, // 34: estudiantes.MatriculaResponse.matricula:type_name -> estudiantes.Matricula
+	27, // 35: estudiantes.MatriculaNomina.matricula:type_name -> estudiantes.Matricula
+	1,  // 36: estudiantes.MatriculaNomina.estudiante:type_name -> estudiantes.EstudianteBasico
+	68, // 37: estudiantes.ListMatriculasPeriodoResponse.matriculas:type_name -> estudiantes.MatriculaNomina
+	2,  // 38: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
+	4,  // 39: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
+	6,  // 40: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
+	8,  // 41: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
+	10, // 42: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
+	12, // 43: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
+	15, // 44: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
+	17, // 45: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
+	19, // 46: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
+	22, // 47: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
+	28, // 48: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
+	32, // 49: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
+	34, // 50: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
+	36, // 51: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
+	38, // 52: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
+	46, // 53: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
+	48, // 54: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
+	50, // 55: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
+	52, // 56: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
+	53, // 57: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
+	55, // 58: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
+	57, // 59: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
+	58, // 60: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
+	60, // 61: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
+	63, // 62: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
+	64, // 63: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
+	65, // 64: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
+	66, // 65: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
+	67, // 66: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
+	69, // 67: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
+	40, // 68: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
+	43, // 69: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
+	3,  // 70: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
+	5,  // 71: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
+	7,  // 72: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
+	9,  // 73: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
+	11, // 74: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
+	13, // 75: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
+	16, // 76: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
+	18, // 77: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
+	20, // 78: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
+	23, // 79: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
+	29, // 80: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
+	33, // 81: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
+	35, // 82: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
+	37, // 83: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
+	39, // 84: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
+	47, // 85: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
+	49, // 86: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
+	51, // 87: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
+	47, // 88: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
+	54, // 89: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
+	56, // 90: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
+	54, // 91: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
+	59, // 92: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
+	61, // 93: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
+	62, // 94: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
+	62, // 95: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 96: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 97: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 98: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
+	70, // 99: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
+	41, // 100: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
+	44, // 101: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
+	70, // [70:102] is the sub-list for method output_type
+	38, // [38:70] is the sub-list for method input_type
+	38, // [38:38] is the sub-list for extension type_name
+	38, // [38:38] is the sub-list for extension extendee
+	0,  // [0:38] is the sub-list for field type_name
 }
 
 func init() { file_estudiantes_service_proto_init() }
@@ -5231,15 +5627,15 @@ func file_estudiantes_service_proto_init() {
 	file_estudiantes_service_proto_msgTypes[14].OneofWrappers = []any{}
 	file_estudiantes_service_proto_msgTypes[17].OneofWrappers = []any{}
 	file_estudiantes_service_proto_msgTypes[25].OneofWrappers = []any{}
-	file_estudiantes_service_proto_msgTypes[47].OneofWrappers = []any{}
-	file_estudiantes_service_proto_msgTypes[53].OneofWrappers = []any{}
+	file_estudiantes_service_proto_msgTypes[52].OneofWrappers = []any{}
+	file_estudiantes_service_proto_msgTypes[58].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_estudiantes_service_proto_rawDesc), len(file_estudiantes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   66,
+			NumMessages:   71,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

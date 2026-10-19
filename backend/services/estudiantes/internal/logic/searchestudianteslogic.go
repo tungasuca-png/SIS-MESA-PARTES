@@ -63,6 +63,11 @@ func (l *SearchEstudiantesLogic) SearchEstudiantes(in *estudiantes.SearchEstudia
 		Grado:    strings.TrimSpace(in.Grado),
 		Seccion:  strings.TrimSpace(in.Seccion),
 		Turno:    strings.TrimSpace(in.Turno),
+		Orden:    strings.ToLower(strings.TrimSpace(in.Orden)),
+	}
+	// Etapa 6: solo los órdenes de la lista blanca del repositorio.
+	if _, ok := repository.OrdenesBusqueda[filter.Orden]; !ok {
+		return nil, status.Error(codes.InvalidArgument, "validation_error: orden inválido: use apellidos, codigo o recientes")
 	}
 
 	q := strings.TrimSpace(in.Q)

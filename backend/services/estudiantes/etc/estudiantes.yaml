@@ -64,3 +64,6 @@ Middlewares:
       - /estudiantes.Estudiantes/ReingresarMatricula
       - /estudiantes.Estudiantes/ConcluirMatricula
       - /estudiantes.Estudiantes/ListMatriculasPeriodo
+      # Etapa 6: parentesco con historial e historial de cambios.
+      - /estudiantes.Estudiantes/CambiarParentescoFamiliar
+      - /estudiantes.Estudiantes/ListHistorialEstudiante

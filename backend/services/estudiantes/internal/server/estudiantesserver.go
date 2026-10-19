@@ -174,3 +174,14 @@ func (s *EstudiantesServer) ListMatriculasPeriodo(ctx context.Context, in *estud
 	l := logic.NewListMatriculasPeriodoLogic(ctx, s.svcCtx)
 	return l.ListMatriculasPeriodo(in)
 }
+
+// Etapa 6: parentesco con historial e historial de cambios.
+func (s *EstudiantesServer) CambiarParentescoFamiliar(ctx context.Context, in *estudiantes.CambiarParentescoFamiliarRequest) (*estudiantes.CambiarParentescoFamiliarResponse, error) {
+	l := logic.NewCambiarParentescoFamiliarLogic(ctx, s.svcCtx)
+	return l.CambiarParentescoFamiliar(in)
+}
+
+func (s *EstudiantesServer) ListHistorialEstudiante(ctx context.Context, in *estudiantes.ListHistorialEstudianteRequest) (*estudiantes.ListHistorialEstudianteResponse, error) {
+	l := logic.NewListHistorialEstudianteLogic(ctx, s.svcCtx)
+	return l.ListHistorialEstudiante(in)
+}

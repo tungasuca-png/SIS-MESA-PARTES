@@ -14,72 +14,77 @@ import (
 )
 
 type (
-	ActualizarFamiliarRequest        = estudiantes.ActualizarFamiliarRequest
-	ActualizarFamiliarResponse       = estudiantes.ActualizarFamiliarResponse
-	CambiarSeccionMatriculaRequest   = estudiantes.CambiarSeccionMatriculaRequest
-	ChangeEstadoEstudianteRequest    = estudiantes.ChangeEstadoEstudianteRequest
-	ChangeEstadoEstudianteResponse   = estudiantes.ChangeEstadoEstudianteResponse
-	ChangeEstadoPeriodoRequest       = estudiantes.ChangeEstadoPeriodoRequest
-	ConcluirMatriculaRequest         = estudiantes.ConcluirMatriculaRequest
-	CreateEstudianteRequest          = estudiantes.CreateEstudianteRequest
-	CreateEstudianteResponse         = estudiantes.CreateEstudianteResponse
-	CreatePeriodoRequest             = estudiantes.CreatePeriodoRequest
-	CreatePersonaRequest             = estudiantes.CreatePersonaRequest
-	CreateSeccionRequest             = estudiantes.CreateSeccionRequest
-	DesvincularFamiliarRequest       = estudiantes.DesvincularFamiliarRequest
-	DesvincularFamiliarResponse      = estudiantes.DesvincularFamiliarResponse
-	Estudiante                       = estudiantes.Estudiante
-	EstudianteBasico                 = estudiantes.EstudianteBasico
-	EstudiantePersonal               = estudiantes.EstudiantePersonal
-	Familiar                         = estudiantes.Familiar
-	GetEstudiantePersonalRequest     = estudiantes.GetEstudiantePersonalRequest
-	GetEstudiantePersonalResponse    = estudiantes.GetEstudiantePersonalResponse
-	GetEstudianteRequest             = estudiantes.GetEstudianteRequest
-	GetEstudianteResponse            = estudiantes.GetEstudianteResponse
-	GetEstudiantesBasicRequest       = estudiantes.GetEstudiantesBasicRequest
-	GetEstudiantesBasicResponse      = estudiantes.GetEstudiantesBasicResponse
-	GetPersonaRequest                = estudiantes.GetPersonaRequest
-	GetPersonaResponse               = estudiantes.GetPersonaResponse
-	GrupoPosibleDuplicado            = estudiantes.GrupoPosibleDuplicado
-	ListFamiliaresEstudianteRequest  = estudiantes.ListFamiliaresEstudianteRequest
-	ListFamiliaresEstudianteResponse = estudiantes.ListFamiliaresEstudianteResponse
-	ListMatriculasEstudianteRequest  = estudiantes.ListMatriculasEstudianteRequest
-	ListMatriculasEstudianteResponse = estudiantes.ListMatriculasEstudianteResponse
-	ListMatriculasPeriodoRequest     = estudiantes.ListMatriculasPeriodoRequest
-	ListMatriculasPeriodoResponse    = estudiantes.ListMatriculasPeriodoResponse
-	ListPeriodosRequest              = estudiantes.ListPeriodosRequest
-	ListPeriodosResponse             = estudiantes.ListPeriodosResponse
-	ListPosiblesDuplicadosRequest    = estudiantes.ListPosiblesDuplicadosRequest
-	ListPosiblesDuplicadosResponse   = estudiantes.ListPosiblesDuplicadosResponse
-	ListSeccionesRequest             = estudiantes.ListSeccionesRequest
-	ListSeccionesResponse            = estudiantes.ListSeccionesResponse
-	Matricula                        = estudiantes.Matricula
-	MatriculaNomina                  = estudiantes.MatriculaNomina
-	MatriculaResponse                = estudiantes.MatriculaResponse
-	MatricularEstudianteRequest      = estudiantes.MatricularEstudianteRequest
-	MovimientoMatricula              = estudiantes.MovimientoMatricula
-	PeriodoAcademico                 = estudiantes.PeriodoAcademico
-	PeriodoResponse                  = estudiantes.PeriodoResponse
-	Persona                          = estudiantes.Persona
-	PersonaResponse                  = estudiantes.PersonaResponse
-	ReingresarMatriculaRequest       = estudiantes.ReingresarMatriculaRequest
-	ResolveEstudianteRequest         = estudiantes.ResolveEstudianteRequest
-	ResolveEstudianteResponse        = estudiantes.ResolveEstudianteResponse
-	RetirarMatriculaRequest          = estudiantes.RetirarMatriculaRequest
-	SearchEstudiantesRequest         = estudiantes.SearchEstudiantesRequest
-	SearchEstudiantesResponse        = estudiantes.SearchEstudiantesResponse
-	SearchPersonasRequest            = estudiantes.SearchPersonasRequest
-	SearchPersonasResponse           = estudiantes.SearchPersonasResponse
-	SeccionAcademica                 = estudiantes.SeccionAcademica
-	SeccionResponse                  = estudiantes.SeccionResponse
-	UpdateEstudiantePersonalRequest  = estudiantes.UpdateEstudiantePersonalRequest
-	UpdateEstudiantePersonalResponse = estudiantes.UpdateEstudiantePersonalResponse
-	UpdateEstudianteRequest          = estudiantes.UpdateEstudianteRequest
-	UpdateEstudianteResponse         = estudiantes.UpdateEstudianteResponse
-	UpdatePersonaRequest             = estudiantes.UpdatePersonaRequest
-	VincularFamiliarRequest          = estudiantes.VincularFamiliarRequest
-	VincularFamiliarResponse         = estudiantes.VincularFamiliarResponse
-	VinculoPersona                   = estudiantes.VinculoPersona
+	ActualizarFamiliarRequest         = estudiantes.ActualizarFamiliarRequest
+	ActualizarFamiliarResponse        = estudiantes.ActualizarFamiliarResponse
+	CambiarParentescoFamiliarRequest  = estudiantes.CambiarParentescoFamiliarRequest
+	CambiarParentescoFamiliarResponse = estudiantes.CambiarParentescoFamiliarResponse
+	CambiarSeccionMatriculaRequest    = estudiantes.CambiarSeccionMatriculaRequest
+	ChangeEstadoEstudianteRequest     = estudiantes.ChangeEstadoEstudianteRequest
+	ChangeEstadoEstudianteResponse    = estudiantes.ChangeEstadoEstudianteResponse
+	ChangeEstadoPeriodoRequest        = estudiantes.ChangeEstadoPeriodoRequest
+	ConcluirMatriculaRequest          = estudiantes.ConcluirMatriculaRequest
+	CreateEstudianteRequest           = estudiantes.CreateEstudianteRequest
+	CreateEstudianteResponse          = estudiantes.CreateEstudianteResponse
+	CreatePeriodoRequest              = estudiantes.CreatePeriodoRequest
+	CreatePersonaRequest              = estudiantes.CreatePersonaRequest
+	CreateSeccionRequest              = estudiantes.CreateSeccionRequest
+	DesvincularFamiliarRequest        = estudiantes.DesvincularFamiliarRequest
+	DesvincularFamiliarResponse       = estudiantes.DesvincularFamiliarResponse
+	Estudiante                        = estudiantes.Estudiante
+	EstudianteBasico                  = estudiantes.EstudianteBasico
+	EstudiantePersonal                = estudiantes.EstudiantePersonal
+	EventoHistorial                   = estudiantes.EventoHistorial
+	Familiar                          = estudiantes.Familiar
+	GetEstudiantePersonalRequest      = estudiantes.GetEstudiantePersonalRequest
+	GetEstudiantePersonalResponse     = estudiantes.GetEstudiantePersonalResponse
+	GetEstudianteRequest              = estudiantes.GetEstudianteRequest
+	GetEstudianteResponse             = estudiantes.GetEstudianteResponse
+	GetEstudiantesBasicRequest        = estudiantes.GetEstudiantesBasicRequest
+	GetEstudiantesBasicResponse       = estudiantes.GetEstudiantesBasicResponse
+	GetPersonaRequest                 = estudiantes.GetPersonaRequest
+	GetPersonaResponse                = estudiantes.GetPersonaResponse
+	GrupoPosibleDuplicado             = estudiantes.GrupoPosibleDuplicado
+	ListFamiliaresEstudianteRequest   = estudiantes.ListFamiliaresEstudianteRequest
+	ListFamiliaresEstudianteResponse  = estudiantes.ListFamiliaresEstudianteResponse
+	ListHistorialEstudianteRequest    = estudiantes.ListHistorialEstudianteRequest
+	ListHistorialEstudianteResponse   = estudiantes.ListHistorialEstudianteResponse
+	ListMatriculasEstudianteRequest   = estudiantes.ListMatriculasEstudianteRequest
+	ListMatriculasEstudianteResponse  = estudiantes.ListMatriculasEstudianteResponse
+	ListMatriculasPeriodoRequest      = estudiantes.ListMatriculasPeriodoRequest
+	ListMatriculasPeriodoResponse     = estudiantes.ListMatriculasPeriodoResponse
+	ListPeriodosRequest               = estudiantes.ListPeriodosRequest
+	ListPeriodosResponse              = estudiantes.ListPeriodosResponse
+	ListPosiblesDuplicadosRequest     = estudiantes.ListPosiblesDuplicadosRequest
+	ListPosiblesDuplicadosResponse    = estudiantes.ListPosiblesDuplicadosResponse
+	ListSeccionesRequest              = estudiantes.ListSeccionesRequest
+	ListSeccionesResponse             = estudiantes.ListSeccionesResponse
+	Matricula                         = estudiantes.Matricula
+	MatriculaNomina                   = estudiantes.MatriculaNomina
+	MatriculaResponse                 = estudiantes.MatriculaResponse
+	MatricularEstudianteRequest       = estudiantes.MatricularEstudianteRequest
+	MovimientoMatricula               = estudiantes.MovimientoMatricula
+	PeriodoAcademico                  = estudiantes.PeriodoAcademico
+	PeriodoResponse                   = estudiantes.PeriodoResponse
+	Persona                           = estudiantes.Persona
+	PersonaResponse                   = estudiantes.PersonaResponse
+	ReingresarMatriculaRequest        = estudiantes.ReingresarMatriculaRequest
+	ResolveEstudianteRequest          = estudiantes.ResolveEstudianteRequest
+	ResolveEstudianteResponse         = estudiantes.ResolveEstudianteResponse
+	RetirarMatriculaRequest           = estudiantes.RetirarMatriculaRequest
+	SearchEstudiantesRequest          = estudiantes.SearchEstudiantesRequest
+	SearchEstudiantesResponse         = estudiantes.SearchEstudiantesResponse
+	SearchPersonasRequest             = estudiantes.SearchPersonasRequest
+	SearchPersonasResponse            = estudiantes.SearchPersonasResponse
+	SeccionAcademica                  = estudiantes.SeccionAcademica
+	SeccionResponse                   = estudiantes.SeccionResponse
+	UpdateEstudiantePersonalRequest   = estudiantes.UpdateEstudiantePersonalRequest
+	UpdateEstudiantePersonalResponse  = estudiantes.UpdateEstudiantePersonalResponse
+	UpdateEstudianteRequest           = estudiantes.UpdateEstudianteRequest
+	UpdateEstudianteResponse          = estudiantes.UpdateEstudianteResponse
+	UpdatePersonaRequest              = estudiantes.UpdatePersonaRequest
+	VincularFamiliarRequest           = estudiantes.VincularFamiliarRequest
+	VincularFamiliarResponse          = estudiantes.VincularFamiliarResponse
+	VinculoPersona                    = estudiantes.VinculoPersona
 
 	Estudiantes interface {
 		GetEstudiante(ctx context.Context, in *GetEstudianteRequest, opts ...grpc.CallOption) (*GetEstudianteResponse, error)
@@ -114,6 +119,9 @@ type (
 		ReingresarMatricula(ctx context.Context, in *ReingresarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
 		ConcluirMatricula(ctx context.Context, in *ConcluirMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
 		ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error)
+		// Etapa 6: parentesco con historial e historial de cambios.
+		CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error)
+		ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error)
 	}
 
 	defaultEstudiantes struct {
@@ -277,4 +285,15 @@ func (m *defaultEstudiantes) ConcluirMatricula(ctx context.Context, in *Concluir
 func (m *defaultEstudiantes) ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error) {
 	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
 	return client.ListMatriculasPeriodo(ctx, in, opts...)
+}
+
+// Etapa 6: parentesco con historial e historial de cambios.
+func (m *defaultEstudiantes) CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.CambiarParentescoFamiliar(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ListHistorialEstudiante(ctx, in, opts...)
 }

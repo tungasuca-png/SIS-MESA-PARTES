@@ -73,6 +73,9 @@ message SearchEstudiantesRequest {
   string grado = 6;
   string seccion = 7;
   string turno = 8;
+  // Etapa 6: orden del listado (lista blanca): "" o "apellidos" (por defecto),
+  // "codigo", "recientes" (alta más reciente primero).
+  string orden = 9;
 }
 
 message SearchEstudiantesResponse {
@@ -415,6 +418,50 @@ message ActualizarFamiliarResponse {
   Familiar familiar = 1;
 }
 
+// CambiarParentescoFamiliarRequest (etapa 6): corrige el parentesco de una
+// relación vigente CONSERVANDO el historial, en UNA transacción: cierra la
+// relación actual (hasta = desde) y crea otra con la misma persona, el nuevo parentesco y el mismo
+// rol de apoderado. Si algo falla (p. ej. ya hay una MADRE vigente), no
+// cambia nada. "estudiantes.familia.update".
+message CambiarParentescoFamiliarRequest {
+  string estudiante_id = 1;
+  string relacion_id = 2;
+  string parentesco = 3;
+  string desde = 4;               // AAAA-MM-DD, vacío = hoy (Lima); no futura
+}
+
+message CambiarParentescoFamiliarResponse {
+  Familiar anterior = 1;          // relación cerrada (historial)
+  Familiar familiar = 2;          // relación nueva vigente
+}
+
+// ---- Etapa 6: HISTORIAL de cambios del estudiante ----
+// Eventos de CAMBIO registrados en la auditoría (nunca lecturas): alta,
+// edición, cambio de estado, datos personales, familia y matrícula. Solo
+// nombres de campos, NUNCA valores anteriores ni nuevos. Requiere
+// "estudiantes.view". Más reciente primero, paginado.
+message EventoHistorial {
+  string id = 1;
+  string accion = 2;              // CREATE | UPDATE | CHANGE_ESTADO | PERSONAL_UPDATE | FAMILIA_UPDATE | MATRICULA_UPDATE
+  string fecha_hora = 3;          // RFC 3339
+  string usuario_id = 4;          // quien hizo el cambio (resolver con Usuarios)
+  repeated string campos = 5;
+  string estado_anterior = 6;     // solo CHANGE_ESTADO (ACTIVO/INACTIVO)
+  string estado_nuevo = 7;
+  int32 version_resultante = 8;
+}
+
+message ListHistorialEstudianteRequest {
+  string estudiante_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListHistorialEstudianteResponse {
+  repeated EventoHistorial eventos = 1;
+  int32 total = 2;
+}
+
 // ---- Modelo maestro, etapa 5: PERSONAS (padres, apoderados) ----
 // Lectura con "estudiantes.familia.view", escritura con
 // "estudiantes.familia.update". GetPersona se audita como PERSONA_VIEW y
@@ -638,4 +685,7 @@ service Estudiantes {
   rpc ReingresarMatricula(ReingresarMatriculaRequest) returns (MatriculaResponse);
   rpc ConcluirMatricula(ConcluirMatriculaRequest) returns (MatriculaResponse);
   rpc ListMatriculasPeriodo(ListMatriculasPeriodoRequest) returns (ListMatriculasPeriodoResponse);
+  // Etapa 6: parentesco con historial e historial de cambios.
+  rpc CambiarParentescoFamiliar(CambiarParentescoFamiliarRequest) returns (CambiarParentescoFamiliarResponse);
+  rpc ListHistorialEstudiante(ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse);
 }

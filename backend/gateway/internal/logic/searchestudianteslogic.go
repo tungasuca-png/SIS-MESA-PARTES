@@ -40,6 +40,7 @@ func (l *SearchEstudiantesLogic) SearchEstudiantes(req *types.SearchEstudiantesR
 		Grado:    req.Grado,
 		Seccion:  req.Seccion,
 		Turno:    req.Turno,
+		Orden:    req.Orden,
 	})
 	if err != nil {
 		return nil, err

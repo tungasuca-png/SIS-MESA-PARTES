@@ -82,6 +82,19 @@ type AtencionVersionResumenDTO struct {
 	CreadaEn         string `json:"creada_en"`
 }
 
+type CambiarParentescoFamiliarRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	RelacionId    string `path:"relacion_id"`
+	Parentesco    string `json:"parentesco,optional"`
+	Desde         string `json:"desde,optional"`
+}
+
+type CambiarParentescoFamiliarResponse struct {
+	Anterior FamiliarDTO `json:"anterior"`
+	Familiar FamiliarDTO `json:"familiar"`
+}
+
 type CambiarSeccionMatriculaRequest struct {
 	Authorization   string `header:"Authorization,optional"`
 	MatriculaId     string `path:"matricula_id"`
@@ -374,6 +387,17 @@ type EstudianteWriteResponse struct {
 	Estudiante EstudianteBasicoDTO `json:"estudiante"`
 }
 
+type EventoHistorialDTO struct {
+	Id                string   `json:"id"`
+	Accion            string   `json:"accion"`
+	FechaHora         string   `json:"fecha_hora"`
+	UsuarioId         string   `json:"usuario_id"`
+	Campos            []string `json:"campos"`
+	EstadoAnterior    string   `json:"estado_anterior"`
+	EstadoNuevo       string   `json:"estado_nuevo"`
+	VersionResultante int32    `json:"version_resultante"`
+}
+
 type ExpedienteDTO struct {
 	Id                 string `json:"id"`
 	Codigo             string `json:"codigo"`
@@ -637,6 +661,18 @@ type ListFamiliaresEstudianteRequest struct {
 
 type ListFamiliaresEstudianteResponse struct {
 	Familiares []FamiliarDTO `json:"familiares"`
+}
+
+type ListHistorialEstudianteRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Page          int32  `form:"page,optional"`
+	PageSize      int32  `form:"page_size,optional"`
+}
+
+type ListHistorialEstudianteResponse struct {
+	Eventos []EventoHistorialDTO `json:"eventos"`
+	Total   int32                `json:"total"`
 }
 
 type ListMatriculasEstudianteRequest struct {
@@ -978,6 +1014,7 @@ type SearchEstudiantesRequest struct {
 	Grado         string `form:"grado,optional"`
 	Seccion       string `form:"seccion,optional"`
 	Turno         string `form:"turno,optional"`
+	Orden         string `form:"orden,optional"`
 }
 
 type SearchEstudiantesResponse struct {
