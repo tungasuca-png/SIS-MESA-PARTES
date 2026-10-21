@@ -1,16 +1,30 @@
 .dp-panel {
     background: var(--dp-card-bg);
     border: 1px solid var(--dp-border);
-    border-radius: 14px;
-    padding: 20px 22px 8px;
-    box-shadow: 0 2px 10px rgba(27, 37, 89, 0.04);
+    border-radius: 12px;
+    padding: 18px 20px 8px;
+    box-shadow: var(--dp-shadow);
 }
 
 .dp-panel-title {
-    margin: 0 0 14px;
-    font-size: 15.5px;
+    margin: 0 0 12px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--dp-text-primary);
+}
+
+/* Encabezado de panel con acción a la derecha (compartido). */
+.dp-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.dp-panel-head .dp-panel-title {
+    margin: 0;
 }
 
 .dp-table-wrapper {
@@ -28,14 +42,14 @@
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.04em;
     color: var(--dp-text-secondary);
-    padding: 0 12px 12px;
+    padding: 0 12px 10px;
     border-bottom: 1px solid var(--dp-border);
 }
 
 .dp-table tbody td {
-    padding: 14px 12px;
+    padding: 11px 12px;
     border-bottom: 1px solid var(--dp-border);
     font-size: 13.5px;
     color: var(--dp-text-primary);
@@ -64,8 +78,8 @@
     color: var(--dp-text-secondary);
     font-size: 12.5px;
     font-weight: 600;
-    padding: 6px 11px;
-    border-radius: 8px;
+    padding: 5px 10px;
+    border-radius: 7px;
     cursor: pointer;
     font-family: inherit;
     text-decoration: none;
@@ -77,7 +91,7 @@
 }
 
 .dp-priority-urgente {
-    color: var(--dp-primary);
+    color: var(--dp-danger);
     font-weight: 700;
 }
 

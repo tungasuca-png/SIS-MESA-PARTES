@@ -134,7 +134,7 @@
 }
 
 .dp-btn-primary:hover {
-    background: #1550c4;
+    background: var(--dp-primary-hover, #0f3275);
 }
 
 .dp-btn-primary:disabled {

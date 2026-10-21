@@ -197,7 +197,7 @@
     width: 64px;
     height: 64px;
     border-radius: 16px;
-    background: linear-gradient(135deg, var(--dp-sidebar-bg), var(--dp-accent));
+    background: linear-gradient(135deg, var(--dp-brand-dark), var(--dp-accent));
     color: #fff;
     display: flex;
     align-items: center;

@@ -4,7 +4,8 @@
     gap: 16px;
     background: var(--dp-card-bg);
     border-bottom: 1px solid var(--dp-border);
-    padding: 16px 28px;
+    padding: 12px 28px;
+    min-height: 64px;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -21,14 +22,14 @@
 
 .dp-header-titles h1 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--dp-text-primary);
 }
 
 .dp-header-titles p {
-    margin: 2px 0 0;
-    font-size: 13px;
+    margin: 1px 0 0;
+    font-size: 12.5px;
     color: var(--dp-text-secondary);
 }
 
@@ -70,15 +71,15 @@
     gap: 8px;
     background: var(--dp-bg);
     border: 1px solid var(--dp-border);
-    border-radius: 999px;
-    padding: 6px 14px;
+    border-radius: 8px;
+    padding: 7px 12px;
     color: var(--dp-text-secondary);
-    min-width: 280px;
+    min-width: 260px;
 }
 
 .dp-header-search:focus-within {
-    border-color: var(--dp-accent);
-    box-shadow: 0 0 0 3px var(--dp-accent-soft);
+    border-color: var(--dp-primary);
+    box-shadow: 0 0 0 3px var(--dp-primary-soft);
 }
 
 .dp-header-search input {

@@ -76,11 +76,13 @@ function Sidebar({ open, onClose }) {
 
     const renderItem = (item, isChild = false) => {
         const childClass = isChild ? " dp-nav-item--child" : "";
+        const active = item.path && isItemActive(item, location);
         return item.path ? (
             <Link
                 key={item.key}
                 to={item.path}
-                className={`dp-nav-item${childClass} ${isItemActive(item, location) ? "dp-nav-item--active" : ""}`}
+                className={`dp-nav-item${childClass} ${active ? "dp-nav-item--active" : ""}`}
+                aria-current={active ? "page" : undefined}
                 onClick={onClose}
             >
                 {!isChild && <Icon name={item.icon} size={18} />}

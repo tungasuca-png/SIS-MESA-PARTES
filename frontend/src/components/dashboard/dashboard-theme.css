@@ -1,23 +1,37 @@
 /* ============================================
    TOKENS VISUALES — DASHBOARD MESA DE PARTES
-   Paleta institucional, escopeada al Dashboard
+   Paleta institucional sobria, escopeada al Dashboard.
+   Fondo neutro; el azul institucional es acento,
+   no superficie.
    ============================================ */
 
 .dashboard-shell {
-    --dp-sidebar-bg: #0F2942;
-    --dp-sidebar-hover: #1D3B66;
-    --dp-sidebar-active: #183B5E;
+    /* Barra lateral clara (antes azul oscuro a pantalla completa). */
+    --dp-sidebar-bg: #FFFFFF;
+    --dp-sidebar-border: #E4E7EC;
+    --dp-sidebar-text: #475467;
+    --dp-sidebar-muted: #98A2B3;
+    --dp-sidebar-hover: #F2F4F7;
+    --dp-sidebar-active: #EAF0FA;
 
-    --dp-bg: #F4F7FE;
+    /* Azul oscuro institucional para superficies puntuales con texto blanco
+       (cabecera del portal del SOLICITANTE, avatar de la ficha). */
+    --dp-brand-dark: #0F2942;
+
+    --dp-bg: #F5F6F8;
     --dp-card-bg: #FFFFFF;
 
-    --dp-primary: #1D61E8;
+    /* Azul institucional (mismo tono que el login). */
+    --dp-primary: #164194;
+    --dp-primary-hover: #0F3275;
+    --dp-primary-soft: #EAF0FA;
 
-    --dp-text-primary: #1B2559;
-    --dp-text-secondary: #68769F;
-    --dp-text-muted: #A3AFD0;
+    --dp-text-primary: #1F2937;
+    --dp-text-secondary: #5B6475;
+    --dp-text-muted: #98A2B3;
 
-    --dp-border: #E9EDF7;
+    --dp-border: #E4E7EC;
+    --dp-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 
     /* Acento institucional turquesa/cian (pestañas, chips, línea de tiempo). */
     --dp-accent: #0E9FB0;
@@ -27,11 +41,11 @@
     --dp-danger-soft: #FFEDD5;
 
     --dp-badge-pending-bg: #FEF3C7;
-    --dp-badge-pending-text: #D97706;
+    --dp-badge-pending-text: #B45309;
     --dp-badge-process-bg: #E0F2FE;
-    --dp-badge-process-text: #0284C7;
+    --dp-badge-process-text: #0369A1;
     --dp-badge-done-bg: #DCFCE7;
-    --dp-badge-done-text: #16A34A;
+    --dp-badge-done-text: #15803D;
     --dp-badge-observed-bg: #F3F4F6;
     --dp-badge-observed-text: #4B5563;
 
