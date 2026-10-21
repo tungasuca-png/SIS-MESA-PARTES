@@ -43,7 +43,7 @@ const PESTANAS = [
     { id: "familia", label: "Padres y apoderados", estado: "parcial" },
     { id: "academico", label: "Historial académico", estado: "disponible" },
     { id: "notas", label: "Notas", estado: "proximamente" },
-    { id: "psicologia", label: "Atenciones psicológicas", estado: "parcial" },
+    { id: "psicologia", label: "Atenciones psicológicas", estado: "disponible" },
     { id: "permisos", label: "Permisos y justificaciones", estado: "proximamente" },
     { id: "documentos", label: "Documentos adjuntos", estado: "proximamente" },
     { id: "asistencia", label: "Asistencia", estado: "proximamente" },

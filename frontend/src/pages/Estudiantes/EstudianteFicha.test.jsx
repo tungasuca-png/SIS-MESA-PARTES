@@ -28,7 +28,7 @@ vi.mock("../../services/estudiantesService", () => ({
     reingresarMatricula: vi.fn(),
     concluirMatricula: vi.fn(),
 }));
-vi.mock("../../services/psicologiaService", () => ({ getExpedientePsicologicoByEstudiante: vi.fn() }));
+vi.mock("../../services/psicologiaService", () => ({ getExpedientePsicologicoByEstudiante: vi.fn(), listAtenciones: vi.fn() }));
 vi.mock("../../services/usuariosService", () => ({ getUsuariosBasic: vi.fn() }));
 vi.mock("../../components/portal/RoleLayout", () => ({
     default: ({ title, children }) => (
@@ -84,7 +84,7 @@ describe("Ficha integral — pestañas", () => {
             "Padres y apoderadosParcial",
             "Historial académico",
             "NotasPróximamente",
-            "Atenciones psicológicasParcial",
+            "Atenciones psicológicas",
             "Permisos y justificacionesPróximamente",
             "Documentos adjuntosPróximamente",
             "AsistenciaPróximamente",
@@ -410,29 +410,124 @@ describe("Ficha integral — matrícula", () => {
 });
 
 describe("Ficha integral — atenciones psicológicas", () => {
-    it("sin permiso de Psicología no consulta ni muestra nada clínico", async () => {
-        renderEstudiantes(ruta);
+    const EXP = {
+        id: "x-1",
+        estudiante_id: basico.id,
+        codigo: "PSI-2026-001",
+        estado: "EN_SEGUIMIENTO",
+        responsable_id: "u-1",
+        fecha_apertura: "2026-04-01T10:00:00Z",
+        resumen_caso: "TEXTO CLINICO RESERVADO",
+        motivo_cierre: "MOTIVO RESERVADO",
+    };
+    const VER = ["estudiantes.view", "psicologia.expedientes.view"];
+    const abrir = async (permissions) => {
+        renderEstudiantes(ruta, { permissions });
         await pestana("Atenciones psicológicas");
-        expect(screen.getByText(/información es confidencial/)).toBeTruthy();
-        expect(psicologia.getExpedientePsicologicoByEstudiante).not.toHaveBeenCalled();
-    });
+    };
 
-    it("con permiso muestra solo existencia y estado, nunca el resumen del caso", async () => {
-        psicologia.getExpedientePsicologicoByEstudiante.mockResolvedValue({
-            expediente: { id: "x-1", codigo: "PSI-2026-001", estado: "ABIERTO", responsable_id: "u-1", fecha_apertura: "2026-04-01T10:00:00Z", resumen_caso: "TEXTO CLINICO" },
-        });
-        renderEstudiantes(ruta, { permissions: ["estudiantes.view", "psicologia.expedientes.view"] });
-        await pestana("Atenciones psicológicas");
+    it("1. autorizado con expediente: estado, apertura, responsable y acceso al módulo; nunca el resumen del caso", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockResolvedValue({ expediente: EXP });
+        await abrir(VER);
         expect(await screen.findByText("PSI-2026-001")).toBeTruthy();
-        expect(screen.getByText("Abierto")).toBeTruthy();
-        expect(screen.queryByText(/TEXTO CLINICO/)).toBeNull();
+        expect(screen.getByText("En seguimiento")).toBeTruthy();
+        expect(screen.getByText("2026-04-01")).toBeTruthy();
+        expect(await screen.findByText("Secretaría Uno")).toBeTruthy();
         expect(screen.getByRole("link", { name: /módulo de Psicología/ }).getAttribute("href")).toBe("/psicologia/expedientes/x-1");
+        expect(screen.queryByText(/TEXTO CLINICO/)).toBeNull();
+        expect(screen.queryByText(/MOTIVO RESERVADO/)).toBeNull();
+        expect(psicologia.getExpedientePsicologicoByEstudiante).toHaveBeenCalledWith(basico.id);
+        expect(psicologia.getExpedientePsicologicoByEstudiante).toHaveBeenCalledTimes(1);
     });
 
-    it("404 = sin expediente en el alcance del usuario", async () => {
+    it("2. autorizado (alcance general) sin expedientes: lo confirma solo tras un 404 autorizado", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockRejectedValue(httpError(404, "expediente psicológico no encontrado"));
+        await abrir(VER);
+        expect(await screen.findByText("Este estudiante no tiene expedientes psicológicos registrados.")).toBeTruthy();
+    });
+
+    it("2b. con solo view_own un 404 no afirma que el estudiante no tenga expedientes", async () => {
         psicologia.getExpedientePsicologicoByEstudiante.mockRejectedValue(httpError(404, "no encontrado"));
-        renderEstudiantes(ruta, { permissions: ["estudiantes.view", "psicologia.expedientes.view_own"] });
-        await pestana("Atenciones psicológicas");
-        expect(await screen.findByText(/No hay un expediente psicológico/)).toBeTruthy();
+        await abrir(["estudiantes.view", "psicologia.expedientes.view_own"]);
+        expect(await screen.findByText("No hay expedientes psicológicos de este estudiante bajo tu responsabilidad.")).toBeTruthy();
+        expect(screen.queryByText(/no tiene expedientes psicológicos registrados/)).toBeNull();
+    });
+
+    it("3. sin permiso de Psicología: mensaje fijo, sin consultas ni datos", async () => {
+        await abrir(["estudiantes.view", "psicologia.atenciones.view"]);
+        expect(screen.getByText("No tienes permisos para consultar esta información.")).toBeTruthy();
+        expect(psicologia.getExpedientePsicologicoByEstudiante).not.toHaveBeenCalled();
+        expect(psicologia.listAtenciones).not.toHaveBeenCalled();
+        expect(screen.queryByText(/PSI-/)).toBeNull();
+    });
+
+    it("4. con permiso de expediente pero sin el de atenciones: no consulta el contenido clínico", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockResolvedValue({ expediente: EXP });
+        await abrir(VER);
+        expect(await screen.findByText("PSI-2026-001")).toBeTruthy();
+        expect(screen.getByText(/requiere la autorización específica de Psicología/)).toBeTruthy();
+        expect(psicologia.listAtenciones).not.toHaveBeenCalled();
+    });
+
+    it("4b. con psicologia.atenciones.view lista las atenciones (número, fecha, estado) con enlace al módulo", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockResolvedValue({ expediente: EXP });
+        psicologia.listAtenciones.mockResolvedValue({
+            total: 1,
+            atenciones: [{ id: "a-1", numero: 3, estado: "REGISTRADA", fecha_atencion: "2026-05-02", motivos: [{ codigo: "X", nombre: "MOTIVO CLINICO" }] }],
+        });
+        await abrir([...VER, "psicologia.atenciones.view"]);
+        const lista = await screen.findByRole("list", { name: "Atenciones registradas" });
+        expect(psicologia.listAtenciones).toHaveBeenCalledWith("x-1", { pageSize: 10 });
+        expect(within(lista).getByRole("link", { name: "Atención N.° 3" }).getAttribute("href")).toBe("/psicologia/atenciones/a-1");
+        expect(within(lista).getByText(/2026-05-02 · Registrada/)).toBeTruthy();
+        expect(screen.queryByText(/MOTIVO CLINICO/)).toBeNull();
+    });
+
+    it("4c. si Psicología deniega las atenciones (403) lo dice sin mostrar contenido", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockResolvedValue({ expediente: EXP });
+        psicologia.listAtenciones.mockRejectedValue(httpError(403, "el usuario no tiene el permiso requerido"));
+        await abrir([...VER, "psicologia.atenciones.view"]);
+        const bloque = (await screen.findByText("Atenciones registradas")).parentElement;
+        expect(await within(bloque).findByText("No tienes permisos para consultar esta información.")).toBeTruthy();
+    });
+
+    it("5. sesión no autenticada (401): no se presenta como «sin expedientes»", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockRejectedValue(httpError(401, "se requiere autenticación"));
+        await abrir(VER);
+        expect(await screen.findByText("Tu sesión no es válida. Inicia sesión nuevamente.")).toBeTruthy();
+        expect(screen.queryByText(/no tiene expedientes/)).toBeNull();
+    });
+
+    it("6. servicio no disponible: mensaje de conexión y reintento sin duplicar solicitudes", async () => {
+        const sinRed = new Error("Network Error");
+        psicologia.getExpedientePsicologicoByEstudiante.mockRejectedValueOnce(sinRed).mockResolvedValueOnce({ expediente: EXP });
+        await abrir(VER);
+        expect(await screen.findByText("No se pudo conectar con el servicio de Psicología.")).toBeTruthy();
+        expect(screen.queryByText(/no tiene expedientes/)).toBeNull();
+        fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+        expect(await screen.findByText("PSI-2026-001")).toBeTruthy();
+        expect(psicologia.getExpedientePsicologicoByEstudiante).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+        [403, "No tienes permisos para consultar esta información."],
+        [500, "No se pudo conectar con el servicio de Psicología."],
+        [503, "No se pudo conectar con el servicio de Psicología."],
+    ])("7. respuesta %i del backend", async (status, mensaje) => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockRejectedValue(httpError(status, "x"));
+        await abrir(VER);
+        expect(await screen.findByText(mensaje)).toBeTruthy();
+        expect(screen.queryByText(/no tiene expedientes/)).toBeNull();
+        expect(screen.queryByText(/PSI-/)).toBeNull();
+    });
+
+    it("9. las demás pestañas siguen funcionando después de consultar Psicología", async () => {
+        psicologia.getExpedientePsicologicoByEstudiante.mockResolvedValue({ expediente: EXP });
+        await abrir(VER);
+        await screen.findByText("PSI-2026-001");
+        await pestana("Historial del estudiante");
+        expect(await screen.findByRole("heading", { name: "Trayectoria académica" })).toBeTruthy();
+        await pestana("Información general");
+        expect(await screen.findByText("Identidad básica")).toBeTruthy();
     });
 });
