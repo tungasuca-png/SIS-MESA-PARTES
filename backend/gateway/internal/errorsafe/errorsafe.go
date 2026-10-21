@@ -8,12 +8,19 @@
 // deben llegar a un navegador, menos aún desde la red local. Aquí:
 //   - 4xx: exactamente la misma respuesta que go-zero (contrato intacto);
 //   - 5xx: mismo código HTTP y mismo formato "rpc error: code = X desc = ...",
-//     con un mensaje genérico; el error original queda solo en el log.
+//     con un mensaje genérico; el error original queda solo en el log;
+//   - 400 de parseo (httpx.Parse): se conserva `field "x" is not set` (el
+//     nombre del campo es parte pública del contrato); cualquier otro error de
+//     parseo ("strconv.ParseInt: parsing ...", "json: cannot unmarshal ... Go
+//     struct field ...") revela detalles de implementación y se reemplaza por
+//     MensajeSolicitudInvalida.
 package errorsafe
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"regexp"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
@@ -21,6 +28,13 @@ import (
 )
 
 const MensajeNoDisponible = "servicio no disponible temporalmente"
+
+// MensajeSolicitudInvalida reemplaza los errores de parseo con detalles
+// internos (tipos de Go, nombres de structs, mensajes de strconv/json).
+const MensajeSolicitudInvalida = "solicitud inválida: hay parámetros con un formato no válido"
+
+// campoFaltante: único error de parseo de go-zero que se devuelve tal cual.
+var campoFaltante = regexp.MustCompile(`^field "[A-Za-z0-9_.]+" is not set$`)
 
 // httpStatus replica el mapeo de go-zero (rest/internal/errcode.CodeFromGrpcError).
 func httpStatus(code codes.Code) int {
@@ -55,8 +69,12 @@ func httpStatus(code codes.Code) int {
 func Handler(ctx context.Context, err error) (int, any) {
 	st, ok := status.FromError(err)
 	if !ok {
-		// Errores de parseo de la solicitud (httpx.Parse): mismo 400 que go-zero.
-		return http.StatusBadRequest, err
+		// Errores de parseo de la solicitud (httpx.Parse).
+		if campoFaltante.MatchString(err.Error()) {
+			return http.StatusBadRequest, err
+		}
+		logx.WithContext(ctx).Infof("solicitud con parámetros inválidos: %v", err)
+		return http.StatusBadRequest, errors.New(MensajeSolicitudInvalida)
 	}
 	code := httpStatus(st.Code())
 	if code < http.StatusInternalServerError {

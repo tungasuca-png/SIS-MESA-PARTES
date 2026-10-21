@@ -67,6 +67,28 @@ func TestHandler_5xx_SinDetallesInternos(t *testing.T) {
 	}
 }
 
+// Seguridad: los errores de parseo con detalles internos (strconv, json, tipos
+// de Go) responden 400 con un mensaje genérico. Reproduce GET
+// /api/expedientes?page=abc y ?page_size=99999999999 y un JSON mal tipado.
+func TestHandler_ErrorDeParseo_SinDetallesInternos(t *testing.T) {
+	for _, interno := range []string{
+		`strconv.ParseInt: parsing "abc": invalid syntax`,
+		`strconv.ParseInt: parsing "99999999999": value out of range`,
+		`json: cannot unmarshal string into Go struct field LoginRequest.dni of type int`,
+		`invalid character 'x' looking for beginning of value`,
+		`field "x" is not set; DROP TABLE`,
+	} {
+		code, body := responder(t, errors.New(interno))
+		if code != http.StatusBadRequest {
+			t.Errorf("%q: código %d, se esperaba 400", interno, code)
+		}
+		if !strings.Contains(body, MensajeSolicitudInvalida) || strings.Contains(body, "strconv") ||
+			strings.Contains(body, "Go struct") || strings.Contains(body, "DROP") {
+			t.Errorf("%q: el cuerpo expone detalles internos: %q", interno, body)
+		}
+	}
+}
+
 func TestHandler_ErrorDeParseo_400(t *testing.T) {
 	code, body := responder(t, errors.New("field \"es_apoderado\" is not set"))
 	if code != http.StatusBadRequest || !strings.Contains(body, "es_apoderado") {

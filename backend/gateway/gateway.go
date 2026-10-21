@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 
+	"gateway/internal/cabeceras"
 	"gateway/internal/config"
 	"gateway/internal/errorsafe"
 	"gateway/internal/handler"
@@ -47,6 +48,8 @@ func main() {
 
 	// Reemplaza al LogHandler estándar (Middlewares.Log=false en el YAML).
 	server.Use(logsafe.AccessLog)
+	// Cabeceras de seguridad en todas las respuestas (nosniff, no-store, ...).
+	server.Use(cabeceras.Seguridad)
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
