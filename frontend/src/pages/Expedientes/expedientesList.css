@@ -65,3 +65,17 @@
         width: 100%;
     }
 }
+
+/* Fila que acaba de llegar (actualizacion en vivo). */
+.dp-table tr.dp-row-new td {
+    animation: dp-row-new 4s ease-out;
+}
+
+@keyframes dp-row-new {
+    from {
+        background: #e0f2fe;
+    }
+    to {
+        background: transparent;
+    }
+}

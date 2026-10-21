@@ -8,6 +8,7 @@ import ModuleCards from "../../components/dashboard/ModuleCards";
 import "../../components/dashboard/forms.css";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
+import { useActualizacionEnVivo } from "../../hooks/useActualizacionEnVivo";
 import { getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import "./dashboard.css";
@@ -37,11 +38,16 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // En vivo: los contadores y los recientes se actualizan solos (sin
+    // "Cargando..." después de la primera carga).
+    const [vivo, setVivo] = useState(0);
+    useActualizacionEnVivo(() => setVivo((n) => n + 1), user?.role !== "SOLICITANTE");
+
     useEffect(() => {
         let active = true;
 
         async function load() {
-            setLoading(true);
+            if (vivo === 0) setLoading(true);
             setError("");
             try {
                 const [statResults, recentesResp] = await Promise.all([
@@ -73,7 +79,7 @@ function Dashboard() {
         return () => {
             active = false;
         };
-    }, []);
+    }, [vivo]);
 
     if (user?.role === "SOLICITANTE") {
         return <Navigate to="/mesa-de-partes" replace />;

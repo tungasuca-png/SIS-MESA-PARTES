@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import { getExpedientes } from "../../services/expedientesService";
+import { useActualizacionEnVivo } from "../../hooks/useActualizacionEnVivo";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
 import { DEFAULT_PAGE_SIZE, tipoLabel } from "../../constants/expedientes";
@@ -25,11 +26,15 @@ function Seguimiento() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // En vivo: el estado de cada trámite se actualiza solo (sin recargar).
+    const [vivo, setVivo] = useState(0);
+    useActualizacionEnVivo(() => setVivo((n) => n + 1));
+
     useEffect(() => {
         let active = true;
 
         async function load() {
-            setLoading(true);
+            if (vivo === 0) setLoading(true);
             setError("");
             try {
                 const data = await getExpedientes({ page: 1, pageSize: DEFAULT_PAGE_SIZE });
@@ -46,7 +51,7 @@ function Seguimiento() {
         return () => {
             active = false;
         };
-    }, []);
+    }, [vivo]);
 
     return (
         <RoleLayout title="Seguimiento">

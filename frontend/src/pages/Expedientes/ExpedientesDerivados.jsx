@@ -7,6 +7,7 @@ import { getDerivaciones } from "../../services/derivacionesService";
 import { getExpediente } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
+import { useActualizacionEnVivo } from "../../hooks/useActualizacionEnVivo";
 import "../../components/dashboard/RecentExpedientes.css";
 import "../../components/dashboard/documentosPanel.css";
 import "./expedientesList.css";
@@ -50,11 +51,15 @@ function ExpedientesDerivados() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // En vivo: nuevas derivaciones aparecen solas (sin recargar).
+    const [vivo, setVivo] = useState(0);
+    useActualizacionEnVivo(() => setVivo((n) => n + 1));
+
     useEffect(() => {
         let active = true;
 
         async function load() {
-            setLoading(true);
+            if (vivo === 0) setLoading(true);
             setError("");
             try {
                 const data = await getDerivaciones({ tipo: "DERIVACION", page, pageSize: PAGE_SIZE });
@@ -73,7 +78,7 @@ function ExpedientesDerivados() {
         return () => {
             active = false;
         };
-    }, [page]);
+    }, [page, vivo]);
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
