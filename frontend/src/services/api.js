@@ -7,8 +7,12 @@ import {
     setSession,
 } from "./tokenStorage";
 
+// Vacío = rutas relativas (/api/...), que el servidor de Vite reenvía al
+// Gateway: funciona igual desde este equipo y desde otro de la red local.
+const API_URL = import.meta.env.VITE_API_URL || "";
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: API_URL,
     headers: {
         "Content-Type": "application/json",
     },
@@ -32,7 +36,7 @@ const requestNewAccessToken = async () => {
 
     // Petición sin interceptores para no reentrar en este mismo flujo.
     const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/refresh`,
+        `${API_URL}/api/auth/refresh`,
         { refresh_token: refreshToken }
     );
 
@@ -58,7 +62,7 @@ let permissionsRefreshPromise = null;
 const requestMyPermissions = async () => {
     const accessToken = getAccessToken();
     const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}${PERMISSIONS_ENDPOINT}`,
+        `${API_URL}${PERMISSIONS_ENDPOINT}`,
         accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : undefined
     );
     return response.data.permissions ?? [];
