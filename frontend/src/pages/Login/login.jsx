@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { extractBackendMessage } from "../../utils/apiErrors";
 import "./login.css";
 
 function Login() {
@@ -42,6 +43,17 @@ function Login() {
                 setError("No se pudo conectar con el servidor. Inténtalo nuevamente.");
             } else if (err.response.status === 400) {
                 setError("El DNI debe tener 8 dígitos numéricos");
+            } else if (err.response.status === 429) {
+                // Auth bloquea la cuenta 15 minutos tras 5 intentos fallidos
+                // ("account_locked: ... en N minutos").
+                const minutos = extractBackendMessage(err.response.data)?.match(/en (\d+) minuto/)?.[1];
+                setError(
+                    `Cuenta bloqueada temporalmente por demasiados intentos fallidos. ${
+                        minutos ? `Intenta de nuevo en ${minutos} ${minutos === "1" ? "minuto" : "minutos"}.` : "Intenta de nuevo más tarde."
+                    }`
+                );
+            } else if (err.response.status >= 500) {
+                setError("El servicio no está disponible en este momento. Inténtalo nuevamente.");
             } else {
                 setError("DNI o clave incorrectos");
             }

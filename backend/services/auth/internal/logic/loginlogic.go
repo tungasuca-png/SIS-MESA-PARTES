@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"math"
 	"time"
 
 	"auth/auth"
@@ -57,7 +58,7 @@ func (l *LoginLogic) Login(in *auth.LoginRequest) (*auth.LoginResponse, error) {
 	}
 
 	if user.LockedUntil.Valid && time.Now().Before(user.LockedUntil.Time) {
-		return nil, invalidCredentialsError()
+		return nil, accountLockedError(user.LockedUntil.Time)
 	}
 	if user.LockedUntil.Valid && !time.Now().Before(user.LockedUntil.Time) {
 		if err := l.svcCtx.UserRepository.ClearExpiredLoginLock(l.ctx, user.ID); err != nil {
@@ -66,8 +67,13 @@ func (l *LoginLogic) Login(in *auth.LoginRequest) (*auth.LoginResponse, error) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(in.Password)); err != nil {
-		if err := l.svcCtx.UserRepository.RecordFailedLogin(l.ctx, user.ID); err != nil {
+		lockedUntil, err := l.svcCtx.UserRepository.RecordFailedLogin(l.ctx, user.ID)
+		if err != nil {
 			return nil, status.Error(codes.Internal, "no se pudo procesar el login")
+		}
+		// El intento que completa el límite ya informa el bloqueo.
+		if lockedUntil.Valid && time.Now().Before(lockedUntil.Time) {
+			return nil, accountLockedError(lockedUntil.Time)
 		}
 		return nil, invalidCredentialsError()
 	}
@@ -117,4 +123,17 @@ func (l *LoginLogic) Login(in *auth.LoginRequest) (*auth.LoginResponse, error) {
 
 func invalidCredentialsError() error {
 	return status.Error(codes.Unauthenticated, "credenciales inválidas")
+}
+
+// accountLockedError informa el bloqueo temporal (5 intentos fallidos) y los
+// minutos que faltan, redondeados hacia arriba. ResourceExhausted -> HTTP 429
+// en el Gateway. Decisión solicitada: se prefiere avisar del bloqueo, aunque
+// así se revela que el DNI corresponde a una cuenta (solo tras 5 fallos).
+func accountLockedError(until time.Time) error {
+	minutos := int(math.Ceil(time.Until(until).Minutes()))
+	if minutos < 1 {
+		minutos = 1
+	}
+	return status.Errorf(codes.ResourceExhausted,
+		"account_locked: cuenta bloqueada temporalmente por demasiados intentos fallidos; intenta de nuevo en %d minutos", minutos)
 }
