@@ -8,12 +8,14 @@ import (
 	"fmt"
 
 	"gateway/internal/config"
+	"gateway/internal/errorsafe"
 	"gateway/internal/handler"
 	"gateway/internal/logsafe"
 	"gateway/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 var configFile = flag.String("f", "etc/gateway-api.yaml", "the config file")
@@ -27,6 +29,10 @@ func main() {
 	// Antes de crear los clientes gRPC: oculta el contenido (no los errores) de las
 	// llamadas con contraseñas, tokens o datos clínicos.
 	logsafe.ProtectSensitiveRPCLogs()
+
+	// Los 5xx no devuelven al navegador detalles internos (direcciones,
+	// errores de conexión); los 4xx conservan su código estable.
+	httpx.SetErrorHandlerCtx(errorsafe.Handler)
 
 	server := rest.MustNewServer(
 		c.RestConf,
