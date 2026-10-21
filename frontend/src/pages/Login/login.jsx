@@ -65,205 +65,127 @@ function Login() {
     return (
         <main className="login-page">
 
-            <section className="login-container">
+            <section className="login-card" aria-labelledby="login-titulo">
 
-                {/* PANEL IZQUIERDO */}
-                <div className="login-brand">
+                {/* IDENTIDAD */}
+                <header className="login-header">
+                    <img
+                        className="login-logo"
+                        src="/logo-tungasuca.png"
+                        alt="Logo de la I.E. Tungasuca"
+                    />
+                    <div className="login-brand-text">
+                        <span className="login-brand-name">I.E. Tungasuca</span>
+                        <span className="login-brand-system">SIS-MESA-PARTES</span>
+                    </div>
+                </header>
 
-                    <div className="brand-content">
+                <div className="login-title">
+                    <h1 id="login-titulo">Iniciar sesión</h1>
+                    <p>Ingresa tus credenciales para acceder al sistema.</p>
+                </div>
 
-                        <div className="brand-logo">
-                            <img
-                                src="/logo-tungasuca.png"
-                                alt="Logo de la I.E. Tungasuca"
+                <form onSubmit={handleSubmit} noValidate>
+
+                    {/* DNI */}
+                    <div className="form-group">
+                        <label htmlFor="dni">DNI</label>
+                        <div className="input-box">
+                            <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+                            </svg>
+                            <input
+                                id="dni"
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={8}
+                                value={dni}
+                                onChange={(e) =>
+                                    setDni(e.target.value.replace(/[^0-9]/g, ""))
+                                }
+                                placeholder="8 dígitos"
+                                autoComplete="username"
+                                disabled={loading}
                             />
                         </div>
-
-                        <h1>
-                            I.E. TUNGASUCA
-                        </h1>
-
-                        <div className="brand-line">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-
-                        <h2>
-                            Plataforma Educativa
-                        </h2>
-
-                        <p>
-                            Sistema de gestión institucional
-                        </p>
-
-                        <div className="brand-description">
-                            <p>
-                                Accede al sistema para gestionar
-                                información, documentos y procesos
-                                de la institución educativa.
-                            </p>
-                        </div>
-
                     </div>
 
-                    <div className="brand-footer">
-                        © 2026 I.E. Tungasuca
-                    </div>
-
-                </div>
-
-
-                {/* PANEL DERECHO */}
-                <div className="login-form-panel">
-
-                    <div className="form-content">
-
-                        <div className="form-title">
-
-                            <span className="welcome">
-                                BIENVENIDO
-                            </span>
-
-                            <h2>
-                                Iniciar sesión
-                            </h2>
-
-                            <p>
-                                Ingresa tus credenciales para acceder
-                                al sistema.
-                            </p>
-
-                        </div>
-
-
-                        <form onSubmit={handleSubmit}>
-
-                            {/* DNI */}
-                            <div className="form-group">
-
-                                <label htmlFor="dni">
-                                    DNI
-                                </label>
-
-                                <div className="input-box">
-
-                                    <span className="input-icon">
-                                        👤
-                                    </span>
-
-                                    <input
-                                        id="dni"
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={8}
-                                        value={dni}
-                                        onChange={(e) =>
-                                            setDni(e.target.value.replace(/[^0-9]/g, ""))
-                                        }
-                                        placeholder="Ingrese su DNI"
-                                        autoComplete="username"
-                                        disabled={loading}
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* CONTRASEÑA */}
-                            <div className="form-group">
-
-                                <label htmlFor="password">
-                                    Clave
-                                </label>
-
-                                <div className="input-box">
-
-                                    <span className="input-icon">
-                                        🔒
-                                    </span>
-
-                                    <input
-                                        id="password"
-                                        className="input-con-accion"
-                                        type={mostrarClave ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
-                                        placeholder="Ingrese su clave"
-                                        autoComplete="current-password"
-                                        disabled={loading}
-                                    />
-
-                                    <button
-                                        type="button"
-                                        className="toggle-clave"
-                                        onClick={() => setMostrarClave((v) => !v)}
-                                        aria-label={mostrarClave ? "Ocultar contraseña" : "Mostrar contraseña"}
-                                        aria-pressed={mostrarClave}
-                                        aria-controls="password"
-                                        title={mostrarClave ? "Ocultar contraseña" : "Mostrar contraseña"}
-                                        disabled={loading}
-                                    >
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-                                            <circle cx="12" cy="12" r="3" />
-                                            {mostrarClave && <path d="M3 3l18 18" />}
-                                        </svg>
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* ERROR */}
-                            {error && (
-                                <div className="login-error">
-                                    <span>!</span>
-                                    <p>{error}</p>
-                                </div>
-                            )}
-
-
-                            {/* BOTÓN */}
+                    {/* CONTRASEÑA */}
+                    <div className="form-group">
+                        <label htmlFor="password">Clave</label>
+                        <div className="input-box">
+                            <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <rect x="5" y="11" width="14" height="10" rx="2" />
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                            </svg>
+                            <input
+                                id="password"
+                                className="input-con-accion"
+                                type={mostrarClave ? "text" : "password"}
+                                value={password}
+                                onChange={(e) =>
+                                    setPassword(e.target.value)
+                                }
+                                placeholder="Ingresa tu clave"
+                                autoComplete="current-password"
+                                disabled={loading}
+                            />
                             <button
-                                type="submit"
-                                className="login-button"
+                                type="button"
+                                className="toggle-clave"
+                                onClick={() => setMostrarClave((v) => !v)}
+                                aria-label={mostrarClave ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                aria-pressed={mostrarClave}
+                                aria-controls="password"
+                                title={mostrarClave ? "Ocultar contraseña" : "Mostrar contraseña"}
                                 disabled={loading}
                             >
-                                {loading
-                                    ? "INGRESANDO..."
-                                    : "INGRESAR AL SISTEMA"}
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                    {mostrarClave && <path d="M3 3l18 18" />}
+                                </svg>
                             </button>
-
-                        </form>
-
-
-                        <div className="form-footer">
-
-                            <p>
-                                ¿No tienes una cuenta?
-                            </p>
-
-                            <span>
-                                Solicita tus credenciales a la
-                                institución educativa.
-                            </span>
-
                         </div>
-
                     </div>
 
-                </div>
+                    {/* ERROR */}
+                    {error && (
+                        <div className="login-error" role="alert">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 8v5M12 16h.01" />
+                            </svg>
+                            <p>{error}</p>
+                        </div>
+                    )}
+
+                    {/* BOTÓN */}
+                    <button
+                        type="submit"
+                        className="login-button"
+                        disabled={loading}
+                        aria-busy={loading}
+                    >
+                        {loading && <span className="login-spinner" aria-hidden="true" />}
+                        {loading ? "Ingresando..." : "Ingresar"}
+                    </button>
+
+                </form>
+
+                <p className="login-help">
+                    ¿No tienes una cuenta? Solicita tus credenciales a la institución educativa.
+                </p>
 
             </section>
+
+            <footer className="login-footer">
+                © 2026 I.E. Tungasuca
+            </footer>
 
         </main>
     );
 }
 
 export default Login;
-
