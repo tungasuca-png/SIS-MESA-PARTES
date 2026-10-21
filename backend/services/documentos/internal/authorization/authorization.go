@@ -6,12 +6,9 @@
 // Service. Estas reglas son locales y deben reemplazarse cuando exista ese
 // mecanismo compartido (igual que en Expedientes y Usuarios Service).
 //
-// LIMITACION CONOCIDA (v1): este servicio no verifica si el expediente_id
-// indicado realmente pertenece al solicitante autenticado -- eso requeriria
-// una llamada cross-service a Expedientes Service que no se implementa en
-// esta etapa. Un SOLICITANTE autenticado puede listar/ver/descargar
-// documentos de cualquier expediente si conoce su id. Documentado como
-// pendiente para una proxima etapa (ver README).
+// El acceso a cada expediente (propietario, área, alcance global) lo decide
+// Expedientes Service: este servicio lo consulta con Expedientes.GetExpediente
+// / ListExpedientes reenviando el mismo JWT (ver DebeVerificarExpediente).
 package authorization
 
 var internalRoles = map[string]bool{
@@ -43,11 +40,26 @@ func CanDelete(role string) bool {
 	return IsInternal(role)
 }
 
-// CanViewAll: el personal interno puede listar documentos de cualquier
-// expediente sin filtro adicional. Un SOLICITANTE que liste SIN indicar un
-// expediente_id especifico se acota a "subido_por = el mismo" (ver
-// ListFilter.SubidoPor en el repositorio), ya que este servicio no puede
-// verificar de quien es cada expediente (limitacion ya documentada arriba).
+// CanViewAll: rol del personal interno. NO decide qué documentos se ven
+// (ver DebeVerificarExpediente); se conserva por compatibilidad.
 func CanViewAll(role string) bool {
 	return IsInternal(role)
+}
+
+// AlcanceGlobalExpedientes replica authorization.CanViewAll de Expedientes
+// Service: solo ADMIN y SECRETARIA ven todos los expedientes. DIRECTOR,
+// SUBDIRECTOR, DOCENTE y AUXILIAR ven solo lo derivado a su área, y un
+// SOLICITANTE solo lo suyo. El rol sale del JWT ya validado (firmado por Auth).
+func AlcanceGlobalExpedientes(role string) bool {
+	return role == "ADMIN" || role == "SECRETARIA"
+}
+
+// DebeVerificarExpediente: "documentos.view" permite ver los documentos de
+// los expedientes que el usuario PUEDE ver, no los de toda la institución.
+// Solo con alcance global se omite la consulta a Expedientes; en cualquier
+// otro caso el acceso se confirma allí (fail-closed). Antes, cualquier rol
+// con "documentos.view" (p. ej. DOCENTE) listaba y descargaba documentos de
+// expedientes ajenos a su área.
+func DebeVerificarExpediente(hasViewAll bool, role string) bool {
+	return !hasViewAll || !AlcanceGlobalExpedientes(role)
 }

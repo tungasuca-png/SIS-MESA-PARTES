@@ -40,3 +40,31 @@ func TestCanViewAll(t *testing.T) {
 		t.Error("personal interno debe poder ver todos los documentos")
 	}
 }
+
+// Seguridad (BOLA): "documentos.view" no da acceso a documentos de
+// expedientes fuera del alcance del usuario. Solo ADMIN y SECRETARIA (alcance
+// global en Expedientes) omiten la verificación contra Expedientes.
+func TestDebeVerificarExpediente(t *testing.T) {
+	for _, c := range []struct {
+		hasViewAll bool
+		role       string
+		verificar  bool
+	}{
+		{true, "ADMIN", false},
+		{true, "SECRETARIA", false},
+		{true, "DIRECTOR", true},
+		{true, "SUBDIRECTOR", true},
+		{true, "DOCENTE", true},
+		{true, "AUXILIAR", true},
+		{true, "PSICOLOGO", true},
+		{true, "SOLICITANTE", true},
+		{true, "", true},
+		{true, "admin", true}, // el rol es exacto: no se normaliza un claim alterado
+		{false, "ADMIN", true},
+		{false, "SOLICITANTE", true},
+	} {
+		if got := DebeVerificarExpediente(c.hasViewAll, c.role); got != c.verificar {
+			t.Errorf("DebeVerificarExpediente(%v, %q) = %v, se esperaba %v", c.hasViewAll, c.role, got, c.verificar)
+		}
+	}
+}

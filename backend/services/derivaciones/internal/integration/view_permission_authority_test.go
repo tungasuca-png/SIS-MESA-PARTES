@@ -56,6 +56,26 @@ func (c *scopedExpedientesClient) GetExpediente(ctx context.Context, in *expedie
 	return &expedientesclient.GetExpedienteResponse{Expediente: &expedientesclient.Expediente{Id: in.Id, SolicitanteId: dueno}}, nil
 }
 
+// ListExpedientes modela el listado acotado de Expedientes: los expedientes
+// propios del usuario del JWT más los de su alcance interno.
+func (c *scopedExpedientesClient) ListExpedientes(ctx context.Context, _ *expedientesclient.ListExpedientesRequest, _ ...grpc.CallOption) (*expedientesclient.ListExpedientesResponse, error) {
+	md, _ := metadata.FromOutgoingContext(ctx)
+	var sub string
+	if h := md.Get("authorization"); len(h) > 0 {
+		claims := &security.Claims{}
+		_, _, _ = jwt.NewParser().ParseUnverified(strings.TrimPrefix(h[0], "Bearer "), claims)
+		sub = claims.Subject
+	}
+	out := &expedientesclient.ListExpedientesResponse{}
+	for exp, dueno := range c.solicitantes {
+		if sub != "" && (dueno == sub || c.alcance[sub][exp]) {
+			out.Expedientes = append(out.Expedientes, &expedientesclient.Expediente{Id: exp, SolicitanteId: dueno})
+		}
+	}
+	out.Total = int32(len(out.Expedientes))
+	return out, nil
+}
+
 // TestVisibilidadDerivacionesPermisoEsLaAutoridad prueba que ver derivaciones
 // lo deciden derivaciones.view (alcance general) y derivaciones.view_own
 // (solo expedientes propios) según Auth — nunca el nombre del rol — y que el
@@ -207,6 +227,11 @@ func TestVisibilidadDerivacionesPermisoEsLaAutoridad(t *testing.T) {
 		wantCode(t, err, codes.PermissionDenied, "view no elimina el alcance de datos")
 		_, err = client.GetDerivacion(c, &derivaciones.GetDerivacionRequest{Id: dA})
 		wantCode(t, err, codes.PermissionDenied, "Get: view no elimina el alcance de datos")
+		// Seguridad: el listado general tampoco amplía el alcance.
+		g, err := client.ListDerivaciones(c, &derivaciones.ListDerivacionesRequest{})
+		if err != nil || g.Total != 1 || g.Derivaciones[0].ExpedienteId != expC {
+			t.Fatalf("listado general con view: solo su expediente expC, got %+v err=%v", g, err)
+		}
 	})
 
 	t.Run("Caso4_AdminConView_AlcanceGlobal_VistaCompleta", func(t *testing.T) {
@@ -244,6 +269,12 @@ func TestVisibilidadDerivacionesPermisoEsLaAutoridad(t *testing.T) {
 		}
 		_, err := client.ListDerivaciones(c, &derivaciones.ListDerivacionesRequest{ExpedienteId: expB})
 		wantCode(t, err, codes.PermissionDenied, "DOCENTE fuera de su alcance")
+		// Seguridad: el listado general (sin expediente_id) solo trae las
+		// derivaciones de los expedientes de su área, no las de expB/expC.
+		g, err := client.ListDerivaciones(c, &derivaciones.ListDerivacionesRequest{})
+		if err != nil || g.Total != 1 || g.Derivaciones[0].Id != dA {
+			t.Fatalf("listado general del DOCENTE: solo la derivación de expA, got %+v err=%v", g, err)
+		}
 	})
 
 	t.Run("ViewOwn_ExigePropiedadReal_NoAlcancePorArea", func(t *testing.T) {

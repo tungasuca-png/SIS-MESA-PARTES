@@ -70,6 +70,36 @@ func (v visibilidad) verificarExpediente(ctx context.Context, svcCtx *svc.Servic
 	return nil
 }
 
+// expedientesVisiblesPorPagina: máximo que acepta Expedientes.ListExpedientes.
+const expedientesVisiblesPorPagina = 100
+
+// expedientesVisibles devuelve los IDs de TODOS los expedientes que el
+// usuario puede ver, según Expedientes.ListExpedientes llamado con el mismo
+// JWT (propios para un SOLICITANTE, los de su área para el personal con
+// alcance por área). Fail-closed: cualquier error se propaga.
+func expedientesVisibles(ctx context.Context, svcCtx *svc.ServiceContext) ([]string, error) {
+	outCtx := ctx
+	if token, ok := interceptor.TokenFromContext(ctx); ok {
+		outCtx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+token)
+	}
+	ids := make([]string, 0)
+	for page := int32(1); ; page++ {
+		resp, err := svcCtx.ExpedientesClient.ListExpedientes(outCtx, &expedientesclient.ListExpedientesRequest{
+			Page:     page,
+			PageSize: expedientesVisiblesPorPagina,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, exp := range resp.Expedientes {
+			ids = append(ids, exp.Id)
+		}
+		if len(resp.Expedientes) == 0 || int32(len(ids)) >= resp.Total {
+			return ids, nil
+		}
+	}
+}
+
 // proyectar devuelve la derivación tal como debe verla este usuario. Con
 // "view_own" (sin "view") se entrega una vista reducida: solo el recorrido
 // (tipo, origen, destino, fecha). El motivo, la condición y quién la
