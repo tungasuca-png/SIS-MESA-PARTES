@@ -16,6 +16,12 @@ type AnnulPsicologiaAtencionRequest struct {
 	Motivo        string `json:"motivo"`
 }
 
+type ArchivoExcelResponse struct {
+	Nombre          string `json:"nombre"`
+	ContenidoBase64 string `json:"contenido_base64"`
+	Filas           int32  `json:"filas"`
+}
+
 type AtencionContenidoDTO struct {
 	FechaAtencion         string   `json:"fecha_atencion,optional"`
 	HoraAtencion          string   `json:"hora_atencion,optional"`
@@ -398,6 +404,10 @@ type EventoHistorialDTO struct {
 	VersionResultante int32    `json:"version_resultante"`
 }
 
+type ExcelEstudiantesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
 type ExpedienteDTO struct {
 	Id                 string `json:"id"`
 	Codigo             string `json:"codigo"`
@@ -449,6 +459,12 @@ type ExportPsicologiaAtencionPdfResponse struct {
 	ContenidoBase64 string `json:"contenido_base64"`
 }
 
+type ExportarEstudiantesExcelRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Nivel         string `form:"nivel,optional"`
+}
+
 type FamiliarDTO struct {
 	RelacionId  string     `json:"relacion_id"`
 	Persona     PersonaDTO `json:"persona"`
@@ -461,6 +477,20 @@ type FamiliarDTO struct {
 
 type FamiliarResponse struct {
 	Familiar FamiliarDTO `json:"familiar"`
+}
+
+type FilaImportacionDTO struct {
+	Fila            int32    `json:"fila"`
+	TipoDocumento   string   `json:"tipo_documento"`
+	NumeroDocumento string   `json:"numero_documento"`
+	ApellidoPaterno string   `json:"apellido_paterno"`
+	ApellidoMaterno string   `json:"apellido_materno"`
+	Nombres         string   `json:"nombres"`
+	Estado          string   `json:"estado"`
+	Nivel           string   `json:"nivel"`
+	Resultado       string   `json:"resultado"`
+	Errores         []string `json:"errores"`
+	Avisos          []string `json:"avisos"`
 }
 
 type GetDerivacionRequest struct {
@@ -597,6 +627,13 @@ type GetUsuariosBasicResponse struct {
 type GrupoPosibleDuplicadoDTO struct {
 	Criterio    string                `json:"criterio"`
 	Estudiantes []EstudianteBasicoDTO `json:"estudiantes"`
+}
+
+type ImportarEstudiantesExcelResponse struct {
+	Resumen    ResumenImportacionDTO `json:"resumen"`
+	Filas      []FilaImportacionDTO  `json:"filas"`
+	Huella     string                `json:"huella"`
+	Confirmada bool                  `json:"confirmada"`
 }
 
 type ListAllDerivacionesRequest struct {
@@ -980,6 +1017,18 @@ type ResolverExpedienteRequest struct {
 
 type ResolverExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type ResumenImportacionDTO struct {
+	Total      int32 `json:"total"`
+	Validas    int32 `json:"validas"`
+	ConErrores int32 `json:"con_errores"`
+	Duplicadas int32 `json:"duplicadas"`
+	YaExisten  int32 `json:"ya_existen"`
+	Insertadas int32 `json:"insertadas"`
+	Omitidas   int32 `json:"omitidas"`
+	Rechazadas int32 `json:"rechazadas"`
+	ConAvisos  int32 `json:"con_avisos"`
 }
 
 type RetirarMatriculaRequest struct {

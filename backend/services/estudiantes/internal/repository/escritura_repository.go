@@ -29,6 +29,10 @@ type Maestro struct {
 	FotoRef          *string
 	Estado           string
 	Version          int
+	// Nivel: columna académica HEREDADA (estudiantes.nivel). Solo la escribe
+	// el alta por importación Excel; "" = valor por defecto de la columna. Ni
+	// Update ni la auditoría la tocan (no está en su lista de campos).
+	Nivel string
 }
 
 // Auditoria es lo que se registra en auditoria_estudiantes: nunca valores,
@@ -74,12 +78,12 @@ func (r *EstudianteRepository) Create(ctx context.Context, m Maestro, aud Audito
 		err := tx.QueryRow(ctx, `
 			INSERT INTO estudiantes (codigo, codigo_siagie, tipo_documento, numero_documento, nombres,
 				apellido_paterno, apellido_materno, apellidos, fecha_nacimiento, sexo, pais_nacimiento,
-				ubigeo_nacimiento, lengua_materna, segunda_lengua, foto_ref, estado)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10, $11, $12, $13, $14, $15, $16)
+				ubigeo_nacimiento, lengua_materna, segunda_lengua, foto_ref, estado, nivel)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10, $11, $12, $13, $14, $15, $16, $17)
 			RETURNING id, version
 		`, m.Codigo, m.CodigoSiagie, m.TipoDocumento, m.NumeroDocumento, m.Nombres,
 			m.ApellidoPaterno, m.ApellidoMaterno, m.Apellidos, m.FechaNacimiento, m.Sexo, m.PaisNacimiento,
-			m.UbigeoNacimiento, m.LenguaMaterna, m.SegundaLengua, m.FotoRef, m.Estado).Scan(&id, &version)
+			m.UbigeoNacimiento, m.LenguaMaterna, m.SegundaLengua, m.FotoRef, m.Estado, m.Nivel).Scan(&id, &version)
 		if err != nil {
 			return "", classifyWriteError(err)
 		}

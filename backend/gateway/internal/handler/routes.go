@@ -425,6 +425,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ListPosiblesDuplicadosHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/exportar",
+				Handler: ExportarEstudiantesExcelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/importacion/confirmar",
+				Handler: ConfirmarImportacionEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/importacion/plantilla",
+				Handler: PlantillaEstudiantesExcelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/importacion/preview",
+				Handler: PreviewImportacionEstudiantesHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPatch,
 				Path:    "/api/estudiantes/matriculas/:matricula_id/conclusion",
 				Handler: ConcluirMatriculaHandler(serverCtx),

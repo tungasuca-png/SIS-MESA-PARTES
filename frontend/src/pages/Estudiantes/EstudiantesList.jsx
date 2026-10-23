@@ -7,8 +7,10 @@ import EstudianteFormModal from "../../components/estudiantes/EstudianteFormModa
 import CambiarEstadoModal from "../../components/estudiantes/CambiarEstadoModal";
 import NominaPeriodo from "../../components/estudiantes/NominaPeriodo";
 import PosiblesDuplicados from "../../components/estudiantes/PosiblesDuplicados";
+import ImportarEstudiantesModal from "../../components/estudiantes/ImportarEstudiantesModal";
 import { usePermissions } from "../../hooks/usePermissions";
-import { searchEstudiantes } from "../../services/estudiantesService";
+import { XLSX_MIME, exportarEstudiantesExcel, searchEstudiantes } from "../../services/estudiantesService";
+import { descargarBase64 } from "../../utils/descargas";
 import {
     BUSQUEDA_MAX,
     ESTADOS_ESTUDIANTE,
@@ -73,6 +75,9 @@ function EstudiantesList() {
     const [editando, setEditando] = useState(null);
     const [cambiandoEstado, setCambiandoEstado] = useState(null);
     const [mensaje, setMensaje] = useState("");
+    const [importando, setImportando] = useState(false);
+    const [exportando, setExportando] = useState(false);
+    const [errorExcel, setErrorExcel] = useState("");
 
     // Nueva búsqueda desde la barra superior con la página ya abierta.
     const [qPrevia, setQPrevia] = useState(qInicial);
@@ -131,6 +136,22 @@ function EstudiantesList() {
         }));
     };
 
+    // Exportación oficial: datos actuales del maestro (backend), con los
+    // filtros de estado y nivel que el usuario tenga aplicados.
+    const exportar = async () => {
+        setExportando(true);
+        setErrorExcel("");
+        try {
+            const data = await exportarEstudiantesExcel({ estado: criterios.estado, nivel: criterios.nivel });
+            descargarBase64(data.contenido_base64, data.nombre, XLSX_MIME);
+            setMensaje(`Se exportaron ${data.filas} estudiante(s).`);
+        } catch (err) {
+            setErrorExcel(estudianteError(err).message);
+        } finally {
+            setExportando(false);
+        }
+    };
+
     const recargar = () => {
         setEditando(null);
         setCambiandoEstado(null);
@@ -156,11 +177,27 @@ function EstudiantesList() {
                         <h2 className="dp-panel-title">Estudiantes</h2>
                         <p className="est-subtitle">Directorio institucional de estudiantes.</p>
                     </div>
-                    {canCreate && (
-                        <button type="button" className="dp-btn-primary" onClick={() => setShowCreate(true)}>
-                            Registrar estudiante
+                    <div className="est-header-actions">
+                        <button
+                            type="button"
+                            className="dp-btn-secondary"
+                            onClick={exportar}
+                            disabled={exportando}
+                            title="Exporta el formato oficial con los filtros de estado y nivel aplicados"
+                        >
+                            {exportando ? "Exportando…" : "Exportar Excel"}
                         </button>
-                    )}
+                        {canCreate && (
+                            <button type="button" className="dp-btn-secondary" onClick={() => setImportando(true)}>
+                                Importar Excel
+                            </button>
+                        )}
+                        {canCreate && (
+                            <button type="button" className="dp-btn-primary" onClick={() => setShowCreate(true)}>
+                                Registrar estudiante
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="est-segmented est-vista" role="tablist" aria-label="Vista del directorio">
@@ -247,6 +284,11 @@ function EstudiantesList() {
                 </div>
 
                 {mensaje && <p className="est-banner-success">{mensaje}</p>}
+                {errorExcel && (
+                    <p className="dp-form-error" role="alert">
+                        {errorExcel}
+                    </p>
+                )}
 
                 {loading && <p className="dp-table-empty">Cargando estudiantes...</p>}
                 {!loading && error && <p className="dp-form-error">{error.message}</p>}
@@ -363,6 +405,16 @@ function EstudiantesList() {
                 </>
                 )}
             </section>
+
+            {importando && (
+                <ImportarEstudiantesModal
+                    onClose={() => setImportando(false)}
+                    onImported={(resumen) => {
+                        setMensaje(`Importación completada: ${resumen.insertadas} estudiante(s) registrado(s).`);
+                        setReloadToken((token) => token + 1);
+                    }}
+                />
+            )}
 
             {showCreate && (
                 <EstudianteFormModal

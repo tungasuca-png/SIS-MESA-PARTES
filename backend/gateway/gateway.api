@@ -1533,6 +1533,59 @@ type ListHistorialEstudianteResponse {
 	Total   int32                `json:"total"`
 }
 
+// Importación/exportación Excel de estudiantes (formato oficial de 9
+// columnas). Los archivos viajan en base64 dentro de JSON, igual que el PDF
+// del FUT; la carga del archivo a importar es multipart/form-data (campo
+// "archivo"; en la confirmación, además "huella"), leída por el handler.
+type ExcelEstudiantesRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ExportarEstudiantesExcelRequest {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Nivel         string `form:"nivel,optional"`
+}
+
+type ArchivoExcelResponse {
+	Nombre          string `json:"nombre"`
+	ContenidoBase64 string `json:"contenido_base64"`
+	Filas           int32  `json:"filas"`
+}
+
+type FilaImportacionDTO {
+	Fila            int32    `json:"fila"`
+	TipoDocumento   string   `json:"tipo_documento"`
+	NumeroDocumento string   `json:"numero_documento"`
+	ApellidoPaterno string   `json:"apellido_paterno"`
+	ApellidoMaterno string   `json:"apellido_materno"`
+	Nombres         string   `json:"nombres"`
+	Estado          string   `json:"estado"`
+	Nivel           string   `json:"nivel"`
+	Resultado       string   `json:"resultado"`
+	Errores         []string `json:"errores"`
+	Avisos          []string `json:"avisos"`
+}
+
+type ResumenImportacionDTO {
+	Total      int32 `json:"total"`
+	Validas    int32 `json:"validas"`
+	ConErrores int32 `json:"con_errores"`
+	Duplicadas int32 `json:"duplicadas"`
+	YaExisten  int32 `json:"ya_existen"`
+	Insertadas int32 `json:"insertadas"`
+	Omitidas   int32 `json:"omitidas"`
+	Rechazadas int32 `json:"rechazadas"`
+	ConAvisos  int32 `json:"con_avisos"`
+}
+
+type ImportarEstudiantesExcelResponse {
+	Resumen    ResumenImportacionDTO `json:"resumen"`
+	Filas      []FilaImportacionDTO  `json:"filas"`
+	Huella     string                `json:"huella"`
+	Confirmada bool                  `json:"confirmada"`
+}
+
 type MatriculaNominaDTO {
 	Matricula  MatriculaDTO         `json:"matricula"`
 	Estudiante *EstudianteBasicoDTO `json:"estudiante"`
@@ -1645,5 +1698,18 @@ service gateway-api {
 
 	@handler ListHistorialEstudiante
 	get /api/estudiantes/:id/historial (ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse)
+
+	// Excel: plantilla, importación en dos etapas y exportación.
+	@handler PlantillaEstudiantesExcel
+	get /api/estudiantes/importacion/plantilla (ExcelEstudiantesRequest) returns (ArchivoExcelResponse)
+
+	@handler PreviewImportacionEstudiantes
+	post /api/estudiantes/importacion/preview (ExcelEstudiantesRequest) returns (ImportarEstudiantesExcelResponse)
+
+	@handler ConfirmarImportacionEstudiantes
+	post /api/estudiantes/importacion/confirmar (ExcelEstudiantesRequest) returns (ImportarEstudiantesExcelResponse)
+
+	@handler ExportarEstudiantesExcel
+	get /api/estudiantes/exportar (ExportarEstudiantesExcelRequest) returns (ArchivoExcelResponse)
 }
 

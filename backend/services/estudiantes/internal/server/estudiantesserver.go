@@ -185,3 +185,24 @@ func (s *EstudiantesServer) ListHistorialEstudiante(ctx context.Context, in *est
 	l := logic.NewListHistorialEstudianteLogic(ctx, s.svcCtx)
 	return l.ListHistorialEstudiante(in)
 }
+
+// Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+func (s *EstudiantesServer) PlantillaEstudiantes(ctx context.Context, in *estudiantes.PlantillaEstudiantesRequest) (*estudiantes.ArchivoExcelResponse, error) {
+	l := logic.NewPlantillaEstudiantesLogic(ctx, s.svcCtx)
+	return l.PlantillaEstudiantes(in)
+}
+
+func (s *EstudiantesServer) PreviewImportacionEstudiantes(ctx context.Context, in *estudiantes.ImportarEstudiantesRequest) (*estudiantes.ImportarEstudiantesResponse, error) {
+	l := logic.NewPreviewImportacionEstudiantesLogic(ctx, s.svcCtx)
+	return l.PreviewImportacionEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ConfirmarImportacionEstudiantes(ctx context.Context, in *estudiantes.ImportarEstudiantesRequest) (*estudiantes.ImportarEstudiantesResponse, error) {
+	l := logic.NewConfirmarImportacionEstudiantesLogic(ctx, s.svcCtx)
+	return l.ConfirmarImportacionEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ExportarEstudiantes(ctx context.Context, in *estudiantes.ExportarEstudiantesRequest) (*estudiantes.ArchivoExcelResponse, error) {
+	l := logic.NewExportarEstudiantesLogic(ctx, s.svcCtx)
+	return l.ExportarEstudiantes(in)
+}

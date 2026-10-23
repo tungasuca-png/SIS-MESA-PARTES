@@ -613,3 +613,10 @@
 .est-psi-nota {
     margin-top: 14px;
 }
+
+/* Acciones de la cabecera del directorio (Excel + alta). */
+.est-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}

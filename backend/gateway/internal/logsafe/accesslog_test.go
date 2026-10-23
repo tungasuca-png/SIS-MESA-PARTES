@@ -139,7 +139,7 @@ func TestSensitiveRPCMethods_NombresVerificadosContraElCodigoGenerado(t *testing
 	esperados := map[string]int{
 		"/auth.Auth/":               6,
 		"/psicologia.Psicologia/":   18,
-		"/estudiantes.Estudiantes/": 32, // etapas 5 y 6: todos los RPC de Estudiantes
+		"/estudiantes.Estudiantes/": 36, // etapas 5 y 6 + Excel: todos los RPC de Estudiantes
 	}
 	encontrados := map[string]int{}
 	for _, m := range sensitiveRPCMethods {
@@ -159,7 +159,7 @@ func TestSensitiveRPCMethods_NombresVerificadosContraElCodigoGenerado(t *testing
 			t.Fatalf("se esperaban %d métodos con prefijo %s, hay %d", n, p, encontrados[p])
 		}
 	}
-	if len(sensitiveRPCMethods) != 56 {
-		t.Fatalf("se esperaban 6 métodos de Auth + 18 de Psicología + 32 de Estudiantes, hay %d", len(sensitiveRPCMethods))
+	if len(sensitiveRPCMethods) != 60 {
+		t.Fatalf("se esperaban 6 métodos de Auth + 18 de Psicología + 36 de Estudiantes, hay %d", len(sensitiveRPCMethods))
 	}
 }

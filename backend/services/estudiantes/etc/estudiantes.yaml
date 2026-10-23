@@ -67,3 +67,8 @@ Middlewares:
       # Etapa 6: parentesco con historial e historial de cambios.
       - /estudiantes.Estudiantes/CambiarParentescoFamiliar
       - /estudiantes.Estudiantes/ListHistorialEstudiante
+      # Importación/exportación Excel: el archivo trae DNI y nombres de menores.
+      - /estudiantes.Estudiantes/PlantillaEstudiantes
+      - /estudiantes.Estudiantes/PreviewImportacionEstudiantes
+      - /estudiantes.Estudiantes/ConfirmarImportacionEstudiantes
+      - /estudiantes.Estudiantes/ExportarEstudiantes

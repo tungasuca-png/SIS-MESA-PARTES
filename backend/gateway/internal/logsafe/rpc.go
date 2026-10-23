@@ -89,6 +89,12 @@ var sensitiveRPCMethods = []string{
 	// Etapa 6: parentesco con historial e historial de cambios.
 	estudiantes.Estudiantes_CambiarParentescoFamiliar_FullMethodName,
 	estudiantes.Estudiantes_ListHistorialEstudiante_FullMethodName,
+	// Importación/exportación Excel: el archivo (y la vista previa) traen DNI
+	// y nombres de menores.
+	estudiantes.Estudiantes_PlantillaEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_PreviewImportacionEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ExportarEstudiantes_FullMethodName,
 }
 
 // ProtectSensitiveRPCLogs debe llamarse una vez al arrancar, antes de crear los

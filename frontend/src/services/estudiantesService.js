@@ -291,3 +291,37 @@ export const listPosiblesDuplicados = async ({ page, pageSize } = {}) => {
     });
     return response.data;
 };
+
+// Excel de estudiantes (formato oficial de 9 columnas). La plantilla y la
+// exportación llegan como { nombre, contenido_base64, filas } (mismo patrón
+// que el PDF del FUT). La importación envía el archivo como
+// multipart/form-data: el Content-Type se declara a propósito, porque con el
+// "application/json" por defecto de la instancia axios convertiría el
+// FormData en JSON (el navegador agrega el boundary).
+export const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+export const descargarPlantillaEstudiantes = async () => {
+    const response = await api.get("/api/estudiantes/importacion/plantilla");
+    return response.data;
+};
+
+export const exportarEstudiantesExcel = async ({ estado, nivel } = {}) => {
+    const response = await api.get("/api/estudiantes/exportar", {
+        params: { estado: estado || undefined, nivel: nivel || undefined },
+    });
+    return response.data;
+};
+
+const enviarExcel = async (ruta, archivo, huella) => {
+    const form = new FormData();
+    form.append("archivo", archivo);
+    if (huella) form.append("huella", huella);
+    const response = await api.post(ruta, form, { headers: { "Content-Type": "multipart/form-data" } });
+    return response.data;
+};
+
+export const previsualizarImportacionEstudiantes = (archivo) =>
+    enviarExcel("/api/estudiantes/importacion/preview", archivo);
+
+export const confirmarImportacionEstudiantes = (archivo, huella) =>
+    enviarExcel("/api/estudiantes/importacion/confirmar", archivo, huella);

@@ -4935,6 +4935,518 @@ func (x *ListMatriculasPeriodoResponse) GetTotal() int32 {
 	return 0
 }
 
+type PlantillaEstudiantesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlantillaEstudiantesRequest) Reset() {
+	*x = PlantillaEstudiantesRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlantillaEstudiantesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlantillaEstudiantesRequest) ProtoMessage() {}
+
+func (x *PlantillaEstudiantesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlantillaEstudiantesRequest.ProtoReflect.Descriptor instead.
+func (*PlantillaEstudiantesRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{71}
+}
+
+type ArchivoExcelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nombre        string                 `protobuf:"bytes,1,opt,name=nombre,proto3" json:"nombre,omitempty"`       // nombre sugerido (p. ej. estudiantes_2026-10-23.xlsx)
+	Contenido     []byte                 `protobuf:"bytes,2,opt,name=contenido,proto3" json:"contenido,omitempty"` // .xlsx
+	Filas         int32                  `protobuf:"varint,3,opt,name=filas,proto3" json:"filas,omitempty"`        // estudiantes exportados (0 en la plantilla)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ArchivoExcelResponse) Reset() {
+	*x = ArchivoExcelResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[72]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ArchivoExcelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ArchivoExcelResponse) ProtoMessage() {}
+
+func (x *ArchivoExcelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[72]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ArchivoExcelResponse.ProtoReflect.Descriptor instead.
+func (*ArchivoExcelResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{72}
+}
+
+func (x *ArchivoExcelResponse) GetNombre() string {
+	if x != nil {
+		return x.Nombre
+	}
+	return ""
+}
+
+func (x *ArchivoExcelResponse) GetContenido() []byte {
+	if x != nil {
+		return x.Contenido
+	}
+	return nil
+}
+
+func (x *ArchivoExcelResponse) GetFilas() int32 {
+	if x != nil {
+		return x.Filas
+	}
+	return 0
+}
+
+type ImportarEstudiantesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NombreArchivo string                 `protobuf:"bytes,1,opt,name=nombre_archivo,json=nombreArchivo,proto3" json:"nombre_archivo,omitempty"` // solo para validar la extensión .xlsx
+	Contenido     []byte                 `protobuf:"bytes,2,opt,name=contenido,proto3" json:"contenido,omitempty"`
+	// Confirmación: huella devuelta por la vista previa. Si el archivo no es
+	// exactamente el previsualizado, la confirmación se rechaza.
+	Huella        string `protobuf:"bytes,3,opt,name=huella,proto3" json:"huella,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportarEstudiantesRequest) Reset() {
+	*x = ImportarEstudiantesRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportarEstudiantesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportarEstudiantesRequest) ProtoMessage() {}
+
+func (x *ImportarEstudiantesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportarEstudiantesRequest.ProtoReflect.Descriptor instead.
+func (*ImportarEstudiantesRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{73}
+}
+
+func (x *ImportarEstudiantesRequest) GetNombreArchivo() string {
+	if x != nil {
+		return x.NombreArchivo
+	}
+	return ""
+}
+
+func (x *ImportarEstudiantesRequest) GetContenido() []byte {
+	if x != nil {
+		return x.Contenido
+	}
+	return nil
+}
+
+func (x *ImportarEstudiantesRequest) GetHuella() string {
+	if x != nil {
+		return x.Huella
+	}
+	return ""
+}
+
+// Resultado por fila. Vista previa: VALIDA | ERROR | DUPLICADA | YA_EXISTE.
+// Confirmación: INSERTADA | OMITIDA (ya existía) | RECHAZADA (error).
+type FilaImportacion struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Fila            int32                  `protobuf:"varint,1,opt,name=fila,proto3" json:"fila,omitempty"` // número de fila de Excel
+	TipoDocumento   string                 `protobuf:"bytes,2,opt,name=tipo_documento,json=tipoDocumento,proto3" json:"tipo_documento,omitempty"`
+	NumeroDocumento string                 `protobuf:"bytes,3,opt,name=numero_documento,json=numeroDocumento,proto3" json:"numero_documento,omitempty"`
+	ApellidoPaterno string                 `protobuf:"bytes,4,opt,name=apellido_paterno,json=apellidoPaterno,proto3" json:"apellido_paterno,omitempty"`
+	ApellidoMaterno string                 `protobuf:"bytes,5,opt,name=apellido_materno,json=apellidoMaterno,proto3" json:"apellido_materno,omitempty"`
+	Nombres         string                 `protobuf:"bytes,6,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	Estado          string                 `protobuf:"bytes,7,opt,name=estado,proto3" json:"estado,omitempty"`
+	Nivel           string                 `protobuf:"bytes,8,opt,name=nivel,proto3" json:"nivel,omitempty"`
+	Resultado       string                 `protobuf:"bytes,9,opt,name=resultado,proto3" json:"resultado,omitempty"`
+	Errores         []string               `protobuf:"bytes,10,rep,name=errores,proto3" json:"errores,omitempty"`
+	Avisos          []string               `protobuf:"bytes,11,rep,name=avisos,proto3" json:"avisos,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *FilaImportacion) Reset() {
+	*x = FilaImportacion{}
+	mi := &file_estudiantes_service_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FilaImportacion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FilaImportacion) ProtoMessage() {}
+
+func (x *FilaImportacion) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FilaImportacion.ProtoReflect.Descriptor instead.
+func (*FilaImportacion) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *FilaImportacion) GetFila() int32 {
+	if x != nil {
+		return x.Fila
+	}
+	return 0
+}
+
+func (x *FilaImportacion) GetTipoDocumento() string {
+	if x != nil {
+		return x.TipoDocumento
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetNumeroDocumento() string {
+	if x != nil {
+		return x.NumeroDocumento
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetApellidoPaterno() string {
+	if x != nil {
+		return x.ApellidoPaterno
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetApellidoMaterno() string {
+	if x != nil {
+		return x.ApellidoMaterno
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetNombres() string {
+	if x != nil {
+		return x.Nombres
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetNivel() string {
+	if x != nil {
+		return x.Nivel
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetResultado() string {
+	if x != nil {
+		return x.Resultado
+	}
+	return ""
+}
+
+func (x *FilaImportacion) GetErrores() []string {
+	if x != nil {
+		return x.Errores
+	}
+	return nil
+}
+
+func (x *FilaImportacion) GetAvisos() []string {
+	if x != nil {
+		return x.Avisos
+	}
+	return nil
+}
+
+type ResumenImportacion struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Validas       int32                  `protobuf:"varint,2,opt,name=validas,proto3" json:"validas,omitempty"`
+	ConErrores    int32                  `protobuf:"varint,3,opt,name=con_errores,json=conErrores,proto3" json:"con_errores,omitempty"`
+	Duplicadas    int32                  `protobuf:"varint,4,opt,name=duplicadas,proto3" json:"duplicadas,omitempty"` // repetidas dentro del archivo
+	YaExisten     int32                  `protobuf:"varint,5,opt,name=ya_existen,json=yaExisten,proto3" json:"ya_existen,omitempty"`
+	Insertadas    int32                  `protobuf:"varint,6,opt,name=insertadas,proto3" json:"insertadas,omitempty"`
+	Omitidas      int32                  `protobuf:"varint,7,opt,name=omitidas,proto3" json:"omitidas,omitempty"`
+	Rechazadas    int32                  `protobuf:"varint,8,opt,name=rechazadas,proto3" json:"rechazadas,omitempty"`
+	ConAvisos     int32                  `protobuf:"varint,9,opt,name=con_avisos,json=conAvisos,proto3" json:"con_avisos,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResumenImportacion) Reset() {
+	*x = ResumenImportacion{}
+	mi := &file_estudiantes_service_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResumenImportacion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResumenImportacion) ProtoMessage() {}
+
+func (x *ResumenImportacion) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResumenImportacion.ProtoReflect.Descriptor instead.
+func (*ResumenImportacion) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{75}
+}
+
+func (x *ResumenImportacion) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetValidas() int32 {
+	if x != nil {
+		return x.Validas
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetConErrores() int32 {
+	if x != nil {
+		return x.ConErrores
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetDuplicadas() int32 {
+	if x != nil {
+		return x.Duplicadas
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetYaExisten() int32 {
+	if x != nil {
+		return x.YaExisten
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetInsertadas() int32 {
+	if x != nil {
+		return x.Insertadas
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetOmitidas() int32 {
+	if x != nil {
+		return x.Omitidas
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetRechazadas() int32 {
+	if x != nil {
+		return x.Rechazadas
+	}
+	return 0
+}
+
+func (x *ResumenImportacion) GetConAvisos() int32 {
+	if x != nil {
+		return x.ConAvisos
+	}
+	return 0
+}
+
+type ImportarEstudiantesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Resumen       *ResumenImportacion    `protobuf:"bytes,1,opt,name=resumen,proto3" json:"resumen,omitempty"`
+	Filas         []*FilaImportacion     `protobuf:"bytes,2,rep,name=filas,proto3" json:"filas,omitempty"`
+	Huella        string                 `protobuf:"bytes,3,opt,name=huella,proto3" json:"huella,omitempty"`
+	Confirmada    bool                   `protobuf:"varint,4,opt,name=confirmada,proto3" json:"confirmada,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportarEstudiantesResponse) Reset() {
+	*x = ImportarEstudiantesResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportarEstudiantesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportarEstudiantesResponse) ProtoMessage() {}
+
+func (x *ImportarEstudiantesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportarEstudiantesResponse.ProtoReflect.Descriptor instead.
+func (*ImportarEstudiantesResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *ImportarEstudiantesResponse) GetResumen() *ResumenImportacion {
+	if x != nil {
+		return x.Resumen
+	}
+	return nil
+}
+
+func (x *ImportarEstudiantesResponse) GetFilas() []*FilaImportacion {
+	if x != nil {
+		return x.Filas
+	}
+	return nil
+}
+
+func (x *ImportarEstudiantesResponse) GetHuella() string {
+	if x != nil {
+		return x.Huella
+	}
+	return ""
+}
+
+func (x *ImportarEstudiantesResponse) GetConfirmada() bool {
+	if x != nil {
+		return x.Confirmada
+	}
+	return false
+}
+
+type ExportarEstudiantesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Estado        string                 `protobuf:"bytes,1,opt,name=estado,proto3" json:"estado,omitempty"` // opcional: ACTIVO | INACTIVO
+	Nivel         string                 `protobuf:"bytes,2,opt,name=nivel,proto3" json:"nivel,omitempty"`   // opcional: INICIAL | PRIMARIA | SECUNDARIA
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExportarEstudiantesRequest) Reset() {
+	*x = ExportarEstudiantesRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExportarEstudiantesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportarEstudiantesRequest) ProtoMessage() {}
+
+func (x *ExportarEstudiantesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportarEstudiantesRequest.ProtoReflect.Descriptor instead.
+func (*ExportarEstudiantesRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *ExportarEstudiantesRequest) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *ExportarEstudiantesRequest) GetNivel() string {
+	if x != nil {
+		return x.Nivel
+	}
+	return ""
+}
+
 var File_estudiantes_service_proto protoreflect.FileDescriptor
 
 const file_estudiantes_service_proto_rawDesc = "" +
@@ -5386,7 +5898,58 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\n" +
 	"matriculas\x18\x01 \x03(\v2\x1c.estudiantes.MatriculaNominaR\n" +
 	"matriculas\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total2\x8b\x19\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\x1d\n" +
+	"\x1bPlantillaEstudiantesRequest\"b\n" +
+	"\x14ArchivoExcelResponse\x12\x16\n" +
+	"\x06nombre\x18\x01 \x01(\tR\x06nombre\x12\x1c\n" +
+	"\tcontenido\x18\x02 \x01(\fR\tcontenido\x12\x14\n" +
+	"\x05filas\x18\x03 \x01(\x05R\x05filas\"y\n" +
+	"\x1aImportarEstudiantesRequest\x12%\n" +
+	"\x0enombre_archivo\x18\x01 \x01(\tR\rnombreArchivo\x12\x1c\n" +
+	"\tcontenido\x18\x02 \x01(\fR\tcontenido\x12\x16\n" +
+	"\x06huella\x18\x03 \x01(\tR\x06huella\"\xe5\x02\n" +
+	"\x0fFilaImportacion\x12\x12\n" +
+	"\x04fila\x18\x01 \x01(\x05R\x04fila\x12%\n" +
+	"\x0etipo_documento\x18\x02 \x01(\tR\rtipoDocumento\x12)\n" +
+	"\x10numero_documento\x18\x03 \x01(\tR\x0fnumeroDocumento\x12)\n" +
+	"\x10apellido_paterno\x18\x04 \x01(\tR\x0fapellidoPaterno\x12)\n" +
+	"\x10apellido_materno\x18\x05 \x01(\tR\x0fapellidoMaterno\x12\x18\n" +
+	"\anombres\x18\x06 \x01(\tR\anombres\x12\x16\n" +
+	"\x06estado\x18\a \x01(\tR\x06estado\x12\x14\n" +
+	"\x05nivel\x18\b \x01(\tR\x05nivel\x12\x1c\n" +
+	"\tresultado\x18\t \x01(\tR\tresultado\x12\x18\n" +
+	"\aerrores\x18\n" +
+	" \x03(\tR\aerrores\x12\x16\n" +
+	"\x06avisos\x18\v \x03(\tR\x06avisos\"\x9f\x02\n" +
+	"\x12ResumenImportacion\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12\x18\n" +
+	"\avalidas\x18\x02 \x01(\x05R\avalidas\x12\x1f\n" +
+	"\vcon_errores\x18\x03 \x01(\x05R\n" +
+	"conErrores\x12\x1e\n" +
+	"\n" +
+	"duplicadas\x18\x04 \x01(\x05R\n" +
+	"duplicadas\x12\x1d\n" +
+	"\n" +
+	"ya_existen\x18\x05 \x01(\x05R\tyaExisten\x12\x1e\n" +
+	"\n" +
+	"insertadas\x18\x06 \x01(\x05R\n" +
+	"insertadas\x12\x1a\n" +
+	"\bomitidas\x18\a \x01(\x05R\bomitidas\x12\x1e\n" +
+	"\n" +
+	"rechazadas\x18\b \x01(\x05R\n" +
+	"rechazadas\x12\x1d\n" +
+	"\n" +
+	"con_avisos\x18\t \x01(\x05R\tconAvisos\"\xc4\x01\n" +
+	"\x1bImportarEstudiantesResponse\x129\n" +
+	"\aresumen\x18\x01 \x01(\v2\x1f.estudiantes.ResumenImportacionR\aresumen\x122\n" +
+	"\x05filas\x18\x02 \x03(\v2\x1c.estudiantes.FilaImportacionR\x05filas\x12\x16\n" +
+	"\x06huella\x18\x03 \x01(\tR\x06huella\x12\x1e\n" +
+	"\n" +
+	"confirmada\x18\x04 \x01(\bR\n" +
+	"confirmada\"J\n" +
+	"\x1aExportarEstudiantesRequest\x12\x16\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado\x12\x14\n" +
+	"\x05nivel\x18\x02 \x01(\tR\x05nivel2\xbd\x1c\n" +
 	"\vEstudiantes\x12V\n" +
 	"\rGetEstudiante\x12!.estudiantes.GetEstudianteRequest\x1a\".estudiantes.GetEstudianteResponse\x12b\n" +
 	"\x11SearchEstudiantes\x12%.estudiantes.SearchEstudiantesRequest\x1a&.estudiantes.SearchEstudiantesResponse\x12h\n" +
@@ -5420,7 +5983,11 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x11ConcluirMatricula\x12%.estudiantes.ConcluirMatriculaRequest\x1a\x1e.estudiantes.MatriculaResponse\x12n\n" +
 	"\x15ListMatriculasPeriodo\x12).estudiantes.ListMatriculasPeriodoRequest\x1a*.estudiantes.ListMatriculasPeriodoResponse\x12z\n" +
 	"\x19CambiarParentescoFamiliar\x12-.estudiantes.CambiarParentescoFamiliarRequest\x1a..estudiantes.CambiarParentescoFamiliarResponse\x12t\n" +
-	"\x17ListHistorialEstudiante\x12+.estudiantes.ListHistorialEstudianteRequest\x1a,.estudiantes.ListHistorialEstudianteResponseB\x0fZ\r./estudiantesb\x06proto3"
+	"\x17ListHistorialEstudiante\x12+.estudiantes.ListHistorialEstudianteRequest\x1a,.estudiantes.ListHistorialEstudianteResponse\x12c\n" +
+	"\x14PlantillaEstudiantes\x12(.estudiantes.PlantillaEstudiantesRequest\x1a!.estudiantes.ArchivoExcelResponse\x12r\n" +
+	"\x1dPreviewImportacionEstudiantes\x12'.estudiantes.ImportarEstudiantesRequest\x1a(.estudiantes.ImportarEstudiantesResponse\x12t\n" +
+	"\x1fConfirmarImportacionEstudiantes\x12'.estudiantes.ImportarEstudiantesRequest\x1a(.estudiantes.ImportarEstudiantesResponse\x12a\n" +
+	"\x13ExportarEstudiantes\x12'.estudiantes.ExportarEstudiantesRequest\x1a!.estudiantes.ArchivoExcelResponseB\x0fZ\r./estudiantesb\x06proto3"
 
 var (
 	file_estudiantes_service_proto_rawDescOnce sync.Once
@@ -5434,7 +6001,7 @@ func file_estudiantes_service_proto_rawDescGZIP() []byte {
 	return file_estudiantes_service_proto_rawDescData
 }
 
-var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 71)
+var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 78)
 var file_estudiantes_service_proto_goTypes = []any{
 	(*Estudiante)(nil),                        // 0: estudiantes.Estudiante
 	(*EstudianteBasico)(nil),                  // 1: estudiantes.EstudianteBasico
@@ -5507,6 +6074,13 @@ var file_estudiantes_service_proto_goTypes = []any{
 	(*MatriculaNomina)(nil),                   // 68: estudiantes.MatriculaNomina
 	(*ListMatriculasPeriodoRequest)(nil),      // 69: estudiantes.ListMatriculasPeriodoRequest
 	(*ListMatriculasPeriodoResponse)(nil),     // 70: estudiantes.ListMatriculasPeriodoResponse
+	(*PlantillaEstudiantesRequest)(nil),       // 71: estudiantes.PlantillaEstudiantesRequest
+	(*ArchivoExcelResponse)(nil),              // 72: estudiantes.ArchivoExcelResponse
+	(*ImportarEstudiantesRequest)(nil),        // 73: estudiantes.ImportarEstudiantesRequest
+	(*FilaImportacion)(nil),                   // 74: estudiantes.FilaImportacion
+	(*ResumenImportacion)(nil),                // 75: estudiantes.ResumenImportacion
+	(*ImportarEstudiantesResponse)(nil),       // 76: estudiantes.ImportarEstudiantesResponse
+	(*ExportarEstudiantesRequest)(nil),        // 77: estudiantes.ExportarEstudiantesRequest
 }
 var file_estudiantes_service_proto_depIdxs = []int32{
 	0,  // 0: estudiantes.GetEstudianteResponse.estudiante:type_name -> estudiantes.Estudiante
@@ -5547,75 +6121,85 @@ var file_estudiantes_service_proto_depIdxs = []int32{
 	27, // 35: estudiantes.MatriculaNomina.matricula:type_name -> estudiantes.Matricula
 	1,  // 36: estudiantes.MatriculaNomina.estudiante:type_name -> estudiantes.EstudianteBasico
 	68, // 37: estudiantes.ListMatriculasPeriodoResponse.matriculas:type_name -> estudiantes.MatriculaNomina
-	2,  // 38: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
-	4,  // 39: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
-	6,  // 40: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
-	8,  // 41: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
-	10, // 42: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
-	12, // 43: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
-	15, // 44: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
-	17, // 45: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
-	19, // 46: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
-	22, // 47: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
-	28, // 48: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
-	32, // 49: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
-	34, // 50: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
-	36, // 51: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
-	38, // 52: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
-	46, // 53: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
-	48, // 54: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
-	50, // 55: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
-	52, // 56: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
-	53, // 57: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
-	55, // 58: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
-	57, // 59: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
-	58, // 60: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
-	60, // 61: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
-	63, // 62: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
-	64, // 63: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
-	65, // 64: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
-	66, // 65: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
-	67, // 66: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
-	69, // 67: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
-	40, // 68: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
-	43, // 69: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
-	3,  // 70: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
-	5,  // 71: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
-	7,  // 72: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
-	9,  // 73: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
-	11, // 74: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
-	13, // 75: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
-	16, // 76: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
-	18, // 77: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
-	20, // 78: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
-	23, // 79: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
-	29, // 80: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
-	33, // 81: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
-	35, // 82: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
-	37, // 83: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
-	39, // 84: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
-	47, // 85: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
-	49, // 86: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
-	51, // 87: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
-	47, // 88: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
-	54, // 89: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
-	56, // 90: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
-	54, // 91: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
-	59, // 92: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
-	61, // 93: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
-	62, // 94: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
-	62, // 95: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 96: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 97: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 98: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
-	70, // 99: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
-	41, // 100: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
-	44, // 101: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
-	70, // [70:102] is the sub-list for method output_type
-	38, // [38:70] is the sub-list for method input_type
-	38, // [38:38] is the sub-list for extension type_name
-	38, // [38:38] is the sub-list for extension extendee
-	0,  // [0:38] is the sub-list for field type_name
+	75, // 38: estudiantes.ImportarEstudiantesResponse.resumen:type_name -> estudiantes.ResumenImportacion
+	74, // 39: estudiantes.ImportarEstudiantesResponse.filas:type_name -> estudiantes.FilaImportacion
+	2,  // 40: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
+	4,  // 41: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
+	6,  // 42: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
+	8,  // 43: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
+	10, // 44: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
+	12, // 45: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
+	15, // 46: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
+	17, // 47: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
+	19, // 48: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
+	22, // 49: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
+	28, // 50: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
+	32, // 51: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
+	34, // 52: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
+	36, // 53: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
+	38, // 54: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
+	46, // 55: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
+	48, // 56: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
+	50, // 57: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
+	52, // 58: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
+	53, // 59: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
+	55, // 60: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
+	57, // 61: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
+	58, // 62: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
+	60, // 63: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
+	63, // 64: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
+	64, // 65: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
+	65, // 66: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
+	66, // 67: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
+	67, // 68: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
+	69, // 69: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
+	40, // 70: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
+	43, // 71: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
+	71, // 72: estudiantes.Estudiantes.PlantillaEstudiantes:input_type -> estudiantes.PlantillaEstudiantesRequest
+	73, // 73: estudiantes.Estudiantes.PreviewImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
+	73, // 74: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
+	77, // 75: estudiantes.Estudiantes.ExportarEstudiantes:input_type -> estudiantes.ExportarEstudiantesRequest
+	3,  // 76: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
+	5,  // 77: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
+	7,  // 78: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
+	9,  // 79: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
+	11, // 80: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
+	13, // 81: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
+	16, // 82: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
+	18, // 83: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
+	20, // 84: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
+	23, // 85: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
+	29, // 86: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
+	33, // 87: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
+	35, // 88: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
+	37, // 89: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
+	39, // 90: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
+	47, // 91: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
+	49, // 92: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
+	51, // 93: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
+	47, // 94: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
+	54, // 95: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
+	56, // 96: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
+	54, // 97: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
+	59, // 98: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
+	61, // 99: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
+	62, // 100: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
+	62, // 101: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 102: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 103: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 104: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
+	70, // 105: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
+	41, // 106: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
+	44, // 107: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
+	72, // 108: estudiantes.Estudiantes.PlantillaEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
+	76, // 109: estudiantes.Estudiantes.PreviewImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
+	76, // 110: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
+	72, // 111: estudiantes.Estudiantes.ExportarEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
+	76, // [76:112] is the sub-list for method output_type
+	40, // [40:76] is the sub-list for method input_type
+	40, // [40:40] is the sub-list for extension type_name
+	40, // [40:40] is the sub-list for extension extendee
+	0,  // [0:40] is the sub-list for field type_name
 }
 
 func init() { file_estudiantes_service_proto_init() }
@@ -5635,7 +6219,7 @@ func file_estudiantes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_estudiantes_service_proto_rawDesc), len(file_estudiantes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   71,
+			NumMessages:   78,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -35,6 +35,9 @@ const MENSAJES = {
     no_changes: "No hay cambios para guardar.",
     invalid_date: "La fecha es anterior a la matrícula, al retiro o al inicio de la relación registrados.",
     invalid_parentesco: "El parentesco no está registrado en el catálogo.",
+    // Importación/exportación Excel.
+    importacion_cambiada: "El archivo cambió desde la vista previa. Vuelve a validarlo antes de confirmar.",
+    importacion_sin_vista_previa: "Valida el archivo antes de confirmar la importación.",
 };
 
 // Estos códigos traen un texto del backend ya pensado para el usuario (sin
@@ -43,6 +46,15 @@ const CON_DETALLE = {
     validation_error: "Datos inválidos",
     invalid_document: "Documento inválido",
     invalid_state: "Estado inválido",
+    // Excel: el backend explica qué corregir en el archivo.
+    archivo_invalido: "Archivo no válido",
+    archivo_vacio: "Archivo sin datos",
+    archivo_grande: "Archivo demasiado grande",
+    encabezados_invalidos: "Encabezados incorrectos",
+    demasiadas_filas: "Demasiadas filas",
+    export_demasiados: "Demasiados registros",
+    invalid_nivel: "Nivel inválido",
+    invalid_estado: "Estado inválido",
 };
 
 export function parseCodigoError(rawBody) {
@@ -91,6 +103,9 @@ export function estudianteError(error) {
             return { kind: "validation", code, message: MENSAJES[code] };
         }
         return { kind: "validation", code, message: "Los datos ingresados no son válidos." };
+    }
+    if (status === 413) {
+        return { kind: "validation", code: "archivo_grande", message: "El archivo es demasiado grande (máximo 1 MB)." };
     }
     return { kind: "server", code: null, message: "Ocurrió un error en el servidor. Intenta nuevamente más tarde." };
 }

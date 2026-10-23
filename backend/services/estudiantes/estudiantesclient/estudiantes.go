@@ -16,6 +16,7 @@ import (
 type (
 	ActualizarFamiliarRequest         = estudiantes.ActualizarFamiliarRequest
 	ActualizarFamiliarResponse        = estudiantes.ActualizarFamiliarResponse
+	ArchivoExcelResponse              = estudiantes.ArchivoExcelResponse
 	CambiarParentescoFamiliarRequest  = estudiantes.CambiarParentescoFamiliarRequest
 	CambiarParentescoFamiliarResponse = estudiantes.CambiarParentescoFamiliarResponse
 	CambiarSeccionMatriculaRequest    = estudiantes.CambiarSeccionMatriculaRequest
@@ -34,7 +35,9 @@ type (
 	EstudianteBasico                  = estudiantes.EstudianteBasico
 	EstudiantePersonal                = estudiantes.EstudiantePersonal
 	EventoHistorial                   = estudiantes.EventoHistorial
+	ExportarEstudiantesRequest        = estudiantes.ExportarEstudiantesRequest
 	Familiar                          = estudiantes.Familiar
+	FilaImportacion                   = estudiantes.FilaImportacion
 	GetEstudiantePersonalRequest      = estudiantes.GetEstudiantePersonalRequest
 	GetEstudiantePersonalResponse     = estudiantes.GetEstudiantePersonalResponse
 	GetEstudianteRequest              = estudiantes.GetEstudianteRequest
@@ -44,6 +47,8 @@ type (
 	GetPersonaRequest                 = estudiantes.GetPersonaRequest
 	GetPersonaResponse                = estudiantes.GetPersonaResponse
 	GrupoPosibleDuplicado             = estudiantes.GrupoPosibleDuplicado
+	ImportarEstudiantesRequest        = estudiantes.ImportarEstudiantesRequest
+	ImportarEstudiantesResponse       = estudiantes.ImportarEstudiantesResponse
 	ListFamiliaresEstudianteRequest   = estudiantes.ListFamiliaresEstudianteRequest
 	ListFamiliaresEstudianteResponse  = estudiantes.ListFamiliaresEstudianteResponse
 	ListHistorialEstudianteRequest    = estudiantes.ListHistorialEstudianteRequest
@@ -67,9 +72,11 @@ type (
 	PeriodoResponse                   = estudiantes.PeriodoResponse
 	Persona                           = estudiantes.Persona
 	PersonaResponse                   = estudiantes.PersonaResponse
+	PlantillaEstudiantesRequest       = estudiantes.PlantillaEstudiantesRequest
 	ReingresarMatriculaRequest        = estudiantes.ReingresarMatriculaRequest
 	ResolveEstudianteRequest          = estudiantes.ResolveEstudianteRequest
 	ResolveEstudianteResponse         = estudiantes.ResolveEstudianteResponse
+	ResumenImportacion                = estudiantes.ResumenImportacion
 	RetirarMatriculaRequest           = estudiantes.RetirarMatriculaRequest
 	SearchEstudiantesRequest          = estudiantes.SearchEstudiantesRequest
 	SearchEstudiantesResponse         = estudiantes.SearchEstudiantesResponse
@@ -122,6 +129,11 @@ type (
 		// Etapa 6: parentesco con historial e historial de cambios.
 		CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error)
 		ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error)
+		// Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+		PlantillaEstudiantes(ctx context.Context, in *PlantillaEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error)
+		PreviewImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
+		ConfirmarImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
+		ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error)
 	}
 
 	defaultEstudiantes struct {
@@ -296,4 +308,25 @@ func (m *defaultEstudiantes) CambiarParentescoFamiliar(ctx context.Context, in *
 func (m *defaultEstudiantes) ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error) {
 	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
 	return client.ListHistorialEstudiante(ctx, in, opts...)
+}
+
+// Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+func (m *defaultEstudiantes) PlantillaEstudiantes(ctx context.Context, in *PlantillaEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.PlantillaEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) PreviewImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.PreviewImportacionEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ConfirmarImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ConfirmarImportacionEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ExportarEstudiantes(ctx, in, opts...)
 }

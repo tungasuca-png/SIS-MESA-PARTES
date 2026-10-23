@@ -652,6 +652,66 @@ message ListMatriculasPeriodoResponse {
   int32 total = 2;
 }
 
+// ===== Importación / exportación Excel (formato oficial de 9 columnas) =====
+// El archivo viaja como bytes (.xlsx); el servicio lo lee, valida y escribe
+// en el maestro. La plantilla y la exportación devuelven el .xlsx generado.
+
+message PlantillaEstudiantesRequest {}
+
+message ArchivoExcelResponse {
+  string nombre = 1;     // nombre sugerido (p. ej. estudiantes_2026-10-23.xlsx)
+  bytes contenido = 2;   // .xlsx
+  int32 filas = 3;       // estudiantes exportados (0 en la plantilla)
+}
+
+message ImportarEstudiantesRequest {
+  string nombre_archivo = 1; // solo para validar la extensión .xlsx
+  bytes contenido = 2;
+  // Confirmación: huella devuelta por la vista previa. Si el archivo no es
+  // exactamente el previsualizado, la confirmación se rechaza.
+  string huella = 3;
+}
+
+// Resultado por fila. Vista previa: VALIDA | ERROR | DUPLICADA | YA_EXISTE.
+// Confirmación: INSERTADA | OMITIDA (ya existía) | RECHAZADA (error).
+message FilaImportacion {
+  int32 fila = 1; // número de fila de Excel
+  string tipo_documento = 2;
+  string numero_documento = 3;
+  string apellido_paterno = 4;
+  string apellido_materno = 5;
+  string nombres = 6;
+  string estado = 7;
+  string nivel = 8;
+  string resultado = 9;
+  repeated string errores = 10;
+  repeated string avisos = 11;
+}
+
+message ResumenImportacion {
+  int32 total = 1;
+  int32 validas = 2;
+  int32 con_errores = 3;
+  int32 duplicadas = 4; // repetidas dentro del archivo
+  int32 ya_existen = 5;
+  int32 insertadas = 6;
+  int32 omitidas = 7;
+  int32 rechazadas = 8;
+  int32 con_avisos = 9;
+}
+
+message ImportarEstudiantesResponse {
+  ResumenImportacion resumen = 1;
+  repeated FilaImportacion filas = 2;
+  string huella = 3;
+  bool confirmada = 4;
+}
+
+message ExportarEstudiantesRequest {
+  string estado = 1; // opcional: ACTIVO | INACTIVO
+  string nivel = 2;  // opcional: INICIAL | PRIMARIA | SECUNDARIA
+}
+
 service Estudiantes {
   rpc GetEstudiante(GetEstudianteRequest) returns (GetEstudianteResponse);
   rpc SearchEstudiantes(SearchEstudiantesRequest) returns (SearchEstudiantesResponse);
@@ -688,4 +748,10 @@ service Estudiantes {
   // Etapa 6: parentesco con historial e historial de cambios.
   rpc CambiarParentescoFamiliar(CambiarParentescoFamiliarRequest) returns (CambiarParentescoFamiliarResponse);
   rpc ListHistorialEstudiante(ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse);
+  // Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+  // estudiantes.create; la exportación, estudiantes.view.
+  rpc PlantillaEstudiantes(PlantillaEstudiantesRequest) returns (ArchivoExcelResponse);
+  rpc PreviewImportacionEstudiantes(ImportarEstudiantesRequest) returns (ImportarEstudiantesResponse);
+  rpc ConfirmarImportacionEstudiantes(ImportarEstudiantesRequest) returns (ImportarEstudiantesResponse);
+  rpc ExportarEstudiantes(ExportarEstudiantesRequest) returns (ArchivoExcelResponse);
 }
