@@ -39,7 +39,7 @@ func (l *ConfirmarImportacionEstudiantesLogic) ConfirmarImportacionEstudiantes(i
 	}
 	a, err := analizarImportacion(l.ctx, l.svcCtx, in)
 	if err != nil {
-		return nil, errorSeguro(l.Logger, "confirmar importación", "no se pudo analizar el archivo", err)
+		return nil, errorImportacion(l.Logger, "confirmar importación", err)
 	}
 	if a.huella != strings.TrimSpace(in.Huella) {
 		return nil, status.Error(codes.FailedPrecondition, "importacion_cambiada: el archivo no es el mismo de la vista previa; vuelva a previsualizarlo")

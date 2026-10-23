@@ -42,7 +42,7 @@ func (r Registro) NombreCompleto() string {
 func Validar(f Fila) (Registro, []string) {
 	var errs []string
 	r := Registro{
-		TipoDocumento: validation.Upper(f.TipoDocumento),
+		TipoDocumento: tipoDocumento(f.TipoDocumento),
 		Nombres:       validation.CleanText(f.Nombres),
 		Estado:        validation.Upper(f.Estado),
 		Nivel:         validation.Upper(f.Nivel),
@@ -108,6 +108,28 @@ func Validar(f Fila) (Registro, []string) {
 		errs = append(errs, "NIVEL inválido: use "+strings.Join(Niveles, ", "))
 	}
 	return r, errs
+}
+
+// aliasTipoDocumento: nombres con que otros sistemas (p. ej. el reporte de
+// usuarios del colegio) escriben un tipo del catálogo. Solo equivalencias
+// exactas; cualquier otro valor se rechaza.
+var aliasTipoDocumento = map[string]string{
+	"CARNE EXT.":            validation.TipoCE,
+	"CARNE EXT":             validation.TipoCE,
+	"CARNET EXT.":           validation.TipoCE,
+	"CARNE DE EXTRANJERIA":  validation.TipoCE,
+	"CARNÉ DE EXTRANJERÍA":  validation.TipoCE,
+	"CARNET DE EXTRANJERIA": validation.TipoCE,
+	"C.E.":                  validation.TipoCE,
+	"SIN DOCUMENTO":         validation.TipoSinDocumento,
+}
+
+func tipoDocumento(v string) string {
+	t := strings.ToUpper(strings.Join(strings.Fields(v), " "))
+	if alias, ok := aliasTipoDocumento[t]; ok {
+		return alias
+	}
+	return t
 }
 
 // CodigoPara deriva el código del maestro (único, obligatorio, máx. 20):

@@ -77,6 +77,8 @@ func Leer(contenido []byte, lim Limites) ([]Fila, error) {
 
 	var filas []Fila
 	numero := 0
+	encabezado := false
+	var errEncabezado error
 	for rows.Next() {
 		numero++
 		// RawCellValue: el valor almacenado, sin formato de número; así un DNI
@@ -85,9 +87,20 @@ func Leer(contenido []byte, lim Limites) ([]Fila, error) {
 		if err != nil {
 			return nil, ErrArchivoInvalido
 		}
-		if numero == 1 {
-			if err := validarEncabezados(celdas); err != nil {
-				return nil, err
+		// Los encabezados van en la primera fila de la plantilla, pero los
+		// reportes exportados de otros sistemas traen un título encima: se
+		// buscan en las primeras filasTitulo filas y lo anterior se ignora.
+		if !encabezado {
+			err := validarEncabezados(celdas)
+			if err == nil {
+				encabezado = true
+				continue
+			}
+			if errEncabezado == nil && !filaVaciaDeCeldas(celdas) {
+				errEncabezado = err
+			}
+			if numero >= filasTitulo {
+				return nil, errEncabezado
 			}
 			continue
 		}
@@ -103,13 +116,28 @@ func Leer(contenido []byte, lim Limites) ([]Fila, error) {
 	if err := rows.Error(); err != nil {
 		return nil, ErrArchivoInvalido
 	}
-	if numero == 0 {
+	if !encabezado {
+		if errEncabezado != nil {
+			return nil, errEncabezado
+		}
 		return nil, &ErrorArchivo{Code: "encabezados_invalidos", Msg: "la primera fila debe tener los encabezados: " + strings.Join(Encabezados, " | ")}
 	}
 	if len(filas) == 0 {
 		return nil, ErrArchivoVacio
 	}
 	return filas, nil
+}
+
+// filasTitulo: hasta cuántas filas se buscan los encabezados.
+const filasTitulo = 10
+
+func filaVaciaDeCeldas(celdas []string) bool {
+	for _, c := range celdas {
+		if strings.TrimSpace(c) != "" {
+			return false
+		}
+	}
+	return true
 }
 
 func validarEncabezados(celdas []string) error {

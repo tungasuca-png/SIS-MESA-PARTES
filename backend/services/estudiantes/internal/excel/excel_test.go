@@ -318,3 +318,33 @@ func TestExportador_SinRegistros(t *testing.T) {
 		t.Fatalf("sin registros: solo los 9 encabezados, got %v", rows)
 	}
 }
+
+// Reportes exportados de otros sistemas: título y fila vacía sobre los
+// encabezados oficiales (caso real del reporte de usuarios del colegio).
+func TestLeer_TituloSobreLosEncabezados(t *testing.T) {
+	contenido := libro(t, HojaEstudiantes,
+		fila("REPORTE DE USUARIOS"),
+		fila(),
+		cab(),
+		fila("1", "CARNE EXT.", "001234567", "Pérez", "", "Ana", "ESTUDIANTE", "ACTIVO", "SECUNDARIA"),
+	)
+	filas, err := Leer(contenido, limites)
+	if err != nil || len(filas) != 1 || filas[0].Numero != 4 {
+		t.Fatalf("encabezados en la fila 3 deben aceptarse: %+v %v", filas, err)
+	}
+	r, errs := Validar(filas[0])
+	if len(errs) != 0 || r.TipoDocumento != "CE" {
+		t.Fatalf("«CARNE EXT.» equivale a CE: %+v %v", r, errs)
+	}
+}
+
+func TestLeer_SinEncabezadosEnLasPrimerasFilas(t *testing.T) {
+	filas := [][]any{}
+	for i := 0; i < 12; i++ {
+		filas = append(filas, fila("título"))
+	}
+	filas = append(filas, cab())
+	if _, err := Leer(libro(t, HojaEstudiantes, filas...), limites); codigoError(err) != "encabezados_invalidos" {
+		t.Fatalf("encabezados después de la fila 10: %v", err)
+	}
+}

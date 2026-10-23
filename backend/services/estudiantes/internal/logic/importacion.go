@@ -79,6 +79,17 @@ type analisis struct {
 	filas  []*filaAnalizada
 }
 
+// errorImportacion conserva los errores ya expresados como gRPC (archivo
+// inválido -> 400 con el motivo para el usuario) y traduce el resto con
+// errorSeguro (BD: mensaje genérico). Antes un archivo con encabezados
+// incorrectos salía como 500 "no se pudo analizar el archivo".
+func errorImportacion(log logx.Logger, op string, err error) error {
+	if _, ok := status.FromError(err); ok {
+		return err
+	}
+	return errorSeguro(log, op, "no se pudo analizar el archivo", err)
+}
+
 // errorArchivo traduce los errores de estructura del archivo a 400.
 func errorArchivo(err error) error {
 	return status.Error(codes.InvalidArgument, err.Error())

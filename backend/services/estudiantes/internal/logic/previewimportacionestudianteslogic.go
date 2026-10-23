@@ -31,7 +31,7 @@ func (l *PreviewImportacionEstudiantesLogic) PreviewImportacionEstudiantes(in *e
 	}
 	a, err := analizarImportacion(l.ctx, l.svcCtx, in)
 	if err != nil {
-		return nil, errorSeguro(l.Logger, "previsualizar importación", "no se pudo analizar el archivo", err)
+		return nil, errorImportacion(l.Logger, "previsualizar importación", err)
 	}
 	return respuestaImportacion(a, false), nil
 }
