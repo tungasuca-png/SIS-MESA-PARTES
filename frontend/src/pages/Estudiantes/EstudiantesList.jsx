@@ -7,10 +7,10 @@ import EstudianteFormModal from "../../components/estudiantes/EstudianteFormModa
 import CambiarEstadoModal from "../../components/estudiantes/CambiarEstadoModal";
 import NominaPeriodo from "../../components/estudiantes/NominaPeriodo";
 import PosiblesDuplicados from "../../components/estudiantes/PosiblesDuplicados";
-import ImportarEstudiantesModal from "../../components/estudiantes/ImportarEstudiantesModal";
+import ImportarDatosModal from "../../components/estudiantes/ImportarDatosModal";
+import ExportarDatosModal from "../../components/estudiantes/ExportarDatosModal";
 import { usePermissions } from "../../hooks/usePermissions";
-import { XLSX_MIME, exportarEstudiantesExcel, searchEstudiantes } from "../../services/estudiantesService";
-import { descargarBase64 } from "../../utils/descargas";
+import { searchEstudiantes } from "../../services/estudiantesService";
 import {
     BUSQUEDA_MAX,
     ESTADOS_ESTUDIANTE,
@@ -77,7 +77,6 @@ function EstudiantesList() {
     const [mensaje, setMensaje] = useState("");
     const [importando, setImportando] = useState(false);
     const [exportando, setExportando] = useState(false);
-    const [errorExcel, setErrorExcel] = useState("");
 
     // Nueva búsqueda desde la barra superior con la página ya abierta.
     const [qPrevia, setQPrevia] = useState(qInicial);
@@ -136,22 +135,6 @@ function EstudiantesList() {
         }));
     };
 
-    // Exportación oficial: datos actuales del maestro (backend), con los
-    // filtros de estado y nivel que el usuario tenga aplicados.
-    const exportar = async () => {
-        setExportando(true);
-        setErrorExcel("");
-        try {
-            const data = await exportarEstudiantesExcel({ estado: criterios.estado, nivel: criterios.nivel });
-            descargarBase64(data.contenido_base64, data.nombre, XLSX_MIME);
-            setMensaje(`Se exportaron ${data.filas} estudiante(s).`);
-        } catch (err) {
-            setErrorExcel(estudianteError(err).message);
-        } finally {
-            setExportando(false);
-        }
-    };
-
     const recargar = () => {
         setEditando(null);
         setCambiandoEstado(null);
@@ -181,15 +164,14 @@ function EstudiantesList() {
                         <button
                             type="button"
                             className="dp-btn-secondary"
-                            onClick={exportar}
-                            disabled={exportando}
-                            title="Exporta el formato oficial con los filtros de estado y nivel aplicados"
+                            onClick={() => setExportando(true)}
+                            title="Exporta todos los resultados con los filtros aplicados, en el formato y con los campos que elijas"
                         >
-                            {exportando ? "Exportando…" : "Exportar Excel"}
+                            Exportar
                         </button>
                         {canCreate && (
                             <button type="button" className="dp-btn-secondary" onClick={() => setImportando(true)}>
-                                Importar Excel
+                                Importar
                             </button>
                         )}
                         {canCreate && (
@@ -284,11 +266,6 @@ function EstudiantesList() {
                 </div>
 
                 {mensaje && <p className="est-banner-success">{mensaje}</p>}
-                {errorExcel && (
-                    <p className="dp-form-error" role="alert">
-                        {errorExcel}
-                    </p>
-                )}
 
                 {loading && <p className="dp-table-empty">Cargando estudiantes...</p>}
                 {!loading && error && <p className="dp-form-error">{error.message}</p>}
@@ -407,12 +384,20 @@ function EstudiantesList() {
             </section>
 
             {importando && (
-                <ImportarEstudiantesModal
+                <ImportarDatosModal
                     onClose={() => setImportando(false)}
                     onImported={(resumen) => {
-                        setMensaje(`Importación completada: ${resumen.insertadas} estudiante(s) registrado(s).`);
+                        setMensaje(`Importación completada: ${resumen.insertados} estudiante(s) registrado(s).`);
                         setReloadToken((token) => token + 1);
                     }}
+                />
+            )}
+
+            {exportando && (
+                <ExportarDatosModal
+                    // Los mismos criterios que la tabla (búsqueda, filtros y orden).
+                    filtros={criterios}
+                    onClose={() => setExportando(false)}
                 />
             )}
 

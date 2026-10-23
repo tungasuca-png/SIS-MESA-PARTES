@@ -50,16 +50,16 @@ func (f Fila) Valor(i int) string {
 
 // Origen describe cómo se leyó el archivo (lo que el usuario puede ajustar).
 type Origen struct {
-	Formato          string
+	Formato            string
 	ExtensionDeclarada string
-	Hojas            []string // hojas (xlsx/ods) o tablas (html) disponibles
-	Hoja             string
-	Rutas            []string // rutas de registros posibles (json/xml)
-	Ruta             string
-	Separador        string // csv
-	Codificacion     string // csv/html
-	FilaEncabezado   int    // 1-based dentro de la hoja; 0 = sin encabezado (json/xml)
-	Avisos           []string
+	Hojas              []string // hojas (xlsx/ods) o tablas (html) disponibles
+	Hoja               string
+	Rutas              []string // rutas de registros posibles (json/xml)
+	Ruta               string
+	Separador          string // csv
+	Codificacion       string // csv/html
+	FilaEncabezado     int    // 1-based dentro de la hoja; 0 = sin encabezado (json/xml)
+	Avisos             []string
 }
 
 // Opciones de lectura. Los campos vacíos se detectan automáticamente.

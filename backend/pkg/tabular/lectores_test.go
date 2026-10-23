@@ -185,6 +185,27 @@ func TestHTML_ReporteXLSWebConTituloColspanYScript(t *testing.T) {
 	}
 }
 
+// Exportaciones web que escriben ="01234567" para que Excel conserve los
+// ceros: se leen como texto (con aviso); una fórmula real queda tal cual.
+func TestLiteralExcelDeTexto(t *testing.T) {
+	html := `<table><tr><th>DNI</th><th>Nombre</th></tr><tr><td>="01234567"</td><td>=HYPERLINK("x")</td></tr></table>`
+	tab := leer(t, "r.xls", []byte(html), Opciones{})
+	if tab.Filas[0].Valor(0) != "01234567" || tab.Filas[0].Valor(1) != `=HYPERLINK("x")` {
+		t.Fatalf("literal y fórmula: %+v", tab.Filas[0])
+	}
+	var aviso bool
+	for _, a := range tab.Origen.Avisos {
+		aviso = aviso || strings.Contains(a, "=\"texto\"")
+	}
+	if !aviso {
+		t.Fatalf("debe avisar la normalización: %v", tab.Origen.Avisos)
+	}
+	csv := leer(t, "x.csv", []byte("dni,n\n"+`"=""00012345""",Ana`+"\n"), Opciones{})
+	if csv.Filas[0].Valor(0) != "00012345" {
+		t.Fatalf("CSV con =\"...\": %q", csv.Filas[0].Valor(0))
+	}
+}
+
 func TestCSV_SeparadoresYCodificaciones(t *testing.T) {
 	utf16, _ := unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewEncoder().Bytes([]byte("dni\tnombre\n01234567\tÁngel\n"))
 	w1252, _ := charmap.Windows1252.NewEncoder().Bytes([]byte("dni;nombre\n01234567;Peña\n"))

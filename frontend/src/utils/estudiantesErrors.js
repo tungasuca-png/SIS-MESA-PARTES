@@ -38,6 +38,12 @@ const MENSAJES = {
     // Importación/exportación Excel.
     importacion_cambiada: "El archivo cambió desde la vista previa. Vuelve a validarlo antes de confirmar.",
     importacion_sin_vista_previa: "Valida el archivo antes de confirmar la importación.",
+    importacion_conflicto:
+        "Otro usuario registró uno de estos estudiantes mientras revisabas. No se guardó nada: vuelve a analizar el archivo.",
+    duplicate_plantilla: "Ya existe una plantilla con ese nombre.",
+    plantilla_not_found: "La plantilla ya no existe.",
+    plantillas_no_instaladas: "Las plantillas aún no están habilitadas en el servidor (falta aplicar una actualización de la base de datos).",
+    export_sin_resultados: "No hay estudiantes con los filtros aplicados: no se generó ningún archivo.",
 };
 
 // Estos códigos traen un texto del backend ya pensado para el usuario (sin
@@ -55,6 +61,15 @@ const CON_DETALLE = {
     export_demasiados: "Demasiados registros",
     invalid_nivel: "Nivel inválido",
     invalid_estado: "Estado inválido",
+    // Motor universal de datos.
+    formato_no_soportado: "Formato no admitido",
+    estructura_invalida: "Estructura no válida",
+    demasiadas_columnas: "Demasiadas columnas",
+    opcion_invalida: "Opción no válida",
+    mapeo_incompleto: "Faltan columnas",
+    importacion_con_errores: "Hay filas con errores",
+    importacion_sin_decidir: "Faltan decisiones",
+    plantilla_invalida: "Plantilla no válida",
 };
 
 export function parseCodigoError(rawBody) {

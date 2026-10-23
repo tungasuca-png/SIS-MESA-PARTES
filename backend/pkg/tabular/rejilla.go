@@ -2,6 +2,7 @@ package tabular
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -60,7 +61,7 @@ func armarTabla(crudas []filaCruda, op Opciones, origen Origen) (*Tabla, error) 
 		t.Origen.Avisos = append(t.Origen.Avisos, fmt.Sprintf("se ignoraron %d fila(s) de título antes de los encabezados (fila %d)", idx, cab.numero))
 	}
 
-	desplazadas := 0
+	desplazadas, literales := 0, 0
 	for _, f := range conDatos[idx+1:] {
 		valores := recortarFinal(f.celdas)
 		if len(valores) > len(encabezados) {
@@ -69,10 +70,15 @@ func armarTabla(crudas []filaCruda, op Opciones, origen Origen) (*Tabla, error) 
 				encabezados = append(encabezados, "")
 			}
 		}
-		t.Filas = append(t.Filas, Fila{Numero: f.numero, Valores: limpiar(valores)})
+		limpios, n := limpiar(valores)
+		literales += n
+		t.Filas = append(t.Filas, Fila{Numero: f.numero, Valores: limpios})
 		if len(t.Filas) > op.Limites.MaxFilas {
 			break
 		}
+	}
+	if literales > 0 {
+		t.Origen.Avisos = append(t.Origen.Avisos, fmt.Sprintf("%d celda(s) venían como =\"texto\" (forma en que algunos sistemas conservan ceros iniciales para Excel): se leyeron como texto, sin ejecutar nada", literales))
 	}
 	if desplazadas > 0 {
 		t.Origen.Avisos = append(t.Origen.Avisos, fmt.Sprintf("%d fila(s) tienen más valores que encabezados: revise si hay datos desplazados", desplazadas))
@@ -126,12 +132,25 @@ func recortarFinal(celdas []string) []string {
 	return append([]string(nil), celdas[:n]...)
 }
 
-func limpiar(valores []string) []string {
+// literalExcel: ="texto" sin nada más (ni operadores, ni funciones, ni
+// comillas internas). Es la forma en que muchos sistemas exportan un valor
+// para que Excel lo trate como TEXTO (p. ej. un DNI con ceros iniciales).
+// Se toma el texto interior; cualquier otra fórmula queda tal cual y la
+// rechaza la validación del módulo.
+var literalExcel = regexp.MustCompile(`^="([^"]*)"$`)
+
+func limpiar(valores []string) ([]string, int) {
 	out := make([]string, len(valores))
+	literales := 0
 	for i, v := range valores {
-		out[i] = strings.TrimSpace(strings.ReplaceAll(v, " ", " "))
+		v = strings.TrimSpace(strings.ReplaceAll(v, "\u00a0", " "))
+		if m := literalExcel.FindStringSubmatch(v); m != nil {
+			v = strings.TrimSpace(m[1])
+			literales++
+		}
+		out[i] = v
 	}
-	return out
+	return out, literales
 }
 
 // nombrarEncabezados: vacíos -> "Columna N"; repetidos -> "Nombre (2)". El
@@ -140,7 +159,7 @@ func nombrarEncabezados(cab []string) []string {
 	out := make([]string, len(cab))
 	vistos := map[string]int{}
 	for i, h := range cab {
-		h = strings.TrimSpace(strings.ReplaceAll(h, " ", " "))
+		h = strings.TrimSpace(strings.ReplaceAll(h, "\u00a0", " "))
 		if h == "" {
 			h = fmt.Sprintf("Columna %d", i+1)
 		}
