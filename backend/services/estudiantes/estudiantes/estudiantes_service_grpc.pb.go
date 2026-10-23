@@ -55,6 +55,13 @@ const (
 	Estudiantes_PreviewImportacionEstudiantes_FullMethodName   = "/estudiantes.Estudiantes/PreviewImportacionEstudiantes"
 	Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName = "/estudiantes.Estudiantes/ConfirmarImportacionEstudiantes"
 	Estudiantes_ExportarEstudiantes_FullMethodName             = "/estudiantes.Estudiantes/ExportarEstudiantes"
+	Estudiantes_CamposDatosEstudiantes_FullMethodName          = "/estudiantes.Estudiantes/CamposDatosEstudiantes"
+	Estudiantes_AnalizarDatosEstudiantes_FullMethodName        = "/estudiantes.Estudiantes/AnalizarDatosEstudiantes"
+	Estudiantes_ConfirmarDatosEstudiantes_FullMethodName       = "/estudiantes.Estudiantes/ConfirmarDatosEstudiantes"
+	Estudiantes_ExportarDatosEstudiantes_FullMethodName        = "/estudiantes.Estudiantes/ExportarDatosEstudiantes"
+	Estudiantes_ListPlantillasDatos_FullMethodName             = "/estudiantes.Estudiantes/ListPlantillasDatos"
+	Estudiantes_GuardarPlantillaDatos_FullMethodName           = "/estudiantes.Estudiantes/GuardarPlantillaDatos"
+	Estudiantes_EliminarPlantillaDatos_FullMethodName          = "/estudiantes.Estudiantes/EliminarPlantillaDatos"
 )
 
 // EstudiantesClient is the client API for Estudiantes service.
@@ -102,6 +109,15 @@ type EstudiantesClient interface {
 	PreviewImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
 	ConfirmarImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
 	ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error)
+	// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+	// estudiantes.view; campos/exportar: estudiantes.view; plantillas: según tipo.
+	CamposDatosEstudiantes(ctx context.Context, in *CamposDatosRequest, opts ...grpc.CallOption) (*CamposDatosResponse, error)
+	AnalizarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error)
+	ConfirmarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error)
+	ExportarDatosEstudiantes(ctx context.Context, in *DatosExportacionRequest, opts ...grpc.CallOption) (*ArchivoDatosResponse, error)
+	ListPlantillasDatos(ctx context.Context, in *ListPlantillasDatosRequest, opts ...grpc.CallOption) (*ListPlantillasDatosResponse, error)
+	GuardarPlantillaDatos(ctx context.Context, in *GuardarPlantillaDatosRequest, opts ...grpc.CallOption) (*PlantillaDatosResponse, error)
+	EliminarPlantillaDatos(ctx context.Context, in *EliminarPlantillaDatosRequest, opts ...grpc.CallOption) (*EliminarPlantillaDatosResponse, error)
 }
 
 type estudiantesClient struct {
@@ -472,6 +488,76 @@ func (c *estudiantesClient) ExportarEstudiantes(ctx context.Context, in *Exporta
 	return out, nil
 }
 
+func (c *estudiantesClient) CamposDatosEstudiantes(ctx context.Context, in *CamposDatosRequest, opts ...grpc.CallOption) (*CamposDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CamposDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CamposDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) AnalizarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DatosImportacionResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_AnalizarDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ConfirmarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DatosImportacionResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ConfirmarDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ExportarDatosEstudiantes(ctx context.Context, in *DatosExportacionRequest, opts ...grpc.CallOption) (*ArchivoDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ArchivoDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ExportarDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListPlantillasDatos(ctx context.Context, in *ListPlantillasDatosRequest, opts ...grpc.CallOption) (*ListPlantillasDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPlantillasDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListPlantillasDatos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) GuardarPlantillaDatos(ctx context.Context, in *GuardarPlantillaDatosRequest, opts ...grpc.CallOption) (*PlantillaDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlantillaDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_GuardarPlantillaDatos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) EliminarPlantillaDatos(ctx context.Context, in *EliminarPlantillaDatosRequest, opts ...grpc.CallOption) (*EliminarPlantillaDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EliminarPlantillaDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_EliminarPlantillaDatos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EstudiantesServer is the server API for Estudiantes service.
 // All implementations must embed UnimplementedEstudiantesServer
 // for forward compatibility.
@@ -517,6 +603,15 @@ type EstudiantesServer interface {
 	PreviewImportacionEstudiantes(context.Context, *ImportarEstudiantesRequest) (*ImportarEstudiantesResponse, error)
 	ConfirmarImportacionEstudiantes(context.Context, *ImportarEstudiantesRequest) (*ImportarEstudiantesResponse, error)
 	ExportarEstudiantes(context.Context, *ExportarEstudiantesRequest) (*ArchivoExcelResponse, error)
+	// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+	// estudiantes.view; campos/exportar: estudiantes.view; plantillas: según tipo.
+	CamposDatosEstudiantes(context.Context, *CamposDatosRequest) (*CamposDatosResponse, error)
+	AnalizarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error)
+	ConfirmarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error)
+	ExportarDatosEstudiantes(context.Context, *DatosExportacionRequest) (*ArchivoDatosResponse, error)
+	ListPlantillasDatos(context.Context, *ListPlantillasDatosRequest) (*ListPlantillasDatosResponse, error)
+	GuardarPlantillaDatos(context.Context, *GuardarPlantillaDatosRequest) (*PlantillaDatosResponse, error)
+	EliminarPlantillaDatos(context.Context, *EliminarPlantillaDatosRequest) (*EliminarPlantillaDatosResponse, error)
 	mustEmbedUnimplementedEstudiantesServer()
 }
 
@@ -634,6 +729,27 @@ func (UnimplementedEstudiantesServer) ConfirmarImportacionEstudiantes(context.Co
 }
 func (UnimplementedEstudiantesServer) ExportarEstudiantes(context.Context, *ExportarEstudiantesRequest) (*ArchivoExcelResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExportarEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) CamposDatosEstudiantes(context.Context, *CamposDatosRequest) (*CamposDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CamposDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) AnalizarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AnalizarDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ConfirmarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfirmarDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ExportarDatosEstudiantes(context.Context, *DatosExportacionRequest) (*ArchivoDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExportarDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ListPlantillasDatos(context.Context, *ListPlantillasDatosRequest) (*ListPlantillasDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPlantillasDatos not implemented")
+}
+func (UnimplementedEstudiantesServer) GuardarPlantillaDatos(context.Context, *GuardarPlantillaDatosRequest) (*PlantillaDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GuardarPlantillaDatos not implemented")
+}
+func (UnimplementedEstudiantesServer) EliminarPlantillaDatos(context.Context, *EliminarPlantillaDatosRequest) (*EliminarPlantillaDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EliminarPlantillaDatos not implemented")
 }
 func (UnimplementedEstudiantesServer) mustEmbedUnimplementedEstudiantesServer() {}
 func (UnimplementedEstudiantesServer) testEmbeddedByValue()                     {}
@@ -1304,6 +1420,132 @@ func _Estudiantes_ExportarEstudiantes_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Estudiantes_CamposDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CamposDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CamposDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CamposDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CamposDatosEstudiantes(ctx, req.(*CamposDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_AnalizarDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatosImportacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).AnalizarDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_AnalizarDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).AnalizarDatosEstudiantes(ctx, req.(*DatosImportacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ConfirmarDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatosImportacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ConfirmarDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ConfirmarDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ConfirmarDatosEstudiantes(ctx, req.(*DatosImportacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ExportarDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatosExportacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ExportarDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ExportarDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ExportarDatosEstudiantes(ctx, req.(*DatosExportacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListPlantillasDatos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlantillasDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListPlantillasDatos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListPlantillasDatos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListPlantillasDatos(ctx, req.(*ListPlantillasDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_GuardarPlantillaDatos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GuardarPlantillaDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).GuardarPlantillaDatos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_GuardarPlantillaDatos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).GuardarPlantillaDatos(ctx, req.(*GuardarPlantillaDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_EliminarPlantillaDatos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EliminarPlantillaDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).EliminarPlantillaDatos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_EliminarPlantillaDatos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).EliminarPlantillaDatos(ctx, req.(*EliminarPlantillaDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Estudiantes_ServiceDesc is the grpc.ServiceDesc for Estudiantes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1454,6 +1696,34 @@ var Estudiantes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExportarEstudiantes",
 			Handler:    _Estudiantes_ExportarEstudiantes_Handler,
+		},
+		{
+			MethodName: "CamposDatosEstudiantes",
+			Handler:    _Estudiantes_CamposDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "AnalizarDatosEstudiantes",
+			Handler:    _Estudiantes_AnalizarDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "ConfirmarDatosEstudiantes",
+			Handler:    _Estudiantes_ConfirmarDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "ExportarDatosEstudiantes",
+			Handler:    _Estudiantes_ExportarDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "ListPlantillasDatos",
+			Handler:    _Estudiantes_ListPlantillasDatos_Handler,
+		},
+		{
+			MethodName: "GuardarPlantillaDatos",
+			Handler:    _Estudiantes_GuardarPlantillaDatos_Handler,
+		},
+		{
+			MethodName: "EliminarPlantillaDatos",
+			Handler:    _Estudiantes_EliminarPlantillaDatos_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

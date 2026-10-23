@@ -16,6 +16,14 @@ type AnnulPsicologiaAtencionRequest struct {
 	Motivo        string `json:"motivo"`
 }
 
+type ArchivoDatosResponse struct {
+	Nombre          string `json:"nombre"`
+	Mime            string `json:"mime"`
+	ContenidoBase64 string `json:"contenido_base64"`
+	Filas           int32  `json:"filas"`
+	Protegidas      int32  `json:"protegidas"`
+}
+
 type ArchivoExcelResponse struct {
 	Nombre          string `json:"nombre"`
 	ContenidoBase64 string `json:"contenido_base64"`
@@ -110,6 +118,14 @@ type CambiarSeccionMatriculaRequest struct {
 	Motivo          string `json:"motivo,optional"`
 }
 
+type CampoDatosDTO struct {
+	Clave      string `json:"clave"`
+	Etiqueta   string `json:"etiqueta"`
+	Grupo      string `json:"grupo"`
+	Importable bool   `json:"importable"`
+	Exportable bool   `json:"exportable"`
+}
+
 type ChangeEstadoEstudianteRequest struct {
 	Authorization   string `header:"Authorization,optional"`
 	Id              string `path:"id"`
@@ -137,6 +153,23 @@ type ClosePsicologiaExpedienteRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
 	Motivo        string `json:"motivo"`
+}
+
+type ColumnaAnalizadaDTO struct {
+	Columna      int32    `json:"columna"`
+	Encabezado   string   `json:"encabezado"`
+	Campo        string   `json:"campo"`
+	Confianza    string   `json:"confianza"`
+	Motivo       string   `json:"motivo"`
+	Alternativas []string `json:"alternativas"`
+	Muestras     []string `json:"muestras"`
+	Confirmada   bool     `json:"confirmada"`
+	Importable   bool     `json:"importable"`
+}
+
+type ColumnaExportDatosDTO struct {
+	Clave      string `json:"clave"`
+	Encabezado string `json:"encabezado,optional"`
 }
 
 type ConcluirMatriculaRequest struct {
@@ -262,6 +295,61 @@ type CreateUsuarioResponse struct {
 	UsuariosSyncOk bool   `json:"usuarios_sync_ok"`
 }
 
+type DatosArchivoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type DatosCamposRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type DatosCamposResponse struct {
+	Campos          []CampoDatosDTO         `json:"campos"`
+	FormatosEntrada []string                `json:"formatos_entrada"`
+	FormatosSalida  []string                `json:"formatos_salida"`
+	ColumnasTabla   []ColumnaExportDatosDTO `json:"columnas_tabla"`
+}
+
+type DatosExportarRequest struct {
+	Authorization    string                  `header:"Authorization,optional"`
+	Q                string                  `json:"q,optional"`
+	Estado           string                  `json:"estado,optional"`
+	Nivel            string                  `json:"nivel,optional"`
+	Grado            string                  `json:"grado,optional"`
+	Seccion          string                  `json:"seccion,optional"`
+	Turno            string                  `json:"turno,optional"`
+	Orden            string                  `json:"orden,optional"`
+	Columnas         []ColumnaExportDatosDTO `json:"columnas,optional"`
+	Formato          string                  `json:"formato,optional"`
+	Separador        string                  `json:"separador,optional"`
+	Codificacion     string                  `json:"codificacion,optional"`
+	ProtegerFormulas bool                    `json:"proteger_formulas,optional"`
+}
+
+type DatosImportacionResponse struct {
+	Formato                string                 `json:"formato"`
+	Extension              string                 `json:"extension"`
+	Hojas                  []string               `json:"hojas"`
+	Hoja                   string                 `json:"hoja"`
+	Rutas                  []string               `json:"rutas"`
+	Ruta                   string                 `json:"ruta"`
+	Separador              string                 `json:"separador"`
+	Codificacion           string                 `json:"codificacion"`
+	FilaEncabezado         int32                  `json:"fila_encabezado"`
+	AvisosArchivo          []string               `json:"avisos_archivo"`
+	Columnas               []ColumnaAnalizadaDTO  `json:"columnas"`
+	ProblemasMapeo         []string               `json:"problemas_mapeo"`
+	RequiereConfirmarMapeo bool                   `json:"requiere_confirmar_mapeo"`
+	Bloqueantes            []string               `json:"bloqueantes"`
+	Avisos                 []string               `json:"avisos"`
+	Resumen                ResumenDatosDTO        `json:"resumen"`
+	Registros              []RegistroAnalizadoDTO `json:"registros"`
+	Huella                 string                 `json:"huella"`
+	Confirmada             bool                   `json:"confirmada"`
+	PlantillaAplicada      string                 `json:"plantilla_aplicada"`
+	PlantillaAvisos        []string               `json:"plantilla_avisos"`
+}
+
 type DeleteDocumentoRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -335,6 +423,16 @@ type DownloadDocumentoRequest struct {
 type DownloadDocumentoResponse struct {
 	Documento DocumentoDTO `json:"documento"`
 	Contenido string       `json:"contenido"`
+}
+
+type EliminarPlantillaDatosRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	PlantillaId   string `path:"plantilla_id"`
+	Tipo          string `json:"tipo"`
+}
+
+type EliminarPlantillaDatosResponse struct {
+	Eliminada bool `json:"eliminada"`
 }
 
 type EstudianteBasicoDTO struct {
@@ -629,6 +727,16 @@ type GrupoPosibleDuplicadoDTO struct {
 	Estudiantes []EstudianteBasicoDTO `json:"estudiantes"`
 }
 
+type GuardarPlantillaDatosRequest struct {
+	Authorization   string `header:"Authorization,optional"`
+	Id              string `json:"id,optional"`
+	Tipo            string `json:"tipo"`
+	Nombre          string `json:"nombre"`
+	Formato         string `json:"formato,optional"`
+	Configuracion   string `json:"configuracion"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+}
+
 type ImportarEstudiantesExcelResponse struct {
 	Resumen    ResumenImportacionDTO `json:"resumen"`
 	Filas      []FilaImportacionDTO  `json:"filas"`
@@ -749,6 +857,15 @@ type ListPermissionsRequest struct {
 
 type ListPermissionsResponse struct {
 	Permissions []PermissionDTO `json:"permissions"`
+}
+
+type ListPlantillasDatosRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Tipo          string `form:"tipo,optional"`
+}
+
+type ListPlantillasDatosResponse struct {
+	Plantillas []PlantillaDatosDTO `json:"plantillas"`
 }
 
 type ListPosiblesDuplicadosRequest struct {
@@ -939,6 +1056,23 @@ type PersonaResponse struct {
 	Persona PersonaDTO `json:"persona"`
 }
 
+type PlantillaDatosDTO struct {
+	Id             string `json:"id"`
+	Tipo           string `json:"tipo"`
+	Nombre         string `json:"nombre"`
+	Formato        string `json:"formato"`
+	Configuracion  string `json:"configuracion"`
+	Version        int32  `json:"version"`
+	CreadoPor      string `json:"creado_por"`
+	ActualizadoPor string `json:"actualizado_por"`
+	Creado         string `json:"creado"`
+	Actualizado    string `json:"actualizado"`
+}
+
+type PlantillaDatosResponse struct {
+	Plantilla PlantillaDatosDTO `json:"plantilla"`
+}
+
 type PsicologiaAtencionResponse struct {
 	Atencion AtencionPsicologicaDTO `json:"atencion"`
 }
@@ -984,6 +1118,25 @@ type RegisterResponse struct {
 	Message  string `json:"message"`
 }
 
+type RegistroAnalizadoDTO struct {
+	Fila         int32    `json:"fila"`
+	Categoria    string   `json:"categoria"`
+	Codigo       string   `json:"codigo"`
+	Documento    string   `json:"documento"`
+	Apellidos    string   `json:"apellidos"`
+	Nombres      string   `json:"nombres"`
+	Estado       string   `json:"estado"`
+	Nivel        string   `json:"nivel"`
+	Grado        string   `json:"grado"`
+	Seccion      string   `json:"seccion"`
+	Turno        string   `json:"turno"`
+	Errores      []string `json:"errores"`
+	Avisos       []string `json:"avisos"`
+	Correcciones []string `json:"correcciones"`
+	Coincidencia string   `json:"coincidencia"`
+	Resultado    string   `json:"resultado"`
+}
+
 type ReingresarMatriculaRequest struct {
 	Authorization   string `header:"Authorization,optional"`
 	MatriculaId     string `path:"matricula_id"`
@@ -1017,6 +1170,19 @@ type ResolverExpedienteRequest struct {
 
 type ResolverExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+}
+
+type ResumenDatosDTO struct {
+	Total        int32 `json:"total"`
+	Nuevos       int32 `json:"nuevos"`
+	Existentes   int32 `json:"existentes"`
+	Duplicados   int32 `json:"duplicados"`
+	PorConfirmar int32 `json:"por_confirmar"`
+	Conflictos   int32 `json:"conflictos"`
+	Invalidos    int32 `json:"invalidos"`
+	ConAvisos    int32 `json:"con_avisos"`
+	Insertados   int32 `json:"insertados"`
+	Omitidos     int32 `json:"omitidos"`
 }
 
 type ResumenImportacionDTO struct {

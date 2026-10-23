@@ -36,6 +36,12 @@ MethodTimeouts:
     Timeout: 60s
   - FullMethod: /estudiantes.Estudiantes/PlantillaEstudiantes
     Timeout: 10s
+  - FullMethod: /estudiantes.Estudiantes/AnalizarDatosEstudiantes
+    Timeout: 60s
+  - FullMethod: /estudiantes.Estudiantes/ConfirmarDatosEstudiantes
+    Timeout: 180s
+  - FullMethod: /estudiantes.Estudiantes/ExportarDatosEstudiantes
+    Timeout: 60s
 
 # go-zero registra el contenido de las solicitudes (stat log). Todo RPC de
 # este servicio lleva datos personales de menores (nombres, DNI, fecha de
@@ -85,3 +91,11 @@ Middlewares:
       - /estudiantes.Estudiantes/PreviewImportacionEstudiantes
       - /estudiantes.Estudiantes/ConfirmarImportacionEstudiantes
       - /estudiantes.Estudiantes/ExportarEstudiantes
+      # Motor universal de datos: archivos y vistas previas con datos de menores.
+      - /estudiantes.Estudiantes/CamposDatosEstudiantes
+      - /estudiantes.Estudiantes/AnalizarDatosEstudiantes
+      - /estudiantes.Estudiantes/ConfirmarDatosEstudiantes
+      - /estudiantes.Estudiantes/ExportarDatosEstudiantes
+      - /estudiantes.Estudiantes/ListPlantillasDatos
+      - /estudiantes.Estudiantes/GuardarPlantillaDatos
+      - /estudiantes.Estudiantes/EliminarPlantillaDatos

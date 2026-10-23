@@ -5447,6 +5447,1710 @@ func (x *ExportarEstudiantesRequest) GetNivel() string {
 	return ""
 }
 
+type OpcionesLectura struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Hoja           string                 `protobuf:"bytes,1,opt,name=hoja,proto3" json:"hoja,omitempty"`
+	Ruta           string                 `protobuf:"bytes,2,opt,name=ruta,proto3" json:"ruta,omitempty"`                                            // json/xml
+	Separador      string                 `protobuf:"bytes,3,opt,name=separador,proto3" json:"separador,omitempty"`                                  // csv: "," ";" "tab" "|"
+	Codificacion   string                 `protobuf:"bytes,4,opt,name=codificacion,proto3" json:"codificacion,omitempty"`                            // utf-8, utf-16, windows-1252, iso-8859-1
+	FilaEncabezado int32                  `protobuf:"varint,5,opt,name=fila_encabezado,json=filaEncabezado,proto3" json:"fila_encabezado,omitempty"` // 0 = detectar
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *OpcionesLectura) Reset() {
+	*x = OpcionesLectura{}
+	mi := &file_estudiantes_service_proto_msgTypes[78]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OpcionesLectura) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpcionesLectura) ProtoMessage() {}
+
+func (x *OpcionesLectura) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[78]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpcionesLectura.ProtoReflect.Descriptor instead.
+func (*OpcionesLectura) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{78}
+}
+
+func (x *OpcionesLectura) GetHoja() string {
+	if x != nil {
+		return x.Hoja
+	}
+	return ""
+}
+
+func (x *OpcionesLectura) GetRuta() string {
+	if x != nil {
+		return x.Ruta
+	}
+	return ""
+}
+
+func (x *OpcionesLectura) GetSeparador() string {
+	if x != nil {
+		return x.Separador
+	}
+	return ""
+}
+
+func (x *OpcionesLectura) GetCodificacion() string {
+	if x != nil {
+		return x.Codificacion
+	}
+	return ""
+}
+
+func (x *OpcionesLectura) GetFilaEncabezado() int32 {
+	if x != nil {
+		return x.FilaEncabezado
+	}
+	return 0
+}
+
+type AsignacionColumna struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Columna       int32                  `protobuf:"varint,1,opt,name=columna,proto3" json:"columna,omitempty"`
+	Campo         string                 `protobuf:"bytes,2,opt,name=campo,proto3" json:"campo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AsignacionColumna) Reset() {
+	*x = AsignacionColumna{}
+	mi := &file_estudiantes_service_proto_msgTypes[79]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AsignacionColumna) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AsignacionColumna) ProtoMessage() {}
+
+func (x *AsignacionColumna) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[79]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AsignacionColumna.ProtoReflect.Descriptor instead.
+func (*AsignacionColumna) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *AsignacionColumna) GetColumna() int32 {
+	if x != nil {
+		return x.Columna
+	}
+	return 0
+}
+
+func (x *AsignacionColumna) GetCampo() string {
+	if x != nil {
+		return x.Campo
+	}
+	return ""
+}
+
+type DatosImportacionRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	NombreArchivo    string                 `protobuf:"bytes,1,opt,name=nombre_archivo,json=nombreArchivo,proto3" json:"nombre_archivo,omitempty"`
+	Contenido        []byte                 `protobuf:"bytes,2,opt,name=contenido,proto3" json:"contenido,omitempty"`
+	Opciones         *OpcionesLectura       `protobuf:"bytes,3,opt,name=opciones,proto3" json:"opciones,omitempty"`
+	Mapeo            []*AsignacionColumna   `protobuf:"bytes,4,rep,name=mapeo,proto3" json:"mapeo,omitempty"`
+	MapeoConfirmado  bool                   `protobuf:"varint,5,opt,name=mapeo_confirmado,json=mapeoConfirmado,proto3" json:"mapeo_confirmado,omitempty"` // true: se usa "mapeo" tal cual (revisado por el usuario)
+	PlantillaId      string                 `protobuf:"bytes,6,opt,name=plantilla_id,json=plantillaId,proto3" json:"plantilla_id,omitempty"`
+	Huella           string                 `protobuf:"bytes,7,opt,name=huella,proto3" json:"huella,omitempty"`                                              // confirmación: la de la vista previa
+	ExcluirInvalidos bool                   `protobuf:"varint,8,opt,name=excluir_invalidos,json=excluirInvalidos,proto3" json:"excluir_invalidos,omitempty"` // confirmación: excluir filas inválidas o en conflicto
+	Aceptadas        []int32                `protobuf:"varint,9,rep,packed,name=aceptadas,proto3" json:"aceptadas,omitempty"`                                // POR_CONFIRMAR que el usuario confirma como personas nuevas
+	Omitidas         []int32                `protobuf:"varint,10,rep,packed,name=omitidas,proto3" json:"omitidas,omitempty"`                                 // POR_CONFIRMAR que el usuario decide no importar
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *DatosImportacionRequest) Reset() {
+	*x = DatosImportacionRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[80]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DatosImportacionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatosImportacionRequest) ProtoMessage() {}
+
+func (x *DatosImportacionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[80]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatosImportacionRequest.ProtoReflect.Descriptor instead.
+func (*DatosImportacionRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{80}
+}
+
+func (x *DatosImportacionRequest) GetNombreArchivo() string {
+	if x != nil {
+		return x.NombreArchivo
+	}
+	return ""
+}
+
+func (x *DatosImportacionRequest) GetContenido() []byte {
+	if x != nil {
+		return x.Contenido
+	}
+	return nil
+}
+
+func (x *DatosImportacionRequest) GetOpciones() *OpcionesLectura {
+	if x != nil {
+		return x.Opciones
+	}
+	return nil
+}
+
+func (x *DatosImportacionRequest) GetMapeo() []*AsignacionColumna {
+	if x != nil {
+		return x.Mapeo
+	}
+	return nil
+}
+
+func (x *DatosImportacionRequest) GetMapeoConfirmado() bool {
+	if x != nil {
+		return x.MapeoConfirmado
+	}
+	return false
+}
+
+func (x *DatosImportacionRequest) GetPlantillaId() string {
+	if x != nil {
+		return x.PlantillaId
+	}
+	return ""
+}
+
+func (x *DatosImportacionRequest) GetHuella() string {
+	if x != nil {
+		return x.Huella
+	}
+	return ""
+}
+
+func (x *DatosImportacionRequest) GetExcluirInvalidos() bool {
+	if x != nil {
+		return x.ExcluirInvalidos
+	}
+	return false
+}
+
+func (x *DatosImportacionRequest) GetAceptadas() []int32 {
+	if x != nil {
+		return x.Aceptadas
+	}
+	return nil
+}
+
+func (x *DatosImportacionRequest) GetOmitidas() []int32 {
+	if x != nil {
+		return x.Omitidas
+	}
+	return nil
+}
+
+type ColumnaAnalizada struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Columna       int32                  `protobuf:"varint,1,opt,name=columna,proto3" json:"columna,omitempty"`
+	Encabezado    string                 `protobuf:"bytes,2,opt,name=encabezado,proto3" json:"encabezado,omitempty"`
+	Campo         string                 `protobuf:"bytes,3,opt,name=campo,proto3" json:"campo,omitempty"`
+	Confianza     string                 `protobuf:"bytes,4,opt,name=confianza,proto3" json:"confianza,omitempty"`
+	Motivo        string                 `protobuf:"bytes,5,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	Alternativas  []string               `protobuf:"bytes,6,rep,name=alternativas,proto3" json:"alternativas,omitempty"`
+	Muestras      []string               `protobuf:"bytes,7,rep,name=muestras,proto3" json:"muestras,omitempty"`
+	Confirmada    bool                   `protobuf:"varint,8,opt,name=confirmada,proto3" json:"confirmada,omitempty"`
+	Importable    bool                   `protobuf:"varint,9,opt,name=importable,proto3" json:"importable,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ColumnaAnalizada) Reset() {
+	*x = ColumnaAnalizada{}
+	mi := &file_estudiantes_service_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ColumnaAnalizada) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ColumnaAnalizada) ProtoMessage() {}
+
+func (x *ColumnaAnalizada) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ColumnaAnalizada.ProtoReflect.Descriptor instead.
+func (*ColumnaAnalizada) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{81}
+}
+
+func (x *ColumnaAnalizada) GetColumna() int32 {
+	if x != nil {
+		return x.Columna
+	}
+	return 0
+}
+
+func (x *ColumnaAnalizada) GetEncabezado() string {
+	if x != nil {
+		return x.Encabezado
+	}
+	return ""
+}
+
+func (x *ColumnaAnalizada) GetCampo() string {
+	if x != nil {
+		return x.Campo
+	}
+	return ""
+}
+
+func (x *ColumnaAnalizada) GetConfianza() string {
+	if x != nil {
+		return x.Confianza
+	}
+	return ""
+}
+
+func (x *ColumnaAnalizada) GetMotivo() string {
+	if x != nil {
+		return x.Motivo
+	}
+	return ""
+}
+
+func (x *ColumnaAnalizada) GetAlternativas() []string {
+	if x != nil {
+		return x.Alternativas
+	}
+	return nil
+}
+
+func (x *ColumnaAnalizada) GetMuestras() []string {
+	if x != nil {
+		return x.Muestras
+	}
+	return nil
+}
+
+func (x *ColumnaAnalizada) GetConfirmada() bool {
+	if x != nil {
+		return x.Confirmada
+	}
+	return false
+}
+
+func (x *ColumnaAnalizada) GetImportable() bool {
+	if x != nil {
+		return x.Importable
+	}
+	return false
+}
+
+type RegistroAnalizado struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Fila          int32                  `protobuf:"varint,1,opt,name=fila,proto3" json:"fila,omitempty"`
+	Categoria     string                 `protobuf:"bytes,2,opt,name=categoria,proto3" json:"categoria,omitempty"`
+	Codigo        string                 `protobuf:"bytes,3,opt,name=codigo,proto3" json:"codigo,omitempty"`
+	Documento     string                 `protobuf:"bytes,4,opt,name=documento,proto3" json:"documento,omitempty"`
+	Apellidos     string                 `protobuf:"bytes,5,opt,name=apellidos,proto3" json:"apellidos,omitempty"`
+	Nombres       string                 `protobuf:"bytes,6,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	Estado        string                 `protobuf:"bytes,7,opt,name=estado,proto3" json:"estado,omitempty"`
+	Nivel         string                 `protobuf:"bytes,8,opt,name=nivel,proto3" json:"nivel,omitempty"`
+	Grado         string                 `protobuf:"bytes,9,opt,name=grado,proto3" json:"grado,omitempty"`
+	Seccion       string                 `protobuf:"bytes,10,opt,name=seccion,proto3" json:"seccion,omitempty"`
+	Turno         string                 `protobuf:"bytes,11,opt,name=turno,proto3" json:"turno,omitempty"`
+	Errores       []string               `protobuf:"bytes,12,rep,name=errores,proto3" json:"errores,omitempty"`
+	Avisos        []string               `protobuf:"bytes,13,rep,name=avisos,proto3" json:"avisos,omitempty"`
+	Correcciones  []string               `protobuf:"bytes,14,rep,name=correcciones,proto3" json:"correcciones,omitempty"`
+	Coincidencia  string                 `protobuf:"bytes,15,opt,name=coincidencia,proto3" json:"coincidencia,omitempty"` // estudiante registrado que coincide (código y nombre)
+	Resultado     string                 `protobuf:"bytes,16,opt,name=resultado,proto3" json:"resultado,omitempty"`       // confirmación: INSERTADO | OMITIDO
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegistroAnalizado) Reset() {
+	*x = RegistroAnalizado{}
+	mi := &file_estudiantes_service_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegistroAnalizado) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegistroAnalizado) ProtoMessage() {}
+
+func (x *RegistroAnalizado) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegistroAnalizado.ProtoReflect.Descriptor instead.
+func (*RegistroAnalizado) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{82}
+}
+
+func (x *RegistroAnalizado) GetFila() int32 {
+	if x != nil {
+		return x.Fila
+	}
+	return 0
+}
+
+func (x *RegistroAnalizado) GetCategoria() string {
+	if x != nil {
+		return x.Categoria
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetCodigo() string {
+	if x != nil {
+		return x.Codigo
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetDocumento() string {
+	if x != nil {
+		return x.Documento
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetApellidos() string {
+	if x != nil {
+		return x.Apellidos
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetNombres() string {
+	if x != nil {
+		return x.Nombres
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetNivel() string {
+	if x != nil {
+		return x.Nivel
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetGrado() string {
+	if x != nil {
+		return x.Grado
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetSeccion() string {
+	if x != nil {
+		return x.Seccion
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetTurno() string {
+	if x != nil {
+		return x.Turno
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetErrores() []string {
+	if x != nil {
+		return x.Errores
+	}
+	return nil
+}
+
+func (x *RegistroAnalizado) GetAvisos() []string {
+	if x != nil {
+		return x.Avisos
+	}
+	return nil
+}
+
+func (x *RegistroAnalizado) GetCorrecciones() []string {
+	if x != nil {
+		return x.Correcciones
+	}
+	return nil
+}
+
+func (x *RegistroAnalizado) GetCoincidencia() string {
+	if x != nil {
+		return x.Coincidencia
+	}
+	return ""
+}
+
+func (x *RegistroAnalizado) GetResultado() string {
+	if x != nil {
+		return x.Resultado
+	}
+	return ""
+}
+
+type ResumenDatos struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Nuevos        int32                  `protobuf:"varint,2,opt,name=nuevos,proto3" json:"nuevos,omitempty"`
+	Existentes    int32                  `protobuf:"varint,3,opt,name=existentes,proto3" json:"existentes,omitempty"`
+	Duplicados    int32                  `protobuf:"varint,4,opt,name=duplicados,proto3" json:"duplicados,omitempty"`
+	PorConfirmar  int32                  `protobuf:"varint,5,opt,name=por_confirmar,json=porConfirmar,proto3" json:"por_confirmar,omitempty"`
+	Conflictos    int32                  `protobuf:"varint,6,opt,name=conflictos,proto3" json:"conflictos,omitempty"`
+	Invalidos     int32                  `protobuf:"varint,7,opt,name=invalidos,proto3" json:"invalidos,omitempty"`
+	ConAvisos     int32                  `protobuf:"varint,8,opt,name=con_avisos,json=conAvisos,proto3" json:"con_avisos,omitempty"`
+	Insertados    int32                  `protobuf:"varint,9,opt,name=insertados,proto3" json:"insertados,omitempty"`
+	Omitidos      int32                  `protobuf:"varint,10,opt,name=omitidos,proto3" json:"omitidos,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResumenDatos) Reset() {
+	*x = ResumenDatos{}
+	mi := &file_estudiantes_service_proto_msgTypes[83]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResumenDatos) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResumenDatos) ProtoMessage() {}
+
+func (x *ResumenDatos) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[83]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResumenDatos.ProtoReflect.Descriptor instead.
+func (*ResumenDatos) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{83}
+}
+
+func (x *ResumenDatos) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetNuevos() int32 {
+	if x != nil {
+		return x.Nuevos
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetExistentes() int32 {
+	if x != nil {
+		return x.Existentes
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetDuplicados() int32 {
+	if x != nil {
+		return x.Duplicados
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetPorConfirmar() int32 {
+	if x != nil {
+		return x.PorConfirmar
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetConflictos() int32 {
+	if x != nil {
+		return x.Conflictos
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetInvalidos() int32 {
+	if x != nil {
+		return x.Invalidos
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetConAvisos() int32 {
+	if x != nil {
+		return x.ConAvisos
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetInsertados() int32 {
+	if x != nil {
+		return x.Insertados
+	}
+	return 0
+}
+
+func (x *ResumenDatos) GetOmitidos() int32 {
+	if x != nil {
+		return x.Omitidos
+	}
+	return 0
+}
+
+type DatosImportacionResponse struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	Formato                string                 `protobuf:"bytes,1,opt,name=formato,proto3" json:"formato,omitempty"`
+	Extension              string                 `protobuf:"bytes,2,opt,name=extension,proto3" json:"extension,omitempty"`
+	Hojas                  []string               `protobuf:"bytes,3,rep,name=hojas,proto3" json:"hojas,omitempty"`
+	Hoja                   string                 `protobuf:"bytes,4,opt,name=hoja,proto3" json:"hoja,omitempty"`
+	Rutas                  []string               `protobuf:"bytes,5,rep,name=rutas,proto3" json:"rutas,omitempty"`
+	Ruta                   string                 `protobuf:"bytes,6,opt,name=ruta,proto3" json:"ruta,omitempty"`
+	Separador              string                 `protobuf:"bytes,7,opt,name=separador,proto3" json:"separador,omitempty"`
+	Codificacion           string                 `protobuf:"bytes,8,opt,name=codificacion,proto3" json:"codificacion,omitempty"`
+	FilaEncabezado         int32                  `protobuf:"varint,9,opt,name=fila_encabezado,json=filaEncabezado,proto3" json:"fila_encabezado,omitempty"`
+	AvisosArchivo          []string               `protobuf:"bytes,10,rep,name=avisos_archivo,json=avisosArchivo,proto3" json:"avisos_archivo,omitempty"`
+	Columnas               []*ColumnaAnalizada    `protobuf:"bytes,11,rep,name=columnas,proto3" json:"columnas,omitempty"`
+	ProblemasMapeo         []string               `protobuf:"bytes,12,rep,name=problemas_mapeo,json=problemasMapeo,proto3" json:"problemas_mapeo,omitempty"`
+	RequiereConfirmarMapeo bool                   `protobuf:"varint,13,opt,name=requiere_confirmar_mapeo,json=requiereConfirmarMapeo,proto3" json:"requiere_confirmar_mapeo,omitempty"`
+	Bloqueantes            []string               `protobuf:"bytes,14,rep,name=bloqueantes,proto3" json:"bloqueantes,omitempty"`
+	Avisos                 []string               `protobuf:"bytes,15,rep,name=avisos,proto3" json:"avisos,omitempty"`
+	Resumen                *ResumenDatos          `protobuf:"bytes,16,opt,name=resumen,proto3" json:"resumen,omitempty"`
+	Registros              []*RegistroAnalizado   `protobuf:"bytes,17,rep,name=registros,proto3" json:"registros,omitempty"`
+	Huella                 string                 `protobuf:"bytes,18,opt,name=huella,proto3" json:"huella,omitempty"`
+	Confirmada             bool                   `protobuf:"varint,19,opt,name=confirmada,proto3" json:"confirmada,omitempty"`
+	PlantillaAplicada      string                 `protobuf:"bytes,20,opt,name=plantilla_aplicada,json=plantillaAplicada,proto3" json:"plantilla_aplicada,omitempty"`
+	PlantillaAvisos        []string               `protobuf:"bytes,21,rep,name=plantilla_avisos,json=plantillaAvisos,proto3" json:"plantilla_avisos,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DatosImportacionResponse) Reset() {
+	*x = DatosImportacionResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[84]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DatosImportacionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatosImportacionResponse) ProtoMessage() {}
+
+func (x *DatosImportacionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[84]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatosImportacionResponse.ProtoReflect.Descriptor instead.
+func (*DatosImportacionResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{84}
+}
+
+func (x *DatosImportacionResponse) GetFormato() string {
+	if x != nil {
+		return x.Formato
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetExtension() string {
+	if x != nil {
+		return x.Extension
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetHojas() []string {
+	if x != nil {
+		return x.Hojas
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetHoja() string {
+	if x != nil {
+		return x.Hoja
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetRutas() []string {
+	if x != nil {
+		return x.Rutas
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetRuta() string {
+	if x != nil {
+		return x.Ruta
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetSeparador() string {
+	if x != nil {
+		return x.Separador
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetCodificacion() string {
+	if x != nil {
+		return x.Codificacion
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetFilaEncabezado() int32 {
+	if x != nil {
+		return x.FilaEncabezado
+	}
+	return 0
+}
+
+func (x *DatosImportacionResponse) GetAvisosArchivo() []string {
+	if x != nil {
+		return x.AvisosArchivo
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetColumnas() []*ColumnaAnalizada {
+	if x != nil {
+		return x.Columnas
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetProblemasMapeo() []string {
+	if x != nil {
+		return x.ProblemasMapeo
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetRequiereConfirmarMapeo() bool {
+	if x != nil {
+		return x.RequiereConfirmarMapeo
+	}
+	return false
+}
+
+func (x *DatosImportacionResponse) GetBloqueantes() []string {
+	if x != nil {
+		return x.Bloqueantes
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetAvisos() []string {
+	if x != nil {
+		return x.Avisos
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetResumen() *ResumenDatos {
+	if x != nil {
+		return x.Resumen
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetRegistros() []*RegistroAnalizado {
+	if x != nil {
+		return x.Registros
+	}
+	return nil
+}
+
+func (x *DatosImportacionResponse) GetHuella() string {
+	if x != nil {
+		return x.Huella
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetConfirmada() bool {
+	if x != nil {
+		return x.Confirmada
+	}
+	return false
+}
+
+func (x *DatosImportacionResponse) GetPlantillaAplicada() string {
+	if x != nil {
+		return x.PlantillaAplicada
+	}
+	return ""
+}
+
+func (x *DatosImportacionResponse) GetPlantillaAvisos() []string {
+	if x != nil {
+		return x.PlantillaAvisos
+	}
+	return nil
+}
+
+type CampoDatos struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clave         string                 `protobuf:"bytes,1,opt,name=clave,proto3" json:"clave,omitempty"`
+	Etiqueta      string                 `protobuf:"bytes,2,opt,name=etiqueta,proto3" json:"etiqueta,omitempty"`
+	Grupo         string                 `protobuf:"bytes,3,opt,name=grupo,proto3" json:"grupo,omitempty"`
+	Importable    bool                   `protobuf:"varint,4,opt,name=importable,proto3" json:"importable,omitempty"`
+	Exportable    bool                   `protobuf:"varint,5,opt,name=exportable,proto3" json:"exportable,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CampoDatos) Reset() {
+	*x = CampoDatos{}
+	mi := &file_estudiantes_service_proto_msgTypes[85]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CampoDatos) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CampoDatos) ProtoMessage() {}
+
+func (x *CampoDatos) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[85]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CampoDatos.ProtoReflect.Descriptor instead.
+func (*CampoDatos) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{85}
+}
+
+func (x *CampoDatos) GetClave() string {
+	if x != nil {
+		return x.Clave
+	}
+	return ""
+}
+
+func (x *CampoDatos) GetEtiqueta() string {
+	if x != nil {
+		return x.Etiqueta
+	}
+	return ""
+}
+
+func (x *CampoDatos) GetGrupo() string {
+	if x != nil {
+		return x.Grupo
+	}
+	return ""
+}
+
+func (x *CampoDatos) GetImportable() bool {
+	if x != nil {
+		return x.Importable
+	}
+	return false
+}
+
+func (x *CampoDatos) GetExportable() bool {
+	if x != nil {
+		return x.Exportable
+	}
+	return false
+}
+
+type ColumnaExportDatos struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clave         string                 `protobuf:"bytes,1,opt,name=clave,proto3" json:"clave,omitempty"`
+	Encabezado    string                 `protobuf:"bytes,2,opt,name=encabezado,proto3" json:"encabezado,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ColumnaExportDatos) Reset() {
+	*x = ColumnaExportDatos{}
+	mi := &file_estudiantes_service_proto_msgTypes[86]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ColumnaExportDatos) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ColumnaExportDatos) ProtoMessage() {}
+
+func (x *ColumnaExportDatos) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[86]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ColumnaExportDatos.ProtoReflect.Descriptor instead.
+func (*ColumnaExportDatos) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{86}
+}
+
+func (x *ColumnaExportDatos) GetClave() string {
+	if x != nil {
+		return x.Clave
+	}
+	return ""
+}
+
+func (x *ColumnaExportDatos) GetEncabezado() string {
+	if x != nil {
+		return x.Encabezado
+	}
+	return ""
+}
+
+type CamposDatosRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CamposDatosRequest) Reset() {
+	*x = CamposDatosRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[87]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CamposDatosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CamposDatosRequest) ProtoMessage() {}
+
+func (x *CamposDatosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[87]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CamposDatosRequest.ProtoReflect.Descriptor instead.
+func (*CamposDatosRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{87}
+}
+
+type CamposDatosResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Campos          []*CampoDatos          `protobuf:"bytes,1,rep,name=campos,proto3" json:"campos,omitempty"`
+	FormatosEntrada []string               `protobuf:"bytes,2,rep,name=formatos_entrada,json=formatosEntrada,proto3" json:"formatos_entrada,omitempty"`
+	FormatosSalida  []string               `protobuf:"bytes,3,rep,name=formatos_salida,json=formatosSalida,proto3" json:"formatos_salida,omitempty"`
+	ColumnasTabla   []*ColumnaExportDatos  `protobuf:"bytes,4,rep,name=columnas_tabla,json=columnasTabla,proto3" json:"columnas_tabla,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *CamposDatosResponse) Reset() {
+	*x = CamposDatosResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[88]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CamposDatosResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CamposDatosResponse) ProtoMessage() {}
+
+func (x *CamposDatosResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[88]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CamposDatosResponse.ProtoReflect.Descriptor instead.
+func (*CamposDatosResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{88}
+}
+
+func (x *CamposDatosResponse) GetCampos() []*CampoDatos {
+	if x != nil {
+		return x.Campos
+	}
+	return nil
+}
+
+func (x *CamposDatosResponse) GetFormatosEntrada() []string {
+	if x != nil {
+		return x.FormatosEntrada
+	}
+	return nil
+}
+
+func (x *CamposDatosResponse) GetFormatosSalida() []string {
+	if x != nil {
+		return x.FormatosSalida
+	}
+	return nil
+}
+
+func (x *CamposDatosResponse) GetColumnasTabla() []*ColumnaExportDatos {
+	if x != nil {
+		return x.ColumnasTabla
+	}
+	return nil
+}
+
+type DatosExportacionRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Q                string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
+	Estado           string                 `protobuf:"bytes,2,opt,name=estado,proto3" json:"estado,omitempty"`
+	Nivel            string                 `protobuf:"bytes,3,opt,name=nivel,proto3" json:"nivel,omitempty"`
+	Grado            string                 `protobuf:"bytes,4,opt,name=grado,proto3" json:"grado,omitempty"`
+	Seccion          string                 `protobuf:"bytes,5,opt,name=seccion,proto3" json:"seccion,omitempty"`
+	Turno            string                 `protobuf:"bytes,6,opt,name=turno,proto3" json:"turno,omitempty"`
+	Orden            string                 `protobuf:"bytes,7,opt,name=orden,proto3" json:"orden,omitempty"`
+	Columnas         []*ColumnaExportDatos  `protobuf:"bytes,8,rep,name=columnas,proto3" json:"columnas,omitempty"`
+	Formato          string                 `protobuf:"bytes,9,opt,name=formato,proto3" json:"formato,omitempty"`
+	Separador        string                 `protobuf:"bytes,10,opt,name=separador,proto3" json:"separador,omitempty"`
+	Codificacion     string                 `protobuf:"bytes,11,opt,name=codificacion,proto3" json:"codificacion,omitempty"`
+	ProtegerFormulas bool                   `protobuf:"varint,12,opt,name=proteger_formulas,json=protegerFormulas,proto3" json:"proteger_formulas,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *DatosExportacionRequest) Reset() {
+	*x = DatosExportacionRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[89]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DatosExportacionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatosExportacionRequest) ProtoMessage() {}
+
+func (x *DatosExportacionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[89]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatosExportacionRequest.ProtoReflect.Descriptor instead.
+func (*DatosExportacionRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{89}
+}
+
+func (x *DatosExportacionRequest) GetQ() string {
+	if x != nil {
+		return x.Q
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetNivel() string {
+	if x != nil {
+		return x.Nivel
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetGrado() string {
+	if x != nil {
+		return x.Grado
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetSeccion() string {
+	if x != nil {
+		return x.Seccion
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetTurno() string {
+	if x != nil {
+		return x.Turno
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetOrden() string {
+	if x != nil {
+		return x.Orden
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetColumnas() []*ColumnaExportDatos {
+	if x != nil {
+		return x.Columnas
+	}
+	return nil
+}
+
+func (x *DatosExportacionRequest) GetFormato() string {
+	if x != nil {
+		return x.Formato
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetSeparador() string {
+	if x != nil {
+		return x.Separador
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetCodificacion() string {
+	if x != nil {
+		return x.Codificacion
+	}
+	return ""
+}
+
+func (x *DatosExportacionRequest) GetProtegerFormulas() bool {
+	if x != nil {
+		return x.ProtegerFormulas
+	}
+	return false
+}
+
+type ArchivoDatosResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nombre        string                 `protobuf:"bytes,1,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	Mime          string                 `protobuf:"bytes,2,opt,name=mime,proto3" json:"mime,omitempty"`
+	Contenido     []byte                 `protobuf:"bytes,3,opt,name=contenido,proto3" json:"contenido,omitempty"`
+	Filas         int32                  `protobuf:"varint,4,opt,name=filas,proto3" json:"filas,omitempty"`
+	Protegidas    int32                  `protobuf:"varint,5,opt,name=protegidas,proto3" json:"protegidas,omitempty"` // celdas CSV/TSV protegidas contra fórmulas
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ArchivoDatosResponse) Reset() {
+	*x = ArchivoDatosResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[90]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ArchivoDatosResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ArchivoDatosResponse) ProtoMessage() {}
+
+func (x *ArchivoDatosResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[90]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ArchivoDatosResponse.ProtoReflect.Descriptor instead.
+func (*ArchivoDatosResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{90}
+}
+
+func (x *ArchivoDatosResponse) GetNombre() string {
+	if x != nil {
+		return x.Nombre
+	}
+	return ""
+}
+
+func (x *ArchivoDatosResponse) GetMime() string {
+	if x != nil {
+		return x.Mime
+	}
+	return ""
+}
+
+func (x *ArchivoDatosResponse) GetContenido() []byte {
+	if x != nil {
+		return x.Contenido
+	}
+	return nil
+}
+
+func (x *ArchivoDatosResponse) GetFilas() int32 {
+	if x != nil {
+		return x.Filas
+	}
+	return 0
+}
+
+func (x *ArchivoDatosResponse) GetProtegidas() int32 {
+	if x != nil {
+		return x.Protegidas
+	}
+	return 0
+}
+
+type PlantillaDatos struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Tipo           string                 `protobuf:"bytes,2,opt,name=tipo,proto3" json:"tipo,omitempty"` // IMPORTACION | EXPORTACION
+	Nombre         string                 `protobuf:"bytes,3,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	Formato        string                 `protobuf:"bytes,4,opt,name=formato,proto3" json:"formato,omitempty"`
+	Configuracion  string                 `protobuf:"bytes,5,opt,name=configuracion,proto3" json:"configuracion,omitempty"` // JSON validado por el servicio
+	Version        int32                  `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+	CreadoPor      string                 `protobuf:"bytes,7,opt,name=creado_por,json=creadoPor,proto3" json:"creado_por,omitempty"`
+	ActualizadoPor string                 `protobuf:"bytes,8,opt,name=actualizado_por,json=actualizadoPor,proto3" json:"actualizado_por,omitempty"`
+	Creado         string                 `protobuf:"bytes,9,opt,name=creado,proto3" json:"creado,omitempty"`
+	Actualizado    string                 `protobuf:"bytes,10,opt,name=actualizado,proto3" json:"actualizado,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *PlantillaDatos) Reset() {
+	*x = PlantillaDatos{}
+	mi := &file_estudiantes_service_proto_msgTypes[91]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlantillaDatos) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlantillaDatos) ProtoMessage() {}
+
+func (x *PlantillaDatos) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[91]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlantillaDatos.ProtoReflect.Descriptor instead.
+func (*PlantillaDatos) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{91}
+}
+
+func (x *PlantillaDatos) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetNombre() string {
+	if x != nil {
+		return x.Nombre
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetFormato() string {
+	if x != nil {
+		return x.Formato
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetConfiguracion() string {
+	if x != nil {
+		return x.Configuracion
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetVersion() int32 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *PlantillaDatos) GetCreadoPor() string {
+	if x != nil {
+		return x.CreadoPor
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetActualizadoPor() string {
+	if x != nil {
+		return x.ActualizadoPor
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetCreado() string {
+	if x != nil {
+		return x.Creado
+	}
+	return ""
+}
+
+func (x *PlantillaDatos) GetActualizado() string {
+	if x != nil {
+		return x.Actualizado
+	}
+	return ""
+}
+
+type ListPlantillasDatosRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tipo          string                 `protobuf:"bytes,1,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPlantillasDatosRequest) Reset() {
+	*x = ListPlantillasDatosRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[92]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPlantillasDatosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPlantillasDatosRequest) ProtoMessage() {}
+
+func (x *ListPlantillasDatosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[92]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPlantillasDatosRequest.ProtoReflect.Descriptor instead.
+func (*ListPlantillasDatosRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{92}
+}
+
+func (x *ListPlantillasDatosRequest) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+type ListPlantillasDatosResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Plantillas    []*PlantillaDatos      `protobuf:"bytes,1,rep,name=plantillas,proto3" json:"plantillas,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPlantillasDatosResponse) Reset() {
+	*x = ListPlantillasDatosResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[93]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPlantillasDatosResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPlantillasDatosResponse) ProtoMessage() {}
+
+func (x *ListPlantillasDatosResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[93]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPlantillasDatosResponse.ProtoReflect.Descriptor instead.
+func (*ListPlantillasDatosResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{93}
+}
+
+func (x *ListPlantillasDatosResponse) GetPlantillas() []*PlantillaDatos {
+	if x != nil {
+		return x.Plantillas
+	}
+	return nil
+}
+
+type GuardarPlantillaDatosRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // vacío = nueva
+	Tipo            string                 `protobuf:"bytes,2,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	Nombre          string                 `protobuf:"bytes,3,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	Formato         string                 `protobuf:"bytes,4,opt,name=formato,proto3" json:"formato,omitempty"`
+	Configuracion   string                 `protobuf:"bytes,5,opt,name=configuracion,proto3" json:"configuracion,omitempty"`
+	ExpectedVersion int32                  `protobuf:"varint,6,opt,name=expected_version,json=expectedVersion,proto3" json:"expected_version,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GuardarPlantillaDatosRequest) Reset() {
+	*x = GuardarPlantillaDatosRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[94]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuardarPlantillaDatosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuardarPlantillaDatosRequest) ProtoMessage() {}
+
+func (x *GuardarPlantillaDatosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[94]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuardarPlantillaDatosRequest.ProtoReflect.Descriptor instead.
+func (*GuardarPlantillaDatosRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{94}
+}
+
+func (x *GuardarPlantillaDatosRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *GuardarPlantillaDatosRequest) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+func (x *GuardarPlantillaDatosRequest) GetNombre() string {
+	if x != nil {
+		return x.Nombre
+	}
+	return ""
+}
+
+func (x *GuardarPlantillaDatosRequest) GetFormato() string {
+	if x != nil {
+		return x.Formato
+	}
+	return ""
+}
+
+func (x *GuardarPlantillaDatosRequest) GetConfiguracion() string {
+	if x != nil {
+		return x.Configuracion
+	}
+	return ""
+}
+
+func (x *GuardarPlantillaDatosRequest) GetExpectedVersion() int32 {
+	if x != nil {
+		return x.ExpectedVersion
+	}
+	return 0
+}
+
+type PlantillaDatosResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Plantilla     *PlantillaDatos        `protobuf:"bytes,1,opt,name=plantilla,proto3" json:"plantilla,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlantillaDatosResponse) Reset() {
+	*x = PlantillaDatosResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[95]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlantillaDatosResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlantillaDatosResponse) ProtoMessage() {}
+
+func (x *PlantillaDatosResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[95]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlantillaDatosResponse.ProtoReflect.Descriptor instead.
+func (*PlantillaDatosResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{95}
+}
+
+func (x *PlantillaDatosResponse) GetPlantilla() *PlantillaDatos {
+	if x != nil {
+		return x.Plantilla
+	}
+	return nil
+}
+
+type EliminarPlantillaDatosRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Tipo          string                 `protobuf:"bytes,2,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EliminarPlantillaDatosRequest) Reset() {
+	*x = EliminarPlantillaDatosRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[96]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EliminarPlantillaDatosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EliminarPlantillaDatosRequest) ProtoMessage() {}
+
+func (x *EliminarPlantillaDatosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[96]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EliminarPlantillaDatosRequest.ProtoReflect.Descriptor instead.
+func (*EliminarPlantillaDatosRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{96}
+}
+
+func (x *EliminarPlantillaDatosRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *EliminarPlantillaDatosRequest) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+type EliminarPlantillaDatosResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Eliminada     bool                   `protobuf:"varint,1,opt,name=eliminada,proto3" json:"eliminada,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EliminarPlantillaDatosResponse) Reset() {
+	*x = EliminarPlantillaDatosResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[97]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EliminarPlantillaDatosResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EliminarPlantillaDatosResponse) ProtoMessage() {}
+
+func (x *EliminarPlantillaDatosResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[97]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EliminarPlantillaDatosResponse.ProtoReflect.Descriptor instead.
+func (*EliminarPlantillaDatosResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{97}
+}
+
+func (x *EliminarPlantillaDatosResponse) GetEliminada() bool {
+	if x != nil {
+		return x.Eliminada
+	}
+	return false
+}
+
 var File_estudiantes_service_proto protoreflect.FileDescriptor
 
 const file_estudiantes_service_proto_rawDesc = "" +
@@ -5949,7 +7653,185 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"confirmada\"J\n" +
 	"\x1aExportarEstudiantesRequest\x12\x16\n" +
 	"\x06estado\x18\x01 \x01(\tR\x06estado\x12\x14\n" +
-	"\x05nivel\x18\x02 \x01(\tR\x05nivel2\xbd\x1c\n" +
+	"\x05nivel\x18\x02 \x01(\tR\x05nivel\"\xa4\x01\n" +
+	"\x0fOpcionesLectura\x12\x12\n" +
+	"\x04hoja\x18\x01 \x01(\tR\x04hoja\x12\x12\n" +
+	"\x04ruta\x18\x02 \x01(\tR\x04ruta\x12\x1c\n" +
+	"\tseparador\x18\x03 \x01(\tR\tseparador\x12\"\n" +
+	"\fcodificacion\x18\x04 \x01(\tR\fcodificacion\x12'\n" +
+	"\x0ffila_encabezado\x18\x05 \x01(\x05R\x0efilaEncabezado\"C\n" +
+	"\x11AsignacionColumna\x12\x18\n" +
+	"\acolumna\x18\x01 \x01(\x05R\acolumna\x12\x14\n" +
+	"\x05campo\x18\x02 \x01(\tR\x05campo\"\x9b\x03\n" +
+	"\x17DatosImportacionRequest\x12%\n" +
+	"\x0enombre_archivo\x18\x01 \x01(\tR\rnombreArchivo\x12\x1c\n" +
+	"\tcontenido\x18\x02 \x01(\fR\tcontenido\x128\n" +
+	"\bopciones\x18\x03 \x01(\v2\x1c.estudiantes.OpcionesLecturaR\bopciones\x124\n" +
+	"\x05mapeo\x18\x04 \x03(\v2\x1e.estudiantes.AsignacionColumnaR\x05mapeo\x12)\n" +
+	"\x10mapeo_confirmado\x18\x05 \x01(\bR\x0fmapeoConfirmado\x12!\n" +
+	"\fplantilla_id\x18\x06 \x01(\tR\vplantillaId\x12\x16\n" +
+	"\x06huella\x18\a \x01(\tR\x06huella\x12+\n" +
+	"\x11excluir_invalidos\x18\b \x01(\bR\x10excluirInvalidos\x12\x1c\n" +
+	"\taceptadas\x18\t \x03(\x05R\taceptadas\x12\x1a\n" +
+	"\bomitidas\x18\n" +
+	" \x03(\x05R\bomitidas\"\x98\x02\n" +
+	"\x10ColumnaAnalizada\x12\x18\n" +
+	"\acolumna\x18\x01 \x01(\x05R\acolumna\x12\x1e\n" +
+	"\n" +
+	"encabezado\x18\x02 \x01(\tR\n" +
+	"encabezado\x12\x14\n" +
+	"\x05campo\x18\x03 \x01(\tR\x05campo\x12\x1c\n" +
+	"\tconfianza\x18\x04 \x01(\tR\tconfianza\x12\x16\n" +
+	"\x06motivo\x18\x05 \x01(\tR\x06motivo\x12\"\n" +
+	"\falternativas\x18\x06 \x03(\tR\falternativas\x12\x1a\n" +
+	"\bmuestras\x18\a \x03(\tR\bmuestras\x12\x1e\n" +
+	"\n" +
+	"confirmada\x18\b \x01(\bR\n" +
+	"confirmada\x12\x1e\n" +
+	"\n" +
+	"importable\x18\t \x01(\bR\n" +
+	"importable\"\xbf\x03\n" +
+	"\x11RegistroAnalizado\x12\x12\n" +
+	"\x04fila\x18\x01 \x01(\x05R\x04fila\x12\x1c\n" +
+	"\tcategoria\x18\x02 \x01(\tR\tcategoria\x12\x16\n" +
+	"\x06codigo\x18\x03 \x01(\tR\x06codigo\x12\x1c\n" +
+	"\tdocumento\x18\x04 \x01(\tR\tdocumento\x12\x1c\n" +
+	"\tapellidos\x18\x05 \x01(\tR\tapellidos\x12\x18\n" +
+	"\anombres\x18\x06 \x01(\tR\anombres\x12\x16\n" +
+	"\x06estado\x18\a \x01(\tR\x06estado\x12\x14\n" +
+	"\x05nivel\x18\b \x01(\tR\x05nivel\x12\x14\n" +
+	"\x05grado\x18\t \x01(\tR\x05grado\x12\x18\n" +
+	"\aseccion\x18\n" +
+	" \x01(\tR\aseccion\x12\x14\n" +
+	"\x05turno\x18\v \x01(\tR\x05turno\x12\x18\n" +
+	"\aerrores\x18\f \x03(\tR\aerrores\x12\x16\n" +
+	"\x06avisos\x18\r \x03(\tR\x06avisos\x12\"\n" +
+	"\fcorrecciones\x18\x0e \x03(\tR\fcorrecciones\x12\"\n" +
+	"\fcoincidencia\x18\x0f \x01(\tR\fcoincidencia\x12\x1c\n" +
+	"\tresultado\x18\x10 \x01(\tR\tresultado\"\xba\x02\n" +
+	"\fResumenDatos\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12\x16\n" +
+	"\x06nuevos\x18\x02 \x01(\x05R\x06nuevos\x12\x1e\n" +
+	"\n" +
+	"existentes\x18\x03 \x01(\x05R\n" +
+	"existentes\x12\x1e\n" +
+	"\n" +
+	"duplicados\x18\x04 \x01(\x05R\n" +
+	"duplicados\x12#\n" +
+	"\rpor_confirmar\x18\x05 \x01(\x05R\fporConfirmar\x12\x1e\n" +
+	"\n" +
+	"conflictos\x18\x06 \x01(\x05R\n" +
+	"conflictos\x12\x1c\n" +
+	"\tinvalidos\x18\a \x01(\x05R\tinvalidos\x12\x1d\n" +
+	"\n" +
+	"con_avisos\x18\b \x01(\x05R\tconAvisos\x12\x1e\n" +
+	"\n" +
+	"insertados\x18\t \x01(\x05R\n" +
+	"insertados\x12\x1a\n" +
+	"\bomitidos\x18\n" +
+	" \x01(\x05R\bomitidos\"\x95\x06\n" +
+	"\x18DatosImportacionResponse\x12\x18\n" +
+	"\aformato\x18\x01 \x01(\tR\aformato\x12\x1c\n" +
+	"\textension\x18\x02 \x01(\tR\textension\x12\x14\n" +
+	"\x05hojas\x18\x03 \x03(\tR\x05hojas\x12\x12\n" +
+	"\x04hoja\x18\x04 \x01(\tR\x04hoja\x12\x14\n" +
+	"\x05rutas\x18\x05 \x03(\tR\x05rutas\x12\x12\n" +
+	"\x04ruta\x18\x06 \x01(\tR\x04ruta\x12\x1c\n" +
+	"\tseparador\x18\a \x01(\tR\tseparador\x12\"\n" +
+	"\fcodificacion\x18\b \x01(\tR\fcodificacion\x12'\n" +
+	"\x0ffila_encabezado\x18\t \x01(\x05R\x0efilaEncabezado\x12%\n" +
+	"\x0eavisos_archivo\x18\n" +
+	" \x03(\tR\ravisosArchivo\x129\n" +
+	"\bcolumnas\x18\v \x03(\v2\x1d.estudiantes.ColumnaAnalizadaR\bcolumnas\x12'\n" +
+	"\x0fproblemas_mapeo\x18\f \x03(\tR\x0eproblemasMapeo\x128\n" +
+	"\x18requiere_confirmar_mapeo\x18\r \x01(\bR\x16requiereConfirmarMapeo\x12 \n" +
+	"\vbloqueantes\x18\x0e \x03(\tR\vbloqueantes\x12\x16\n" +
+	"\x06avisos\x18\x0f \x03(\tR\x06avisos\x123\n" +
+	"\aresumen\x18\x10 \x01(\v2\x19.estudiantes.ResumenDatosR\aresumen\x12<\n" +
+	"\tregistros\x18\x11 \x03(\v2\x1e.estudiantes.RegistroAnalizadoR\tregistros\x12\x16\n" +
+	"\x06huella\x18\x12 \x01(\tR\x06huella\x12\x1e\n" +
+	"\n" +
+	"confirmada\x18\x13 \x01(\bR\n" +
+	"confirmada\x12-\n" +
+	"\x12plantilla_aplicada\x18\x14 \x01(\tR\x11plantillaAplicada\x12)\n" +
+	"\x10plantilla_avisos\x18\x15 \x03(\tR\x0fplantillaAvisos\"\x94\x01\n" +
+	"\n" +
+	"CampoDatos\x12\x14\n" +
+	"\x05clave\x18\x01 \x01(\tR\x05clave\x12\x1a\n" +
+	"\betiqueta\x18\x02 \x01(\tR\betiqueta\x12\x14\n" +
+	"\x05grupo\x18\x03 \x01(\tR\x05grupo\x12\x1e\n" +
+	"\n" +
+	"importable\x18\x04 \x01(\bR\n" +
+	"importable\x12\x1e\n" +
+	"\n" +
+	"exportable\x18\x05 \x01(\bR\n" +
+	"exportable\"J\n" +
+	"\x12ColumnaExportDatos\x12\x14\n" +
+	"\x05clave\x18\x01 \x01(\tR\x05clave\x12\x1e\n" +
+	"\n" +
+	"encabezado\x18\x02 \x01(\tR\n" +
+	"encabezado\"\x14\n" +
+	"\x12CamposDatosRequest\"\xe2\x01\n" +
+	"\x13CamposDatosResponse\x12/\n" +
+	"\x06campos\x18\x01 \x03(\v2\x17.estudiantes.CampoDatosR\x06campos\x12)\n" +
+	"\x10formatos_entrada\x18\x02 \x03(\tR\x0fformatosEntrada\x12'\n" +
+	"\x0fformatos_salida\x18\x03 \x03(\tR\x0eformatosSalida\x12F\n" +
+	"\x0ecolumnas_tabla\x18\x04 \x03(\v2\x1f.estudiantes.ColumnaExportDatosR\rcolumnasTabla\"\xf7\x02\n" +
+	"\x17DatosExportacionRequest\x12\f\n" +
+	"\x01q\x18\x01 \x01(\tR\x01q\x12\x16\n" +
+	"\x06estado\x18\x02 \x01(\tR\x06estado\x12\x14\n" +
+	"\x05nivel\x18\x03 \x01(\tR\x05nivel\x12\x14\n" +
+	"\x05grado\x18\x04 \x01(\tR\x05grado\x12\x18\n" +
+	"\aseccion\x18\x05 \x01(\tR\aseccion\x12\x14\n" +
+	"\x05turno\x18\x06 \x01(\tR\x05turno\x12\x14\n" +
+	"\x05orden\x18\a \x01(\tR\x05orden\x12;\n" +
+	"\bcolumnas\x18\b \x03(\v2\x1f.estudiantes.ColumnaExportDatosR\bcolumnas\x12\x18\n" +
+	"\aformato\x18\t \x01(\tR\aformato\x12\x1c\n" +
+	"\tseparador\x18\n" +
+	" \x01(\tR\tseparador\x12\"\n" +
+	"\fcodificacion\x18\v \x01(\tR\fcodificacion\x12+\n" +
+	"\x11proteger_formulas\x18\f \x01(\bR\x10protegerFormulas\"\x96\x01\n" +
+	"\x14ArchivoDatosResponse\x12\x16\n" +
+	"\x06nombre\x18\x01 \x01(\tR\x06nombre\x12\x12\n" +
+	"\x04mime\x18\x02 \x01(\tR\x04mime\x12\x1c\n" +
+	"\tcontenido\x18\x03 \x01(\fR\tcontenido\x12\x14\n" +
+	"\x05filas\x18\x04 \x01(\x05R\x05filas\x12\x1e\n" +
+	"\n" +
+	"protegidas\x18\x05 \x01(\x05R\n" +
+	"protegidas\"\xa8\x02\n" +
+	"\x0ePlantillaDatos\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04tipo\x18\x02 \x01(\tR\x04tipo\x12\x16\n" +
+	"\x06nombre\x18\x03 \x01(\tR\x06nombre\x12\x18\n" +
+	"\aformato\x18\x04 \x01(\tR\aformato\x12$\n" +
+	"\rconfiguracion\x18\x05 \x01(\tR\rconfiguracion\x12\x18\n" +
+	"\aversion\x18\x06 \x01(\x05R\aversion\x12\x1d\n" +
+	"\n" +
+	"creado_por\x18\a \x01(\tR\tcreadoPor\x12'\n" +
+	"\x0factualizado_por\x18\b \x01(\tR\x0eactualizadoPor\x12\x16\n" +
+	"\x06creado\x18\t \x01(\tR\x06creado\x12 \n" +
+	"\vactualizado\x18\n" +
+	" \x01(\tR\vactualizado\"0\n" +
+	"\x1aListPlantillasDatosRequest\x12\x12\n" +
+	"\x04tipo\x18\x01 \x01(\tR\x04tipo\"Z\n" +
+	"\x1bListPlantillasDatosResponse\x12;\n" +
+	"\n" +
+	"plantillas\x18\x01 \x03(\v2\x1b.estudiantes.PlantillaDatosR\n" +
+	"plantillas\"\xc5\x01\n" +
+	"\x1cGuardarPlantillaDatosRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04tipo\x18\x02 \x01(\tR\x04tipo\x12\x16\n" +
+	"\x06nombre\x18\x03 \x01(\tR\x06nombre\x12\x18\n" +
+	"\aformato\x18\x04 \x01(\tR\aformato\x12$\n" +
+	"\rconfiguracion\x18\x05 \x01(\tR\rconfiguracion\x12)\n" +
+	"\x10expected_version\x18\x06 \x01(\x05R\x0fexpectedVersion\"S\n" +
+	"\x16PlantillaDatosResponse\x129\n" +
+	"\tplantilla\x18\x01 \x01(\v2\x1b.estudiantes.PlantillaDatosR\tplantilla\"C\n" +
+	"\x1dEliminarPlantillaDatosRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04tipo\x18\x02 \x01(\tR\x04tipo\">\n" +
+	"\x1eEliminarPlantillaDatosResponse\x12\x1c\n" +
+	"\teliminada\x18\x01 \x01(\bR\teliminada2\x98\"\n" +
 	"\vEstudiantes\x12V\n" +
 	"\rGetEstudiante\x12!.estudiantes.GetEstudianteRequest\x1a\".estudiantes.GetEstudianteResponse\x12b\n" +
 	"\x11SearchEstudiantes\x12%.estudiantes.SearchEstudiantesRequest\x1a&.estudiantes.SearchEstudiantesResponse\x12h\n" +
@@ -5987,7 +7869,14 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x14PlantillaEstudiantes\x12(.estudiantes.PlantillaEstudiantesRequest\x1a!.estudiantes.ArchivoExcelResponse\x12r\n" +
 	"\x1dPreviewImportacionEstudiantes\x12'.estudiantes.ImportarEstudiantesRequest\x1a(.estudiantes.ImportarEstudiantesResponse\x12t\n" +
 	"\x1fConfirmarImportacionEstudiantes\x12'.estudiantes.ImportarEstudiantesRequest\x1a(.estudiantes.ImportarEstudiantesResponse\x12a\n" +
-	"\x13ExportarEstudiantes\x12'.estudiantes.ExportarEstudiantesRequest\x1a!.estudiantes.ArchivoExcelResponseB\x0fZ\r./estudiantesb\x06proto3"
+	"\x13ExportarEstudiantes\x12'.estudiantes.ExportarEstudiantesRequest\x1a!.estudiantes.ArchivoExcelResponse\x12[\n" +
+	"\x16CamposDatosEstudiantes\x12\x1f.estudiantes.CamposDatosRequest\x1a .estudiantes.CamposDatosResponse\x12g\n" +
+	"\x18AnalizarDatosEstudiantes\x12$.estudiantes.DatosImportacionRequest\x1a%.estudiantes.DatosImportacionResponse\x12h\n" +
+	"\x19ConfirmarDatosEstudiantes\x12$.estudiantes.DatosImportacionRequest\x1a%.estudiantes.DatosImportacionResponse\x12c\n" +
+	"\x18ExportarDatosEstudiantes\x12$.estudiantes.DatosExportacionRequest\x1a!.estudiantes.ArchivoDatosResponse\x12h\n" +
+	"\x13ListPlantillasDatos\x12'.estudiantes.ListPlantillasDatosRequest\x1a(.estudiantes.ListPlantillasDatosResponse\x12g\n" +
+	"\x15GuardarPlantillaDatos\x12).estudiantes.GuardarPlantillaDatosRequest\x1a#.estudiantes.PlantillaDatosResponse\x12q\n" +
+	"\x16EliminarPlantillaDatos\x12*.estudiantes.EliminarPlantillaDatosRequest\x1a+.estudiantes.EliminarPlantillaDatosResponseB\x0fZ\r./estudiantesb\x06proto3"
 
 var (
 	file_estudiantes_service_proto_rawDescOnce sync.Once
@@ -6001,7 +7890,7 @@ func file_estudiantes_service_proto_rawDescGZIP() []byte {
 	return file_estudiantes_service_proto_rawDescData
 }
 
-var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 78)
+var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 98)
 var file_estudiantes_service_proto_goTypes = []any{
 	(*Estudiante)(nil),                        // 0: estudiantes.Estudiante
 	(*EstudianteBasico)(nil),                  // 1: estudiantes.EstudianteBasico
@@ -6081,6 +7970,26 @@ var file_estudiantes_service_proto_goTypes = []any{
 	(*ResumenImportacion)(nil),                // 75: estudiantes.ResumenImportacion
 	(*ImportarEstudiantesResponse)(nil),       // 76: estudiantes.ImportarEstudiantesResponse
 	(*ExportarEstudiantesRequest)(nil),        // 77: estudiantes.ExportarEstudiantesRequest
+	(*OpcionesLectura)(nil),                   // 78: estudiantes.OpcionesLectura
+	(*AsignacionColumna)(nil),                 // 79: estudiantes.AsignacionColumna
+	(*DatosImportacionRequest)(nil),           // 80: estudiantes.DatosImportacionRequest
+	(*ColumnaAnalizada)(nil),                  // 81: estudiantes.ColumnaAnalizada
+	(*RegistroAnalizado)(nil),                 // 82: estudiantes.RegistroAnalizado
+	(*ResumenDatos)(nil),                      // 83: estudiantes.ResumenDatos
+	(*DatosImportacionResponse)(nil),          // 84: estudiantes.DatosImportacionResponse
+	(*CampoDatos)(nil),                        // 85: estudiantes.CampoDatos
+	(*ColumnaExportDatos)(nil),                // 86: estudiantes.ColumnaExportDatos
+	(*CamposDatosRequest)(nil),                // 87: estudiantes.CamposDatosRequest
+	(*CamposDatosResponse)(nil),               // 88: estudiantes.CamposDatosResponse
+	(*DatosExportacionRequest)(nil),           // 89: estudiantes.DatosExportacionRequest
+	(*ArchivoDatosResponse)(nil),              // 90: estudiantes.ArchivoDatosResponse
+	(*PlantillaDatos)(nil),                    // 91: estudiantes.PlantillaDatos
+	(*ListPlantillasDatosRequest)(nil),        // 92: estudiantes.ListPlantillasDatosRequest
+	(*ListPlantillasDatosResponse)(nil),       // 93: estudiantes.ListPlantillasDatosResponse
+	(*GuardarPlantillaDatosRequest)(nil),      // 94: estudiantes.GuardarPlantillaDatosRequest
+	(*PlantillaDatosResponse)(nil),            // 95: estudiantes.PlantillaDatosResponse
+	(*EliminarPlantillaDatosRequest)(nil),     // 96: estudiantes.EliminarPlantillaDatosRequest
+	(*EliminarPlantillaDatosResponse)(nil),    // 97: estudiantes.EliminarPlantillaDatosResponse
 }
 var file_estudiantes_service_proto_depIdxs = []int32{
 	0,  // 0: estudiantes.GetEstudianteResponse.estudiante:type_name -> estudiantes.Estudiante
@@ -6123,83 +8032,107 @@ var file_estudiantes_service_proto_depIdxs = []int32{
 	68, // 37: estudiantes.ListMatriculasPeriodoResponse.matriculas:type_name -> estudiantes.MatriculaNomina
 	75, // 38: estudiantes.ImportarEstudiantesResponse.resumen:type_name -> estudiantes.ResumenImportacion
 	74, // 39: estudiantes.ImportarEstudiantesResponse.filas:type_name -> estudiantes.FilaImportacion
-	2,  // 40: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
-	4,  // 41: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
-	6,  // 42: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
-	8,  // 43: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
-	10, // 44: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
-	12, // 45: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
-	15, // 46: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
-	17, // 47: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
-	19, // 48: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
-	22, // 49: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
-	28, // 50: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
-	32, // 51: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
-	34, // 52: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
-	36, // 53: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
-	38, // 54: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
-	46, // 55: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
-	48, // 56: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
-	50, // 57: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
-	52, // 58: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
-	53, // 59: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
-	55, // 60: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
-	57, // 61: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
-	58, // 62: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
-	60, // 63: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
-	63, // 64: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
-	64, // 65: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
-	65, // 66: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
-	66, // 67: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
-	67, // 68: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
-	69, // 69: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
-	40, // 70: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
-	43, // 71: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
-	71, // 72: estudiantes.Estudiantes.PlantillaEstudiantes:input_type -> estudiantes.PlantillaEstudiantesRequest
-	73, // 73: estudiantes.Estudiantes.PreviewImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
-	73, // 74: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
-	77, // 75: estudiantes.Estudiantes.ExportarEstudiantes:input_type -> estudiantes.ExportarEstudiantesRequest
-	3,  // 76: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
-	5,  // 77: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
-	7,  // 78: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
-	9,  // 79: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
-	11, // 80: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
-	13, // 81: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
-	16, // 82: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
-	18, // 83: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
-	20, // 84: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
-	23, // 85: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
-	29, // 86: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
-	33, // 87: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
-	35, // 88: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
-	37, // 89: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
-	39, // 90: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
-	47, // 91: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
-	49, // 92: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
-	51, // 93: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
-	47, // 94: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
-	54, // 95: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
-	56, // 96: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
-	54, // 97: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
-	59, // 98: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
-	61, // 99: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
-	62, // 100: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
-	62, // 101: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 102: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 103: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 104: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
-	70, // 105: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
-	41, // 106: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
-	44, // 107: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
-	72, // 108: estudiantes.Estudiantes.PlantillaEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
-	76, // 109: estudiantes.Estudiantes.PreviewImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
-	76, // 110: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
-	72, // 111: estudiantes.Estudiantes.ExportarEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
-	76, // [76:112] is the sub-list for method output_type
-	40, // [40:76] is the sub-list for method input_type
-	40, // [40:40] is the sub-list for extension type_name
-	40, // [40:40] is the sub-list for extension extendee
-	0,  // [0:40] is the sub-list for field type_name
+	78, // 40: estudiantes.DatosImportacionRequest.opciones:type_name -> estudiantes.OpcionesLectura
+	79, // 41: estudiantes.DatosImportacionRequest.mapeo:type_name -> estudiantes.AsignacionColumna
+	81, // 42: estudiantes.DatosImportacionResponse.columnas:type_name -> estudiantes.ColumnaAnalizada
+	83, // 43: estudiantes.DatosImportacionResponse.resumen:type_name -> estudiantes.ResumenDatos
+	82, // 44: estudiantes.DatosImportacionResponse.registros:type_name -> estudiantes.RegistroAnalizado
+	85, // 45: estudiantes.CamposDatosResponse.campos:type_name -> estudiantes.CampoDatos
+	86, // 46: estudiantes.CamposDatosResponse.columnas_tabla:type_name -> estudiantes.ColumnaExportDatos
+	86, // 47: estudiantes.DatosExportacionRequest.columnas:type_name -> estudiantes.ColumnaExportDatos
+	91, // 48: estudiantes.ListPlantillasDatosResponse.plantillas:type_name -> estudiantes.PlantillaDatos
+	91, // 49: estudiantes.PlantillaDatosResponse.plantilla:type_name -> estudiantes.PlantillaDatos
+	2,  // 50: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
+	4,  // 51: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
+	6,  // 52: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
+	8,  // 53: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
+	10, // 54: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
+	12, // 55: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
+	15, // 56: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
+	17, // 57: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
+	19, // 58: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
+	22, // 59: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
+	28, // 60: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
+	32, // 61: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
+	34, // 62: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
+	36, // 63: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
+	38, // 64: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
+	46, // 65: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
+	48, // 66: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
+	50, // 67: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
+	52, // 68: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
+	53, // 69: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
+	55, // 70: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
+	57, // 71: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
+	58, // 72: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
+	60, // 73: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
+	63, // 74: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
+	64, // 75: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
+	65, // 76: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
+	66, // 77: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
+	67, // 78: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
+	69, // 79: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
+	40, // 80: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
+	43, // 81: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
+	71, // 82: estudiantes.Estudiantes.PlantillaEstudiantes:input_type -> estudiantes.PlantillaEstudiantesRequest
+	73, // 83: estudiantes.Estudiantes.PreviewImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
+	73, // 84: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
+	77, // 85: estudiantes.Estudiantes.ExportarEstudiantes:input_type -> estudiantes.ExportarEstudiantesRequest
+	87, // 86: estudiantes.Estudiantes.CamposDatosEstudiantes:input_type -> estudiantes.CamposDatosRequest
+	80, // 87: estudiantes.Estudiantes.AnalizarDatosEstudiantes:input_type -> estudiantes.DatosImportacionRequest
+	80, // 88: estudiantes.Estudiantes.ConfirmarDatosEstudiantes:input_type -> estudiantes.DatosImportacionRequest
+	89, // 89: estudiantes.Estudiantes.ExportarDatosEstudiantes:input_type -> estudiantes.DatosExportacionRequest
+	92, // 90: estudiantes.Estudiantes.ListPlantillasDatos:input_type -> estudiantes.ListPlantillasDatosRequest
+	94, // 91: estudiantes.Estudiantes.GuardarPlantillaDatos:input_type -> estudiantes.GuardarPlantillaDatosRequest
+	96, // 92: estudiantes.Estudiantes.EliminarPlantillaDatos:input_type -> estudiantes.EliminarPlantillaDatosRequest
+	3,  // 93: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
+	5,  // 94: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
+	7,  // 95: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
+	9,  // 96: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
+	11, // 97: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
+	13, // 98: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
+	16, // 99: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
+	18, // 100: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
+	20, // 101: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
+	23, // 102: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
+	29, // 103: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
+	33, // 104: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
+	35, // 105: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
+	37, // 106: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
+	39, // 107: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
+	47, // 108: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
+	49, // 109: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
+	51, // 110: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
+	47, // 111: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
+	54, // 112: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
+	56, // 113: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
+	54, // 114: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
+	59, // 115: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
+	61, // 116: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
+	62, // 117: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
+	62, // 118: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 119: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 120: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
+	62, // 121: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
+	70, // 122: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
+	41, // 123: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
+	44, // 124: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
+	72, // 125: estudiantes.Estudiantes.PlantillaEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
+	76, // 126: estudiantes.Estudiantes.PreviewImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
+	76, // 127: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
+	72, // 128: estudiantes.Estudiantes.ExportarEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
+	88, // 129: estudiantes.Estudiantes.CamposDatosEstudiantes:output_type -> estudiantes.CamposDatosResponse
+	84, // 130: estudiantes.Estudiantes.AnalizarDatosEstudiantes:output_type -> estudiantes.DatosImportacionResponse
+	84, // 131: estudiantes.Estudiantes.ConfirmarDatosEstudiantes:output_type -> estudiantes.DatosImportacionResponse
+	90, // 132: estudiantes.Estudiantes.ExportarDatosEstudiantes:output_type -> estudiantes.ArchivoDatosResponse
+	93, // 133: estudiantes.Estudiantes.ListPlantillasDatos:output_type -> estudiantes.ListPlantillasDatosResponse
+	95, // 134: estudiantes.Estudiantes.GuardarPlantillaDatos:output_type -> estudiantes.PlantillaDatosResponse
+	97, // 135: estudiantes.Estudiantes.EliminarPlantillaDatos:output_type -> estudiantes.EliminarPlantillaDatosResponse
+	93, // [93:136] is the sub-list for method output_type
+	50, // [50:93] is the sub-list for method input_type
+	50, // [50:50] is the sub-list for extension type_name
+	50, // [50:50] is the sub-list for extension extendee
+	0,  // [0:50] is the sub-list for field type_name
 }
 
 func init() { file_estudiantes_service_proto_init() }
@@ -6219,7 +8152,7 @@ func file_estudiantes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_estudiantes_service_proto_rawDesc), len(file_estudiantes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   78,
+			NumMessages:   98,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

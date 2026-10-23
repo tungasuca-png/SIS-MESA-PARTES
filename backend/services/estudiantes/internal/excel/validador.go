@@ -42,7 +42,7 @@ func (r Registro) NombreCompleto() string {
 func Validar(f Fila) (Registro, []string) {
 	var errs []string
 	r := Registro{
-		TipoDocumento: tipoDocumento(f.TipoDocumento),
+		TipoDocumento: NormalizarTipoDocumento(f.TipoDocumento),
 		Nombres:       validation.CleanText(f.Nombres),
 		Estado:        validation.Upper(f.Estado),
 		Nivel:         validation.Upper(f.Nivel),
@@ -124,7 +124,8 @@ var aliasTipoDocumento = map[string]string{
 	"SIN DOCUMENTO":         validation.TipoSinDocumento,
 }
 
-func tipoDocumento(v string) string {
+// NormalizarTipoDocumento: mayúsculas, espacios colapsados y alias (CARNE EXT. -> CE).
+func NormalizarTipoDocumento(v string) string {
 	t := strings.ToUpper(strings.Join(strings.Fields(v), " "))
 	if alias, ok := aliasTipoDocumento[t]; ok {
 		return alias

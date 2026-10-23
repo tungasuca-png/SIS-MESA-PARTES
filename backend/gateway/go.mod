@@ -119,3 +119,5 @@ replace derivaciones => ../services/derivaciones
 replace psicologia => ../services/psicologia
 
 replace estudiantes => ../services/estudiantes
+
+replace tabular => ../pkg/tabular

@@ -1700,6 +1700,175 @@ service gateway-api {
 	get /api/estudiantes/:id/historial (ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse)
 }
 
+// ===== Motor universal de datos (importación/exportación multiformato) =====
+type DatosCamposRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type CampoDatosDTO {
+	Clave      string `json:"clave"`
+	Etiqueta   string `json:"etiqueta"`
+	Grupo      string `json:"grupo"`
+	Importable bool   `json:"importable"`
+	Exportable bool   `json:"exportable"`
+}
+
+type ColumnaExportDatosDTO {
+	Clave      string `json:"clave"`
+	Encabezado string `json:"encabezado,optional"`
+}
+
+type DatosCamposResponse {
+	Campos          []CampoDatosDTO         `json:"campos"`
+	FormatosEntrada []string                `json:"formatos_entrada"`
+	FormatosSalida  []string                `json:"formatos_salida"`
+	ColumnasTabla   []ColumnaExportDatosDTO `json:"columnas_tabla"`
+}
+
+// Carga multipart: campo "archivo" + campo "solicitud" (JSON con opciones,
+// mapeo y decisiones), leídos por el handler.
+type DatosArchivoRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ColumnaAnalizadaDTO {
+	Columna      int32    `json:"columna"`
+	Encabezado   string   `json:"encabezado"`
+	Campo        string   `json:"campo"`
+	Confianza    string   `json:"confianza"`
+	Motivo       string   `json:"motivo"`
+	Alternativas []string `json:"alternativas"`
+	Muestras     []string `json:"muestras"`
+	Confirmada   bool     `json:"confirmada"`
+	Importable   bool     `json:"importable"`
+}
+
+type RegistroAnalizadoDTO {
+	Fila         int32    `json:"fila"`
+	Categoria    string   `json:"categoria"`
+	Codigo       string   `json:"codigo"`
+	Documento    string   `json:"documento"`
+	Apellidos    string   `json:"apellidos"`
+	Nombres      string   `json:"nombres"`
+	Estado       string   `json:"estado"`
+	Nivel        string   `json:"nivel"`
+	Grado        string   `json:"grado"`
+	Seccion      string   `json:"seccion"`
+	Turno        string   `json:"turno"`
+	Errores      []string `json:"errores"`
+	Avisos       []string `json:"avisos"`
+	Correcciones []string `json:"correcciones"`
+	Coincidencia string   `json:"coincidencia"`
+	Resultado    string   `json:"resultado"`
+}
+
+type ResumenDatosDTO {
+	Total        int32 `json:"total"`
+	Nuevos       int32 `json:"nuevos"`
+	Existentes   int32 `json:"existentes"`
+	Duplicados   int32 `json:"duplicados"`
+	PorConfirmar int32 `json:"por_confirmar"`
+	Conflictos   int32 `json:"conflictos"`
+	Invalidos    int32 `json:"invalidos"`
+	ConAvisos    int32 `json:"con_avisos"`
+	Insertados   int32 `json:"insertados"`
+	Omitidos     int32 `json:"omitidos"`
+}
+
+type DatosImportacionResponse {
+	Formato                string                 `json:"formato"`
+	Extension              string                 `json:"extension"`
+	Hojas                  []string               `json:"hojas"`
+	Hoja                   string                 `json:"hoja"`
+	Rutas                  []string               `json:"rutas"`
+	Ruta                   string                 `json:"ruta"`
+	Separador              string                 `json:"separador"`
+	Codificacion           string                 `json:"codificacion"`
+	FilaEncabezado         int32                  `json:"fila_encabezado"`
+	AvisosArchivo          []string               `json:"avisos_archivo"`
+	Columnas               []ColumnaAnalizadaDTO  `json:"columnas"`
+	ProblemasMapeo         []string               `json:"problemas_mapeo"`
+	RequiereConfirmarMapeo bool                   `json:"requiere_confirmar_mapeo"`
+	Bloqueantes            []string               `json:"bloqueantes"`
+	Avisos                 []string               `json:"avisos"`
+	Resumen                ResumenDatosDTO        `json:"resumen"`
+	Registros              []RegistroAnalizadoDTO `json:"registros"`
+	Huella                 string                 `json:"huella"`
+	Confirmada             bool                   `json:"confirmada"`
+	PlantillaAplicada      string                 `json:"plantilla_aplicada"`
+	PlantillaAvisos        []string               `json:"plantilla_avisos"`
+}
+
+type DatosExportarRequest {
+	Authorization    string                  `header:"Authorization,optional"`
+	Q                string                  `json:"q,optional"`
+	Estado           string                  `json:"estado,optional"`
+	Nivel            string                  `json:"nivel,optional"`
+	Grado            string                  `json:"grado,optional"`
+	Seccion          string                  `json:"seccion,optional"`
+	Turno            string                  `json:"turno,optional"`
+	Orden            string                  `json:"orden,optional"`
+	Columnas         []ColumnaExportDatosDTO `json:"columnas,optional"`
+	Formato          string                  `json:"formato,optional"`
+	Separador        string                  `json:"separador,optional"`
+	Codificacion     string                  `json:"codificacion,optional"`
+	ProtegerFormulas bool                    `json:"proteger_formulas,optional"`
+}
+
+type ArchivoDatosResponse {
+	Nombre          string `json:"nombre"`
+	Mime            string `json:"mime"`
+	ContenidoBase64 string `json:"contenido_base64"`
+	Filas           int32  `json:"filas"`
+	Protegidas      int32  `json:"protegidas"`
+}
+
+type PlantillaDatosDTO {
+	Id             string `json:"id"`
+	Tipo           string `json:"tipo"`
+	Nombre         string `json:"nombre"`
+	Formato        string `json:"formato"`
+	Configuracion  string `json:"configuracion"`
+	Version        int32  `json:"version"`
+	CreadoPor      string `json:"creado_por"`
+	ActualizadoPor string `json:"actualizado_por"`
+	Creado         string `json:"creado"`
+	Actualizado    string `json:"actualizado"`
+}
+
+type ListPlantillasDatosRequest {
+	Authorization string `header:"Authorization,optional"`
+	Tipo          string `form:"tipo,optional"`
+}
+
+type ListPlantillasDatosResponse {
+	Plantillas []PlantillaDatosDTO `json:"plantillas"`
+}
+
+type GuardarPlantillaDatosRequest {
+	Authorization   string `header:"Authorization,optional"`
+	Id              string `json:"id,optional"`
+	Tipo            string `json:"tipo"`
+	Nombre          string `json:"nombre"`
+	Formato         string `json:"formato,optional"`
+	Configuracion   string `json:"configuracion"`
+	ExpectedVersion int32  `json:"expected_version,optional"`
+}
+
+type PlantillaDatosResponse {
+	Plantilla PlantillaDatosDTO `json:"plantilla"`
+}
+
+type EliminarPlantillaDatosRequest {
+	Authorization string `header:"Authorization,optional"`
+	PlantillaId   string `path:"plantilla_id"`
+	Tipo          string `json:"tipo"`
+}
+
+type EliminarPlantillaDatosResponse {
+	Eliminada bool `json:"eliminada"`
+}
+
 // Excel de estudiantes: validar o registrar cientos de filas supera el tiempo
 // HTTP por defecto (3 s); el servicio tiene hasta 180 s para confirmar.
 @server (
@@ -1718,5 +1887,39 @@ service gateway-api {
 
 	@handler ExportarEstudiantesExcel
 	get /api/estudiantes/exportar (ExportarEstudiantesExcelRequest) returns (ArchivoExcelResponse)
+}
+
+// Motor universal de datos: carga de archivos (hasta 3 MB; el cuerpo
+// multipart, 4 MB) y confirmación de cientos de registros.
+@server (
+	timeout:  190s
+	maxBytes: 4194304
+)
+service gateway-api {
+	@handler AnalizarDatosEstudiantes
+	post /api/estudiantes/datos/analizar (DatosArchivoRequest) returns (DatosImportacionResponse)
+
+	@handler ConfirmarDatosEstudiantes
+	post /api/estudiantes/datos/confirmar (DatosArchivoRequest) returns (DatosImportacionResponse)
+}
+
+@server (
+	timeout: 70s
+)
+service gateway-api {
+	@handler CamposDatosEstudiantes
+	get /api/estudiantes/datos/campos (DatosCamposRequest) returns (DatosCamposResponse)
+
+	@handler ExportarDatosEstudiantes
+	post /api/estudiantes/datos/exportar (DatosExportarRequest) returns (ArchivoDatosResponse)
+
+	@handler ListPlantillasDatos
+	get /api/estudiantes/datos/plantillas (ListPlantillasDatosRequest) returns (ListPlantillasDatosResponse)
+
+	@handler GuardarPlantillaDatos
+	post /api/estudiantes/datos/plantillas (GuardarPlantillaDatosRequest) returns (PlantillaDatosResponse)
+
+	@handler EliminarPlantillaDatos
+	post /api/estudiantes/datos/plantillas/:plantilla_id/eliminar (EliminarPlantillaDatosRequest) returns (EliminarPlantillaDatosResponse)
 }
 

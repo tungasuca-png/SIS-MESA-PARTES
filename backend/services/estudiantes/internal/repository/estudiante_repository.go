@@ -155,14 +155,12 @@ var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 // los nombres de columna de los filtros son constantes de este archivo. El
 // orden es determinista y sale de OrdenesBusqueda (etapa 6): el cliente elige
 // solo una clave de esa tabla.
-func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) ([]*Estudiante, int, error) {
+// condicionesBusqueda arma las condiciones del directorio (búsqueda por
+// palabras y filtros exactos), parametrizadas con param. La comparten Search
+// y la exportación, para que exportar devuelva exactamente lo que filtra la
+// tabla.
+func condicionesBusqueda(filter SearchFilter, param func(any) string) []string {
 	conds := make([]string, 0, len(filter.Terms)+5)
-	args := make([]any, 0, len(filter.Terms)+7)
-	param := func(v any) string {
-		args = append(args, v)
-		return fmt.Sprintf("$%d", len(args))
-	}
-
 	for _, term := range filter.Terms {
 		conds = append(conds, `texto_busqueda LIKE '%' || estudiantes_normalizar(`+param(likeEscaper.Replace(term))+`) || '%'`)
 	}
@@ -177,6 +175,16 @@ func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) 
 			conds = append(conds, f.col+" = "+param(f.val))
 		}
 	}
+	return conds
+}
+
+func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) ([]*Estudiante, int, error) {
+	args := make([]any, 0, len(filter.Terms)+7)
+	param := func(v any) string {
+		args = append(args, v)
+		return fmt.Sprintf("$%d", len(args))
+	}
+	conds := condicionesBusqueda(filter, param)
 
 	where := ""
 	if len(conds) > 0 {

@@ -33,6 +33,9 @@ type Maestro struct {
 	// el alta por importación Excel; "" = valor por defecto de la columna. Ni
 	// Update ni la auditoría la tocan (no está en su lista de campos).
 	Nivel string
+	// Grado, Seccion y Turno: también columnas académicas HEREDADAS; solo las
+	// escribe la importación de datos (CrearLote).
+	Grado, Seccion, Turno string
 }
 
 // Auditoria es lo que se registra en auditoria_estudiantes: nunca valores,

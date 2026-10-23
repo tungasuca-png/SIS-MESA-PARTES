@@ -206,3 +206,39 @@ func (s *EstudiantesServer) ExportarEstudiantes(ctx context.Context, in *estudia
 	l := logic.NewExportarEstudiantesLogic(ctx, s.svcCtx)
 	return l.ExportarEstudiantes(in)
 }
+
+// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+func (s *EstudiantesServer) CamposDatosEstudiantes(ctx context.Context, in *estudiantes.CamposDatosRequest) (*estudiantes.CamposDatosResponse, error) {
+	l := logic.NewCamposDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.CamposDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) AnalizarDatosEstudiantes(ctx context.Context, in *estudiantes.DatosImportacionRequest) (*estudiantes.DatosImportacionResponse, error) {
+	l := logic.NewAnalizarDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.AnalizarDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ConfirmarDatosEstudiantes(ctx context.Context, in *estudiantes.DatosImportacionRequest) (*estudiantes.DatosImportacionResponse, error) {
+	l := logic.NewConfirmarDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.ConfirmarDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ExportarDatosEstudiantes(ctx context.Context, in *estudiantes.DatosExportacionRequest) (*estudiantes.ArchivoDatosResponse, error) {
+	l := logic.NewExportarDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.ExportarDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ListPlantillasDatos(ctx context.Context, in *estudiantes.ListPlantillasDatosRequest) (*estudiantes.ListPlantillasDatosResponse, error) {
+	l := logic.NewListPlantillasDatosLogic(ctx, s.svcCtx)
+	return l.ListPlantillasDatos(in)
+}
+
+func (s *EstudiantesServer) GuardarPlantillaDatos(ctx context.Context, in *estudiantes.GuardarPlantillaDatosRequest) (*estudiantes.PlantillaDatosResponse, error) {
+	l := logic.NewGuardarPlantillaDatosLogic(ctx, s.svcCtx)
+	return l.GuardarPlantillaDatos(in)
+}
+
+func (s *EstudiantesServer) EliminarPlantillaDatos(ctx context.Context, in *estudiantes.EliminarPlantillaDatosRequest) (*estudiantes.EliminarPlantillaDatosResponse, error) {
+	l := logic.NewEliminarPlantillaDatosLogic(ctx, s.svcCtx)
+	return l.EliminarPlantillaDatos(in)
+}

@@ -712,6 +712,194 @@ message ExportarEstudiantesRequest {
   string nivel = 2;  // opcional: INICIAL | PRIMARIA | SECUNDARIA
 }
 
+// ===== Motor universal de datos (importación/exportación multiformato) =====
+// El archivo se lee con backend/pkg/tabular (xlsx/xlsm, ods, html/"xls web",
+// csv/tsv/txt, json, jsonl/ndjson, xml). La vista previa no escribe nada; la
+// confirmación vuelve a leer y validar el MISMO archivo con el MISMO mapeo
+// (huella) y registra los nuevos en UNA transacción.
+
+message OpcionesLectura {
+  string hoja = 1;
+  string ruta = 2;          // json/xml
+  string separador = 3;     // csv: "," ";" "tab" "|"
+  string codificacion = 4;  // utf-8, utf-16, windows-1252, iso-8859-1
+  int32 fila_encabezado = 5; // 0 = detectar
+}
+
+message AsignacionColumna {
+  int32 columna = 1;
+  string campo = 2;
+}
+
+message DatosImportacionRequest {
+  string nombre_archivo = 1;
+  bytes contenido = 2;
+  OpcionesLectura opciones = 3;
+  repeated AsignacionColumna mapeo = 4;
+  bool mapeo_confirmado = 5;   // true: se usa "mapeo" tal cual (revisado por el usuario)
+  string plantilla_id = 6;
+  string huella = 7;           // confirmación: la de la vista previa
+  bool excluir_invalidos = 8;  // confirmación: excluir filas inválidas o en conflicto
+  repeated int32 aceptadas = 9; // POR_CONFIRMAR que el usuario confirma como personas nuevas
+  repeated int32 omitidas = 10; // POR_CONFIRMAR que el usuario decide no importar
+}
+
+message ColumnaAnalizada {
+  int32 columna = 1;
+  string encabezado = 2;
+  string campo = 3;
+  string confianza = 4;
+  string motivo = 5;
+  repeated string alternativas = 6;
+  repeated string muestras = 7;
+  bool confirmada = 8;
+  bool importable = 9;
+}
+
+message RegistroAnalizado {
+  int32 fila = 1;
+  string categoria = 2;
+  string codigo = 3;
+  string documento = 4;
+  string apellidos = 5;
+  string nombres = 6;
+  string estado = 7;
+  string nivel = 8;
+  string grado = 9;
+  string seccion = 10;
+  string turno = 11;
+  repeated string errores = 12;
+  repeated string avisos = 13;
+  repeated string correcciones = 14;
+  string coincidencia = 15; // estudiante registrado que coincide (código y nombre)
+  string resultado = 16;    // confirmación: INSERTADO | OMITIDO
+}
+
+message ResumenDatos {
+  int32 total = 1;
+  int32 nuevos = 2;
+  int32 existentes = 3;
+  int32 duplicados = 4;
+  int32 por_confirmar = 5;
+  int32 conflictos = 6;
+  int32 invalidos = 7;
+  int32 con_avisos = 8;
+  int32 insertados = 9;
+  int32 omitidos = 10;
+}
+
+message DatosImportacionResponse {
+  string formato = 1;
+  string extension = 2;
+  repeated string hojas = 3;
+  string hoja = 4;
+  repeated string rutas = 5;
+  string ruta = 6;
+  string separador = 7;
+  string codificacion = 8;
+  int32 fila_encabezado = 9;
+  repeated string avisos_archivo = 10;
+  repeated ColumnaAnalizada columnas = 11;
+  repeated string problemas_mapeo = 12;
+  bool requiere_confirmar_mapeo = 13;
+  repeated string bloqueantes = 14;
+  repeated string avisos = 15;
+  ResumenDatos resumen = 16;
+  repeated RegistroAnalizado registros = 17;
+  string huella = 18;
+  bool confirmada = 19;
+  string plantilla_aplicada = 20;
+  repeated string plantilla_avisos = 21;
+}
+
+message CampoDatos {
+  string clave = 1;
+  string etiqueta = 2;
+  string grupo = 3;
+  bool importable = 4;
+  bool exportable = 5;
+}
+
+message ColumnaExportDatos {
+  string clave = 1;
+  string encabezado = 2;
+}
+
+message CamposDatosRequest {}
+
+message CamposDatosResponse {
+  repeated CampoDatos campos = 1;
+  repeated string formatos_entrada = 2;
+  repeated string formatos_salida = 3;
+  repeated ColumnaExportDatos columnas_tabla = 4;
+}
+
+message DatosExportacionRequest {
+  string q = 1;
+  string estado = 2;
+  string nivel = 3;
+  string grado = 4;
+  string seccion = 5;
+  string turno = 6;
+  string orden = 7;
+  repeated ColumnaExportDatos columnas = 8;
+  string formato = 9;
+  string separador = 10;
+  string codificacion = 11;
+  bool proteger_formulas = 12;
+}
+
+message ArchivoDatosResponse {
+  string nombre = 1;
+  string mime = 2;
+  bytes contenido = 3;
+  int32 filas = 4;
+  int32 protegidas = 5; // celdas CSV/TSV protegidas contra fórmulas
+}
+
+message PlantillaDatos {
+  string id = 1;
+  string tipo = 2; // IMPORTACION | EXPORTACION
+  string nombre = 3;
+  string formato = 4;
+  string configuracion = 5; // JSON validado por el servicio
+  int32 version = 6;
+  string creado_por = 7;
+  string actualizado_por = 8;
+  string creado = 9;
+  string actualizado = 10;
+}
+
+message ListPlantillasDatosRequest {
+  string tipo = 1;
+}
+
+message ListPlantillasDatosResponse {
+  repeated PlantillaDatos plantillas = 1;
+}
+
+message GuardarPlantillaDatosRequest {
+  string id = 1; // vacío = nueva
+  string tipo = 2;
+  string nombre = 3;
+  string formato = 4;
+  string configuracion = 5;
+  int32 expected_version = 6;
+}
+
+message PlantillaDatosResponse {
+  PlantillaDatos plantilla = 1;
+}
+
+message EliminarPlantillaDatosRequest {
+  string id = 1;
+  string tipo = 2;
+}
+
+message EliminarPlantillaDatosResponse {
+  bool eliminada = 1;
+}
+
 service Estudiantes {
   rpc GetEstudiante(GetEstudianteRequest) returns (GetEstudianteResponse);
   rpc SearchEstudiantes(SearchEstudiantesRequest) returns (SearchEstudiantesResponse);
@@ -754,4 +942,13 @@ service Estudiantes {
   rpc PreviewImportacionEstudiantes(ImportarEstudiantesRequest) returns (ImportarEstudiantesResponse);
   rpc ConfirmarImportacionEstudiantes(ImportarEstudiantesRequest) returns (ImportarEstudiantesResponse);
   rpc ExportarEstudiantes(ExportarEstudiantesRequest) returns (ArchivoExcelResponse);
+  // Motor universal de datos. Analizar/confirmar: estudiantes.create y
+  // estudiantes.view; campos/exportar: estudiantes.view; plantillas: según tipo.
+  rpc CamposDatosEstudiantes(CamposDatosRequest) returns (CamposDatosResponse);
+  rpc AnalizarDatosEstudiantes(DatosImportacionRequest) returns (DatosImportacionResponse);
+  rpc ConfirmarDatosEstudiantes(DatosImportacionRequest) returns (DatosImportacionResponse);
+  rpc ExportarDatosEstudiantes(DatosExportacionRequest) returns (ArchivoDatosResponse);
+  rpc ListPlantillasDatos(ListPlantillasDatosRequest) returns (ListPlantillasDatosResponse);
+  rpc GuardarPlantillaDatos(GuardarPlantillaDatosRequest) returns (PlantillaDatosResponse);
+  rpc EliminarPlantillaDatos(EliminarPlantillaDatosRequest) returns (EliminarPlantillaDatosResponse);
 }

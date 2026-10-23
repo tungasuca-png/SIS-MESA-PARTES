@@ -29,6 +29,9 @@ type Config struct {
 
 	// Excel: importación/exportación de estudiantes (opcional).
 	Excel ExcelConfig `json:",optional"`
+
+	// Datos: límites del motor universal de importación/exportación (opcional).
+	Datos DatosConfig `json:",optional"`
 }
 
 // ExcelConfig: límites de la importación/exportación Excel de estudiantes.
@@ -41,4 +44,12 @@ type ExcelConfig struct {
 	MaxFilasImportacion int `json:",optional"`
 	// MaxFilasExportacion: estudiantes por exportación (predeterminado 10000).
 	MaxFilasExportacion int `json:",optional"`
+}
+
+// DatosConfig: límites del motor de datos. 0 = predeterminado del motor
+// (3 MB, 5000 registros) y 10000 registros por exportación.
+type DatosConfig struct {
+	MaxBytes            int64 `json:",optional"`
+	MaxFilas            int   `json:",optional"`
+	MaxFilasExportacion int   `json:",optional"`
 }

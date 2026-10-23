@@ -16,21 +16,33 @@ import (
 type (
 	ActualizarFamiliarRequest         = estudiantes.ActualizarFamiliarRequest
 	ActualizarFamiliarResponse        = estudiantes.ActualizarFamiliarResponse
+	ArchivoDatosResponse              = estudiantes.ArchivoDatosResponse
 	ArchivoExcelResponse              = estudiantes.ArchivoExcelResponse
+	AsignacionColumna                 = estudiantes.AsignacionColumna
 	CambiarParentescoFamiliarRequest  = estudiantes.CambiarParentescoFamiliarRequest
 	CambiarParentescoFamiliarResponse = estudiantes.CambiarParentescoFamiliarResponse
 	CambiarSeccionMatriculaRequest    = estudiantes.CambiarSeccionMatriculaRequest
+	CampoDatos                        = estudiantes.CampoDatos
+	CamposDatosRequest                = estudiantes.CamposDatosRequest
+	CamposDatosResponse               = estudiantes.CamposDatosResponse
 	ChangeEstadoEstudianteRequest     = estudiantes.ChangeEstadoEstudianteRequest
 	ChangeEstadoEstudianteResponse    = estudiantes.ChangeEstadoEstudianteResponse
 	ChangeEstadoPeriodoRequest        = estudiantes.ChangeEstadoPeriodoRequest
+	ColumnaAnalizada                  = estudiantes.ColumnaAnalizada
+	ColumnaExportDatos                = estudiantes.ColumnaExportDatos
 	ConcluirMatriculaRequest          = estudiantes.ConcluirMatriculaRequest
 	CreateEstudianteRequest           = estudiantes.CreateEstudianteRequest
 	CreateEstudianteResponse          = estudiantes.CreateEstudianteResponse
 	CreatePeriodoRequest              = estudiantes.CreatePeriodoRequest
 	CreatePersonaRequest              = estudiantes.CreatePersonaRequest
 	CreateSeccionRequest              = estudiantes.CreateSeccionRequest
+	DatosExportacionRequest           = estudiantes.DatosExportacionRequest
+	DatosImportacionRequest           = estudiantes.DatosImportacionRequest
+	DatosImportacionResponse          = estudiantes.DatosImportacionResponse
 	DesvincularFamiliarRequest        = estudiantes.DesvincularFamiliarRequest
 	DesvincularFamiliarResponse       = estudiantes.DesvincularFamiliarResponse
+	EliminarPlantillaDatosRequest     = estudiantes.EliminarPlantillaDatosRequest
+	EliminarPlantillaDatosResponse    = estudiantes.EliminarPlantillaDatosResponse
 	Estudiante                        = estudiantes.Estudiante
 	EstudianteBasico                  = estudiantes.EstudianteBasico
 	EstudiantePersonal                = estudiantes.EstudiantePersonal
@@ -47,6 +59,7 @@ type (
 	GetPersonaRequest                 = estudiantes.GetPersonaRequest
 	GetPersonaResponse                = estudiantes.GetPersonaResponse
 	GrupoPosibleDuplicado             = estudiantes.GrupoPosibleDuplicado
+	GuardarPlantillaDatosRequest      = estudiantes.GuardarPlantillaDatosRequest
 	ImportarEstudiantesRequest        = estudiantes.ImportarEstudiantesRequest
 	ImportarEstudiantesResponse       = estudiantes.ImportarEstudiantesResponse
 	ListFamiliaresEstudianteRequest   = estudiantes.ListFamiliaresEstudianteRequest
@@ -59,6 +72,8 @@ type (
 	ListMatriculasPeriodoResponse     = estudiantes.ListMatriculasPeriodoResponse
 	ListPeriodosRequest               = estudiantes.ListPeriodosRequest
 	ListPeriodosResponse              = estudiantes.ListPeriodosResponse
+	ListPlantillasDatosRequest        = estudiantes.ListPlantillasDatosRequest
+	ListPlantillasDatosResponse       = estudiantes.ListPlantillasDatosResponse
 	ListPosiblesDuplicadosRequest     = estudiantes.ListPosiblesDuplicadosRequest
 	ListPosiblesDuplicadosResponse    = estudiantes.ListPosiblesDuplicadosResponse
 	ListSeccionesRequest              = estudiantes.ListSeccionesRequest
@@ -68,14 +83,19 @@ type (
 	MatriculaResponse                 = estudiantes.MatriculaResponse
 	MatricularEstudianteRequest       = estudiantes.MatricularEstudianteRequest
 	MovimientoMatricula               = estudiantes.MovimientoMatricula
+	OpcionesLectura                   = estudiantes.OpcionesLectura
 	PeriodoAcademico                  = estudiantes.PeriodoAcademico
 	PeriodoResponse                   = estudiantes.PeriodoResponse
 	Persona                           = estudiantes.Persona
 	PersonaResponse                   = estudiantes.PersonaResponse
+	PlantillaDatos                    = estudiantes.PlantillaDatos
+	PlantillaDatosResponse            = estudiantes.PlantillaDatosResponse
 	PlantillaEstudiantesRequest       = estudiantes.PlantillaEstudiantesRequest
+	RegistroAnalizado                 = estudiantes.RegistroAnalizado
 	ReingresarMatriculaRequest        = estudiantes.ReingresarMatriculaRequest
 	ResolveEstudianteRequest          = estudiantes.ResolveEstudianteRequest
 	ResolveEstudianteResponse         = estudiantes.ResolveEstudianteResponse
+	ResumenDatos                      = estudiantes.ResumenDatos
 	ResumenImportacion                = estudiantes.ResumenImportacion
 	RetirarMatriculaRequest           = estudiantes.RetirarMatriculaRequest
 	SearchEstudiantesRequest          = estudiantes.SearchEstudiantesRequest
@@ -134,6 +154,14 @@ type (
 		PreviewImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
 		ConfirmarImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
 		ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error)
+		// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+		CamposDatosEstudiantes(ctx context.Context, in *CamposDatosRequest, opts ...grpc.CallOption) (*CamposDatosResponse, error)
+		AnalizarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error)
+		ConfirmarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error)
+		ExportarDatosEstudiantes(ctx context.Context, in *DatosExportacionRequest, opts ...grpc.CallOption) (*ArchivoDatosResponse, error)
+		ListPlantillasDatos(ctx context.Context, in *ListPlantillasDatosRequest, opts ...grpc.CallOption) (*ListPlantillasDatosResponse, error)
+		GuardarPlantillaDatos(ctx context.Context, in *GuardarPlantillaDatosRequest, opts ...grpc.CallOption) (*PlantillaDatosResponse, error)
+		EliminarPlantillaDatos(ctx context.Context, in *EliminarPlantillaDatosRequest, opts ...grpc.CallOption) (*EliminarPlantillaDatosResponse, error)
 	}
 
 	defaultEstudiantes struct {
@@ -329,4 +357,40 @@ func (m *defaultEstudiantes) ConfirmarImportacionEstudiantes(ctx context.Context
 func (m *defaultEstudiantes) ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error) {
 	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
 	return client.ExportarEstudiantes(ctx, in, opts...)
+}
+
+// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+func (m *defaultEstudiantes) CamposDatosEstudiantes(ctx context.Context, in *CamposDatosRequest, opts ...grpc.CallOption) (*CamposDatosResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.CamposDatosEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) AnalizarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.AnalizarDatosEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ConfirmarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ConfirmarDatosEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ExportarDatosEstudiantes(ctx context.Context, in *DatosExportacionRequest, opts ...grpc.CallOption) (*ArchivoDatosResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ExportarDatosEstudiantes(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) ListPlantillasDatos(ctx context.Context, in *ListPlantillasDatosRequest, opts ...grpc.CallOption) (*ListPlantillasDatosResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.ListPlantillasDatos(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) GuardarPlantillaDatos(ctx context.Context, in *GuardarPlantillaDatosRequest, opts ...grpc.CallOption) (*PlantillaDatosResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.GuardarPlantillaDatos(ctx, in, opts...)
+}
+
+func (m *defaultEstudiantes) EliminarPlantillaDatos(ctx context.Context, in *EliminarPlantillaDatosRequest, opts ...grpc.CallOption) (*EliminarPlantillaDatosResponse, error) {
+	client := estudiantes.NewEstudiantesClient(m.cli.Conn())
+	return client.EliminarPlantillaDatos(ctx, in, opts...)
 }

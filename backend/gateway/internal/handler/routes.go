@@ -528,4 +528,52 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 		rest.WithTimeout(190000*time.Millisecond),
 	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/analizar",
+				Handler: AnalizarDatosEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/confirmar",
+				Handler: ConfirmarDatosEstudiantesHandler(serverCtx),
+			},
+		},
+		rest.WithTimeout(190000*time.Millisecond),
+		rest.WithMaxBytes(4194304),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/datos/campos",
+				Handler: CamposDatosEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/exportar",
+				Handler: ExportarDatosEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/datos/plantillas",
+				Handler: ListPlantillasDatosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/plantillas",
+				Handler: GuardarPlantillaDatosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/plantillas/:plantilla_id/eliminar",
+				Handler: EliminarPlantillaDatosHandler(serverCtx),
+			},
+		},
+		rest.WithTimeout(70000*time.Millisecond),
+	)
 }

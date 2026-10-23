@@ -95,6 +95,14 @@ var sensitiveRPCMethods = []string{
 	estudiantes.Estudiantes_PreviewImportacionEstudiantes_FullMethodName,
 	estudiantes.Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName,
 	estudiantes.Estudiantes_ExportarEstudiantes_FullMethodName,
+	// Motor universal de datos: archivos, vistas previas y exportaciones.
+	estudiantes.Estudiantes_CamposDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_AnalizarDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ConfirmarDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ExportarDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ListPlantillasDatos_FullMethodName,
+	estudiantes.Estudiantes_GuardarPlantillaDatos_FullMethodName,
+	estudiantes.Estudiantes_EliminarPlantillaDatos_FullMethodName,
 }
 
 // ProtectSensitiveRPCLogs debe llamarse una vez al arrancar, antes de crear los
