@@ -9,6 +9,7 @@ import (
 	"estudiantes/estudiantesclient"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type PreviewImportacionEstudiantesLogic struct {
@@ -23,7 +24,8 @@ func NewPreviewImportacionEstudiantesLogic(ctx context.Context, svcCtx *svc.Serv
 
 func (l *PreviewImportacionEstudiantesLogic) PreviewImportacionEstudiantes(req *types.ExcelEstudiantesRequest, archivo ArchivoExcel) (*types.ImportarEstudiantesExcelResponse, error) {
 	resp, err := l.svcCtx.EstudiantesClient.PreviewImportacionEstudiantes(withAuthorization(l.ctx, req.Authorization),
-		&estudiantesclient.ImportarEstudiantesRequest{NombreArchivo: archivo.Nombre, Contenido: archivo.Contenido})
+		&estudiantesclient.ImportarEstudiantesRequest{NombreArchivo: archivo.Nombre, Contenido: archivo.Contenido},
+		zrpc.WithCallTimeout(tiempoExcelValidar))
 	if err != nil {
 		return nil, err
 	}

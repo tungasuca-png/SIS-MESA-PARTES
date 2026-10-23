@@ -2,6 +2,7 @@ package logic
 
 import (
 	"encoding/base64"
+	"time"
 
 	"gateway/internal/types"
 
@@ -11,6 +12,14 @@ import (
 // Excel de estudiantes: el Gateway reenvía el archivo (o la solicitud) a
 // Estudiantes Service con el JWT del usuario y traduce la respuesta. Toda la
 // validación, la autorización y la escritura ocurren en el servicio.
+
+// Tiempos por llamada (el predeterminado de go-zero es 2 s): coinciden con
+// MethodTimeouts de Estudiantes Service y quedan dentro del timeout HTTP de
+// las rutas Excel (gateway.api, 190 s).
+const (
+	tiempoExcelValidar   = 60 * time.Second
+	tiempoExcelConfirmar = 180 * time.Second
+)
 
 // ArchivoExcel es el archivo subido por multipart (ver handler).
 type ArchivoExcel struct {

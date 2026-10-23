@@ -9,6 +9,7 @@ import (
 	"estudiantes/estudiantesclient"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ConfirmarImportacionEstudiantesLogic struct {
@@ -23,7 +24,8 @@ func NewConfirmarImportacionEstudiantesLogic(ctx context.Context, svcCtx *svc.Se
 
 func (l *ConfirmarImportacionEstudiantesLogic) ConfirmarImportacionEstudiantes(req *types.ExcelEstudiantesRequest, archivo ArchivoExcel) (*types.ImportarEstudiantesExcelResponse, error) {
 	resp, err := l.svcCtx.EstudiantesClient.ConfirmarImportacionEstudiantes(withAuthorization(l.ctx, req.Authorization),
-		&estudiantesclient.ImportarEstudiantesRequest{NombreArchivo: archivo.Nombre, Contenido: archivo.Contenido, Huella: archivo.Huella})
+		&estudiantesclient.ImportarEstudiantesRequest{NombreArchivo: archivo.Nombre, Contenido: archivo.Contenido, Huella: archivo.Huella},
+		zrpc.WithCallTimeout(tiempoExcelConfirmar))
 	if err != nil {
 		return nil, err
 	}

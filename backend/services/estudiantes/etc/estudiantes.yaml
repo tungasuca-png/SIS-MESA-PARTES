@@ -24,6 +24,19 @@ JWTSecret: ${JWT_SECRET}
 AuthRpc:
   Target: 127.0.0.1:8080
 
+# El tiempo por defecto de go-zero es 2 s por RPC: no alcanza para validar o
+# registrar cientos de estudiantes de un Excel (cada alta es su propia
+# transacción con auditoría). Solo estos métodos tienen más tiempo.
+MethodTimeouts:
+  - FullMethod: /estudiantes.Estudiantes/PreviewImportacionEstudiantes
+    Timeout: 60s
+  - FullMethod: /estudiantes.Estudiantes/ConfirmarImportacionEstudiantes
+    Timeout: 180s
+  - FullMethod: /estudiantes.Estudiantes/ExportarEstudiantes
+    Timeout: 60s
+  - FullMethod: /estudiantes.Estudiantes/PlantillaEstudiantes
+    Timeout: 10s
+
 # go-zero registra el contenido de las solicitudes (stat log). Todo RPC de
 # este servicio lleva datos personales de menores (nombres, DNI, fecha de
 # nacimiento): se excluye el contenido de TODOS los métodos. FASE E-05: una

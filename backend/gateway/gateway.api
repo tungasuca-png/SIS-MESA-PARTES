@@ -1698,7 +1698,14 @@ service gateway-api {
 
 	@handler ListHistorialEstudiante
 	get /api/estudiantes/:id/historial (ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse)
+}
 
+// Excel de estudiantes: validar o registrar cientos de filas supera el tiempo
+// HTTP por defecto (3 s); el servicio tiene hasta 180 s para confirmar.
+@server (
+	timeout: 190s
+)
+service gateway-api {
 	// Excel: plantilla, importación en dos etapas y exportación.
 	@handler PlantillaEstudiantesExcel
 	get /api/estudiantes/importacion/plantilla (ExcelEstudiantesRequest) returns (ArchivoExcelResponse)
