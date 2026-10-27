@@ -14,7 +14,9 @@ body,
 }
 
 html {
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    /* Inter (con respaldo del sistema si no hay conexión). */
+    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 body {

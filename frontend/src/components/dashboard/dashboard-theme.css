@@ -1,54 +1,83 @@
 /* ============================================
-   TOKENS VISUALES — DASHBOARD MESA DE PARTES
-   Paleta institucional sobria, escopeada al Dashboard.
-   Fondo neutro; el azul institucional es acento,
-   no superficie.
+   TOKENS VISUALES — SIS MESA DE PARTES
+   Paleta institucional (login y logo): azul marino #061B49 para la
+   navegación, azules #0B3D91 / #082D68 / #1769C2 para acciones, dorado
+   #F4C430 como acento puntual y rojo #C62828 para errores. Escopeada a
+   .dashboard-shell (layout interno y portal del solicitante).
    ============================================ */
 
 .dashboard-shell {
-    /* Barra lateral clara (antes azul oscuro a pantalla completa). */
-    --dp-sidebar-bg: #FFFFFF;
-    --dp-sidebar-border: #E4E7EC;
-    --dp-sidebar-text: #475467;
-    --dp-sidebar-muted: #98A2B3;
-    --dp-sidebar-hover: #F2F4F7;
-    --dp-sidebar-active: #EAF0FA;
+    /* Identidad institucional */
+    --dp-navy: #061B49;
+    --dp-navy-2: #082D68;
+    --dp-primary: #0B3D91;
+    --dp-primary-hover: #082D68;
+    --dp-interactive: #1769C2;
+    --dp-primary-soft: #E8EFFA;
+    --dp-gold: #F4C430;
+    --dp-gold-soft: #FEF6D8;
+    --dp-brand-dark: #061B49;
 
-    /* Azul oscuro institucional para superficies puntuales con texto blanco
-       (cabecera del portal del SOLICITANTE, avatar de la ficha). */
-    --dp-brand-dark: #0F2942;
+    /* Navegación (barra lateral azul marino) */
+    --dp-sidebar-bg: #061B49;
+    --dp-sidebar-border: rgba(255, 255, 255, 0.08);
+    --dp-sidebar-text: rgba(255, 255, 255, 0.78);
+    --dp-sidebar-muted: rgba(255, 255, 255, 0.45);
+    --dp-sidebar-hover: rgba(255, 255, 255, 0.07);
+    --dp-sidebar-active: rgba(255, 255, 255, 0.12);
 
-    --dp-bg: #F5F6F8;
+    /* Superficies y texto */
+    --dp-bg: #F4F6F9;
     --dp-card-bg: #FFFFFF;
-
-    /* Azul institucional (mismo tono que el login). */
-    --dp-primary: #164194;
-    --dp-primary-hover: #0F3275;
-    --dp-primary-soft: #EAF0FA;
-
-    --dp-text-primary: #1F2937;
-    --dp-text-secondary: #5B6475;
-    --dp-text-muted: #98A2B3;
-
+    --dp-surface-2: #F8FAFC;
+    --dp-text-primary: #101828;
+    --dp-text-secondary: #475467;
+    --dp-text-muted: #8A94A6;
     --dp-border: #E4E7EC;
-    --dp-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    --dp-border-strong: #D0D5DD;
 
-    /* Acento institucional turquesa/cian (pestañas, chips, línea de tiempo). */
+    /* Escala de espaciado y forma */
+    --dp-radius-sm: 6px;
+    --dp-radius: 8px;
+    --dp-radius-lg: 12px;
+    --dp-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --dp-shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+    --dp-shadow-lg: 0 20px 48px rgba(6, 27, 73, 0.22);
+    --dp-focus: 0 0 0 3px rgba(23, 105, 194, 0.25);
+    --dp-transition: 0.15s ease;
+
+    /* Acento turquesa (pestañas, chips, línea de tiempo) */
     --dp-accent: #0E9FB0;
     --dp-accent-strong: #0B7F8D;
     --dp-accent-soft: #E0F6F8;
-    --dp-danger: #C2410C;
-    --dp-danger-soft: #FFEDD5;
 
-    --dp-badge-pending-bg: #FEF3C7;
-    --dp-badge-pending-text: #B45309;
-    --dp-badge-process-bg: #E0F2FE;
-    --dp-badge-process-text: #0369A1;
-    --dp-badge-done-bg: #DCFCE7;
-    --dp-badge-done-text: #15803D;
-    --dp-badge-observed-bg: #F3F4F6;
-    --dp-badge-observed-text: #4B5563;
+    /* Semánticos */
+    --dp-danger: #C62828;
+    --dp-danger-hover: #A61E1E;
+    --dp-danger-soft: #FEF3F2;
+    --dp-danger-border: #FECDCA;
+    --dp-warning-bg: #FFFAEB;
+    --dp-warning-border: #FEDF89;
+    --dp-warning-text: #93370D;
+    --dp-success-bg: #ECFDF3;
+    --dp-success-border: #ABEFC6;
+    --dp-success-text: #067647;
+    --dp-info-bg: #EFF8FF;
+    --dp-info-border: #B2DDFF;
+    --dp-info-text: #175CD3;
 
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    /* Badges de estado */
+    --dp-badge-pending-bg: #FEF6D8;
+    --dp-badge-pending-text: #8A5A00;
+    --dp-badge-process-bg: #E8EFFA;
+    --dp-badge-process-text: #0B3D91;
+    --dp-badge-done-bg: #ECFDF3;
+    --dp-badge-done-text: #067647;
+    --dp-badge-observed-bg: #FEF3F2;
+    --dp-badge-observed-text: #B42318;
+
+    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
     color: var(--dp-text-primary);
 }

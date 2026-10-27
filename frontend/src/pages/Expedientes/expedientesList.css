@@ -14,18 +14,33 @@
 .dp-filters {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 10px;
-    margin: 14px 0 18px;
+    margin: 14px 0 16px;
+    padding: 12px;
+    background: var(--dp-surface-2);
+    border: 1px solid var(--dp-border);
+    border-radius: var(--dp-radius);
 }
 
-.dp-filters select {
-    border: 1px solid var(--dp-border);
-    border-radius: 9px;
+.dp-filters select,
+.dp-filters input {
+    min-height: 38px;
+    border: 1px solid var(--dp-border-strong);
+    border-radius: var(--dp-radius);
     padding: 8px 12px;
-    font-size: 13px;
+    font-size: 13.5px;
     font-family: inherit;
     color: var(--dp-text-primary);
-    background: var(--dp-bg);
+    background: var(--dp-card-bg);
+    outline: none;
+    transition: border-color var(--dp-transition), box-shadow var(--dp-transition);
+}
+
+.dp-filters select:focus,
+.dp-filters input:focus {
+    border-color: var(--dp-interactive);
+    box-shadow: var(--dp-focus);
 }
 
 .dp-pagination {
@@ -34,8 +49,10 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
-    padding: 16px 4px;
-    font-size: 12.5px;
+    margin: 0 -22px;
+    padding: 12px 22px 4px;
+    border-top: 1px solid var(--dp-border);
+    font-size: 13px;
     color: var(--dp-text-secondary);
 }
 

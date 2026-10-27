@@ -1,19 +1,24 @@
+/* ============================================
+   PANELES Y TABLAS (compartido por todos los listados)
+   ============================================ */
+
 .dp-panel {
     background: var(--dp-card-bg);
     border: 1px solid var(--dp-border);
-    border-radius: 12px;
-    padding: 18px 20px 8px;
+    border-radius: var(--dp-radius-lg);
+    padding: 20px 22px 12px;
     box-shadow: var(--dp-shadow);
 }
 
 .dp-panel-title {
     margin: 0 0 12px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--dp-text-primary);
 }
 
-/* Encabezado de panel con acción a la derecha (compartido). */
+/* Encabezado de panel con acción a la derecha. */
 .dp-panel-head {
     display: flex;
     align-items: flex-start;
@@ -27,32 +32,54 @@
     margin: 0;
 }
 
+/* Contenedor de tabla: bordes propios y desplazamiento horizontal en móvil. */
 .dp-table-wrapper {
     overflow-x: auto;
+    margin: 0 -22px;
+    border-top: 1px solid var(--dp-border);
+    -webkit-overflow-scrolling: touch;
 }
 
 .dp-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 640px;
 }
 
 .dp-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     text-align: left;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 11.5px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     color: var(--dp-text-secondary);
-    padding: 0 12px 10px;
+    background: var(--dp-surface-2);
+    padding: 10px 14px;
     border-bottom: 1px solid var(--dp-border);
+    white-space: nowrap;
+}
+
+.dp-table thead th:first-child,
+.dp-table tbody td:first-child {
+    padding-left: 22px;
+}
+
+.dp-table thead th:last-child,
+.dp-table tbody td:last-child {
+    padding-right: 22px;
 }
 
 .dp-table tbody td {
-    padding: 11px 12px;
-    border-bottom: 1px solid var(--dp-border);
+    padding: 12px 14px;
+    border-bottom: 1px solid #EEF0F3;
     font-size: 13.5px;
     color: var(--dp-text-primary);
+    vertical-align: middle;
+    transition: background var(--dp-transition);
 }
 
 .dp-table tbody tr:last-child td {
@@ -60,49 +87,88 @@
 }
 
 .dp-table tbody tr:hover td {
-    background: var(--dp-bg);
+    background: #F7F9FC;
 }
 
+/* Código de expediente o registro: identificador destacado. */
 .dp-table-code {
     font-weight: 600;
-    color: var(--dp-text-primary);
+    color: var(--dp-primary);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
+/* Acción de fila: compacta, secundaria. */
 .dp-table-action {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border: 1px solid var(--dp-border);
-    background: transparent;
+    min-height: 30px;
+    border: 1px solid var(--dp-border-strong);
+    background: var(--dp-card-bg);
     color: var(--dp-text-secondary);
     font-size: 12.5px;
     font-weight: 600;
     padding: 5px 10px;
-    border-radius: 7px;
+    border-radius: var(--dp-radius);
     cursor: pointer;
     font-family: inherit;
     text-decoration: none;
+    white-space: nowrap;
+    transition: border-color var(--dp-transition), color var(--dp-transition), background var(--dp-transition);
 }
 
 .dp-table-action:hover {
-    border-color: var(--dp-primary);
+    border-color: var(--dp-interactive);
     color: var(--dp-primary);
+    background: var(--dp-primary-soft);
+}
+
+.dp-table-action:focus-visible {
+    outline: none;
+    box-shadow: var(--dp-focus);
+}
+
+.dp-table-action:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .dp-priority-urgente {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     color: var(--dp-danger);
     font-weight: 700;
+}
+
+.dp-priority-urgente::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
 .dp-usuario-fallback {
     color: var(--dp-text-muted);
 }
 
+/* Estado vacío / carga de un listado. */
 .dp-table-empty {
     margin: 0;
-    padding: 24px 4px 12px;
+    padding: 36px 16px 28px;
     color: var(--dp-text-secondary);
     font-size: 13.5px;
     text-align: center;
+}
+
+.dp-table-empty::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: var(--dp-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A94A6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h16v16H4z'/%3E%3Cpath d='M4 9h16M9 9v11'/%3E%3C/svg%3E") center / 20px no-repeat;
 }
