@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
+import { ProgresoMini } from "../../components/portal/SeguimientoTramite";
+import { calcularSeguimiento } from "../../utils/progresoTramite";
 import { getExpedientes } from "../../services/expedientesService";
 import { useActualizacionEnVivo } from "../../hooks/useActualizacionEnVivo";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
@@ -74,6 +76,7 @@ function Seguimiento() {
                                     <th>Asunto</th>
                                     <th>Fecha</th>
                                     <th>Estado</th>
+                                    <th>Avance</th>
                                     <th>Acción</th>
                                 </tr>
                             </thead>
@@ -86,6 +89,9 @@ function Seguimiento() {
                                         <td>{formatDate(item.fecha_registro)}</td>
                                         <td>
                                             <StatusBadge status={item.estado} />
+                                        </td>
+                                        <td>
+                                            <ProgresoMini seguimiento={calcularSeguimiento(item)} />
                                         </td>
                                         <td>
                                             <Link

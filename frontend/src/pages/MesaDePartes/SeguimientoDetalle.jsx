@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
+import { LineaTiempoTramite, ProgresoTramite } from "../../components/portal/SeguimientoTramite";
 import { getExpediente } from "../../services/expedientesService";
 import { getDerivacionesByExpediente } from "../../services/derivacionesService";
 import { usePermissions } from "../../hooks/usePermissions";
+import { useAuth } from "../../hooks/useAuth";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
+import { calcularSeguimiento } from "../../utils/progresoTramite";
 import { tipoLabel } from "../../constants/expedientes";
+import { roleLabel } from "../../constants/roles";
 import "../Expedientes/expedienteDetail.css";
 import "./mesaDePartes.css";
 
@@ -19,20 +23,21 @@ const TIPO_DERIVACION_LABEL = {
     APROBACION: "Aprobación",
 };
 
-// Línea de tiempo armada SOLO con datos reales:
-//  - "Solicitud presentada" viene de expediente.fecha_registro.
-//  - Cada paso intermedio viene de una Derivación real (Derivaciones
-//    Service) — si no hay ninguna registrada, esa parte de la línea
-//    simplemente no aparece (no se inventan pasos).
-//  - El estado actual viene de expediente.estado / fecha_actualizacion.
+// Seguimiento armado SOLO con datos reales:
+//  - Etapas y porcentaje: calcularSeguimiento (utils/progresoTramite.js), a
+//    partir de expediente.estado, fecha_registro y fecha_actualizacion.
+//  - Movimientos: cada Derivación real (Derivaciones Service) — si no hay
+//    ninguna registrada, no se inventan pasos.
 // Expedientes Service no guarda un historial propio de cambios de estado
 // (solo el estado vigente) — si en el futuro existe ese historial, cada
-// cambio podría agregarse acá como un paso más.
+// cambio podría fechar las etapas intermedias.
 // El acceso ya no depende de user.role (Paso 8): la ruta está protegida por
-// PermissionRoute con expedientes.view/expedientes.view_own en App.jsx.
+// PermissionRoute con expedientes.view/expedientes.view_own en App.jsx, y el
+// backend solo entrega expedientes propios con view_own.
 function SeguimientoDetalle() {
     const { id } = useParams();
     const { can } = usePermissions();
+    const { user } = useAuth();
     // Las derivaciones se consultan solo con permiso (view_own para expedientes
     // propios, view general); sin ninguno no se pide ni se muestra nada.
     const puedeVerDerivaciones = can(["derivaciones.view", "derivaciones.view_own"]);
@@ -76,6 +81,15 @@ function SeguimientoDetalle() {
     // El backend devuelve las derivaciones más recientes primero; para una
     // línea de tiempo se necesita orden cronológico ascendente.
     const derivacionesOrdenadas = [...derivaciones].reverse();
+    const seguimiento = calcularSeguimiento(expediente, derivaciones);
+
+    // Misma condición que ExpedienteDetail para ofrecer la corrección: solo
+    // el dueño del expediente observado (el backend vuelve a validarlo).
+    const puedeCorregir =
+        expediente &&
+        can("expedientes.view_own") &&
+        expediente.estado === "OBSERVADO" &&
+        expediente.solicitante_id === user?.id;
 
     return (
         <RoleLayout title="Seguimiento del expediente">
@@ -98,38 +112,75 @@ function SeguimientoDetalle() {
                         <StatusBadge status={expediente.estado} />
                     </div>
 
-                    <ul className="mdp-timeline mdp-timeline--detail">
-                        <li className="mdp-timeline-item">
-                            <span className="mdp-timeline-dot" />
-                            <p className="mdp-timeline-title">Solicitud presentada</p>
-                            <p className="mdp-timeline-meta">{formatDateTime(expediente.fecha_registro)}</p>
-                            <p className="mdp-timeline-desc">Su solicitud fue registrada correctamente.</p>
-                        </li>
+                    <dl className="seg-datos">
+                        <div>
+                            <dt>Presentado</dt>
+                            <dd>{formatDateTime(expediente.fecha_registro)}</dd>
+                        </div>
+                        <div>
+                            <dt>Última actualización</dt>
+                            <dd>{formatDateTime(expediente.fecha_actualizacion)}</dd>
+                        </div>
+                        {expediente.area_actual && (
+                            <div>
+                                <dt>Área actual</dt>
+                                <dd>{roleLabel(expediente.area_actual)}</dd>
+                            </div>
+                        )}
+                    </dl>
 
-                        {derivacionesOrdenadas.map((item) => (
-                            <li key={item.id} className="mdp-timeline-item">
-                                <span className="mdp-timeline-dot" />
-                                <p className="mdp-timeline-title">
-                                    {TIPO_DERIVACION_LABEL[item.tipo] ?? item.tipo}: {item.origen} → {item.destino}
-                                </p>
-                                <p className="mdp-timeline-meta">{formatDateTime(item.fecha_registro)}</p>
-                                {(item.motivo || item.condicion) && (
-                                    <p className="mdp-timeline-desc">
-                                        {item.motivo}
-                                        {item.condicion ? ` — ${item.condicion}` : ""}
-                                    </p>
-                                )}
-                            </li>
-                        ))}
+                    {seguimiento ? (
+                        <>
+                            <ProgresoTramite seguimiento={seguimiento} />
+                            <LineaTiempoTramite
+                                seguimiento={seguimiento}
+                                areaActual={expediente.area_actual ? roleLabel(expediente.area_actual) : ""}
+                                accionObservacion={
+                                    puedeCorregir && (
+                                        <Link to={`/expedientes/${expediente.id}`} className="dp-btn-primary">
+                                            Corregir y volver a presentar
+                                        </Link>
+                                    )
+                                }
+                            />
+                        </>
+                    ) : (
+                        // Estado fuera del flujo conocido: se informa sin porcentaje.
+                        <p className="dp-alert dp-alert--info">
+                            Estado actual: {expediente.estado}. No es posible calcular el avance de este trámite.
+                        </p>
+                    )}
 
-                        <li className="mdp-timeline-item mdp-timeline-item--pendiente">
-                            <span className="mdp-timeline-dot" />
-                            <p className="mdp-timeline-title">Estado actual: {expediente.estado.replace("_", " ")}</p>
-                            <p className="mdp-timeline-meta">
-                                Última actualización: {formatDateTime(expediente.fecha_actualizacion)}
+                    {puedeVerDerivaciones && (
+                        <div className="seg-movimientos">
+                            <h3 className="seg-movimientos-titulo">Movimientos registrados</h3>
+                            <p className="seg-movimientos-nota">
+                                Derivaciones de su expediente entre áreas, tal como fueron registradas.
                             </p>
-                        </li>
-                    </ul>
+                            {derivacionesOrdenadas.length === 0 ? (
+                                <p className="seg-movimientos-nota">Aún no hay movimientos registrados.</p>
+                            ) : (
+                                <ul className="mdp-timeline">
+                                    {derivacionesOrdenadas.map((item) => (
+                                        <li key={item.id} className="mdp-timeline-item">
+                                            <span className="mdp-timeline-dot" />
+                                            <p className="mdp-timeline-title">
+                                                {TIPO_DERIVACION_LABEL[item.tipo] ?? item.tipo}: {roleLabel(item.origen)} →{" "}
+                                                {roleLabel(item.destino)}
+                                            </p>
+                                            <p className="mdp-timeline-meta">{formatDateTime(item.fecha_registro)}</p>
+                                            {(item.motivo || item.condicion) && (
+                                                <p className="mdp-timeline-desc">
+                                                    {item.motivo}
+                                                    {item.condicion ? ` — ${item.condicion}` : ""}
+                                                </p>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
                 </section>
             )}
         </RoleLayout>

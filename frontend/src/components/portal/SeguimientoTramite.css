@@ -1,0 +1,372 @@
+/* Seguimiento del trámite (portal del solicitante): tarjeta de avance,
+   línea de tiempo de etapas y barra compacta del listado. */
+
+/* ---------- Tarjeta de avance ---------- */
+.seg-progreso {
+    --seg-tono: var(--dp-interactive);
+    margin-top: 18px;
+    padding: 18px 20px;
+    border: 1px solid var(--dp-border);
+    border-left: 4px solid var(--seg-tono);
+    border-radius: var(--dp-radius-lg);
+    background: var(--dp-surface-2);
+}
+
+.seg-progreso--finalizado {
+    --seg-tono: #17B26A;
+}
+
+.seg-progreso--observado {
+    --seg-tono: #DC6803;
+    background: var(--dp-warning-bg);
+    border-color: var(--dp-warning-border);
+    border-left-color: var(--seg-tono);
+}
+
+.seg-progreso-cabecera {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.seg-progreso-titulo {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dp-text-secondary);
+}
+
+.seg-progreso-etapa {
+    margin: 4px 0 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dp-text-primary);
+}
+
+.seg-progreso-porcentaje {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--dp-navy);
+    font-variant-numeric: tabular-nums;
+}
+
+.seg-progreso-porcentaje span {
+    margin-left: 2px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dp-text-secondary);
+}
+
+.seg-progreso-barra {
+    position: relative;
+    height: 10px;
+    margin-top: 14px;
+    border-radius: 999px;
+    background: var(--dp-border);
+    overflow: hidden;
+}
+
+.seg-progreso-relleno {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--dp-primary), var(--seg-tono));
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.seg-progreso--finalizado .seg-progreso-relleno {
+    background: linear-gradient(90deg, var(--dp-primary), #17B26A);
+}
+
+.seg-progreso--observado .seg-progreso-relleno {
+    background: #DC6803;
+}
+
+.seg-progreso-detalle {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--dp-text-secondary);
+}
+
+/* ---------- Línea de tiempo ---------- */
+.seg-linea {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 0;
+}
+
+.seg-etapa {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+    padding-bottom: 22px;
+}
+
+/* Conector entre etapas: sólido si la etapa ya se completó. */
+.seg-etapa::before {
+    content: "";
+    position: absolute;
+    left: 17px;
+    top: 38px;
+    bottom: 2px;
+    width: 2px;
+    background: var(--dp-border);
+}
+
+.seg-etapa:last-child {
+    padding-bottom: 0;
+}
+
+.seg-etapa:last-child::before {
+    display: none;
+}
+
+.seg-etapa--completada::before {
+    background: var(--dp-primary);
+}
+
+.seg-etapa-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--dp-border-strong);
+    background: var(--dp-card-bg);
+    color: var(--dp-text-muted);
+}
+
+.seg-etapa--completada .seg-etapa-icono {
+    border-color: var(--dp-primary);
+    background: var(--dp-primary);
+    color: #ffffff;
+}
+
+.seg-etapa--actual .seg-etapa-icono {
+    border-color: var(--dp-interactive);
+    color: var(--dp-interactive);
+    box-shadow: 0 0 0 4px rgba(23, 105, 194, 0.15);
+}
+
+.seg-etapa--bloqueada .seg-etapa-icono {
+    border-color: #DC6803;
+    background: var(--dp-warning-bg);
+    color: #DC6803;
+}
+
+.seg-etapa-cuerpo {
+    min-width: 0;
+    padding-top: 6px;
+}
+
+.seg-etapa-cabecera {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+}
+
+.seg-etapa-titulo {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--dp-text-primary);
+}
+
+.seg-etapa--pendiente .seg-etapa-titulo {
+    color: var(--dp-text-muted);
+    font-weight: 600;
+}
+
+.seg-etapa-estado {
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: var(--dp-bg);
+    color: var(--dp-text-secondary);
+}
+
+.seg-etapa--completada .seg-etapa-estado {
+    background: var(--dp-primary-soft);
+    color: var(--dp-primary);
+}
+
+.seg-etapa--actual .seg-etapa-estado {
+    background: var(--dp-gold-soft);
+    color: #8A5A00;
+}
+
+.seg-etapa--bloqueada .seg-etapa-estado {
+    background: var(--dp-warning-bg);
+    color: var(--dp-warning-text);
+    border: 1px solid var(--dp-warning-border);
+}
+
+.seg-etapa-fecha {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dp-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.seg-etapa-fecha--sin {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--dp-text-muted);
+}
+
+.seg-etapa-desc {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--dp-text-secondary);
+}
+
+.seg-etapa--pendiente .seg-etapa-desc {
+    color: var(--dp-text-muted);
+}
+
+.seg-etapa-area {
+    display: inline-block;
+    margin: 8px 0 0;
+    padding: 3px 10px;
+    border-radius: var(--dp-radius-sm);
+    background: var(--dp-primary-soft);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dp-primary);
+}
+
+.seg-etapa-observacion {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--dp-warning-border);
+    border-left: 3px solid #DC6803;
+    border-radius: var(--dp-radius);
+    background: var(--dp-warning-bg);
+    font-size: 13px;
+    color: var(--dp-warning-text);
+    overflow-wrap: anywhere;
+}
+
+.seg-etapa-observacion p {
+    margin: 0;
+}
+
+.seg-etapa-observacion .dp-btn-primary {
+    margin-top: 10px;
+}
+
+/* ---------- Movimientos registrados ---------- */
+.seg-movimientos {
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--dp-border);
+}
+
+.seg-movimientos-titulo {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dp-text-primary);
+}
+
+.seg-movimientos-nota {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    color: var(--dp-text-secondary);
+}
+
+/* ---------- Encabezado del expediente ---------- */
+.seg-datos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 20px;
+    margin: 16px 0 0;
+}
+
+.seg-datos dt {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--dp-text-muted);
+}
+
+.seg-datos dd {
+    margin: 2px 0 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--dp-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Barra compacta del listado ---------- */
+.seg-mini {
+    --seg-tono: var(--dp-interactive);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seg-mini--finalizado {
+    --seg-tono: #17B26A;
+}
+
+.seg-mini--observado {
+    --seg-tono: #DC6803;
+}
+
+.seg-mini-barra {
+    width: 64px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--dp-border);
+    overflow: hidden;
+}
+
+.seg-mini-barra span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--seg-tono);
+}
+
+.seg-mini-valor {
+    min-width: 34px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--dp-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .seg-progreso-relleno {
+        transition: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .seg-progreso {
+        padding: 14px 14px;
+    }
+
+    .seg-progreso-porcentaje {
+        font-size: 28px;
+    }
+
+    .seg-datos {
+        grid-template-columns: 1fr 1fr;
+    }
+}
