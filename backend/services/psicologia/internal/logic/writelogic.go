@@ -41,6 +41,14 @@ func (l *OpenExpedienteLogic) OpenExpediente(in *psicologia.OpenExpedienteReques
 	if in == nil {
 		return nil, status.Error(codes.InvalidArgument, "la solicitud es obligatoria")
 	}
+	clinico, err := accesoClinico(l.ctx, l.svcCtx, userID)
+	if err != nil {
+		return nil, err
+	}
+	// Registrar un resumen inicial es escribir contenido clínico.
+	if strings.TrimSpace(in.ResumenCaso) != "" && !clinico {
+		return nil, denied(l.ctx, l.svcCtx, userID, "", "", motivoPermisoInsuficiente)
+	}
 
 	estudianteID := strings.TrimSpace(in.EstudianteId)
 	if !validation.IsValidUUID(estudianteID) {
@@ -88,7 +96,7 @@ func (l *OpenExpedienteLogic) OpenExpediente(in *psicologia.OpenExpedienteReques
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo abrir el expediente psicológico")
 	}
-	return &psicologia.OpenExpedienteResponse{Expediente: toProto(exp, true)}, nil
+	return &psicologia.OpenExpedienteResponse{Expediente: toProto(exp, clinico)}, nil
 }
 
 // ---- UpdateExpediente ----
@@ -117,6 +125,13 @@ func (l *UpdateExpedienteLogic) UpdateExpediente(in *psicologia.UpdateExpediente
 	}
 	if !validation.IsValidUUID(id) {
 		return nil, status.Error(codes.InvalidArgument, "el identificador no es válido")
+	}
+	clinico, err := accesoClinico(l.ctx, l.svcCtx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if in.ResumenCaso != nil && !clinico {
+		return nil, denied(l.ctx, l.svcCtx, userID, id, "", motivoPermisoInsuficiente)
 	}
 
 	var campos []string
@@ -164,7 +179,7 @@ func (l *UpdateExpedienteLogic) UpdateExpediente(in *psicologia.UpdateExpediente
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo actualizar el expediente psicológico")
 	}
-	return &psicologia.UpdateExpedienteResponse{Expediente: toProto(updated, true)}, nil
+	return &psicologia.UpdateExpedienteResponse{Expediente: toProto(updated, clinico)}, nil
 }
 
 // ---- CloseExpediente ----
@@ -202,6 +217,12 @@ func (l *CloseExpedienteLogic) CloseExpediente(in *psicologia.CloseExpedienteReq
 		return nil, status.Error(codes.InvalidArgument, "el motivo de cierre es demasiado largo")
 	}
 
+	// El motivo lo escribe quien cierra; en la respuesta, el contenido
+	// clínico (resumen y motivo) solo vuelve con acceso clínico.
+	clinico, err := accesoClinico(l.ctx, l.svcCtx, userID)
+	if err != nil {
+		return nil, err
+	}
 	_, scopeFilter, err := loadInScope(l.ctx, l.svcCtx, userID, id)
 	if err != nil {
 		return nil, err
@@ -210,7 +231,7 @@ func (l *CloseExpedienteLogic) CloseExpediente(in *psicologia.CloseExpedienteReq
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo cerrar el expediente psicológico")
 	}
-	return &psicologia.CloseExpedienteResponse{Expediente: toProto(closed, true)}, nil
+	return &psicologia.CloseExpedienteResponse{Expediente: toProto(closed, clinico)}, nil
 }
 
 // ---- ReopenExpediente ----
@@ -249,6 +270,10 @@ func (l *ReopenExpedienteLogic) ReopenExpediente(in *psicologia.ReopenExpediente
 		return nil, status.Error(codes.InvalidArgument, "un expediente cerrado solo puede reabrirse como ABIERTO o EN_SEGUIMIENTO")
 	}
 
+	clinico, err := accesoClinico(l.ctx, l.svcCtx, userID)
+	if err != nil {
+		return nil, err
+	}
 	_, scopeFilter, err := loadInScope(l.ctx, l.svcCtx, userID, id)
 	if err != nil {
 		return nil, err
@@ -257,5 +282,5 @@ func (l *ReopenExpedienteLogic) ReopenExpediente(in *psicologia.ReopenExpediente
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo reabrir el expediente psicológico")
 	}
-	return &psicologia.ReopenExpedienteResponse{Expediente: toProto(reopened, true)}, nil
+	return &psicologia.ReopenExpedienteResponse{Expediente: toProto(reopened, clinico)}, nil
 }

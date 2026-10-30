@@ -3180,6 +3180,7 @@ func (x *CambiarParentescoFamiliarResponse) GetFamiliar() *Familiar {
 // Eventos de CAMBIO registrados en la auditoría (nunca lecturas): alta,
 // edición, cambio de estado, datos personales, familia y matrícula. Solo
 // nombres de campos, NUNCA valores anteriores ni nuevos. Requiere
+// "estudiantes.update": revela quién modificó qué campos, así que no basta
 // "estudiantes.view". Más reciente primero, paginado.
 type EventoHistorial struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`

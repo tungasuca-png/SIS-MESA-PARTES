@@ -439,6 +439,7 @@ message CambiarParentescoFamiliarResponse {
 // Eventos de CAMBIO registrados en la auditoría (nunca lecturas): alta,
 // edición, cambio de estado, datos personales, familia y matrícula. Solo
 // nombres de campos, NUNCA valores anteriores ni nuevos. Requiere
+// "estudiantes.update": revela quién modificó qué campos, así que no basta
 // "estudiantes.view". Más reciente primero, paginado.
 message EventoHistorial {
   string id = 1;

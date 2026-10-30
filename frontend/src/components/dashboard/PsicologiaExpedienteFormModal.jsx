@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { openExpedientePsicologico } from "../../services/psicologiaService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
+import { usePermissions } from "../../hooks/usePermissions";
 import ResponsablePsicologoField from "./ResponsablePsicologoField";
 import EstudianteSelector from "./EstudianteSelector";
 import Icon from "./Icon";
@@ -13,6 +14,10 @@ import "./forms.css";
 // no confía únicamente en que el usuario eligió un resultado.
 // initialEstudiante (opcional): estudiante ya elegido en "Buscar alumno".
 function PsicologiaExpedienteFormModal({ onClose, onCreated, initialEstudiante = null }) {
+    // El resumen inicial es contenido clínico: solo con psicologia.atenciones.view
+    // (el backend lo exige igual).
+    const { can } = usePermissions();
+    const canResumen = can("psicologia.atenciones.view");
     const [estudiante, setEstudiante] = useState(initialEstudiante);
     const [responsableId, setResponsableId] = useState("");
     const [resumenCaso, setResumenCaso] = useState("");
@@ -32,7 +37,7 @@ function PsicologiaExpedienteFormModal({ onClose, onCreated, initialEstudiante =
         try {
             const data = await openExpedientePsicologico(estudiante.id, {
                 responsableId: responsableId || undefined,
-                resumenCaso: resumenCaso.trim() || undefined,
+                resumenCaso: canResumen ? resumenCaso.trim() || undefined : undefined,
             });
             onCreated(data.expediente);
         } catch (err) {
@@ -78,6 +83,7 @@ function PsicologiaExpedienteFormModal({ onClose, onCreated, initialEstudiante =
                         disabled={submitting}
                     />
 
+                    {canResumen && (
                     <div className="dp-form-group">
                         <label htmlFor="psi-resumen">Resumen del caso</label>
                         <textarea
@@ -90,6 +96,7 @@ function PsicologiaExpedienteFormModal({ onClose, onCreated, initialEstudiante =
                             placeholder="Información clínica del caso (opcional)"
                         />
                     </div>
+                    )}
 
                     {error && <p className="dp-form-error">{error}</p>}
 

@@ -26,10 +26,11 @@ func NewListHistorialEstudianteLogic(ctx context.Context, svcCtx *svc.ServiceCon
 
 // ListHistorialEstudiante (etapa 6): eventos de CAMBIO del estudiante (alta,
 // edición, estado, datos personales, familia, matrícula), más reciente
-// primero — "estudiantes.view". Solo nombres de campos, nunca valores; las
-// lecturas auditadas no se incluyen.
+// primero. Solo nombres de campos, nunca valores; las lecturas auditadas no
+// se incluyen. Revela QUIÉN modificó QUÉ campos: exige "estudiantes.update"
+// (quienes mantienen el registro), no basta "estudiantes.view".
 func (l *ListHistorialEstudianteLogic) ListHistorialEstudiante(in *estudiantes.ListHistorialEstudianteRequest) (*estudiantes.ListHistorialEstudianteResponse, error) {
-	if _, err := autorizar(l.ctx, l.svcCtx, permisoView); err != nil {
+	if _, err := autorizar(l.ctx, l.svcCtx, "estudiantes.update"); err != nil {
 		return nil, err
 	}
 	if in == nil {

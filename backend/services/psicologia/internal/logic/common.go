@@ -207,6 +207,16 @@ func formatTime(t time.Time) string { return t.UTC().Format(time.RFC3339) }
 // toProto convierte el modelo al mensaje. includeResumen=false en listados:
 // resumen_caso y motivo_cierre son texto libre sensible y solo se devuelven en
 // el detalle (FASE 6N-3, bloque 13).
+// accesoClinico indica si el usuario puede ver el CONTENIDO clínico del
+// expediente (resumen del caso y motivo de cierre). El alcance del
+// expediente (view/view_own) solo da acceso a sus datos administrativos; el
+// contenido clínico exige además "psicologia.atenciones.view", el mismo
+// permiso que protege las atenciones. Un error de Auth se propaga
+// (fail-closed: no se entrega nada).
+func accesoClinico(ctx context.Context, sc *svc.ServiceContext, userID string) (bool, error) {
+	return authorization.HasPermission(ctx, sc.AuthClient, userID, permAtencionesView)
+}
+
 func toProto(e *repository.Expediente, includeResumen bool) *psicologia.ExpedientePsicologico {
 	out := &psicologia.ExpedientePsicologico{
 		Id:            e.ID,

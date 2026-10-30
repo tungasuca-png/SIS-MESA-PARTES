@@ -85,7 +85,7 @@ exigen `expected_version`; si el registro cambió, responden `version_conflict`.
 | RPC | REST (`/api/estudiantes…`) | Permiso |
 |---|---|---|
 | SearchEstudiantes | `GET /` (`orden`: apellidos, codigo o recientes) | `estudiantes.view` |
-| ListHistorialEstudiante | `GET /:id/historial` (solo eventos de cambio, nombres de campos, sin valores) | `estudiantes.view` |
+| ListHistorialEstudiante | `GET /:id/historial` (solo eventos de cambio, nombres de campos, sin valores; revela quién editó) | `estudiantes.update` |
 | CambiarParentescoFamiliar *(W)* | `POST /:id/familiares/:relacion_id/parentesco` (cierra la relación y crea otra en una transacción) | `estudiantes.familia.update` |
 | GetEstudiante | `GET /:id` | `estudiantes.view` |
 | GetEstudiantesBasic | `POST /basic-batch` | `estudiantes.view` |
