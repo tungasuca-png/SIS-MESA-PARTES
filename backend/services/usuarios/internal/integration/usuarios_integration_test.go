@@ -110,6 +110,22 @@ func (c *scriptedAuthClient) CreateUser(context.Context, *authclient.CreateUserR
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) IssueServiceToken(context.Context, *authclient.IssueServiceTokenRequest, ...grpc.CallOption) (*authclient.IssueServiceTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) CreateServiceClient(context.Context, *authclient.CreateServiceClientRequest, ...grpc.CallOption) (*authclient.CreateServiceClientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) RevokeServiceClient(context.Context, *authclient.RevokeServiceClientRequest, ...grpc.CallOption) (*authclient.RevokeServiceClientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) ListServiceClients(context.Context, *authclient.ListServiceClientsRequest, ...grpc.CallOption) (*authclient.ListServiceClientsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 func TestUsuariosIntegration(t *testing.T) {
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")
