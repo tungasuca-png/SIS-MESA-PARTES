@@ -24,6 +24,11 @@ type ServiceContext struct {
 	RefreshTokenRepository   *repository.RefreshTokenRepository
 	AuthorizationService     *authorization.AuthorizationService
 	JWTManager               *security.JWTManager
+	// Sistemas consumidores (client credentials). ServiceTokenIssuer es nil
+	// si ServiceJWTSecret no está configurado: IssueServiceToken responde
+	// Unavailable y nada más cambia.
+	ServiceClientRepository *repository.ServiceClientRepository
+	ServiceTokenIssuer      *security.ServiceTokenIssuer
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -92,6 +97,17 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	log.Println("Conexión exitosa a PostgreSQL")
 
+	serviceIssuer, err := security.NewServiceTokenIssuer(c.ServiceJWTSecret, c.JWTSecret, c.ServiceTokenIssuer, c.ServiceTokenAudience, c.ServiceTokenDuration)
+	if err != nil {
+		db.Close()
+		log.Fatalf("Configuración de tokens de servicio inválida: %v", err)
+	}
+	if serviceIssuer == nil {
+		log.Println("Tokens de servicio deshabilitados: SERVICE_JWT_SECRET no está configurado")
+	} else {
+		log.Println("Tokens de servicio habilitados (client credentials)")
+	}
+
 	return &ServiceContext{
 		Config:                   c,
 		DB:                       db,
@@ -102,6 +118,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RefreshTokenRepository:   repository.NewRefreshTokenRepository(db),
 		AuthorizationService:     authorization.NewAuthorizationService(repository.NewUserRepository(db), repository.NewRoleRepository(db), repository.NewRolePermissionRepository(db)),
 		JWTManager:               security.NewJWTManager(c.JWTSecret, c.AccessTokenDuration),
+		ServiceClientRepository:  repository.NewServiceClientRepository(db),
+		ServiceTokenIssuer:       serviceIssuer,
 	}
 }
 

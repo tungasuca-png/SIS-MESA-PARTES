@@ -1,0 +1,148 @@
+/* Gráficos del Dashboard: fondo blanco, cuadrícula suave, azul institucional. */
+
+.dp-chart {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.dp-chart svg {
+    display: block;
+    max-width: 100%;
+}
+
+.dp-chart-grid {
+    stroke: #EEF0F3;
+    stroke-width: 1;
+}
+
+.dp-chart-axis {
+    fill: var(--dp-text-muted);
+    font-size: 11px;
+    font-family: inherit;
+}
+
+.dp-chart-line {
+    fill: none;
+    stroke: var(--dp-primary);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.dp-chart-area {
+    fill: var(--dp-primary);
+    opacity: 0.07;
+}
+
+.dp-chart-dot {
+    fill: #FFFFFF;
+    stroke: var(--dp-primary);
+    stroke-width: 1.5;
+}
+
+.dp-chart-dot--active {
+    fill: var(--dp-primary);
+    stroke: #FFFFFF;
+    stroke-width: 2;
+}
+
+.dp-chart-guide {
+    stroke: #D0D5DD;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+}
+
+.dp-chart-tooltip {
+    position: absolute;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 6px 10px;
+    background: #FFFFFF;
+    border: 1px solid var(--dp-border);
+    border-radius: 7px;
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.dp-chart-tooltip-label {
+    color: var(--dp-text-secondary);
+    font-size: 11px;
+}
+
+.dp-chart-tooltip strong {
+    color: var(--dp-text-primary);
+    font-weight: 700;
+}
+
+/* Barras horizontales. */
+.dp-barlist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dp-barlist-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.dp-barlist-label {
+    color: var(--dp-text-primary);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dp-barlist-value {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--dp-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.dp-barlist-pct {
+    margin-left: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--dp-text-muted);
+}
+
+.dp-barlist-track {
+    height: 8px;
+    border-radius: 999px;
+    background: #F0F2F5;
+    overflow: hidden;
+}
+
+.dp-barlist-fill {
+    height: 100%;
+    min-width: 4px;
+    border-radius: 999px;
+    background: var(--dp-primary);
+    opacity: 0.85;
+}
+
+.dp-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

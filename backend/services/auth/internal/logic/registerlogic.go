@@ -64,8 +64,8 @@ func (l *RegisterLogic) Register(in *auth.RegisterRequest) (*auth.RegisterRespon
 	if password == "" {
 		return nil, status.Error(codes.InvalidArgument, "la contraseña es obligatoria")
 	}
-	if len(password) < 8 {
-		return nil, status.Error(codes.InvalidArgument, "la contraseña debe tener al menos 8 caracteres")
+	if err := validarPassword(password); err != nil {
+		return nil, err
 	}
 
 	if role == "" {

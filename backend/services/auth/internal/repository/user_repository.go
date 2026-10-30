@@ -170,8 +170,12 @@ func (r *UserRepository) GetRoles(ctx context.Context, userID string) ([]string,
 	return roles, nil
 }
 
-func (r *UserRepository) RecordFailedLogin(ctx context.Context, userID string) error {
-	_, err := r.db.Exec(ctx, `
+// RecordFailedLogin suma un intento fallido y, al llegar a 5, bloquea la
+// cuenta 15 minutos. Devuelve el bloqueo vigente (inválido si no quedó
+// bloqueada) para que el login pueda informarlo.
+func (r *UserRepository) RecordFailedLogin(ctx context.Context, userID string) (pgtype.Timestamptz, error) {
+	var lockedUntil pgtype.Timestamptz
+	err := r.db.QueryRow(ctx, `
 		UPDATE usuarios
 		SET failed_login_attempts = failed_login_attempts + 1,
 		    locked_until = CASE
@@ -180,8 +184,9 @@ func (r *UserRepository) RecordFailedLogin(ctx context.Context, userID string) e
 		    END,
 		    updated_at = NOW()
 		WHERE id = $1
-	`, userID)
-	return err
+		RETURNING locked_until
+	`, userID).Scan(&lockedUntil)
+	return lockedUntil, err
 }
 
 func (r *UserRepository) ClearExpiredLoginLock(ctx context.Context, userID string) error {

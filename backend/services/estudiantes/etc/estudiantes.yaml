@@ -24,6 +24,32 @@ JWTSecret: ${JWT_SECRET}
 AuthRpc:
   Target: 127.0.0.1:8080
 
+# Sistemas consumidores (client credentials): misma clave de servicio que
+# Auth (SERVICE_JWT_SECRET, distinta de JWT_SECRET). Sin ella, solo se
+# aceptan tokens de usuario.
+ServiceJWTSecret: ${SERVICE_JWT_SECRET}
+ServiceTokenIssuer: tungasuca-auth
+ServiceTokenAudience: estudiantes
+
+# El tiempo por defecto de go-zero es 2 s por RPC: no alcanza para validar o
+# registrar cientos de estudiantes de un Excel (cada alta es su propia
+# transacción con auditoría). Solo estos métodos tienen más tiempo.
+MethodTimeouts:
+  - FullMethod: /estudiantes.Estudiantes/PreviewImportacionEstudiantes
+    Timeout: 60s
+  - FullMethod: /estudiantes.Estudiantes/ConfirmarImportacionEstudiantes
+    Timeout: 180s
+  - FullMethod: /estudiantes.Estudiantes/ExportarEstudiantes
+    Timeout: 60s
+  - FullMethod: /estudiantes.Estudiantes/PlantillaEstudiantes
+    Timeout: 10s
+  - FullMethod: /estudiantes.Estudiantes/AnalizarDatosEstudiantes
+    Timeout: 60s
+  - FullMethod: /estudiantes.Estudiantes/ConfirmarDatosEstudiantes
+    Timeout: 180s
+  - FullMethod: /estudiantes.Estudiantes/ExportarDatosEstudiantes
+    Timeout: 60s
+
 # go-zero registra el contenido de las solicitudes (stat log). Todo RPC de
 # este servicio lleva datos personales de menores (nombres, DNI, fecha de
 # nacimiento): se excluye el contenido de TODOS los métodos. FASE E-05: una
@@ -47,3 +73,36 @@ Middlewares:
       - /estudiantes.Estudiantes/ListFamiliaresEstudiante
       - /estudiantes.Estudiantes/VincularFamiliar
       - /estudiantes.Estudiantes/DesvincularFamiliar
+      # Etapa 5: familia, personas, periodos, secciones y matrículas.
+      - /estudiantes.Estudiantes/ActualizarFamiliar
+      - /estudiantes.Estudiantes/CreatePersona
+      - /estudiantes.Estudiantes/GetPersona
+      - /estudiantes.Estudiantes/SearchPersonas
+      - /estudiantes.Estudiantes/UpdatePersona
+      - /estudiantes.Estudiantes/CreatePeriodo
+      - /estudiantes.Estudiantes/ListPeriodos
+      - /estudiantes.Estudiantes/ChangeEstadoPeriodo
+      - /estudiantes.Estudiantes/CreateSeccion
+      - /estudiantes.Estudiantes/ListSecciones
+      - /estudiantes.Estudiantes/MatricularEstudiante
+      - /estudiantes.Estudiantes/CambiarSeccionMatricula
+      - /estudiantes.Estudiantes/RetirarMatricula
+      - /estudiantes.Estudiantes/ReingresarMatricula
+      - /estudiantes.Estudiantes/ConcluirMatricula
+      - /estudiantes.Estudiantes/ListMatriculasPeriodo
+      # Etapa 6: parentesco con historial e historial de cambios.
+      - /estudiantes.Estudiantes/CambiarParentescoFamiliar
+      - /estudiantes.Estudiantes/ListHistorialEstudiante
+      # Importación/exportación Excel: el archivo trae DNI y nombres de menores.
+      - /estudiantes.Estudiantes/PlantillaEstudiantes
+      - /estudiantes.Estudiantes/PreviewImportacionEstudiantes
+      - /estudiantes.Estudiantes/ConfirmarImportacionEstudiantes
+      - /estudiantes.Estudiantes/ExportarEstudiantes
+      # Motor universal de datos: archivos y vistas previas con datos de menores.
+      - /estudiantes.Estudiantes/CamposDatosEstudiantes
+      - /estudiantes.Estudiantes/AnalizarDatosEstudiantes
+      - /estudiantes.Estudiantes/ConfirmarDatosEstudiantes
+      - /estudiantes.Estudiantes/ExportarDatosEstudiantes
+      - /estudiantes.Estudiantes/ListPlantillasDatos
+      - /estudiantes.Estudiantes/GuardarPlantillaDatos
+      - /estudiantes.Estudiantes/EliminarPlantillaDatos

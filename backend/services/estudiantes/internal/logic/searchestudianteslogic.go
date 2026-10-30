@@ -55,41 +55,14 @@ func (l *SearchEstudiantesLogic) SearchEstudiantes(in *estudiantes.SearchEstudia
 		in = &estudiantes.SearchEstudiantesRequest{}
 	}
 
-	filter := repository.SearchFilter{
-		Page:     int(in.Page),
-		PageSize: int(in.PageSize),
-		Estado:   strings.ToUpper(strings.TrimSpace(in.Estado)),
-		Nivel:    strings.TrimSpace(in.Nivel),
-		Grado:    strings.TrimSpace(in.Grado),
-		Seccion:  strings.TrimSpace(in.Seccion),
-		Turno:    strings.TrimSpace(in.Turno),
+	filter, err := filtroBusqueda(in.Q, in.Estado, in.Nivel, in.Grado, in.Seccion, in.Turno, in.Orden)
+	if err != nil {
+		return nil, err
 	}
-
-	q := strings.TrimSpace(in.Q)
-	if q != "" {
-		if !validation.QueryLenOK(q) {
-			return nil, status.Error(codes.InvalidArgument, "la búsqueda debe tener al menos 2 caracteres")
-		}
-		if utf8.RuneCountInString(q) > validation.MaxQueryLength {
-			return nil, status.Error(codes.InvalidArgument, "la búsqueda es demasiado larga")
-		}
-		filter.Terms = validation.QueryTerms(q)
-		if len(filter.Terms) > validation.MaxQueryTerms {
-			return nil, status.Error(codes.InvalidArgument, "la búsqueda tiene demasiadas palabras")
-		}
-	}
-
-	if filter.Estado != "" && !validation.IsValidEstadoRegistro(filter.Estado) {
-		return nil, status.Error(codes.InvalidArgument, "estado inválido: use ACTIVO o INACTIVO")
-	}
-	for _, v := range []string{filter.Nivel, filter.Grado, filter.Seccion, filter.Turno} {
-		if !validation.FilterLenOK(v) {
-			return nil, status.Error(codes.InvalidArgument, "valor de filtro demasiado largo")
-		}
-	}
-
+	filter.Page, filter.PageSize = int(in.Page), int(in.PageSize)
 	// Mismo criterio ya usado por Usuarios/Expedientes/Psicología: fuera de
 	// rango se recorta a un valor seguro en vez de rechazar la solicitud.
+
 	if filter.Page <= 0 {
 		filter.Page = 1
 	}
@@ -108,4 +81,46 @@ func (l *SearchEstudiantesLogic) SearchEstudiantes(in *estudiantes.SearchEstudia
 		out = append(out, toProtoBasic(item))
 	}
 	return &estudiantes.SearchEstudiantesResponse{Estudiantes: out, Total: int32(total)}, nil
+}
+
+// filtroBusqueda valida y arma el filtro del directorio. Lo comparten la
+// búsqueda paginada y la exportación (mismos criterios que la tabla).
+func filtroBusqueda(q, estado, nivel, grado, seccion, turno, orden string) (repository.SearchFilter, error) {
+	filter := repository.SearchFilter{
+		Estado:  strings.ToUpper(strings.TrimSpace(estado)),
+		Nivel:   strings.TrimSpace(nivel),
+		Grado:   strings.TrimSpace(grado),
+		Seccion: strings.TrimSpace(seccion),
+		Turno:   strings.TrimSpace(turno),
+		Orden:   strings.ToLower(strings.TrimSpace(orden)),
+	}
+	// Etapa 6: solo los órdenes de la lista blanca del repositorio.
+	if _, ok := repository.OrdenesBusqueda[filter.Orden]; !ok {
+		return filter, status.Error(codes.InvalidArgument, "validation_error: orden inválido: use apellidos, codigo o recientes")
+	}
+
+	q = strings.TrimSpace(q)
+	if q != "" {
+		if !validation.QueryLenOK(q) {
+			return filter, status.Error(codes.InvalidArgument, "la búsqueda debe tener al menos 2 caracteres")
+		}
+		if utf8.RuneCountInString(q) > validation.MaxQueryLength {
+			return filter, status.Error(codes.InvalidArgument, "la búsqueda es demasiado larga")
+		}
+		filter.Terms = validation.QueryTerms(q)
+		if len(filter.Terms) > validation.MaxQueryTerms {
+			return filter, status.Error(codes.InvalidArgument, "la búsqueda tiene demasiadas palabras")
+		}
+	}
+
+	if filter.Estado != "" && !validation.IsValidEstadoRegistro(filter.Estado) {
+		return filter, status.Error(codes.InvalidArgument, "estado inválido: use ACTIVO o INACTIVO")
+	}
+	for _, v := range []string{filter.Nivel, filter.Grado, filter.Seccion, filter.Turno} {
+		if !validation.FilterLenOK(v) {
+			return filter, status.Error(codes.InvalidArgument, "valor de filtro demasiado largo")
+		}
+	}
+
+	return filter, nil
 }

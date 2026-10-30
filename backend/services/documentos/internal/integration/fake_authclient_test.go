@@ -2,12 +2,15 @@ package integration
 
 import (
 	"context"
+	"strings"
 
 	"auth/authclient"
 	"expedientes/expedientesclient"
 
+	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -91,6 +94,22 @@ func (c *scriptedAuthClient) CreateUser(context.Context, *authclient.CreateUserR
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) IssueServiceToken(context.Context, *authclient.IssueServiceTokenRequest, ...grpc.CallOption) (*authclient.IssueServiceTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) CreateServiceClient(context.Context, *authclient.CreateServiceClientRequest, ...grpc.CallOption) (*authclient.CreateServiceClientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) RevokeServiceClient(context.Context, *authclient.RevokeServiceClientRequest, ...grpc.CallOption) (*authclient.RevokeServiceClientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) ListServiceClients(context.Context, *authclient.ListServiceClientsRequest, ...grpc.CallOption) (*authclient.ListServiceClientsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 // fakeExpedientesClient (Paso 19C) es un doble de prueba SOLO para
 // TestDocumentosIntegration: esa suite usa un expediente_id y un
 // solicitante_id SINTÉTICOS (fixedUUID) que nunca existen en
@@ -111,9 +130,29 @@ func (c *scriptedAuthClient) CreateUser(context.Context, *authclient.CreateUserR
 type fakeExpedientesClient struct {
 	expedienteID  string
 	solicitanteID string
+	// rolesFueraDeArea simula a Expedientes Service cuando el expediente no
+	// está en el área del rol que llama (DOCENTE, AUXILIAR, ...): Get responde
+	// PermissionDenied y List no lo incluye. El rol se lee del JWT reenviado.
+	rolesFueraDeArea map[string]bool
 }
 
-func (c *fakeExpedientesClient) GetExpediente(_ context.Context, in *expedientesclient.GetExpedienteRequest, _ ...grpc.CallOption) (*expedientesclient.GetExpedienteResponse, error) {
+func (c *fakeExpedientesClient) fueraDeArea(ctx context.Context) bool {
+	md, _ := metadata.FromOutgoingContext(ctx)
+	for _, v := range md.Get("authorization") {
+		claims := jwt.MapClaims{}
+		if _, _, err := jwt.NewParser().ParseUnverified(strings.TrimPrefix(v, "Bearer "), claims); err == nil {
+			if role, _ := claims["role"].(string); c.rolesFueraDeArea[role] {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (c *fakeExpedientesClient) GetExpediente(ctx context.Context, in *expedientesclient.GetExpedienteRequest, _ ...grpc.CallOption) (*expedientesclient.GetExpedienteResponse, error) {
+	if c.fueraDeArea(ctx) {
+		return nil, status.Error(codes.PermissionDenied, "no tiene acceso a este expediente")
+	}
 	if in.Id != c.expedienteID {
 		return nil, status.Error(codes.NotFound, "expediente no encontrado")
 	}
@@ -122,7 +161,10 @@ func (c *fakeExpedientesClient) GetExpediente(_ context.Context, in *expedientes
 	}, nil
 }
 
-func (c *fakeExpedientesClient) ListExpedientes(context.Context, *expedientesclient.ListExpedientesRequest, ...grpc.CallOption) (*expedientesclient.ListExpedientesResponse, error) {
+func (c *fakeExpedientesClient) ListExpedientes(ctx context.Context, _ *expedientesclient.ListExpedientesRequest, _ ...grpc.CallOption) (*expedientesclient.ListExpedientesResponse, error) {
+	if c.fueraDeArea(ctx) {
+		return &expedientesclient.ListExpedientesResponse{}, nil
+	}
 	return &expedientesclient.ListExpedientesResponse{
 		Expedientes: []*expedientesclient.Expediente{{Id: c.expedienteID, SolicitanteId: c.solicitanteID}},
 		Total:       1,

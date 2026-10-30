@@ -200,6 +200,60 @@ message CreateUserResponse {
   string role_nombre = 5;
 }
 
+// Sistemas consumidores (client credentials). Un sistema externo cambia su
+// client_id + client_secret por un JWT de servicio de corta duración,
+// firmado con una clave distinta de la de usuarios (ServiceJWTSecret) y con
+// iss/aud/token_type/scope. Nunca representa a un usuario ni lleva rol.
+message IssueServiceTokenRequest {
+  string client_id = 1;
+  string client_secret = 2;
+}
+
+message IssueServiceTokenResponse {
+  string access_token = 1;
+  int64 expires_in = 2;
+  // Permisos autorizados, separados por espacios (claim "scope").
+  string scope = 3;
+}
+
+message ServiceClient {
+  string id = 1;
+  string nombre = 2;
+  string client_id = 3;
+  string estado = 4;
+  repeated string permisos = 5;
+  string created_at = 6;
+  string last_used_at = 7;
+  string revoked_at = 8;
+}
+
+// Alta administrativa ("integraciones.manage"): client_secret se devuelve
+// UNA sola vez; Auth guarda solo su hash.
+message CreateServiceClientRequest {
+  string nombre = 1;
+  repeated string permisos = 2;
+}
+
+message CreateServiceClientResponse {
+  ServiceClient client = 1;
+  string client_secret = 2;
+}
+
+// Revocación: acepta el id (UUID) o el client_id.
+message RevokeServiceClientRequest {
+  string id = 1;
+}
+
+message RevokeServiceClientResponse {
+  ServiceClient client = 1;
+}
+
+message ListServiceClientsRequest {}
+
+message ListServiceClientsResponse {
+  repeated ServiceClient clients = 1;
+}
+
 service Auth {
   rpc Ping(Request) returns(Response);
   rpc Register(RegisterRequest) returns(RegisterResponse);
@@ -215,4 +269,8 @@ service Auth {
   rpc UpdateRolePermissions(UpdateRolePermissionsRequest) returns(UpdateRolePermissionsResponse);
   rpc UpdateUserRole(UpdateUserRoleRequest) returns(UpdateUserRoleResponse);
   rpc CreateUser(CreateUserRequest) returns(CreateUserResponse);
+  rpc IssueServiceToken(IssueServiceTokenRequest) returns(IssueServiceTokenResponse);
+  rpc CreateServiceClient(CreateServiceClientRequest) returns(CreateServiceClientResponse);
+  rpc RevokeServiceClient(RevokeServiceClientRequest) returns(RevokeServiceClientResponse);
+  rpc ListServiceClients(ListServiceClientsRequest) returns(ListServiceClientsResponse);
 }

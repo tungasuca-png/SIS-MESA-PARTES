@@ -7,6 +7,7 @@ import {
     renderEstudiantes,
 } from "../../test/estudiantesTestUtils";
 import * as service from "../../services/estudiantesService";
+import * as usuarios from "../../services/usuariosService";
 
 vi.mock("../../services/estudiantesService", () => ({
     searchEstudiantes: vi.fn(),
@@ -19,7 +20,23 @@ vi.mock("../../services/estudiantesService", () => ({
     updateEstudiantePersonal: vi.fn(),
     getMatriculasEstudiante: vi.fn(),
     getFamiliaresEstudiante: vi.fn(),
+    getHistorialEstudiante: vi.fn(),
+    vincularFamiliar: vi.fn(),
+    desvincularFamiliar: vi.fn(),
+    actualizarFamiliar: vi.fn(),
+    cambiarParentescoFamiliar: vi.fn(),
+    searchPersonas: vi.fn(),
+    updatePersona: vi.fn(),
+    listPeriodos: vi.fn(),
+    listSecciones: vi.fn(),
+    matricularEstudiante: vi.fn(),
+    cambiarSeccionMatricula: vi.fn(),
+    retirarMatricula: vi.fn(),
+    reingresarMatricula: vi.fn(),
+    concluirMatricula: vi.fn(),
 }));
+vi.mock("../../services/psicologiaService", () => ({ getExpedientePsicologicoByEstudiante: vi.fn() }));
+vi.mock("../../services/usuariosService", () => ({ getUsuariosBasic: vi.fn() }));
 vi.mock("../../components/portal/RoleLayout", () => ({
     default: ({ title, children }) => (
         <div>
@@ -55,7 +72,15 @@ beforeEach(() => {
     cargar();
     service.getMatriculasEstudiante.mockResolvedValue({ matriculas: [] });
     service.getFamiliaresEstudiante.mockResolvedValue({ familiares: [] });
+    service.getHistorialEstudiante.mockResolvedValue({ eventos: [], total: 0 });
+    service.listSecciones.mockResolvedValue({ secciones: [] });
+    usuarios.getUsuariosBasic.mockResolvedValue({ usuarios: [] });
 });
+
+// Abre una pestaña de la ficha (ya cargada).
+const pestana = async (nombre) => {
+    fireEvent.click(await screen.findByRole("tab", { name: new RegExp(nombre) }));
+};
 afterEach(cleanup);
 
 describe("Detalle del estudiante", () => {
@@ -64,14 +89,18 @@ describe("Detalle del estudiante", () => {
         expect(await screen.findByText("Identidad básica")).toBeTruthy();
         expect(service.getEstudiante).toHaveBeenCalledWith(basico.id);
         expect(service.getEstudiantesBasic).toHaveBeenCalledWith([basico.id]);
-        expect(screen.getByText("12345678901234")).toBeTruthy();
-        expect(screen.getByText("DNI 12345678")).toBeTruthy();
+        expect(screen.getAllByText("12345678901234").length).toBe(2);
+        // Documento enmascarado en la cabecera y en la identidad; se muestra a pedido.
+        expect(screen.getAllByText("DNI ••••5678").length).toBe(2);
+        expect(screen.queryByText(/12345678(?!901234)/)).toBeNull();
+        fireEvent.click(screen.getByRole("button", { name: "Mostrar" }));
+        expect(screen.getByText(/DNI 12345678/)).toBeTruthy();
         expect(screen.getByText("Pérez / Soto")).toBeTruthy();
         expect(screen.getByText("Información académica actual")).toBeTruthy();
-        expect(screen.getByText(/Datos heredados, solo de lectura/)).toBeTruthy();
+        expect(screen.getByText(/Datos anteriores al módulo de matrícula/)).toBeTruthy();
         // FASE E-08: sin estudiantes.personal.view no hay sección personal
         // ni se consulta el endpoint personal.
-        expect(screen.queryByText("Datos personales")).toBeNull();
+        expect(screen.getByText("Requieren el permiso de datos personales.")).toBeTruthy();
         expect(screen.queryByText("Fecha de nacimiento")).toBeNull();
         expect(service.getEstudiantePersonal).not.toHaveBeenCalled();
     });
@@ -85,7 +114,7 @@ describe("Detalle del estudiante", () => {
     it("sin permisos de escritura no muestra Editar ni Inactivar", async () => {
         renderEstudiantes(ruta);
         await screen.findByText("Identidad básica");
-        expect(screen.queryByRole("button", { name: "Editar" })).toBeNull();
+        expect(screen.queryByRole("button", { name: "Editar ficha" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Inactivar" })).toBeNull();
     });
 });
@@ -94,7 +123,7 @@ describe("Editar estudiante", () => {
     const abrir = async () => {
         renderEstudiantes(ruta, { permissions: TODOS_LOS_PERMISOS });
         await screen.findByText("Identidad básica");
-        fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+        fireEvent.click(screen.getByRole("button", { name: "Editar ficha" }));
         return screen.getByRole("dialog", { name: "Editar estudiante" });
     };
 
@@ -123,7 +152,7 @@ describe("Editar estudiante", () => {
         );
         expect(await screen.findByText("Cambios guardados correctamente.")).toBeTruthy();
         expect(screen.getByText("Ana María")).toBeTruthy();
-        expect(screen.getByText("5")).toBeTruthy();
+        expect(screen.getByRole("heading", { name: "Ana María Pérez Soto" })).toBeTruthy();
     });
 
     it("sin cambios no envía nada", async () => {
@@ -145,7 +174,7 @@ describe("Editar estudiante", () => {
         cargar({ nombres: "Cambio ajeno", version: 6 });
         fireEvent.click(within(dialog).getByRole("button", { name: "Recargar datos" }));
         await waitFor(() => expect(service.getEstudiante).toHaveBeenCalledTimes(2));
-        expect(await screen.findByText("6")).toBeTruthy();
+        expect(await screen.findByText("Cambio ajeno")).toBeTruthy();
         expect(screen.queryByRole("dialog", { name: "Editar estudiante" })).toBeNull();
         expect(service.updateEstudiante).toHaveBeenCalledTimes(1);
     });
@@ -265,7 +294,6 @@ describe("Datos personales (FASE E-08)", () => {
         expect(await screen.findByText("Datos personales guardados correctamente.")).toBeTruthy();
         expect(screen.getByText("Masculino")).toBeTruthy();
         expect(screen.getByText("QUECHUA")).toBeTruthy();
-        expect(screen.getByText("5")).toBeTruthy();
     });
 
     it("usa la versión más reciente conocida (lectura personal posterior al detalle)", async () => {
@@ -381,9 +409,14 @@ describe("Modelo maestro: historial de matrícula", () => {
             ],
         });
         renderEstudiantes(ruta);
-        expect(await screen.findByText("Historial de matrícula")).toBeTruthy();
-        expect(await screen.findByText("PRIMARIA · 4 · B")).toBeTruthy();
-        expect(screen.getByText("Cambio de sección (2026-06-01)")).toBeTruthy();
+        // La cabecera muestra el periodo vigente (EN_CURSO).
+        expect(await screen.findByText("Periodo vigente (2026)")).toBeTruthy();
+        await pestana("Historial académico");
+        expect(screen.getByText("PRIMARIA · 4° · «B» · MAÑANA")).toBeTruthy();
+        expect(screen.getByText("PRIMARIA · 4° · «B» · MAÑANA · Aula 3")).toBeTruthy();
+        const movimientos = screen.getByRole("list", { name: "Movimientos de 2026" });
+        expect(within(movimientos).getByText("2026-06-01")).toBeTruthy();
+        expect(within(movimientos).getByText(/Cambio de sección/)).toBeTruthy();
         expect(screen.getByText("Sin sección asignada")).toBeTruthy();
         expect(screen.getByText("Concluido")).toBeTruthy();
         expect(service.getMatriculasEstudiante).toHaveBeenCalledWith(basico.id);
@@ -391,6 +424,7 @@ describe("Modelo maestro: historial de matrícula", () => {
 
     it("sin matrículas registradas", async () => {
         renderEstudiantes(ruta);
+        await pestana("Historial académico");
         expect(await screen.findByText("Sin matrículas registradas.")).toBeTruthy();
     });
 });
@@ -416,16 +450,23 @@ describe("Modelo maestro: familiares", () => {
     it("sin estudiantes.familia.view no hay sección ni consulta", async () => {
         renderEstudiantes(ruta);
         await screen.findByText("Identidad básica");
-        expect(screen.queryByText("Familiares")).toBeNull();
+        await pestana("Padres y apoderados");
+        expect(screen.getByText(/No tienes permiso para ver los padres y apoderados/)).toBeTruthy();
         expect(service.getFamiliaresEstudiante).not.toHaveBeenCalled();
     });
 
     it("con estudiantes.familia.view lista las relaciones y permite ver el historial", async () => {
         service.getFamiliaresEstudiante.mockResolvedValue({ familiares });
         renderEstudiantes(ruta, { permissions: ["estudiantes.view", "estudiantes.familia.view"] });
-        expect(await screen.findByText("Padre · Apoderado")).toBeTruthy();
-        expect(screen.getByText("Juan Pérez — DNI 41234567")).toBeTruthy();
-        expect(screen.getByText("María — Sin documento")).toBeTruthy();
+        await pestana("Padres y apoderados");
+        expect(await screen.findByText("Juan Pérez")).toBeTruthy();
+        expect(screen.getByText("Apoderado")).toBeTruthy();
+        expect(screen.getByText(/••••4567/)).toBeTruthy();
+        expect(screen.queryByText(/41234567/)).toBeNull();
+        expect(screen.getByText("María")).toBeTruthy();
+        // Solo lectura: sin familia.update no hay acciones.
+        expect(screen.queryByRole("button", { name: "Vincular responsable" })).toBeNull();
+        expect(screen.queryByRole("button", { name: "Desvincular" })).toBeNull();
         expect(service.getFamiliaresEstudiante).toHaveBeenCalledWith(basico.id, { historial: false });
 
         fireEvent.click(screen.getByLabelText(/Incluir/));
@@ -435,6 +476,7 @@ describe("Modelo maestro: familiares", () => {
     it("403 al leer familiares", async () => {
         service.getFamiliaresEstudiante.mockRejectedValue(httpError(403, "permission_denied: x"));
         renderEstudiantes(ruta, { permissions: ["estudiantes.view", "estudiantes.familia.view"] });
-        expect(await screen.findByText("No tienes permiso para ver los familiares.")).toBeTruthy();
+        await pestana("Padres y apoderados");
+        expect(await screen.findByText("No tienes permiso para ver los padres y apoderados.")).toBeTruthy();
     });
 });

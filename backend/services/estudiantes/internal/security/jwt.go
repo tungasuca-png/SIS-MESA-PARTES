@@ -16,6 +16,8 @@ var ErrInvalidAccessToken = errors.New("invalid access token")
 type Claims struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
+	// TokenType solo existe en tokens de servicio (ver service_token.go).
+	TokenType string `json:"token_type,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -39,8 +41,18 @@ func (v *JWTValidator) Validate(rawToken string) (*Claims, error) {
 			return nil, ErrInvalidAccessToken
 		}
 		return []byte(v.secret), nil
-	})
-	if err != nil || !token.Valid || claims.Subject == "" {
+	},
+		// Endurecimiento: el algoritmo se fija también en el parser y un token
+		// sin "exp" se rechaza (antes se aceptaba y no vencía nunca).
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithExpirationRequired(),
+		// Base64 canónico: sin esto, variantes de la misma firma (bits de relleno
+		// distintos en el último carácter) también validaban.
+		jwt.WithStrictDecoding(),
+	)
+	// Los access tokens de usuario no llevan token_type: uno que lo lleve (de
+	// servicio) nunca se acepta como usuario.
+	if err != nil || !token.Valid || claims.Subject == "" || claims.TokenType != "" {
 		return nil, ErrInvalidAccessToken
 	}
 

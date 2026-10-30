@@ -99,7 +99,8 @@ function PsicologiaExpedienteDetail() {
         setSaving(true);
         try {
             const data = await updateExpedientePsicologico(id, {
-                resumenCaso,
+                // Sin acceso clínico el resumen no se envía (no se sobrescribe a ciegas).
+                resumenCaso: canViewAtenciones ? resumenCaso : undefined,
                 responsableId: responsableId || undefined,
                 estado,
             });
@@ -249,9 +250,14 @@ function PsicologiaExpedienteDetail() {
                             </div>
                         )}
                         {/* Dato clínico: solo en el detalle, nunca en el listado. */}
+                        {/* El backend solo envía el resumen con psicologia.atenciones.view. */}
                         <div>
                             <dt>Resumen del caso</dt>
-                            <dd>{expediente.resumen_caso || "Sin registrar."}</dd>
+                            <dd>
+                                {canViewAtenciones
+                                    ? expediente.resumen_caso || "Sin registrar."
+                                    : "Requiere la autorización para consultar contenido clínico."}
+                            </dd>
                         </div>
                     </dl>
                 )}
@@ -285,6 +291,7 @@ function PsicologiaExpedienteDetail() {
                             reasigna si eliges otro psicólogo.
                         </p>
 
+                        {canViewAtenciones && (
                         <div className="dp-form-group">
                             <label htmlFor="psi-edit-resumen">Resumen del caso</label>
                             <textarea
@@ -296,6 +303,7 @@ function PsicologiaExpedienteDetail() {
                                 disabled={saving}
                             />
                         </div>
+                        )}
 
                         {saveError && <p className="dp-form-error">{saveError}</p>}
 

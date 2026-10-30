@@ -92,3 +92,153 @@ func (s *EstudiantesServer) DesvincularFamiliar(ctx context.Context, in *estudia
 	l := logic.NewDesvincularFamiliarLogic(ctx, s.svcCtx)
 	return l.DesvincularFamiliar(in)
 }
+
+// Etapa 5: familia y personas.
+func (s *EstudiantesServer) ActualizarFamiliar(ctx context.Context, in *estudiantes.ActualizarFamiliarRequest) (*estudiantes.ActualizarFamiliarResponse, error) {
+	l := logic.NewActualizarFamiliarLogic(ctx, s.svcCtx)
+	return l.ActualizarFamiliar(in)
+}
+
+func (s *EstudiantesServer) CreatePersona(ctx context.Context, in *estudiantes.CreatePersonaRequest) (*estudiantes.PersonaResponse, error) {
+	l := logic.NewCreatePersonaLogic(ctx, s.svcCtx)
+	return l.CreatePersona(in)
+}
+
+func (s *EstudiantesServer) GetPersona(ctx context.Context, in *estudiantes.GetPersonaRequest) (*estudiantes.GetPersonaResponse, error) {
+	l := logic.NewGetPersonaLogic(ctx, s.svcCtx)
+	return l.GetPersona(in)
+}
+
+func (s *EstudiantesServer) SearchPersonas(ctx context.Context, in *estudiantes.SearchPersonasRequest) (*estudiantes.SearchPersonasResponse, error) {
+	l := logic.NewSearchPersonasLogic(ctx, s.svcCtx)
+	return l.SearchPersonas(in)
+}
+
+func (s *EstudiantesServer) UpdatePersona(ctx context.Context, in *estudiantes.UpdatePersonaRequest) (*estudiantes.PersonaResponse, error) {
+	l := logic.NewUpdatePersonaLogic(ctx, s.svcCtx)
+	return l.UpdatePersona(in)
+}
+
+// Etapa 5: periodos, secciones y matrículas.
+func (s *EstudiantesServer) CreatePeriodo(ctx context.Context, in *estudiantes.CreatePeriodoRequest) (*estudiantes.PeriodoResponse, error) {
+	l := logic.NewCreatePeriodoLogic(ctx, s.svcCtx)
+	return l.CreatePeriodo(in)
+}
+
+func (s *EstudiantesServer) ListPeriodos(ctx context.Context, in *estudiantes.ListPeriodosRequest) (*estudiantes.ListPeriodosResponse, error) {
+	l := logic.NewListPeriodosLogic(ctx, s.svcCtx)
+	return l.ListPeriodos(in)
+}
+
+func (s *EstudiantesServer) ChangeEstadoPeriodo(ctx context.Context, in *estudiantes.ChangeEstadoPeriodoRequest) (*estudiantes.PeriodoResponse, error) {
+	l := logic.NewChangeEstadoPeriodoLogic(ctx, s.svcCtx)
+	return l.ChangeEstadoPeriodo(in)
+}
+
+func (s *EstudiantesServer) CreateSeccion(ctx context.Context, in *estudiantes.CreateSeccionRequest) (*estudiantes.SeccionResponse, error) {
+	l := logic.NewCreateSeccionLogic(ctx, s.svcCtx)
+	return l.CreateSeccion(in)
+}
+
+func (s *EstudiantesServer) ListSecciones(ctx context.Context, in *estudiantes.ListSeccionesRequest) (*estudiantes.ListSeccionesResponse, error) {
+	l := logic.NewListSeccionesLogic(ctx, s.svcCtx)
+	return l.ListSecciones(in)
+}
+
+func (s *EstudiantesServer) MatricularEstudiante(ctx context.Context, in *estudiantes.MatricularEstudianteRequest) (*estudiantes.MatriculaResponse, error) {
+	l := logic.NewMatricularEstudianteLogic(ctx, s.svcCtx)
+	return l.MatricularEstudiante(in)
+}
+
+func (s *EstudiantesServer) CambiarSeccionMatricula(ctx context.Context, in *estudiantes.CambiarSeccionMatriculaRequest) (*estudiantes.MatriculaResponse, error) {
+	l := logic.NewCambiarSeccionMatriculaLogic(ctx, s.svcCtx)
+	return l.CambiarSeccionMatricula(in)
+}
+
+func (s *EstudiantesServer) RetirarMatricula(ctx context.Context, in *estudiantes.RetirarMatriculaRequest) (*estudiantes.MatriculaResponse, error) {
+	l := logic.NewRetirarMatriculaLogic(ctx, s.svcCtx)
+	return l.RetirarMatricula(in)
+}
+
+func (s *EstudiantesServer) ReingresarMatricula(ctx context.Context, in *estudiantes.ReingresarMatriculaRequest) (*estudiantes.MatriculaResponse, error) {
+	l := logic.NewReingresarMatriculaLogic(ctx, s.svcCtx)
+	return l.ReingresarMatricula(in)
+}
+
+func (s *EstudiantesServer) ConcluirMatricula(ctx context.Context, in *estudiantes.ConcluirMatriculaRequest) (*estudiantes.MatriculaResponse, error) {
+	l := logic.NewConcluirMatriculaLogic(ctx, s.svcCtx)
+	return l.ConcluirMatricula(in)
+}
+
+func (s *EstudiantesServer) ListMatriculasPeriodo(ctx context.Context, in *estudiantes.ListMatriculasPeriodoRequest) (*estudiantes.ListMatriculasPeriodoResponse, error) {
+	l := logic.NewListMatriculasPeriodoLogic(ctx, s.svcCtx)
+	return l.ListMatriculasPeriodo(in)
+}
+
+// Etapa 6: parentesco con historial e historial de cambios.
+func (s *EstudiantesServer) CambiarParentescoFamiliar(ctx context.Context, in *estudiantes.CambiarParentescoFamiliarRequest) (*estudiantes.CambiarParentescoFamiliarResponse, error) {
+	l := logic.NewCambiarParentescoFamiliarLogic(ctx, s.svcCtx)
+	return l.CambiarParentescoFamiliar(in)
+}
+
+func (s *EstudiantesServer) ListHistorialEstudiante(ctx context.Context, in *estudiantes.ListHistorialEstudianteRequest) (*estudiantes.ListHistorialEstudianteResponse, error) {
+	l := logic.NewListHistorialEstudianteLogic(ctx, s.svcCtx)
+	return l.ListHistorialEstudiante(in)
+}
+
+// Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+func (s *EstudiantesServer) PlantillaEstudiantes(ctx context.Context, in *estudiantes.PlantillaEstudiantesRequest) (*estudiantes.ArchivoExcelResponse, error) {
+	l := logic.NewPlantillaEstudiantesLogic(ctx, s.svcCtx)
+	return l.PlantillaEstudiantes(in)
+}
+
+func (s *EstudiantesServer) PreviewImportacionEstudiantes(ctx context.Context, in *estudiantes.ImportarEstudiantesRequest) (*estudiantes.ImportarEstudiantesResponse, error) {
+	l := logic.NewPreviewImportacionEstudiantesLogic(ctx, s.svcCtx)
+	return l.PreviewImportacionEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ConfirmarImportacionEstudiantes(ctx context.Context, in *estudiantes.ImportarEstudiantesRequest) (*estudiantes.ImportarEstudiantesResponse, error) {
+	l := logic.NewConfirmarImportacionEstudiantesLogic(ctx, s.svcCtx)
+	return l.ConfirmarImportacionEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ExportarEstudiantes(ctx context.Context, in *estudiantes.ExportarEstudiantesRequest) (*estudiantes.ArchivoExcelResponse, error) {
+	l := logic.NewExportarEstudiantesLogic(ctx, s.svcCtx)
+	return l.ExportarEstudiantes(in)
+}
+
+// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+func (s *EstudiantesServer) CamposDatosEstudiantes(ctx context.Context, in *estudiantes.CamposDatosRequest) (*estudiantes.CamposDatosResponse, error) {
+	l := logic.NewCamposDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.CamposDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) AnalizarDatosEstudiantes(ctx context.Context, in *estudiantes.DatosImportacionRequest) (*estudiantes.DatosImportacionResponse, error) {
+	l := logic.NewAnalizarDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.AnalizarDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ConfirmarDatosEstudiantes(ctx context.Context, in *estudiantes.DatosImportacionRequest) (*estudiantes.DatosImportacionResponse, error) {
+	l := logic.NewConfirmarDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.ConfirmarDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ExportarDatosEstudiantes(ctx context.Context, in *estudiantes.DatosExportacionRequest) (*estudiantes.ArchivoDatosResponse, error) {
+	l := logic.NewExportarDatosEstudiantesLogic(ctx, s.svcCtx)
+	return l.ExportarDatosEstudiantes(in)
+}
+
+func (s *EstudiantesServer) ListPlantillasDatos(ctx context.Context, in *estudiantes.ListPlantillasDatosRequest) (*estudiantes.ListPlantillasDatosResponse, error) {
+	l := logic.NewListPlantillasDatosLogic(ctx, s.svcCtx)
+	return l.ListPlantillasDatos(in)
+}
+
+func (s *EstudiantesServer) GuardarPlantillaDatos(ctx context.Context, in *estudiantes.GuardarPlantillaDatosRequest) (*estudiantes.PlantillaDatosResponse, error) {
+	l := logic.NewGuardarPlantillaDatosLogic(ctx, s.svcCtx)
+	return l.GuardarPlantillaDatos(in)
+}
+
+func (s *EstudiantesServer) EliminarPlantillaDatos(ctx context.Context, in *estudiantes.EliminarPlantillaDatosRequest) (*estudiantes.EliminarPlantillaDatosResponse, error) {
+	l := logic.NewEliminarPlantillaDatosLogic(ctx, s.svcCtx)
+	return l.EliminarPlantillaDatos(in)
+}

@@ -19,20 +19,49 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Estudiantes_GetEstudiante_FullMethodName            = "/estudiantes.Estudiantes/GetEstudiante"
-	Estudiantes_SearchEstudiantes_FullMethodName        = "/estudiantes.Estudiantes/SearchEstudiantes"
-	Estudiantes_GetEstudiantesBasic_FullMethodName      = "/estudiantes.Estudiantes/GetEstudiantesBasic"
-	Estudiantes_CreateEstudiante_FullMethodName         = "/estudiantes.Estudiantes/CreateEstudiante"
-	Estudiantes_UpdateEstudiante_FullMethodName         = "/estudiantes.Estudiantes/UpdateEstudiante"
-	Estudiantes_ChangeEstadoEstudiante_FullMethodName   = "/estudiantes.Estudiantes/ChangeEstadoEstudiante"
-	Estudiantes_GetEstudiantePersonal_FullMethodName    = "/estudiantes.Estudiantes/GetEstudiantePersonal"
-	Estudiantes_UpdateEstudiantePersonal_FullMethodName = "/estudiantes.Estudiantes/UpdateEstudiantePersonal"
-	Estudiantes_ResolveEstudiante_FullMethodName        = "/estudiantes.Estudiantes/ResolveEstudiante"
-	Estudiantes_ListPosiblesDuplicados_FullMethodName   = "/estudiantes.Estudiantes/ListPosiblesDuplicados"
-	Estudiantes_ListMatriculasEstudiante_FullMethodName = "/estudiantes.Estudiantes/ListMatriculasEstudiante"
-	Estudiantes_ListFamiliaresEstudiante_FullMethodName = "/estudiantes.Estudiantes/ListFamiliaresEstudiante"
-	Estudiantes_VincularFamiliar_FullMethodName         = "/estudiantes.Estudiantes/VincularFamiliar"
-	Estudiantes_DesvincularFamiliar_FullMethodName      = "/estudiantes.Estudiantes/DesvincularFamiliar"
+	Estudiantes_GetEstudiante_FullMethodName                   = "/estudiantes.Estudiantes/GetEstudiante"
+	Estudiantes_SearchEstudiantes_FullMethodName               = "/estudiantes.Estudiantes/SearchEstudiantes"
+	Estudiantes_GetEstudiantesBasic_FullMethodName             = "/estudiantes.Estudiantes/GetEstudiantesBasic"
+	Estudiantes_CreateEstudiante_FullMethodName                = "/estudiantes.Estudiantes/CreateEstudiante"
+	Estudiantes_UpdateEstudiante_FullMethodName                = "/estudiantes.Estudiantes/UpdateEstudiante"
+	Estudiantes_ChangeEstadoEstudiante_FullMethodName          = "/estudiantes.Estudiantes/ChangeEstadoEstudiante"
+	Estudiantes_GetEstudiantePersonal_FullMethodName           = "/estudiantes.Estudiantes/GetEstudiantePersonal"
+	Estudiantes_UpdateEstudiantePersonal_FullMethodName        = "/estudiantes.Estudiantes/UpdateEstudiantePersonal"
+	Estudiantes_ResolveEstudiante_FullMethodName               = "/estudiantes.Estudiantes/ResolveEstudiante"
+	Estudiantes_ListPosiblesDuplicados_FullMethodName          = "/estudiantes.Estudiantes/ListPosiblesDuplicados"
+	Estudiantes_ListMatriculasEstudiante_FullMethodName        = "/estudiantes.Estudiantes/ListMatriculasEstudiante"
+	Estudiantes_ListFamiliaresEstudiante_FullMethodName        = "/estudiantes.Estudiantes/ListFamiliaresEstudiante"
+	Estudiantes_VincularFamiliar_FullMethodName                = "/estudiantes.Estudiantes/VincularFamiliar"
+	Estudiantes_DesvincularFamiliar_FullMethodName             = "/estudiantes.Estudiantes/DesvincularFamiliar"
+	Estudiantes_ActualizarFamiliar_FullMethodName              = "/estudiantes.Estudiantes/ActualizarFamiliar"
+	Estudiantes_CreatePersona_FullMethodName                   = "/estudiantes.Estudiantes/CreatePersona"
+	Estudiantes_GetPersona_FullMethodName                      = "/estudiantes.Estudiantes/GetPersona"
+	Estudiantes_SearchPersonas_FullMethodName                  = "/estudiantes.Estudiantes/SearchPersonas"
+	Estudiantes_UpdatePersona_FullMethodName                   = "/estudiantes.Estudiantes/UpdatePersona"
+	Estudiantes_CreatePeriodo_FullMethodName                   = "/estudiantes.Estudiantes/CreatePeriodo"
+	Estudiantes_ListPeriodos_FullMethodName                    = "/estudiantes.Estudiantes/ListPeriodos"
+	Estudiantes_ChangeEstadoPeriodo_FullMethodName             = "/estudiantes.Estudiantes/ChangeEstadoPeriodo"
+	Estudiantes_CreateSeccion_FullMethodName                   = "/estudiantes.Estudiantes/CreateSeccion"
+	Estudiantes_ListSecciones_FullMethodName                   = "/estudiantes.Estudiantes/ListSecciones"
+	Estudiantes_MatricularEstudiante_FullMethodName            = "/estudiantes.Estudiantes/MatricularEstudiante"
+	Estudiantes_CambiarSeccionMatricula_FullMethodName         = "/estudiantes.Estudiantes/CambiarSeccionMatricula"
+	Estudiantes_RetirarMatricula_FullMethodName                = "/estudiantes.Estudiantes/RetirarMatricula"
+	Estudiantes_ReingresarMatricula_FullMethodName             = "/estudiantes.Estudiantes/ReingresarMatricula"
+	Estudiantes_ConcluirMatricula_FullMethodName               = "/estudiantes.Estudiantes/ConcluirMatricula"
+	Estudiantes_ListMatriculasPeriodo_FullMethodName           = "/estudiantes.Estudiantes/ListMatriculasPeriodo"
+	Estudiantes_CambiarParentescoFamiliar_FullMethodName       = "/estudiantes.Estudiantes/CambiarParentescoFamiliar"
+	Estudiantes_ListHistorialEstudiante_FullMethodName         = "/estudiantes.Estudiantes/ListHistorialEstudiante"
+	Estudiantes_PlantillaEstudiantes_FullMethodName            = "/estudiantes.Estudiantes/PlantillaEstudiantes"
+	Estudiantes_PreviewImportacionEstudiantes_FullMethodName   = "/estudiantes.Estudiantes/PreviewImportacionEstudiantes"
+	Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName = "/estudiantes.Estudiantes/ConfirmarImportacionEstudiantes"
+	Estudiantes_ExportarEstudiantes_FullMethodName             = "/estudiantes.Estudiantes/ExportarEstudiantes"
+	Estudiantes_CamposDatosEstudiantes_FullMethodName          = "/estudiantes.Estudiantes/CamposDatosEstudiantes"
+	Estudiantes_AnalizarDatosEstudiantes_FullMethodName        = "/estudiantes.Estudiantes/AnalizarDatosEstudiantes"
+	Estudiantes_ConfirmarDatosEstudiantes_FullMethodName       = "/estudiantes.Estudiantes/ConfirmarDatosEstudiantes"
+	Estudiantes_ExportarDatosEstudiantes_FullMethodName        = "/estudiantes.Estudiantes/ExportarDatosEstudiantes"
+	Estudiantes_ListPlantillasDatos_FullMethodName             = "/estudiantes.Estudiantes/ListPlantillasDatos"
+	Estudiantes_GuardarPlantillaDatos_FullMethodName           = "/estudiantes.Estudiantes/GuardarPlantillaDatos"
+	Estudiantes_EliminarPlantillaDatos_FullMethodName          = "/estudiantes.Estudiantes/EliminarPlantillaDatos"
 )
 
 // EstudiantesClient is the client API for Estudiantes service.
@@ -53,6 +82,42 @@ type EstudiantesClient interface {
 	ListFamiliaresEstudiante(ctx context.Context, in *ListFamiliaresEstudianteRequest, opts ...grpc.CallOption) (*ListFamiliaresEstudianteResponse, error)
 	VincularFamiliar(ctx context.Context, in *VincularFamiliarRequest, opts ...grpc.CallOption) (*VincularFamiliarResponse, error)
 	DesvincularFamiliar(ctx context.Context, in *DesvincularFamiliarRequest, opts ...grpc.CallOption) (*DesvincularFamiliarResponse, error)
+	// Etapa 5: familia y personas.
+	ActualizarFamiliar(ctx context.Context, in *ActualizarFamiliarRequest, opts ...grpc.CallOption) (*ActualizarFamiliarResponse, error)
+	CreatePersona(ctx context.Context, in *CreatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error)
+	GetPersona(ctx context.Context, in *GetPersonaRequest, opts ...grpc.CallOption) (*GetPersonaResponse, error)
+	SearchPersonas(ctx context.Context, in *SearchPersonasRequest, opts ...grpc.CallOption) (*SearchPersonasResponse, error)
+	UpdatePersona(ctx context.Context, in *UpdatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error)
+	// Etapa 5: periodos, secciones y matrículas.
+	CreatePeriodo(ctx context.Context, in *CreatePeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error)
+	ListPeriodos(ctx context.Context, in *ListPeriodosRequest, opts ...grpc.CallOption) (*ListPeriodosResponse, error)
+	ChangeEstadoPeriodo(ctx context.Context, in *ChangeEstadoPeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error)
+	CreateSeccion(ctx context.Context, in *CreateSeccionRequest, opts ...grpc.CallOption) (*SeccionResponse, error)
+	ListSecciones(ctx context.Context, in *ListSeccionesRequest, opts ...grpc.CallOption) (*ListSeccionesResponse, error)
+	MatricularEstudiante(ctx context.Context, in *MatricularEstudianteRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+	CambiarSeccionMatricula(ctx context.Context, in *CambiarSeccionMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+	RetirarMatricula(ctx context.Context, in *RetirarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+	ReingresarMatricula(ctx context.Context, in *ReingresarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+	ConcluirMatricula(ctx context.Context, in *ConcluirMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error)
+	ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error)
+	// Etapa 6: parentesco con historial e historial de cambios.
+	CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error)
+	ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error)
+	// Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+	// estudiantes.create; la exportación, estudiantes.view.
+	PlantillaEstudiantes(ctx context.Context, in *PlantillaEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error)
+	PreviewImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
+	ConfirmarImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error)
+	ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error)
+	// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+	// estudiantes.view; campos/exportar: estudiantes.view; plantillas: según tipo.
+	CamposDatosEstudiantes(ctx context.Context, in *CamposDatosRequest, opts ...grpc.CallOption) (*CamposDatosResponse, error)
+	AnalizarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error)
+	ConfirmarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error)
+	ExportarDatosEstudiantes(ctx context.Context, in *DatosExportacionRequest, opts ...grpc.CallOption) (*ArchivoDatosResponse, error)
+	ListPlantillasDatos(ctx context.Context, in *ListPlantillasDatosRequest, opts ...grpc.CallOption) (*ListPlantillasDatosResponse, error)
+	GuardarPlantillaDatos(ctx context.Context, in *GuardarPlantillaDatosRequest, opts ...grpc.CallOption) (*PlantillaDatosResponse, error)
+	EliminarPlantillaDatos(ctx context.Context, in *EliminarPlantillaDatosRequest, opts ...grpc.CallOption) (*EliminarPlantillaDatosResponse, error)
 }
 
 type estudiantesClient struct {
@@ -203,6 +268,296 @@ func (c *estudiantesClient) DesvincularFamiliar(ctx context.Context, in *Desvinc
 	return out, nil
 }
 
+func (c *estudiantesClient) ActualizarFamiliar(ctx context.Context, in *ActualizarFamiliarRequest, opts ...grpc.CallOption) (*ActualizarFamiliarResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ActualizarFamiliarResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ActualizarFamiliar_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) CreatePersona(ctx context.Context, in *CreatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PersonaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CreatePersona_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) GetPersona(ctx context.Context, in *GetPersonaRequest, opts ...grpc.CallOption) (*GetPersonaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPersonaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_GetPersona_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) SearchPersonas(ctx context.Context, in *SearchPersonasRequest, opts ...grpc.CallOption) (*SearchPersonasResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchPersonasResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_SearchPersonas_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) UpdatePersona(ctx context.Context, in *UpdatePersonaRequest, opts ...grpc.CallOption) (*PersonaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PersonaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_UpdatePersona_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) CreatePeriodo(ctx context.Context, in *CreatePeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PeriodoResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CreatePeriodo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListPeriodos(ctx context.Context, in *ListPeriodosRequest, opts ...grpc.CallOption) (*ListPeriodosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPeriodosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListPeriodos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ChangeEstadoPeriodo(ctx context.Context, in *ChangeEstadoPeriodoRequest, opts ...grpc.CallOption) (*PeriodoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PeriodoResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ChangeEstadoPeriodo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) CreateSeccion(ctx context.Context, in *CreateSeccionRequest, opts ...grpc.CallOption) (*SeccionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SeccionResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CreateSeccion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListSecciones(ctx context.Context, in *ListSeccionesRequest, opts ...grpc.CallOption) (*ListSeccionesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSeccionesResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListSecciones_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) MatricularEstudiante(ctx context.Context, in *MatricularEstudianteRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MatriculaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_MatricularEstudiante_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) CambiarSeccionMatricula(ctx context.Context, in *CambiarSeccionMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MatriculaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CambiarSeccionMatricula_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) RetirarMatricula(ctx context.Context, in *RetirarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MatriculaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_RetirarMatricula_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ReingresarMatricula(ctx context.Context, in *ReingresarMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MatriculaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ReingresarMatricula_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ConcluirMatricula(ctx context.Context, in *ConcluirMatriculaRequest, opts ...grpc.CallOption) (*MatriculaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MatriculaResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ConcluirMatricula_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListMatriculasPeriodo(ctx context.Context, in *ListMatriculasPeriodoRequest, opts ...grpc.CallOption) (*ListMatriculasPeriodoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMatriculasPeriodoResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListMatriculasPeriodo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) CambiarParentescoFamiliar(ctx context.Context, in *CambiarParentescoFamiliarRequest, opts ...grpc.CallOption) (*CambiarParentescoFamiliarResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CambiarParentescoFamiliarResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CambiarParentescoFamiliar_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListHistorialEstudiante(ctx context.Context, in *ListHistorialEstudianteRequest, opts ...grpc.CallOption) (*ListHistorialEstudianteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListHistorialEstudianteResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListHistorialEstudiante_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) PlantillaEstudiantes(ctx context.Context, in *PlantillaEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ArchivoExcelResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_PlantillaEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) PreviewImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ImportarEstudiantesResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_PreviewImportacionEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ConfirmarImportacionEstudiantes(ctx context.Context, in *ImportarEstudiantesRequest, opts ...grpc.CallOption) (*ImportarEstudiantesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ImportarEstudiantesResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ExportarEstudiantes(ctx context.Context, in *ExportarEstudiantesRequest, opts ...grpc.CallOption) (*ArchivoExcelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ArchivoExcelResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ExportarEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) CamposDatosEstudiantes(ctx context.Context, in *CamposDatosRequest, opts ...grpc.CallOption) (*CamposDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CamposDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_CamposDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) AnalizarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DatosImportacionResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_AnalizarDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ConfirmarDatosEstudiantes(ctx context.Context, in *DatosImportacionRequest, opts ...grpc.CallOption) (*DatosImportacionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DatosImportacionResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ConfirmarDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ExportarDatosEstudiantes(ctx context.Context, in *DatosExportacionRequest, opts ...grpc.CallOption) (*ArchivoDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ArchivoDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ExportarDatosEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) ListPlantillasDatos(ctx context.Context, in *ListPlantillasDatosRequest, opts ...grpc.CallOption) (*ListPlantillasDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPlantillasDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_ListPlantillasDatos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) GuardarPlantillaDatos(ctx context.Context, in *GuardarPlantillaDatosRequest, opts ...grpc.CallOption) (*PlantillaDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlantillaDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_GuardarPlantillaDatos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) EliminarPlantillaDatos(ctx context.Context, in *EliminarPlantillaDatosRequest, opts ...grpc.CallOption) (*EliminarPlantillaDatosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EliminarPlantillaDatosResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_EliminarPlantillaDatos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EstudiantesServer is the server API for Estudiantes service.
 // All implementations must embed UnimplementedEstudiantesServer
 // for forward compatibility.
@@ -221,6 +576,42 @@ type EstudiantesServer interface {
 	ListFamiliaresEstudiante(context.Context, *ListFamiliaresEstudianteRequest) (*ListFamiliaresEstudianteResponse, error)
 	VincularFamiliar(context.Context, *VincularFamiliarRequest) (*VincularFamiliarResponse, error)
 	DesvincularFamiliar(context.Context, *DesvincularFamiliarRequest) (*DesvincularFamiliarResponse, error)
+	// Etapa 5: familia y personas.
+	ActualizarFamiliar(context.Context, *ActualizarFamiliarRequest) (*ActualizarFamiliarResponse, error)
+	CreatePersona(context.Context, *CreatePersonaRequest) (*PersonaResponse, error)
+	GetPersona(context.Context, *GetPersonaRequest) (*GetPersonaResponse, error)
+	SearchPersonas(context.Context, *SearchPersonasRequest) (*SearchPersonasResponse, error)
+	UpdatePersona(context.Context, *UpdatePersonaRequest) (*PersonaResponse, error)
+	// Etapa 5: periodos, secciones y matrículas.
+	CreatePeriodo(context.Context, *CreatePeriodoRequest) (*PeriodoResponse, error)
+	ListPeriodos(context.Context, *ListPeriodosRequest) (*ListPeriodosResponse, error)
+	ChangeEstadoPeriodo(context.Context, *ChangeEstadoPeriodoRequest) (*PeriodoResponse, error)
+	CreateSeccion(context.Context, *CreateSeccionRequest) (*SeccionResponse, error)
+	ListSecciones(context.Context, *ListSeccionesRequest) (*ListSeccionesResponse, error)
+	MatricularEstudiante(context.Context, *MatricularEstudianteRequest) (*MatriculaResponse, error)
+	CambiarSeccionMatricula(context.Context, *CambiarSeccionMatriculaRequest) (*MatriculaResponse, error)
+	RetirarMatricula(context.Context, *RetirarMatriculaRequest) (*MatriculaResponse, error)
+	ReingresarMatricula(context.Context, *ReingresarMatriculaRequest) (*MatriculaResponse, error)
+	ConcluirMatricula(context.Context, *ConcluirMatriculaRequest) (*MatriculaResponse, error)
+	ListMatriculasPeriodo(context.Context, *ListMatriculasPeriodoRequest) (*ListMatriculasPeriodoResponse, error)
+	// Etapa 6: parentesco con historial e historial de cambios.
+	CambiarParentescoFamiliar(context.Context, *CambiarParentescoFamiliarRequest) (*CambiarParentescoFamiliarResponse, error)
+	ListHistorialEstudiante(context.Context, *ListHistorialEstudianteRequest) (*ListHistorialEstudianteResponse, error)
+	// Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+	// estudiantes.create; la exportación, estudiantes.view.
+	PlantillaEstudiantes(context.Context, *PlantillaEstudiantesRequest) (*ArchivoExcelResponse, error)
+	PreviewImportacionEstudiantes(context.Context, *ImportarEstudiantesRequest) (*ImportarEstudiantesResponse, error)
+	ConfirmarImportacionEstudiantes(context.Context, *ImportarEstudiantesRequest) (*ImportarEstudiantesResponse, error)
+	ExportarEstudiantes(context.Context, *ExportarEstudiantesRequest) (*ArchivoExcelResponse, error)
+	// Motor universal de datos. Analizar/confirmar: estudiantes.create y
+	// estudiantes.view; campos/exportar: estudiantes.view; plantillas: según tipo.
+	CamposDatosEstudiantes(context.Context, *CamposDatosRequest) (*CamposDatosResponse, error)
+	AnalizarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error)
+	ConfirmarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error)
+	ExportarDatosEstudiantes(context.Context, *DatosExportacionRequest) (*ArchivoDatosResponse, error)
+	ListPlantillasDatos(context.Context, *ListPlantillasDatosRequest) (*ListPlantillasDatosResponse, error)
+	GuardarPlantillaDatos(context.Context, *GuardarPlantillaDatosRequest) (*PlantillaDatosResponse, error)
+	EliminarPlantillaDatos(context.Context, *EliminarPlantillaDatosRequest) (*EliminarPlantillaDatosResponse, error)
 	mustEmbedUnimplementedEstudiantesServer()
 }
 
@@ -272,6 +663,93 @@ func (UnimplementedEstudiantesServer) VincularFamiliar(context.Context, *Vincula
 }
 func (UnimplementedEstudiantesServer) DesvincularFamiliar(context.Context, *DesvincularFamiliarRequest) (*DesvincularFamiliarResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DesvincularFamiliar not implemented")
+}
+func (UnimplementedEstudiantesServer) ActualizarFamiliar(context.Context, *ActualizarFamiliarRequest) (*ActualizarFamiliarResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ActualizarFamiliar not implemented")
+}
+func (UnimplementedEstudiantesServer) CreatePersona(context.Context, *CreatePersonaRequest) (*PersonaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePersona not implemented")
+}
+func (UnimplementedEstudiantesServer) GetPersona(context.Context, *GetPersonaRequest) (*GetPersonaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPersona not implemented")
+}
+func (UnimplementedEstudiantesServer) SearchPersonas(context.Context, *SearchPersonasRequest) (*SearchPersonasResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchPersonas not implemented")
+}
+func (UnimplementedEstudiantesServer) UpdatePersona(context.Context, *UpdatePersonaRequest) (*PersonaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdatePersona not implemented")
+}
+func (UnimplementedEstudiantesServer) CreatePeriodo(context.Context, *CreatePeriodoRequest) (*PeriodoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePeriodo not implemented")
+}
+func (UnimplementedEstudiantesServer) ListPeriodos(context.Context, *ListPeriodosRequest) (*ListPeriodosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPeriodos not implemented")
+}
+func (UnimplementedEstudiantesServer) ChangeEstadoPeriodo(context.Context, *ChangeEstadoPeriodoRequest) (*PeriodoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ChangeEstadoPeriodo not implemented")
+}
+func (UnimplementedEstudiantesServer) CreateSeccion(context.Context, *CreateSeccionRequest) (*SeccionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateSeccion not implemented")
+}
+func (UnimplementedEstudiantesServer) ListSecciones(context.Context, *ListSeccionesRequest) (*ListSeccionesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListSecciones not implemented")
+}
+func (UnimplementedEstudiantesServer) MatricularEstudiante(context.Context, *MatricularEstudianteRequest) (*MatriculaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MatricularEstudiante not implemented")
+}
+func (UnimplementedEstudiantesServer) CambiarSeccionMatricula(context.Context, *CambiarSeccionMatriculaRequest) (*MatriculaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CambiarSeccionMatricula not implemented")
+}
+func (UnimplementedEstudiantesServer) RetirarMatricula(context.Context, *RetirarMatriculaRequest) (*MatriculaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RetirarMatricula not implemented")
+}
+func (UnimplementedEstudiantesServer) ReingresarMatricula(context.Context, *ReingresarMatriculaRequest) (*MatriculaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReingresarMatricula not implemented")
+}
+func (UnimplementedEstudiantesServer) ConcluirMatricula(context.Context, *ConcluirMatriculaRequest) (*MatriculaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConcluirMatricula not implemented")
+}
+func (UnimplementedEstudiantesServer) ListMatriculasPeriodo(context.Context, *ListMatriculasPeriodoRequest) (*ListMatriculasPeriodoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMatriculasPeriodo not implemented")
+}
+func (UnimplementedEstudiantesServer) CambiarParentescoFamiliar(context.Context, *CambiarParentescoFamiliarRequest) (*CambiarParentescoFamiliarResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CambiarParentescoFamiliar not implemented")
+}
+func (UnimplementedEstudiantesServer) ListHistorialEstudiante(context.Context, *ListHistorialEstudianteRequest) (*ListHistorialEstudianteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHistorialEstudiante not implemented")
+}
+func (UnimplementedEstudiantesServer) PlantillaEstudiantes(context.Context, *PlantillaEstudiantesRequest) (*ArchivoExcelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PlantillaEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) PreviewImportacionEstudiantes(context.Context, *ImportarEstudiantesRequest) (*ImportarEstudiantesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreviewImportacionEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ConfirmarImportacionEstudiantes(context.Context, *ImportarEstudiantesRequest) (*ImportarEstudiantesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfirmarImportacionEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ExportarEstudiantes(context.Context, *ExportarEstudiantesRequest) (*ArchivoExcelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExportarEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) CamposDatosEstudiantes(context.Context, *CamposDatosRequest) (*CamposDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CamposDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) AnalizarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AnalizarDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ConfirmarDatosEstudiantes(context.Context, *DatosImportacionRequest) (*DatosImportacionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfirmarDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ExportarDatosEstudiantes(context.Context, *DatosExportacionRequest) (*ArchivoDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExportarDatosEstudiantes not implemented")
+}
+func (UnimplementedEstudiantesServer) ListPlantillasDatos(context.Context, *ListPlantillasDatosRequest) (*ListPlantillasDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPlantillasDatos not implemented")
+}
+func (UnimplementedEstudiantesServer) GuardarPlantillaDatos(context.Context, *GuardarPlantillaDatosRequest) (*PlantillaDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GuardarPlantillaDatos not implemented")
+}
+func (UnimplementedEstudiantesServer) EliminarPlantillaDatos(context.Context, *EliminarPlantillaDatosRequest) (*EliminarPlantillaDatosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EliminarPlantillaDatos not implemented")
 }
 func (UnimplementedEstudiantesServer) mustEmbedUnimplementedEstudiantesServer() {}
 func (UnimplementedEstudiantesServer) testEmbeddedByValue()                     {}
@@ -546,6 +1024,528 @@ func _Estudiantes_DesvincularFamiliar_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Estudiantes_ActualizarFamiliar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActualizarFamiliarRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ActualizarFamiliar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ActualizarFamiliar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ActualizarFamiliar(ctx, req.(*ActualizarFamiliarRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_CreatePersona_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePersonaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CreatePersona(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CreatePersona_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CreatePersona(ctx, req.(*CreatePersonaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_GetPersona_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPersonaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).GetPersona(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_GetPersona_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).GetPersona(ctx, req.(*GetPersonaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_SearchPersonas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchPersonasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).SearchPersonas(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_SearchPersonas_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).SearchPersonas(ctx, req.(*SearchPersonasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_UpdatePersona_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePersonaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).UpdatePersona(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_UpdatePersona_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).UpdatePersona(ctx, req.(*UpdatePersonaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_CreatePeriodo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePeriodoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CreatePeriodo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CreatePeriodo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CreatePeriodo(ctx, req.(*CreatePeriodoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListPeriodos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPeriodosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListPeriodos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListPeriodos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListPeriodos(ctx, req.(*ListPeriodosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ChangeEstadoPeriodo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeEstadoPeriodoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ChangeEstadoPeriodo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ChangeEstadoPeriodo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ChangeEstadoPeriodo(ctx, req.(*ChangeEstadoPeriodoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_CreateSeccion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSeccionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CreateSeccion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CreateSeccion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CreateSeccion(ctx, req.(*CreateSeccionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListSecciones_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSeccionesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListSecciones(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListSecciones_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListSecciones(ctx, req.(*ListSeccionesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_MatricularEstudiante_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MatricularEstudianteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).MatricularEstudiante(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_MatricularEstudiante_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).MatricularEstudiante(ctx, req.(*MatricularEstudianteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_CambiarSeccionMatricula_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CambiarSeccionMatriculaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CambiarSeccionMatricula(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CambiarSeccionMatricula_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CambiarSeccionMatricula(ctx, req.(*CambiarSeccionMatriculaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_RetirarMatricula_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetirarMatriculaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).RetirarMatricula(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_RetirarMatricula_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).RetirarMatricula(ctx, req.(*RetirarMatriculaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ReingresarMatricula_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReingresarMatriculaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ReingresarMatricula(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ReingresarMatricula_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ReingresarMatricula(ctx, req.(*ReingresarMatriculaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ConcluirMatricula_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConcluirMatriculaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ConcluirMatricula(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ConcluirMatricula_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ConcluirMatricula(ctx, req.(*ConcluirMatriculaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListMatriculasPeriodo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMatriculasPeriodoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListMatriculasPeriodo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListMatriculasPeriodo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListMatriculasPeriodo(ctx, req.(*ListMatriculasPeriodoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_CambiarParentescoFamiliar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CambiarParentescoFamiliarRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CambiarParentescoFamiliar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CambiarParentescoFamiliar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CambiarParentescoFamiliar(ctx, req.(*CambiarParentescoFamiliarRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListHistorialEstudiante_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListHistorialEstudianteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListHistorialEstudiante(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListHistorialEstudiante_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListHistorialEstudiante(ctx, req.(*ListHistorialEstudianteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_PlantillaEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlantillaEstudiantesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).PlantillaEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_PlantillaEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).PlantillaEstudiantes(ctx, req.(*PlantillaEstudiantesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_PreviewImportacionEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportarEstudiantesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).PreviewImportacionEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_PreviewImportacionEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).PreviewImportacionEstudiantes(ctx, req.(*ImportarEstudiantesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ConfirmarImportacionEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportarEstudiantesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ConfirmarImportacionEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ConfirmarImportacionEstudiantes(ctx, req.(*ImportarEstudiantesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ExportarEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportarEstudiantesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ExportarEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ExportarEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ExportarEstudiantes(ctx, req.(*ExportarEstudiantesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_CamposDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CamposDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).CamposDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_CamposDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).CamposDatosEstudiantes(ctx, req.(*CamposDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_AnalizarDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatosImportacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).AnalizarDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_AnalizarDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).AnalizarDatosEstudiantes(ctx, req.(*DatosImportacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ConfirmarDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatosImportacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ConfirmarDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ConfirmarDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ConfirmarDatosEstudiantes(ctx, req.(*DatosImportacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ExportarDatosEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DatosExportacionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ExportarDatosEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ExportarDatosEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ExportarDatosEstudiantes(ctx, req.(*DatosExportacionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_ListPlantillasDatos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPlantillasDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).ListPlantillasDatos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_ListPlantillasDatos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).ListPlantillasDatos(ctx, req.(*ListPlantillasDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_GuardarPlantillaDatos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GuardarPlantillaDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).GuardarPlantillaDatos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_GuardarPlantillaDatos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).GuardarPlantillaDatos(ctx, req.(*GuardarPlantillaDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_EliminarPlantillaDatos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EliminarPlantillaDatosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).EliminarPlantillaDatos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_EliminarPlantillaDatos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).EliminarPlantillaDatos(ctx, req.(*EliminarPlantillaDatosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Estudiantes_ServiceDesc is the grpc.ServiceDesc for Estudiantes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -608,6 +1608,122 @@ var Estudiantes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DesvincularFamiliar",
 			Handler:    _Estudiantes_DesvincularFamiliar_Handler,
+		},
+		{
+			MethodName: "ActualizarFamiliar",
+			Handler:    _Estudiantes_ActualizarFamiliar_Handler,
+		},
+		{
+			MethodName: "CreatePersona",
+			Handler:    _Estudiantes_CreatePersona_Handler,
+		},
+		{
+			MethodName: "GetPersona",
+			Handler:    _Estudiantes_GetPersona_Handler,
+		},
+		{
+			MethodName: "SearchPersonas",
+			Handler:    _Estudiantes_SearchPersonas_Handler,
+		},
+		{
+			MethodName: "UpdatePersona",
+			Handler:    _Estudiantes_UpdatePersona_Handler,
+		},
+		{
+			MethodName: "CreatePeriodo",
+			Handler:    _Estudiantes_CreatePeriodo_Handler,
+		},
+		{
+			MethodName: "ListPeriodos",
+			Handler:    _Estudiantes_ListPeriodos_Handler,
+		},
+		{
+			MethodName: "ChangeEstadoPeriodo",
+			Handler:    _Estudiantes_ChangeEstadoPeriodo_Handler,
+		},
+		{
+			MethodName: "CreateSeccion",
+			Handler:    _Estudiantes_CreateSeccion_Handler,
+		},
+		{
+			MethodName: "ListSecciones",
+			Handler:    _Estudiantes_ListSecciones_Handler,
+		},
+		{
+			MethodName: "MatricularEstudiante",
+			Handler:    _Estudiantes_MatricularEstudiante_Handler,
+		},
+		{
+			MethodName: "CambiarSeccionMatricula",
+			Handler:    _Estudiantes_CambiarSeccionMatricula_Handler,
+		},
+		{
+			MethodName: "RetirarMatricula",
+			Handler:    _Estudiantes_RetirarMatricula_Handler,
+		},
+		{
+			MethodName: "ReingresarMatricula",
+			Handler:    _Estudiantes_ReingresarMatricula_Handler,
+		},
+		{
+			MethodName: "ConcluirMatricula",
+			Handler:    _Estudiantes_ConcluirMatricula_Handler,
+		},
+		{
+			MethodName: "ListMatriculasPeriodo",
+			Handler:    _Estudiantes_ListMatriculasPeriodo_Handler,
+		},
+		{
+			MethodName: "CambiarParentescoFamiliar",
+			Handler:    _Estudiantes_CambiarParentescoFamiliar_Handler,
+		},
+		{
+			MethodName: "ListHistorialEstudiante",
+			Handler:    _Estudiantes_ListHistorialEstudiante_Handler,
+		},
+		{
+			MethodName: "PlantillaEstudiantes",
+			Handler:    _Estudiantes_PlantillaEstudiantes_Handler,
+		},
+		{
+			MethodName: "PreviewImportacionEstudiantes",
+			Handler:    _Estudiantes_PreviewImportacionEstudiantes_Handler,
+		},
+		{
+			MethodName: "ConfirmarImportacionEstudiantes",
+			Handler:    _Estudiantes_ConfirmarImportacionEstudiantes_Handler,
+		},
+		{
+			MethodName: "ExportarEstudiantes",
+			Handler:    _Estudiantes_ExportarEstudiantes_Handler,
+		},
+		{
+			MethodName: "CamposDatosEstudiantes",
+			Handler:    _Estudiantes_CamposDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "AnalizarDatosEstudiantes",
+			Handler:    _Estudiantes_AnalizarDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "ConfirmarDatosEstudiantes",
+			Handler:    _Estudiantes_ConfirmarDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "ExportarDatosEstudiantes",
+			Handler:    _Estudiantes_ExportarDatosEstudiantes_Handler,
+		},
+		{
+			MethodName: "ListPlantillasDatos",
+			Handler:    _Estudiantes_ListPlantillasDatos_Handler,
+		},
+		{
+			MethodName: "GuardarPlantillaDatos",
+			Handler:    _Estudiantes_GuardarPlantillaDatos_Handler,
+		},
+		{
+			MethodName: "EliminarPlantillaDatos",
+			Handler:    _Estudiantes_EliminarPlantillaDatos_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

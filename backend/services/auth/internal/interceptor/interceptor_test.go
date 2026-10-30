@@ -3,6 +3,7 @@ package interceptor
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -132,7 +133,7 @@ func TestAuthenticationInterceptor_RejectsInvalidTokenForms(t *testing.T) {
 	cases := map[string]context.Context{
 		"empty":        metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer ")),
 		"wrong scheme": metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Invalid "+validToken)),
-		"tampered":     testContextWithRawToken(validToken[:len(validToken)-1] + "x"),
+		"tampered":     testContextWithRawToken(alterarFirma(validToken)),
 	}
 	for name, ctx := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -174,4 +175,16 @@ func TestAuthorizationInterceptor_PropagatesCheckerError(t *testing.T) {
 	if !errors.Is(err, checker.err) {
 		t.Fatalf("expected checker error to propagate, got %v", err)
 	}
+}
+
+// alterarFirma cambia un carácter del MEDIO de la firma (determinista). Antes
+// se reemplazaba el último por "x", que a veces decodificaba a la misma firma
+// (bits de relleno de base64) y la prueba fallaba ~1 de cada 16 veces.
+func alterarFirma(token string) string {
+	i := strings.LastIndex(token, ".") + 10
+	c := byte('A')
+	if token[i] == c {
+		c = 'B'
+	}
+	return token[:i] + string(c) + token[i+1:]
 }

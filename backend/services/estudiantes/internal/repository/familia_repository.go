@@ -42,7 +42,8 @@ type PersonaDatos struct {
 }
 
 type Persona struct {
-	ID string
+	ID      string
+	Version int
 	PersonaDatos
 }
 
@@ -67,7 +68,7 @@ type VinculoInput struct {
 
 const familiarSelect = `
 	SELECT f.id, p.id, p.tipo_documento, p.numero_documento, p.nombres, p.apellido_paterno, p.apellido_materno,
-		f.parentesco, f.es_apoderado, f.vigente, to_char(f.desde, 'YYYY-MM-DD'), to_char(f.hasta, 'YYYY-MM-DD')
+		p.version, f.parentesco, f.es_apoderado, f.vigente, to_char(f.desde, 'YYYY-MM-DD'), to_char(f.hasta, 'YYYY-MM-DD')
 	FROM estudiante_familiares f
 	JOIN personas p ON p.id = f.persona_id
 	JOIN cat_parentescos c ON c.codigo = f.parentesco
@@ -77,7 +78,7 @@ func scanFamiliar(row pgx.Row) (*Familiar, error) {
 	f := &Familiar{}
 	err := row.Scan(&f.RelacionID, &f.Persona.ID, &f.Persona.TipoDocumento, &f.Persona.NumeroDocumento,
 		&f.Persona.Nombres, &f.Persona.ApellidoPaterno, &f.Persona.ApellidoMaterno,
-		&f.Parentesco, &f.EsApoderado, &f.Vigente, &f.Desde, &f.Hasta)
+		&f.Persona.Version, &f.Parentesco, &f.EsApoderado, &f.Vigente, &f.Desde, &f.Hasta)
 	if err != nil {
 		return nil, err
 	}

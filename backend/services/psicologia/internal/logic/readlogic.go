@@ -103,10 +103,14 @@ func finishRead(ctx context.Context, sc *svc.ServiceContext, s scope, userID str
 	if !s.allows(exp, userID) {
 		return nil, notFoundHidden(ctx, sc, userID, exp.ID, exp.EstudianteID)
 	}
+	clinico, err := accesoClinico(ctx, sc, userID)
+	if err != nil {
+		return nil, err
+	}
 	if err := auditView(ctx, sc, userID, exp.ID, exp.EstudianteID, ""); err != nil {
 		return nil, err
 	}
-	return &psicologia.GetExpedienteResponse{Expediente: toProto(exp, true)}, nil
+	return &psicologia.GetExpedienteResponse{Expediente: toProto(exp, clinico)}, nil
 }
 
 type ListExpedientesLogic struct {

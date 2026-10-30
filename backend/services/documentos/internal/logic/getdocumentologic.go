@@ -30,7 +30,7 @@ func NewGetDocumentoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetD
 }
 
 func (l *GetDocumentoLogic) GetDocumento(in *documentos.GetDocumentoRequest) (*documentos.GetDocumentoResponse, error) {
-	userID, _, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -77,7 +77,7 @@ func (l *GetDocumentoLogic) GetDocumento(in *documentos.GetDocumentoRequest) (*d
 	// devuelve PermissionDenied, sin duplicar esa comparación acá. Fail-
 	// closed: cualquier error (Expedientes no disponible incluido) se
 	// propaga tal cual, nunca se traduce en acceso permitido.
-	if !hasViewAll {
+	if authorization.DebeVerificarExpediente(hasViewAll, role) {
 		outCtx := l.ctx
 		if token, tokenOk := interceptor.TokenFromContext(l.ctx); tokenOk {
 			outCtx = metadata.AppendToOutgoingContext(l.ctx, "authorization", "Bearer "+token)

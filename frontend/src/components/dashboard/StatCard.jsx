@@ -1,18 +1,29 @@
+import { Link } from "react-router-dom";
 import Icon from "./Icon";
 import "./StatCard.css";
 
-function StatCard({ icon, label, value, delta, positive }) {
-    return (
-        <div className="dp-stat-card">
-            <div className="dp-stat-icon">
-                <Icon name={icon} size={20} />
+// Indicador compacto. `to` lo convierte en enlace (p. ej. a la bandeja
+// filtrada por ese estado); `tone` reutiliza los colores de los estados.
+function StatCard({ icon, label, value, hint, to, tone = "primary" }) {
+    const content = (
+        <>
+            <div className="dp-stat-top">
+                <p className="dp-stat-label">{label}</p>
+                <span className={`dp-stat-icon dp-stat-icon--${tone}`}>
+                    <Icon name={icon} size={16} />
+                </span>
             </div>
-            <p className="dp-stat-label">{label}</p>
             <p className="dp-stat-value">{value}</p>
-            {delta && (
-                <p className={`dp-stat-delta ${positive ? "dp-stat-delta--up" : ""}`}>{delta}</p>
-            )}
-        </div>
+            {hint && <p className="dp-stat-hint">{hint}</p>}
+        </>
+    );
+
+    return to ? (
+        <Link to={to} className="dp-stat-card dp-stat-card--link">
+            {content}
+        </Link>
+    ) : (
+        <div className="dp-stat-card">{content}</div>
     );
 }
 

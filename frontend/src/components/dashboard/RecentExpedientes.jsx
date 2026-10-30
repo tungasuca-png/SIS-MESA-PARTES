@@ -11,6 +11,7 @@ function RecentExpedientes({
     emptyMessage = "No hay expedientes registrados.",
     title = "Expedientes recientes",
     showRemitente = true,
+    action = null,
 }) {
     // Cuando no se muestra "Remitente" (SOLICITANTE viendo solo sus propios
     // expedientes, siempre él mismo) no tiene sentido pedir los nombres de
@@ -21,7 +22,14 @@ function RecentExpedientes({
 
     return (
         <section className="dp-panel">
-            <h2 className="dp-panel-title">{title}</h2>
+            {action ? (
+                <div className="dp-panel-head">
+                    <h2 className="dp-panel-title">{title}</h2>
+                    {action}
+                </div>
+            ) : (
+                <h2 className="dp-panel-title">{title}</h2>
+            )}
 
             {(!items || items.length === 0) ? (
                 <p className="dp-table-empty">{emptyMessage}</p>
@@ -43,7 +51,7 @@ function RecentExpedientes({
                             {items.map((item) => (
                                 <tr key={item.codigo}>
                                     <td className="dp-table-code">{item.codigo}</td>
-                                    <td>{item.asunto}</td>
+                                    <td title={item.asunto}>{item.asunto}</td>
                                     {showRemitente && (
                                         <td>
                                             <SolicitanteNombre

@@ -11,7 +11,39 @@ const MENSAJES = {
     duplicate_document: "Ya existe un estudiante con ese tipo y número de documento.",
     duplicate_codigo_siagie: "Ya existe un estudiante con ese código SIAGIE.",
     version_conflict:
-        "Otro usuario modificó este estudiante mientras trabajabas. Tus cambios NO se guardaron: recarga los datos y vuelve a intentarlo.",
+        "Otro usuario modificó este registro mientras trabajabas. Tus cambios NO se guardaron: recarga los datos y vuelve a intentarlo.",
+    // Etapas 5 y 6 del maestro: familia, personas, periodos y matrículas.
+    persona_not_found: "La persona no existe o ya no está disponible.",
+    relacion_not_found: "La relación familiar no existe para este estudiante.",
+    periodo_not_found: "El periodo académico no existe.",
+    seccion_not_found: "La sección no existe en el periodo de la matrícula.",
+    matricula_not_found: "La matrícula no existe.",
+    duplicate_persona: "Ya existe una persona registrada con ese tipo y número de documento.",
+    duplicate_familiar: "Esa persona ya está vinculada al estudiante.",
+    duplicate_progenitor: "El estudiante ya tiene un padre o una madre vigente con ese parentesco.",
+    duplicate_apoderado: "El estudiante ya tiene un apoderado vigente. Quita primero el rol al apoderado actual.",
+    duplicate_periodo: "Ya existe un periodo para ese año.",
+    duplicate_seccion: "Ya existe esa sección (nivel, grado, sección y turno) en el periodo.",
+    duplicate_matricula: "El estudiante ya tiene una matrícula en ese periodo.",
+    persona_conflict: "La persona se registró al mismo tiempo desde otra sesión. Vuelve a intentarlo.",
+    persona_mismatch: "Ya existe una persona con ese documento y otros nombres. Revisa los datos o búscala para vincularla.",
+    invalid_transition: "El estado actual no permite esta operación.",
+    periodo_cerrado: "El periodo está cerrado y ya no admite cambios.",
+    sin_vacantes: "La sección no tiene vacantes disponibles.",
+    estudiante_inactivo: "Solo se puede matricular a estudiantes con registro activo.",
+    relacion_no_vigente: "La relación ya estaba cerrada.",
+    no_changes: "No hay cambios para guardar.",
+    invalid_date: "La fecha es anterior a la matrícula, al retiro o al inicio de la relación registrados.",
+    invalid_parentesco: "El parentesco no está registrado en el catálogo.",
+    // Importación/exportación Excel.
+    importacion_cambiada: "El archivo cambió desde la vista previa. Vuelve a validarlo antes de confirmar.",
+    importacion_sin_vista_previa: "Valida el archivo antes de confirmar la importación.",
+    importacion_conflicto:
+        "Otro usuario registró uno de estos estudiantes mientras revisabas. No se guardó nada: vuelve a analizar el archivo.",
+    duplicate_plantilla: "Ya existe una plantilla con ese nombre.",
+    plantilla_not_found: "La plantilla ya no existe.",
+    plantillas_no_instaladas: "Las plantillas aún no están habilitadas en el servidor (falta aplicar una actualización de la base de datos).",
+    export_sin_resultados: "No hay estudiantes con los filtros aplicados: no se generó ningún archivo.",
 };
 
 // Estos códigos traen un texto del backend ya pensado para el usuario (sin
@@ -20,6 +52,24 @@ const CON_DETALLE = {
     validation_error: "Datos inválidos",
     invalid_document: "Documento inválido",
     invalid_state: "Estado inválido",
+    // Excel: el backend explica qué corregir en el archivo.
+    archivo_invalido: "Archivo no válido",
+    archivo_vacio: "Archivo sin datos",
+    archivo_grande: "Archivo demasiado grande",
+    encabezados_invalidos: "Encabezados incorrectos",
+    demasiadas_filas: "Demasiadas filas",
+    export_demasiados: "Demasiados registros",
+    invalid_nivel: "Nivel inválido",
+    invalid_estado: "Estado inválido",
+    // Motor universal de datos.
+    formato_no_soportado: "Formato no admitido",
+    estructura_invalida: "Estructura no válida",
+    demasiadas_columnas: "Demasiadas columnas",
+    opcion_invalida: "Opción no válida",
+    mapeo_incompleto: "Faltan columnas",
+    importacion_con_errores: "Hay filas con errores",
+    importacion_sin_decidir: "Faltan decisiones",
+    plantilla_invalida: "Plantilla no válida",
 };
 
 export function parseCodigoError(rawBody) {
@@ -52,7 +102,8 @@ export function estudianteError(error) {
         return { kind: "forbidden", code: code ?? "permission_denied", message: MENSAJES.permission_denied };
     }
     if (status === 404) {
-        return { kind: "not_found", code: code ?? "student_not_found", message: MENSAJES.student_not_found };
+        const notFound = code && MENSAJES[code] ? code : "student_not_found";
+        return { kind: "not_found", code: notFound, message: MENSAJES[notFound] };
     }
     if (status === 409) {
         if (code && MENSAJES[code]) return { kind: "conflict", code, message: MENSAJES[code] };
@@ -62,7 +113,14 @@ export function estudianteError(error) {
         if (code && CON_DETALLE[code]) {
             return { kind: "validation", code, message: detail ? `${CON_DETALLE[code]}: ${detail}.` : `${CON_DETALLE[code]}.` };
         }
+        // Reglas de integridad del backend (FailedPrecondition -> 400): mensaje fijo por código.
+        if (code && MENSAJES[code]) {
+            return { kind: "validation", code, message: MENSAJES[code] };
+        }
         return { kind: "validation", code, message: "Los datos ingresados no son válidos." };
+    }
+    if (status === 413) {
+        return { kind: "validation", code: "archivo_grande", message: "El archivo es demasiado grande (máximo 1 MB)." };
     }
     return { kind: "server", code: null, message: "Ocurrió un error en el servidor. Intenta nuevamente más tarde." };
 }

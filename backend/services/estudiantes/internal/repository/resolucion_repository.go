@@ -15,6 +15,16 @@ func (r *EstudianteRepository) GetByCodigo(ctx context.Context, codigo string) (
 	return found, nil
 }
 
+// GetByCodigoSiagie (etapa 5) resuelve por código SIAGIE EXACTO (único si
+// existe: uq_estudiantes_codigo_siagie).
+func (r *EstudianteRepository) GetByCodigoSiagie(ctx context.Context, codigo string) (*Estudiante, error) {
+	found, err := scanEstudiante(r.db.QueryRow(ctx, `SELECT `+estudianteColumns+` FROM estudiantes WHERE codigo_siagie = $1`, codigo))
+	if err != nil {
+		return nil, classifyNotFound(err)
+	}
+	return found, nil
+}
+
 // GetByDocumento resuelve por tipo y número de documento EXACTOS (únicos
 // cuando el número existe: uq_estudiantes_documento).
 func (r *EstudianteRepository) GetByDocumento(ctx context.Context, tipo, numero string) (*Estudiante, error) {

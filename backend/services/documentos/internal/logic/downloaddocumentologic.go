@@ -30,7 +30,7 @@ func NewDownloadDocumentoLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *DownloadDocumentoLogic) DownloadDocumento(in *documentos.DownloadDocumentoRequest) (*documentos.DownloadDocumentoResponse, error) {
-	userID, _, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -81,7 +81,7 @@ func (l *DownloadDocumentoLogic) DownloadDocumento(in *documentos.DownloadDocume
 	// a este RPC) — ninguna de las dos se elimina; ahora hay defensa en
 	// profundidad: el Gateway protege el flujo HTTP, Documentos protege
 	// su propio RPC aunque se le llame directamente.
-	if !hasViewAll {
+	if authorization.DebeVerificarExpediente(hasViewAll, role) {
 		outCtx := l.ctx
 		if token, tokenOk := interceptor.TokenFromContext(l.ctx); tokenOk {
 			outCtx = metadata.AppendToOutgoingContext(l.ctx, "authorization", "Bearer "+token)

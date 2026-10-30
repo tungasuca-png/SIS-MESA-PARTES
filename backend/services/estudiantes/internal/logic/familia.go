@@ -32,6 +32,15 @@ func personaDatos(in *estudiantes.Persona) (*repository.PersonaDatos, error) {
 	if d.TipoDocumento == "" {
 		d.TipoDocumento = validation.TipoSinDocumento
 	}
+	if err := validarPersona(d); err != nil {
+		return nil, err
+	}
+	return d, nil
+}
+
+// validarPersona (etapa 5) valida el estado FINAL de una persona (alta o
+// edición) con las reglas de documento y nombres del estudiante.
+func validarPersona(d *repository.PersonaDatos) error {
 	for _, err := range []error{
 		validation.RequiredText("persona.nombres", d.Nombres, validation.MaxNombres),
 		validation.OptionalText("persona.apellido_paterno", d.ApellidoPaterno, validation.MaxApellido),
@@ -39,10 +48,10 @@ func personaDatos(in *estudiantes.Persona) (*repository.PersonaDatos, error) {
 		validation.Documento(d.TipoDocumento, d.NumeroDocumento),
 	} {
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return d, nil
+	return nil
 }
 
 // fechaOpcional: "" = nil; si viene, AAAA-MM-DD válida y no anterior a 1900.

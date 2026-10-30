@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import Icon from "../../components/dashboard/Icon";
 import EstadoEstudianteBadge from "../../components/estudiantes/EstadoEstudianteBadge";
 import EstudianteFormModal from "../../components/estudiantes/EstudianteFormModal";
 import CambiarEstadoModal from "../../components/estudiantes/CambiarEstadoModal";
+import NominaPeriodo from "../../components/estudiantes/NominaPeriodo";
+import PosiblesDuplicados from "../../components/estudiantes/PosiblesDuplicados";
+import ImportarDatosModal from "../../components/estudiantes/ImportarDatosModal";
+import ExportarDatosModal from "../../components/estudiantes/ExportarDatosModal";
 import { usePermissions } from "../../hooks/usePermissions";
 import { searchEstudiantes } from "../../services/estudiantesService";
 import {
@@ -12,16 +16,18 @@ import {
     ESTADOS_ESTUDIANTE,
     ESTUDIANTES_PAGE_SIZE,
     FILTRO_MAX,
+    ORDENES_ESTUDIANTES,
     tipoDocumentoLabel,
 } from "../../constants/estudiantes";
 import { validarBusqueda } from "../../utils/estudianteForm";
 import { estudianteError } from "../../utils/estudiantesErrors";
+import { enmascararDocumento } from "../../utils/privacidad";
 import "../../components/dashboard/RecentExpedientes.css";
 import "../../components/dashboard/forms.css";
 import "../Expedientes/expedientesList.css";
 import "./estudiantes.css";
 
-const FILTROS_VACIOS = { estado: "", nivel: "", grado: "", seccion: "", turno: "" };
+const FILTROS_VACIOS = { estado: "", nivel: "", grado: "", seccion: "", turno: "", orden: "" };
 
 // Nivel/grado/sección/turno: el backend todavía no tiene catálogos (son
 // columnas de texto temporales hasta Matrícula), así que se filtran con
@@ -43,16 +49,20 @@ const criteriosDe = (q, filtros) => ({
 // fijo apellidos/nombres/id); aquí no se filtra ni se ordena nada.
 function EstudiantesList() {
     const navigate = useNavigate();
+    // ?q= viene del buscador de la barra superior.
+    const [searchParams] = useSearchParams();
+    const qInicial = searchParams.get("q") || "";
+    const [vista, setVista] = useState("directorio");
     const { can } = usePermissions();
     const canCreate = can("estudiantes.create");
     const canUpdate = can("estudiantes.update");
     const canChangeEstado = can("estudiantes.change_estado");
 
-    const [searchInput, setSearchInput] = useState("");
+    const [searchInput, setSearchInput] = useState(qInicial);
     const [filtrosInput, setFiltrosInput] = useState(FILTROS_VACIOS);
     // Criterios aplicados y página en UN estado: cambiar un criterio vuelve
     // a la página 1 en la misma actualización (una sola consulta).
-    const [consulta, setConsulta] = useState(() => ({ criterios: criteriosDe("", FILTROS_VACIOS), page: 1 }));
+    const [consulta, setConsulta] = useState(() => ({ criterios: criteriosDe(qInicial, FILTROS_VACIOS), page: 1 }));
     const { criterios, page } = consulta;
     const setPage = (updater) => setConsulta((current) => ({ ...current, page: updater(current.page) }));
     const [reloadToken, setReloadToken] = useState(0);
@@ -65,6 +75,16 @@ function EstudiantesList() {
     const [editando, setEditando] = useState(null);
     const [cambiandoEstado, setCambiandoEstado] = useState(null);
     const [mensaje, setMensaje] = useState("");
+    const [importando, setImportando] = useState(false);
+    const [exportando, setExportando] = useState(false);
+
+    // Nueva búsqueda desde la barra superior con la página ya abierta.
+    const [qPrevia, setQPrevia] = useState(qInicial);
+    if (qInicial !== qPrevia) {
+        setQPrevia(qInicial);
+        setSearchInput(qInicial);
+        setVista("directorio");
+    }
 
     // Debounce: una sola consulta cuando el usuario deja de escribir. Si los
     // criterios no cambiaron, se conserva el mismo objeto (sin re-consultar).
@@ -106,7 +126,7 @@ function EstudiantesList() {
     const error = vigente ? resultado.error : null;
 
     const totalPages = Math.max(1, Math.ceil(total / ESTUDIANTES_PAGE_SIZE));
-    const hayCriterios = Object.values(criterios).some(Boolean);
+    const hayCriterios = Object.entries(criterios).some(([k, v]) => k !== "orden" && Boolean(v));
 
     const reemplazar = (estudiante) => {
         setResultado((current) => ({
@@ -140,12 +160,46 @@ function EstudiantesList() {
                         <h2 className="dp-panel-title">Estudiantes</h2>
                         <p className="est-subtitle">Directorio institucional de estudiantes.</p>
                     </div>
-                    {canCreate && (
-                        <button type="button" className="dp-btn-primary" onClick={() => setShowCreate(true)}>
-                            Nuevo estudiante
+                    <div className="est-header-actions">
+                        <button
+                            type="button"
+                            className="dp-btn-secondary"
+                            onClick={() => setExportando(true)}
+                            title="Exporta todos los resultados con los filtros aplicados, en el formato y con los campos que elijas"
+                        >
+                            Exportar
+                        </button>
+                        {canCreate && (
+                            <button type="button" className="dp-btn-secondary" onClick={() => setImportando(true)}>
+                                Importar
+                            </button>
+                        )}
+                        {canCreate && (
+                            <button type="button" className="dp-btn-primary" onClick={() => setShowCreate(true)}>
+                                Registrar estudiante
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="est-segmented est-vista" role="tablist" aria-label="Vista del directorio">
+                    <button type="button" role="tab" aria-selected={vista === "directorio"} className={vista === "directorio" ? "is-active" : ""} onClick={() => setVista("directorio")}>
+                        Directorio
+                    </button>
+                    <button type="button" role="tab" aria-selected={vista === "nomina"} className={vista === "nomina" ? "is-active" : ""} onClick={() => setVista("nomina")}>
+                        Por periodo y sección
+                    </button>
+                    {canUpdate && (
+                        <button type="button" role="tab" aria-selected={vista === "duplicados"} className={vista === "duplicados" ? "is-active" : ""} onClick={() => setVista("duplicados")}>
+                            Posibles duplicados
                         </button>
                     )}
                 </div>
+
+                {vista === "nomina" && <NominaPeriodo />}
+                {vista === "duplicados" && canUpdate && <PosiblesDuplicados />}
+                {vista === "directorio" && (
+                <>
 
                 <div className="est-search">
                     <input
@@ -186,6 +240,17 @@ function EstudiantesList() {
                             onChange={(event) => setFiltrosInput((f) => ({ ...f, [filtro.key]: event.target.value }))}
                         />
                     ))}
+                    <select
+                        aria-label="Ordenar por"
+                        value={filtrosInput.orden}
+                        onChange={(event) => setFiltrosInput((f) => ({ ...f, orden: event.target.value }))}
+                    >
+                        {ORDENES_ESTUDIANTES.map((item) => (
+                            <option key={item.value} value={item.value}>
+                                Orden: {item.label}
+                            </option>
+                        ))}
+                    </select>
                     {(searchInput || Object.values(filtrosInput).some(Boolean)) && (
                         <button
                             type="button"
@@ -219,14 +284,10 @@ function EstudiantesList() {
                                 <thead>
                                     <tr>
                                         <th>Código</th>
-                                        <th>SIAGIE</th>
-                                        <th>Nombres</th>
-                                        <th>Apellidos</th>
+                                        <th>Estudiante</th>
                                         <th>Documento</th>
-                                        <th>Nivel</th>
                                         <th>Grado</th>
                                         <th>Sección</th>
-                                        <th>Turno</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -235,17 +296,16 @@ function EstudiantesList() {
                                     {items.map((item) => (
                                         <tr key={item.id}>
                                             <td className="dp-table-code">{item.codigo}</td>
-                                            <td>{item.codigo_siagie || "—"}</td>
-                                            <td>{item.nombres}</td>
-                                            <td>{item.apellidos}</td>
+                                            <td>
+                                                <span className="est-cell-main">{[item.apellidos, item.nombres].filter(Boolean).join(", ")}</span>
+                                                {item.codigo_siagie && <span className="est-cell-sub">SIAGIE {item.codigo_siagie}</span>}
+                                            </td>
                                             <td>
                                                 {tipoDocumentoLabel(item.tipo_documento)}
-                                                {item.numero_documento ? ` ${item.numero_documento}` : ""}
+                                                {item.numero_documento ? ` ${enmascararDocumento(item.numero_documento)}` : ""}
                                             </td>
-                                            <td>{item.nivel || "—"}</td>
                                             <td>{item.grado || "—"}</td>
                                             <td>{item.seccion || "—"}</td>
-                                            <td>{item.turno || "—"}</td>
                                             <td>
                                                 <EstadoEstudianteBadge estado={item.estado} />
                                             </td>
@@ -257,7 +317,14 @@ function EstudiantesList() {
                                                         aria-label={`Ver ${item.codigo}`}
                                                     >
                                                         <Icon name="eye" size={16} />
-                                                        Ver
+                                                        Ver ficha
+                                                    </Link>
+                                                    <Link
+                                                        to={`/estudiantes/${item.id}?tab=historial`}
+                                                        className="dp-table-action"
+                                                        aria-label={`Historial de ${item.codigo}`}
+                                                    >
+                                                        Historial
                                                     </Link>
                                                     {canUpdate && (
                                                         <button
@@ -312,7 +379,27 @@ function EstudiantesList() {
                         </div>
                     </>
                 )}
+                </>
+                )}
             </section>
+
+            {importando && (
+                <ImportarDatosModal
+                    onClose={() => setImportando(false)}
+                    onImported={(resumen) => {
+                        setMensaje(`Importación completada: ${resumen.insertados} estudiante(s) registrado(s).`);
+                        setReloadToken((token) => token + 1);
+                    }}
+                />
+            )}
+
+            {exportando && (
+                <ExportarDatosModal
+                    // Los mismos criterios que la tabla (búsqueda, filtros y orden).
+                    filtros={criterios}
+                    onClose={() => setExportando(false)}
+                />
+            )}
 
             {showCreate && (
                 <EstudianteFormModal

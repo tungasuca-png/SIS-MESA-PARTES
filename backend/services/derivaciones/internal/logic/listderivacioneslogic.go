@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"derivaciones/derivaciones"
+	"derivaciones/internal/authorization"
 	"derivaciones/internal/interceptor"
 	"derivaciones/internal/repository"
 	"derivaciones/internal/svc"
@@ -35,7 +36,7 @@ func NewListDerivacionesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *ListDerivacionesLogic) ListDerivaciones(in *derivaciones.ListDerivacionesRequest) (*derivaciones.ListDerivacionesResponse, error) {
-	userID, _, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -74,6 +75,16 @@ func (l *ListDerivacionesLogic) ListDerivaciones(in *derivaciones.ListDerivacion
 		if err := vis.verificarExpediente(l.ctx, l.svcCtx, userID, filter.ExpedienteID); err != nil {
 			return nil, err
 		}
+	} else if !authorization.AlcanceGlobalExpedientes(role) {
+		// Listado general con "derivaciones.view": solo las derivaciones de
+		// los expedientes que el usuario puede ver. Antes devolvía las de
+		// toda la institución (con motivo y condición) a cualquier rol con
+		// ese permiso, aunque Expedientes lo acota a su área.
+		ids, err := expedientesVisibles(l.ctx, l.svcCtx)
+		if err != nil {
+			return nil, err
+		}
+		filter.ExpedienteIDs = ids
 	}
 
 	items, total, err := l.svcCtx.DerivacionRepository.List(l.ctx, filter)

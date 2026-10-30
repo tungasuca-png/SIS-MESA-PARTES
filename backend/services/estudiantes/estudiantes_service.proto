@@ -3,12 +3,13 @@ syntax = "proto3";
 package estudiantes;
 option go_package="./estudiantes";
 
-// Estudiantes Service es la fuente básica de estudiantes del sistema: id,
-// código, nombres, nivel/grado/sección/turno y estado de matrícula. NO
-// contiene historial académico, notas, asistencia, apoderados, documentos ni
-// ningún dato clínico (eso pertenece a otros servicios, p. ej. Psicología,
-// que solo guarda estudiante_id como UUID sin FK y consulta aquí lo mínimo
-// para mostrarlo).
+// Estudiantes Service es el maestro escolar del sistema: identidad del
+// estudiante, datos personales, familia (personas, parentesco, apoderado),
+// periodos, secciones, matrículas y su historial. NO contiene notas,
+// asistencia, documentos ni ningún dato clínico (eso pertenece a otros
+// servicios, p. ej. Psicología, que solo guarda estudiante_id como UUID sin
+// FK y consulta aquí lo mínimo para mostrarlo). Los consumidores guardan
+// solo el UUID estable del estudiante.
 message Estudiante {
   string id = 1;
   string codigo = 2;
@@ -72,6 +73,9 @@ message SearchEstudiantesRequest {
   string grado = 6;
   string seccion = 7;
   string turno = 8;
+  // Etapa 6: orden del listado (lista blanca): "" o "apellidos" (por defecto),
+  // "codigo", "recientes" (alta más reciente primero).
+  string orden = 9;
 }
 
 message SearchEstudiantesResponse {
@@ -250,10 +254,12 @@ message UpdateEstudiantePersonalResponse {
 // Exactamente un criterio: codigo, o tipo_documento + numero_documento.
 // Requiere "estudiantes.view". Viaja en el cuerpo (POST) para que el número
 // de documento nunca quede en URLs ni en logs de acceso.
+// Etapa 5: también por codigo_siagie (14 dígitos, único).
 message ResolveEstudianteRequest {
   string codigo = 1;
   string tipo_documento = 2;
   string numero_documento = 3;
+  string codigo_siagie = 4;
 }
 
 message ResolveEstudianteResponse {
@@ -289,7 +295,9 @@ message PeriodoAcademico {
   string id = 1;
   int32 anio = 2;
   string nombre = 3;
-  string estado = 4;
+  string estado = 4;              // PLANIFICADO | EN_CURSO | CERRADO
+  string fecha_inicio = 5;        // AAAA-MM-DD o ""
+  string fecha_fin = 6;
 }
 
 message SeccionAcademica {
@@ -299,6 +307,9 @@ message SeccionAcademica {
   string seccion = 4;
   string turno = 5;
   string aula = 6;
+  string periodo_id = 7;
+  optional int32 vacantes = 8;    // ausente = sin límite registrado
+  int32 matriculados = 9;         // matrículas MATRICULADO (solo en ListSecciones)
 }
 
 message MovimientoMatricula {
@@ -318,6 +329,7 @@ message Matricula {
   string origen = 7;              // REGISTRO | MIGRACION_LEGADO
   int32 version = 8;
   repeated MovimientoMatricula movimientos = 9;
+  string estudiante_id = 10;
 }
 
 message ListMatriculasEstudianteRequest {
@@ -340,6 +352,7 @@ message Persona {
   string nombres = 4;
   string apellido_paterno = 5;
   string apellido_materno = 6;
+  int32 version = 7;              // etapa 5: para UpdatePersona (expected_version)
 }
 
 message Familiar {
@@ -391,6 +404,503 @@ message DesvincularFamiliarResponse {
   Familiar familiar = 1;
 }
 
+// ActualizarFamiliarRequest (etapa 5): cambia SOLO el rol de apoderado de
+// una relación vigente. El parentesco no se edita: se cierra la relación y
+// se registra otra, para conservar el historial. Sigue la regla de un solo
+// apoderado vigente (primero se quita al anterior).
+message ActualizarFamiliarRequest {
+  string estudiante_id = 1;
+  string relacion_id = 2;
+  bool es_apoderado = 3;
+}
+
+message ActualizarFamiliarResponse {
+  Familiar familiar = 1;
+}
+
+// CambiarParentescoFamiliarRequest (etapa 6): corrige el parentesco de una
+// relación vigente CONSERVANDO el historial, en UNA transacción: cierra la
+// relación actual (hasta = desde) y crea otra con la misma persona, el nuevo parentesco y el mismo
+// rol de apoderado. Si algo falla (p. ej. ya hay una MADRE vigente), no
+// cambia nada. "estudiantes.familia.update".
+message CambiarParentescoFamiliarRequest {
+  string estudiante_id = 1;
+  string relacion_id = 2;
+  string parentesco = 3;
+  string desde = 4;               // AAAA-MM-DD, vacío = hoy (Lima); no futura
+}
+
+message CambiarParentescoFamiliarResponse {
+  Familiar anterior = 1;          // relación cerrada (historial)
+  Familiar familiar = 2;          // relación nueva vigente
+}
+
+// ---- Etapa 6: HISTORIAL de cambios del estudiante ----
+// Eventos de CAMBIO registrados en la auditoría (nunca lecturas): alta,
+// edición, cambio de estado, datos personales, familia y matrícula. Solo
+// nombres de campos, NUNCA valores anteriores ni nuevos. Requiere
+// "estudiantes.update": revela quién modificó qué campos, así que no basta
+// "estudiantes.view". Más reciente primero, paginado.
+message EventoHistorial {
+  string id = 1;
+  string accion = 2;              // CREATE | UPDATE | CHANGE_ESTADO | PERSONAL_UPDATE | FAMILIA_UPDATE | MATRICULA_UPDATE
+  string fecha_hora = 3;          // RFC 3339
+  string usuario_id = 4;          // quien hizo el cambio (resolver con Usuarios)
+  repeated string campos = 5;
+  string estado_anterior = 6;     // solo CHANGE_ESTADO (ACTIVO/INACTIVO)
+  string estado_nuevo = 7;
+  int32 version_resultante = 8;
+}
+
+message ListHistorialEstudianteRequest {
+  string estudiante_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListHistorialEstudianteResponse {
+  repeated EventoHistorial eventos = 1;
+  int32 total = 2;
+}
+
+// ---- Modelo maestro, etapa 5: PERSONAS (padres, apoderados) ----
+// Lectura con "estudiantes.familia.view", escritura con
+// "estudiantes.familia.update". GetPersona se audita como PERSONA_VIEW y
+// UpdatePersona como PERSONA_UPDATE (nombres de campos, nunca valores).
+// Errores nuevos: persona_not_found, duplicate_persona, version_conflict.
+
+message VinculoPersona {
+  string relacion_id = 1;
+  EstudianteBasico estudiante = 2;
+  string parentesco = 3;
+  bool es_apoderado = 4;
+  bool vigente = 5;
+  string desde = 6;
+  string hasta = 7;
+}
+
+message CreatePersonaRequest {
+  Persona persona = 1;            // id y version se ignoran
+}
+
+message PersonaResponse {
+  Persona persona = 1;
+}
+
+message GetPersonaRequest {
+  string id = 1;
+  bool incluir_historial = 2;     // false = solo vínculos vigentes
+}
+
+message GetPersonaResponse {
+  Persona persona = 1;
+  repeated VinculoPersona vinculos = 2;
+}
+
+// SearchPersonasRequest: q de 2 a 100 caracteres; busca por número de
+// documento y por nombres y apellidos (cualquier orden, sin tildes).
+message SearchPersonasRequest {
+  string q = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message SearchPersonasResponse {
+  repeated Persona personas = 1;
+  int32 total = 2;
+}
+
+// UpdatePersonaRequest: PATCH parcial con control de versión. Ausente = no
+// cambia; presente con "" = NULL (nombres es obligatorio). El documento se
+// valida sobre el resultado final y no puede repetir el de otra persona.
+message UpdatePersonaRequest {
+  string id = 1;
+  int32 expected_version = 2;
+  optional string tipo_documento = 3;
+  optional string numero_documento = 4;
+  optional string nombres = 5;
+  optional string apellido_paterno = 6;
+  optional string apellido_materno = 7;
+}
+
+// ---- Modelo maestro, etapa 5: PERIODOS, SECCIONES y MATRÍCULAS ----
+// Lectura con "estudiantes.view"; escritura con
+// "estudiantes.matricula.update". Toda operación sobre una matrícula se
+// audita en el estudiante como MATRICULA_UPDATE. Reglas de integridad:
+//   - Periodo: PLANIFICADO -> EN_CURSO -> CERRADO (solo hacia adelante).
+//   - En un periodo CERRADO no se registran secciones ni matrículas ni se
+//     modifican, salvo ConcluirMatricula (cierre de fin de periodo).
+//   - Solo se matricula a un estudiante con registro ACTIVO; una matrícula
+//     por estudiante y periodo; la sección debe ser del mismo periodo y
+//     tener vacantes si su límite está registrado.
+//   - Transiciones de matrícula: MATRICULADO -> RETIRADO | TRASLADADO |
+//     CONCLUIDO; RETIRADO | TRASLADADO -> MATRICULADO (reingreso). Cada
+//     una deja un movimiento (append-only) y nunca borra la anterior.
+//   - Las fechas de los movimientos no pueden ser futuras.
+// Errores nuevos: periodo_not_found, duplicate_periodo, periodo_cerrado,
+// invalid_transition, seccion_not_found, duplicate_seccion, sin_vacantes,
+// matricula_not_found, duplicate_matricula, estudiante_inactivo,
+// version_conflict.
+
+message CreatePeriodoRequest {
+  int32 anio = 1;
+  string nombre = 2;
+  string fecha_inicio = 3;        // AAAA-MM-DD, opcional
+  string fecha_fin = 4;
+}
+
+message PeriodoResponse {
+  PeriodoAcademico periodo = 1;
+}
+
+message ListPeriodosRequest {}
+
+message ListPeriodosResponse {
+  repeated PeriodoAcademico periodos = 1;
+}
+
+message ChangeEstadoPeriodoRequest {
+  string id = 1;
+  string estado = 2;              // EN_CURSO | CERRADO
+}
+
+message CreateSeccionRequest {
+  string periodo_id = 1;
+  string nivel = 2;               // INICIAL | PRIMARIA | SECUNDARIA
+  string grado = 3;
+  string seccion = 4;
+  string turno = 5;               // opcional
+  string aula = 6;                // opcional
+  optional int32 vacantes = 7;
+}
+
+message SeccionResponse {
+  SeccionAcademica seccion = 1;
+}
+
+message ListSeccionesRequest {
+  string periodo_id = 1;
+}
+
+message ListSeccionesResponse {
+  repeated SeccionAcademica secciones = 1;
+}
+
+message MatriculaResponse {
+  Matricula matricula = 1;
+}
+
+message MatricularEstudianteRequest {
+  string estudiante_id = 1;
+  string periodo_id = 2;
+  string seccion_id = 3;          // opcional: puede asignarse después
+  string fecha_matricula = 4;     // AAAA-MM-DD, vacío = hoy (Lima)
+}
+
+// CambiarSeccionMatriculaRequest: asigna o cambia la sección dentro del
+// mismo periodo (movimiento CAMBIO_SECCION, o CAMBIO_TURNO si solo cambia
+// el turno).
+message CambiarSeccionMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string seccion_id = 3;
+  string fecha = 4;               // vacío = hoy (Lima)
+  string motivo = 5;              // opcional, máx. 200
+}
+
+// RetirarMatriculaRequest: tipo RETIRO (estado RETIRADO) o TRASLADO
+// (estado TRASLADADO, movimiento TRASLADO_SALIDA).
+message RetirarMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string tipo = 3;
+  string fecha = 4;               // vacío = hoy (Lima)
+  string motivo = 5;              // obligatorio, máx. 200
+}
+
+message ReingresarMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string fecha = 3;               // vacío = hoy; no anterior al retiro
+  string motivo = 4;              // opcional
+}
+
+// ConcluirMatriculaRequest: el estudiante terminó el periodo (CONCLUIDO).
+// Exige periodo EN_CURSO o CERRADO. No decide aprobación ni promoción: esas
+// reglas no están definidas por el colegio.
+message ConcluirMatriculaRequest {
+  string matricula_id = 1;
+  int32 expected_version = 2;
+  string fecha = 3;               // vacío = hoy (Lima)
+}
+
+// Nómina de un periodo (opcionalmente de una sección o estado).
+message MatriculaNomina {
+  Matricula matricula = 1;        // sin movimientos
+  EstudianteBasico estudiante = 2;
+}
+
+message ListMatriculasPeriodoRequest {
+  string periodo_id = 1;
+  string seccion_id = 2;
+  string estado_matricula = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message ListMatriculasPeriodoResponse {
+  repeated MatriculaNomina matriculas = 1;
+  int32 total = 2;
+}
+
+// ===== Importación / exportación Excel (formato oficial de 9 columnas) =====
+// El archivo viaja como bytes (.xlsx); el servicio lo lee, valida y escribe
+// en el maestro. La plantilla y la exportación devuelven el .xlsx generado.
+
+message PlantillaEstudiantesRequest {}
+
+message ArchivoExcelResponse {
+  string nombre = 1;     // nombre sugerido (p. ej. estudiantes_2026-10-23.xlsx)
+  bytes contenido = 2;   // .xlsx
+  int32 filas = 3;       // estudiantes exportados (0 en la plantilla)
+}
+
+message ImportarEstudiantesRequest {
+  string nombre_archivo = 1; // solo para validar la extensión .xlsx
+  bytes contenido = 2;
+  // Confirmación: huella devuelta por la vista previa. Si el archivo no es
+  // exactamente el previsualizado, la confirmación se rechaza.
+  string huella = 3;
+}
+
+// Resultado por fila. Vista previa: VALIDA | ERROR | DUPLICADA | YA_EXISTE.
+// Confirmación: INSERTADA | OMITIDA (ya existía) | RECHAZADA (error).
+message FilaImportacion {
+  int32 fila = 1; // número de fila de Excel
+  string tipo_documento = 2;
+  string numero_documento = 3;
+  string apellido_paterno = 4;
+  string apellido_materno = 5;
+  string nombres = 6;
+  string estado = 7;
+  string nivel = 8;
+  string resultado = 9;
+  repeated string errores = 10;
+  repeated string avisos = 11;
+}
+
+message ResumenImportacion {
+  int32 total = 1;
+  int32 validas = 2;
+  int32 con_errores = 3;
+  int32 duplicadas = 4; // repetidas dentro del archivo
+  int32 ya_existen = 5;
+  int32 insertadas = 6;
+  int32 omitidas = 7;
+  int32 rechazadas = 8;
+  int32 con_avisos = 9;
+}
+
+message ImportarEstudiantesResponse {
+  ResumenImportacion resumen = 1;
+  repeated FilaImportacion filas = 2;
+  string huella = 3;
+  bool confirmada = 4;
+}
+
+message ExportarEstudiantesRequest {
+  string estado = 1; // opcional: ACTIVO | INACTIVO
+  string nivel = 2;  // opcional: INICIAL | PRIMARIA | SECUNDARIA
+}
+
+// ===== Motor universal de datos (importación/exportación multiformato) =====
+// El archivo se lee con backend/pkg/tabular (xlsx/xlsm, ods, html/"xls web",
+// csv/tsv/txt, json, jsonl/ndjson, xml). La vista previa no escribe nada; la
+// confirmación vuelve a leer y validar el MISMO archivo con el MISMO mapeo
+// (huella) y registra los nuevos en UNA transacción.
+
+message OpcionesLectura {
+  string hoja = 1;
+  string ruta = 2;          // json/xml
+  string separador = 3;     // csv: "," ";" "tab" "|"
+  string codificacion = 4;  // utf-8, utf-16, windows-1252, iso-8859-1
+  int32 fila_encabezado = 5; // 0 = detectar
+}
+
+message AsignacionColumna {
+  int32 columna = 1;
+  string campo = 2;
+}
+
+message DatosImportacionRequest {
+  string nombre_archivo = 1;
+  bytes contenido = 2;
+  OpcionesLectura opciones = 3;
+  repeated AsignacionColumna mapeo = 4;
+  bool mapeo_confirmado = 5;   // true: se usa "mapeo" tal cual (revisado por el usuario)
+  string plantilla_id = 6;
+  string huella = 7;           // confirmación: la de la vista previa
+  bool excluir_invalidos = 8;  // confirmación: excluir filas inválidas o en conflicto
+  repeated int32 aceptadas = 9; // POR_CONFIRMAR que el usuario confirma como personas nuevas
+  repeated int32 omitidas = 10; // POR_CONFIRMAR que el usuario decide no importar
+}
+
+message ColumnaAnalizada {
+  int32 columna = 1;
+  string encabezado = 2;
+  string campo = 3;
+  string confianza = 4;
+  string motivo = 5;
+  repeated string alternativas = 6;
+  repeated string muestras = 7;
+  bool confirmada = 8;
+  bool importable = 9;
+}
+
+message RegistroAnalizado {
+  int32 fila = 1;
+  string categoria = 2;
+  string codigo = 3;
+  string documento = 4;
+  string apellidos = 5;
+  string nombres = 6;
+  string estado = 7;
+  string nivel = 8;
+  string grado = 9;
+  string seccion = 10;
+  string turno = 11;
+  repeated string errores = 12;
+  repeated string avisos = 13;
+  repeated string correcciones = 14;
+  string coincidencia = 15; // estudiante registrado que coincide (código y nombre)
+  string resultado = 16;    // confirmación: INSERTADO | OMITIDO
+}
+
+message ResumenDatos {
+  int32 total = 1;
+  int32 nuevos = 2;
+  int32 existentes = 3;
+  int32 duplicados = 4;
+  int32 por_confirmar = 5;
+  int32 conflictos = 6;
+  int32 invalidos = 7;
+  int32 con_avisos = 8;
+  int32 insertados = 9;
+  int32 omitidos = 10;
+}
+
+message DatosImportacionResponse {
+  string formato = 1;
+  string extension = 2;
+  repeated string hojas = 3;
+  string hoja = 4;
+  repeated string rutas = 5;
+  string ruta = 6;
+  string separador = 7;
+  string codificacion = 8;
+  int32 fila_encabezado = 9;
+  repeated string avisos_archivo = 10;
+  repeated ColumnaAnalizada columnas = 11;
+  repeated string problemas_mapeo = 12;
+  bool requiere_confirmar_mapeo = 13;
+  repeated string bloqueantes = 14;
+  repeated string avisos = 15;
+  ResumenDatos resumen = 16;
+  repeated RegistroAnalizado registros = 17;
+  string huella = 18;
+  bool confirmada = 19;
+  string plantilla_aplicada = 20;
+  repeated string plantilla_avisos = 21;
+}
+
+message CampoDatos {
+  string clave = 1;
+  string etiqueta = 2;
+  string grupo = 3;
+  bool importable = 4;
+  bool exportable = 5;
+}
+
+message ColumnaExportDatos {
+  string clave = 1;
+  string encabezado = 2;
+}
+
+message CamposDatosRequest {}
+
+message CamposDatosResponse {
+  repeated CampoDatos campos = 1;
+  repeated string formatos_entrada = 2;
+  repeated string formatos_salida = 3;
+  repeated ColumnaExportDatos columnas_tabla = 4;
+}
+
+message DatosExportacionRequest {
+  string q = 1;
+  string estado = 2;
+  string nivel = 3;
+  string grado = 4;
+  string seccion = 5;
+  string turno = 6;
+  string orden = 7;
+  repeated ColumnaExportDatos columnas = 8;
+  string formato = 9;
+  string separador = 10;
+  string codificacion = 11;
+  bool proteger_formulas = 12;
+}
+
+message ArchivoDatosResponse {
+  string nombre = 1;
+  string mime = 2;
+  bytes contenido = 3;
+  int32 filas = 4;
+  int32 protegidas = 5; // celdas CSV/TSV protegidas contra fórmulas
+}
+
+message PlantillaDatos {
+  string id = 1;
+  string tipo = 2; // IMPORTACION | EXPORTACION
+  string nombre = 3;
+  string formato = 4;
+  string configuracion = 5; // JSON validado por el servicio
+  int32 version = 6;
+  string creado_por = 7;
+  string actualizado_por = 8;
+  string creado = 9;
+  string actualizado = 10;
+}
+
+message ListPlantillasDatosRequest {
+  string tipo = 1;
+}
+
+message ListPlantillasDatosResponse {
+  repeated PlantillaDatos plantillas = 1;
+}
+
+message GuardarPlantillaDatosRequest {
+  string id = 1; // vacío = nueva
+  string tipo = 2;
+  string nombre = 3;
+  string formato = 4;
+  string configuracion = 5;
+  int32 expected_version = 6;
+}
+
+message PlantillaDatosResponse {
+  PlantillaDatos plantilla = 1;
+}
+
+message EliminarPlantillaDatosRequest {
+  string id = 1;
+  string tipo = 2;
+}
+
+message EliminarPlantillaDatosResponse {
+  bool eliminada = 1;
+}
+
 service Estudiantes {
   rpc GetEstudiante(GetEstudianteRequest) returns (GetEstudianteResponse);
   rpc SearchEstudiantes(SearchEstudiantesRequest) returns (SearchEstudiantesResponse);
@@ -406,4 +916,40 @@ service Estudiantes {
   rpc ListFamiliaresEstudiante(ListFamiliaresEstudianteRequest) returns (ListFamiliaresEstudianteResponse);
   rpc VincularFamiliar(VincularFamiliarRequest) returns (VincularFamiliarResponse);
   rpc DesvincularFamiliar(DesvincularFamiliarRequest) returns (DesvincularFamiliarResponse);
+  // Etapa 5: familia y personas.
+  rpc ActualizarFamiliar(ActualizarFamiliarRequest) returns (ActualizarFamiliarResponse);
+  rpc CreatePersona(CreatePersonaRequest) returns (PersonaResponse);
+  rpc GetPersona(GetPersonaRequest) returns (GetPersonaResponse);
+  rpc SearchPersonas(SearchPersonasRequest) returns (SearchPersonasResponse);
+  rpc UpdatePersona(UpdatePersonaRequest) returns (PersonaResponse);
+  // Etapa 5: periodos, secciones y matrículas.
+  rpc CreatePeriodo(CreatePeriodoRequest) returns (PeriodoResponse);
+  rpc ListPeriodos(ListPeriodosRequest) returns (ListPeriodosResponse);
+  rpc ChangeEstadoPeriodo(ChangeEstadoPeriodoRequest) returns (PeriodoResponse);
+  rpc CreateSeccion(CreateSeccionRequest) returns (SeccionResponse);
+  rpc ListSecciones(ListSeccionesRequest) returns (ListSeccionesResponse);
+  rpc MatricularEstudiante(MatricularEstudianteRequest) returns (MatriculaResponse);
+  rpc CambiarSeccionMatricula(CambiarSeccionMatriculaRequest) returns (MatriculaResponse);
+  rpc RetirarMatricula(RetirarMatriculaRequest) returns (MatriculaResponse);
+  rpc ReingresarMatricula(ReingresarMatriculaRequest) returns (MatriculaResponse);
+  rpc ConcluirMatricula(ConcluirMatriculaRequest) returns (MatriculaResponse);
+  rpc ListMatriculasPeriodo(ListMatriculasPeriodoRequest) returns (ListMatriculasPeriodoResponse);
+  // Etapa 6: parentesco con historial e historial de cambios.
+  rpc CambiarParentescoFamiliar(CambiarParentescoFamiliarRequest) returns (CambiarParentescoFamiliarResponse);
+  rpc ListHistorialEstudiante(ListHistorialEstudianteRequest) returns (ListHistorialEstudianteResponse);
+  // Excel (formato oficial). Plantilla, vista previa y confirmación exigen
+  // estudiantes.create; la exportación, estudiantes.view.
+  rpc PlantillaEstudiantes(PlantillaEstudiantesRequest) returns (ArchivoExcelResponse);
+  rpc PreviewImportacionEstudiantes(ImportarEstudiantesRequest) returns (ImportarEstudiantesResponse);
+  rpc ConfirmarImportacionEstudiantes(ImportarEstudiantesRequest) returns (ImportarEstudiantesResponse);
+  rpc ExportarEstudiantes(ExportarEstudiantesRequest) returns (ArchivoExcelResponse);
+  // Motor universal de datos. Analizar/confirmar: estudiantes.create y
+  // estudiantes.view; campos/exportar: estudiantes.view; plantillas: según tipo.
+  rpc CamposDatosEstudiantes(CamposDatosRequest) returns (CamposDatosResponse);
+  rpc AnalizarDatosEstudiantes(DatosImportacionRequest) returns (DatosImportacionResponse);
+  rpc ConfirmarDatosEstudiantes(DatosImportacionRequest) returns (DatosImportacionResponse);
+  rpc ExportarDatosEstudiantes(DatosExportacionRequest) returns (ArchivoDatosResponse);
+  rpc ListPlantillasDatos(ListPlantillasDatosRequest) returns (ListPlantillasDatosResponse);
+  rpc GuardarPlantillaDatos(GuardarPlantillaDatosRequest) returns (PlantillaDatosResponse);
+  rpc EliminarPlantillaDatos(EliminarPlantillaDatosRequest) returns (EliminarPlantillaDatosResponse);
 }

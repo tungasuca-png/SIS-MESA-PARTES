@@ -5,6 +5,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"gateway/internal/svc"
 
@@ -38,6 +39,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/auth/register",
 				Handler: RegisterHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/token",
+				Handler: ServiceTokenHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -376,13 +382,33 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/:id/familiares/:relacion_id",
+				Handler: ActualizarFamiliarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
 				Path:    "/api/estudiantes/:id/familiares/:relacion_id/desvincular",
 				Handler: DesvincularFamiliarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/:id/familiares/:relacion_id/parentesco",
+				Handler: CambiarParentescoFamiliarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/:id/historial",
+				Handler: ListHistorialEstudianteHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/api/estudiantes/:id/matriculas",
 				Handler: ListMatriculasEstudianteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/:id/matriculas",
+				Handler: MatricularEstudianteHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -405,10 +431,154 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ListPosiblesDuplicadosHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/matriculas/:matricula_id/conclusion",
+				Handler: ConcluirMatriculaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/matriculas/:matricula_id/reingreso",
+				Handler: ReingresarMatriculaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/matriculas/:matricula_id/retiro",
+				Handler: RetirarMatriculaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/matriculas/:matricula_id/seccion",
+				Handler: CambiarSeccionMatriculaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/periodos",
+				Handler: ListPeriodosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/periodos",
+				Handler: CreatePeriodoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/periodos/:periodo_id/estado",
+				Handler: ChangeEstadoPeriodoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/periodos/:periodo_id/matriculas",
+				Handler: ListMatriculasPeriodoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/periodos/:periodo_id/secciones",
+				Handler: ListSeccionesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/periodos/:periodo_id/secciones",
+				Handler: CreateSeccionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/personas",
+				Handler: SearchPersonasHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/personas",
+				Handler: CreatePersonaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/personas/:persona_id",
+				Handler: GetPersonaHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPatch,
+				Path:    "/api/estudiantes/personas/:persona_id",
+				Handler: UpdatePersonaHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/api/estudiantes/resolver",
 				Handler: ResolveEstudianteHandler(serverCtx),
 			},
 		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/exportar",
+				Handler: ExportarEstudiantesExcelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/importacion/confirmar",
+				Handler: ConfirmarImportacionEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/importacion/plantilla",
+				Handler: PlantillaEstudiantesExcelHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/importacion/preview",
+				Handler: PreviewImportacionEstudiantesHandler(serverCtx),
+			},
+		},
+		rest.WithTimeout(190000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/analizar",
+				Handler: AnalizarDatosEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/confirmar",
+				Handler: ConfirmarDatosEstudiantesHandler(serverCtx),
+			},
+		},
+		rest.WithTimeout(190000*time.Millisecond),
+		rest.WithMaxBytes(4194304),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/datos/campos",
+				Handler: CamposDatosEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/exportar",
+				Handler: ExportarDatosEstudiantesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/estudiantes/datos/plantillas",
+				Handler: ListPlantillasDatosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/plantillas",
+				Handler: GuardarPlantillaDatosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/datos/plantillas/:plantilla_id/eliminar",
+				Handler: EliminarPlantillaDatosHandler(serverCtx),
+			},
+		},
+		rest.WithTimeout(70000*time.Millisecond),
 	)
 }

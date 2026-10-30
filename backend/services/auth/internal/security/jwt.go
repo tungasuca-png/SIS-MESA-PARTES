@@ -15,6 +15,9 @@ var ErrJWTConfiguration = errors.New("invalid JWT configuration")
 type JWTClaims struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
+	// TokenType nunca se emite en tokens de usuario (omitempty): solo existe
+	// para que ValidateAccessToken rechace tokens de servicio.
+	TokenType string `json:"token_type,omitempty"`
 	jwt.RegisteredClaims
 }
 

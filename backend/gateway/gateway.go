@@ -7,13 +7,16 @@ import (
 	"flag"
 	"fmt"
 
+	"gateway/internal/cabeceras"
 	"gateway/internal/config"
+	"gateway/internal/errorsafe"
 	"gateway/internal/handler"
 	"gateway/internal/logsafe"
 	"gateway/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 var configFile = flag.String("f", "etc/gateway-api.yaml", "the config file")
@@ -28,6 +31,10 @@ func main() {
 	// llamadas con contraseñas, tokens o datos clínicos.
 	logsafe.ProtectSensitiveRPCLogs()
 
+	// Los 5xx no devuelven al navegador detalles internos (direcciones,
+	// errores de conexión); los 4xx conservan su código estable.
+	httpx.SetErrorHandlerCtx(errorsafe.Handler)
+
 	server := rest.MustNewServer(
 		c.RestConf,
 		rest.WithCors("http://localhost:5173"),
@@ -41,6 +48,8 @@ func main() {
 
 	// Reemplaza al LogHandler estándar (Middlewares.Log=false en el YAML).
 	server.Use(logsafe.AccessLog)
+	// Cabeceras de seguridad en todas las respuestas (nosniff, no-store, ...).
+	server.Use(cabeceras.Seguridad)
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import ExpedienteFormModal from "../../components/dashboard/ExpedienteFormModal";
@@ -7,6 +7,7 @@ import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
 import Icon from "../../components/dashboard/Icon";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
+import { useActualizacionEnVivo } from "../../hooks/useActualizacionEnVivo";
 import { deleteExpediente, getExpedientes } from "../../services/expedientesService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
@@ -71,6 +72,32 @@ function ExpedientesList() {
             active = false;
         };
     }, [estado, prioridad, tipo, page, refreshKey]);
+
+    // En vivo: cada pocos segundos (y en cuanto la campana detecta un trámite
+    // nuevo) se vuelve a consultar en silencio con los MISMOS filtros y
+    // página. Si mientras tanto cambiaron los filtros, la respuesta se
+    // descarta. Las filas que no estaban antes se resaltan.
+    const [recienLlegados, setRecienLlegados] = useState(() => new Set());
+    const filtrosActuales = JSON.stringify({ estado, prioridad, tipo, page, refreshKey });
+    const filtrosVigentes = useRef(filtrosActuales);
+    useEffect(() => {
+        filtrosVigentes.current = filtrosActuales;
+    }, [filtrosActuales]);
+    useActualizacionEnVivo(() => {
+        const clave = filtrosActuales;
+        const conocidos = new Set(items.map((e) => e.id));
+        getExpedientes({ estado, prioridad, tipo, page, pageSize: DEFAULT_PAGE_SIZE })
+            .then((data) => {
+                if (clave !== filtrosVigentes.current) return;
+                const nuevos = data.expedientes || [];
+                setItems(nuevos);
+                setTotal(data.total || 0);
+                setRecienLlegados(new Set(nuevos.filter((e) => !conocidos.has(e.id)).map((e) => e.id)));
+            })
+            .catch(() => {
+                // Un fallo momentáneo no borra lo que ya se ve.
+            });
+    });
 
     useEffect(() => {
         // Limpia el estado de navegación para que un F5 no reabra el modal.
@@ -194,7 +221,7 @@ function ExpedientesList() {
                                 </thead>
                                 <tbody>
                                     {items.map((item) => (
-                                        <tr key={item.codigo}>
+                                        <tr key={item.codigo} className={recienLlegados.has(item.id) ? "dp-row-new" : undefined}>
                                             <td className="dp-table-code">{item.codigo}</td>
                                             <td>{tipoLabel(item.tipo)}</td>
                                             <td>{item.asunto}</td>

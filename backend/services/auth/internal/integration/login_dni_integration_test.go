@@ -190,6 +190,38 @@ func TestLoginPorDNI(t *testing.T) {
 		}
 	})
 
+	// Bloqueo temporal: el 5.º fallo bloquea 15 minutos y lo informa; durante
+	// el bloqueo ni la clave correcta entra; al vencer, se puede entrar.
+	t.Run("Bloqueo_TrasCincoFallos_SeInformaYLuegoSeLibera", func(t *testing.T) {
+		id, _, dni := mkUser("bloqueo", "DOCENTE", true)
+		for i := 1; i <= 4; i++ {
+			_, err := client.Login(ctx, &auth.LoginRequest{Dni: dni, Password: "clave-incorrecta"})
+			if status.Code(err) != codes.Unauthenticated {
+				t.Fatalf("fallo %d: se esperaba credenciales inválidas, got %v", i, err)
+			}
+		}
+		_, err := client.Login(ctx, &auth.LoginRequest{Dni: dni, Password: "clave-incorrecta"})
+		msg := status.Convert(err).Message()
+		if status.Code(err) != codes.ResourceExhausted || !strings.HasPrefix(msg, "account_locked:") || !strings.Contains(msg, "15 minutos") {
+			t.Fatalf("5.º fallo: se esperaba account_locked con 15 minutos, got %v", err)
+		}
+		_, err = client.Login(ctx, &auth.LoginRequest{Dni: dni, Password: clave})
+		if status.Code(err) != codes.ResourceExhausted {
+			t.Fatalf("bloqueada: ni la clave correcta debe entrar, got %v", err)
+		}
+		// Vence el bloqueo (se simula moviéndolo al pasado).
+		if _, err := pool.Exec(ctx, `UPDATE usuarios SET locked_until = NOW() - INTERVAL '1 minute' WHERE id = $1`, id); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := client.Login(ctx, &auth.LoginRequest{Dni: dni, Password: clave}); err != nil {
+			t.Fatalf("tras vencer el bloqueo la clave correcta debe entrar: %v", err)
+		}
+		var fallos int
+		if err := pool.QueryRow(ctx, `SELECT failed_login_attempts FROM usuarios WHERE id = $1`, id).Scan(&fallos); err != nil || fallos != 0 {
+			t.Fatalf("el login correcto debe reiniciar los intentos: %d err=%v", fallos, err)
+		}
+	})
+
 	t.Run("UsuarioSinDNI_NoPuedeIniciarSesion", func(t *testing.T) {
 		var id string
 		u := prefix + "sindni"

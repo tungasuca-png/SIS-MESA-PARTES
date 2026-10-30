@@ -25,6 +25,8 @@ var sensitiveRPCMethods = []string{
 	auth.Auth_Logout_FullMethodName,
 	auth.Auth_ValidateToken_FullMethodName,
 	auth.Auth_CreateUser_FullMethodName,
+	// Client credentials: client_secret en la solicitud y token en la respuesta.
+	auth.Auth_IssueServiceToken_FullMethodName,
 
 	// Psicología: identificadores de estudiantes y texto clínico (resumen_caso,
 	// motivo de cierre) en solicitudes y respuestas.
@@ -68,6 +70,41 @@ var sensitiveRPCMethods = []string{
 	estudiantes.Estudiantes_ListFamiliaresEstudiante_FullMethodName,
 	estudiantes.Estudiantes_VincularFamiliar_FullMethodName,
 	estudiantes.Estudiantes_DesvincularFamiliar_FullMethodName,
+	// Etapa 5: personas (documento, nombres), apoderado, periodos, secciones
+	// y matrículas (estudiante, sección, motivos de retiro o traslado).
+	estudiantes.Estudiantes_ActualizarFamiliar_FullMethodName,
+	estudiantes.Estudiantes_CreatePersona_FullMethodName,
+	estudiantes.Estudiantes_GetPersona_FullMethodName,
+	estudiantes.Estudiantes_SearchPersonas_FullMethodName,
+	estudiantes.Estudiantes_UpdatePersona_FullMethodName,
+	estudiantes.Estudiantes_CreatePeriodo_FullMethodName,
+	estudiantes.Estudiantes_ListPeriodos_FullMethodName,
+	estudiantes.Estudiantes_ChangeEstadoPeriodo_FullMethodName,
+	estudiantes.Estudiantes_CreateSeccion_FullMethodName,
+	estudiantes.Estudiantes_ListSecciones_FullMethodName,
+	estudiantes.Estudiantes_MatricularEstudiante_FullMethodName,
+	estudiantes.Estudiantes_CambiarSeccionMatricula_FullMethodName,
+	estudiantes.Estudiantes_RetirarMatricula_FullMethodName,
+	estudiantes.Estudiantes_ReingresarMatricula_FullMethodName,
+	estudiantes.Estudiantes_ConcluirMatricula_FullMethodName,
+	estudiantes.Estudiantes_ListMatriculasPeriodo_FullMethodName,
+	// Etapa 6: parentesco con historial e historial de cambios.
+	estudiantes.Estudiantes_CambiarParentescoFamiliar_FullMethodName,
+	estudiantes.Estudiantes_ListHistorialEstudiante_FullMethodName,
+	// Importación/exportación Excel: el archivo (y la vista previa) traen DNI
+	// y nombres de menores.
+	estudiantes.Estudiantes_PlantillaEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_PreviewImportacionEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ConfirmarImportacionEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ExportarEstudiantes_FullMethodName,
+	// Motor universal de datos: archivos, vistas previas y exportaciones.
+	estudiantes.Estudiantes_CamposDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_AnalizarDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ConfirmarDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ExportarDatosEstudiantes_FullMethodName,
+	estudiantes.Estudiantes_ListPlantillasDatos_FullMethodName,
+	estudiantes.Estudiantes_GuardarPlantillaDatos_FullMethodName,
+	estudiantes.Estudiantes_EliminarPlantillaDatos_FullMethodName,
 }
 
 // ProtectSensitiveRPCLogs debe llamarse una vez al arrancar, antes de crear los

@@ -69,7 +69,7 @@ func TestDocumentosIntegration(t *testing.T) {
 		// solicitanteID son sintéticos, sin relación con un Expedientes
 		// Service real. El ownership real se prueba en
 		// TestHasPermissionIntegration.
-		ExpedientesClient: &fakeExpedientesClient{expedienteID: expedienteID, solicitanteID: solicitanteID},
+		ExpedientesClient: &fakeExpedientesClient{expedienteID: expedienteID, solicitanteID: solicitanteID, rolesFueraDeArea: map[string]bool{"DOCENTE": true}},
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
@@ -208,6 +208,24 @@ func TestDocumentosIntegration(t *testing.T) {
 	}
 	if proveidos.Total != 1 || proveidos.Documentos[0].Id != proveidoResp.Documento.Id {
 		t.Fatalf("expected exactly the proveido uploaded, got %+v", proveidos)
+	}
+
+	// --- Seguridad (BOLA): "documentos.view" no alcanza documentos de un
+	// expediente fuera del área del rol. El DOCENTE tiene documentos.view
+	// (todo permitido en el Auth simulado), pero el expediente no está en su
+	// área: Expedientes lo deniega y Documentos debe respetarlo.
+	ctxDocente := authContext(fixedUUID(time.Now().UnixNano(), 4), "DOCENTE")
+	if _, err := client.GetDocumento(ctxDocente, &documentos.GetDocumentoRequest{Id: proveidoResp.Documento.Id}); status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("DOCENTE fuera de área: GetDocumento debe dar PermissionDenied, got %v", err)
+	}
+	if _, err := client.DownloadDocumento(ctxDocente, &documentos.DownloadDocumentoRequest{Id: proveidoResp.Documento.Id}); status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("DOCENTE fuera de área: DownloadDocumento debe dar PermissionDenied, got %v", err)
+	}
+	if _, err := client.ListDocumentos(ctxDocente, &documentos.ListDocumentosRequest{ExpedienteId: expedienteID}); status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("DOCENTE fuera de área: ListDocumentos por expediente debe dar PermissionDenied, got %v", err)
+	}
+	if globalDocente, err := client.ListDocumentos(ctxDocente, &documentos.ListDocumentosRequest{}); err != nil || globalDocente.Total != 0 {
+		t.Fatalf("DOCENTE fuera de área: el listado general no debe incluir documentos ajenos, got %+v, %v", globalDocente, err)
 	}
 
 	// --- Eliminar: SOLICITANTE no puede, ADMIN si ---

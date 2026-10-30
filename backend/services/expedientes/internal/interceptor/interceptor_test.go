@@ -90,3 +90,19 @@ func TestAuthenticationInterceptor_TamperedToken(t *testing.T) {
 		t.Fatalf("expected Unauthenticated, got %v", err)
 	}
 }
+
+// Seguridad: un JWT bien firmado pero sin "exp" ya no se acepta (antes no
+// vencía nunca), y uno firmado con otro secreto tampoco.
+func TestAuthenticationInterceptor_TokenSinExpONoFirmadoPorAuth(t *testing.T) {
+	sinExp, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": "user-1", "role": "ADMIN"}).SignedString([]byte("test-secret"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	otroSecreto := signToken(t, "otro-secreto", "user-1", "ana", "ADMIN", time.Hour)
+	for nombre, token := range map[string]string{"sin exp": sinExp, "otro secreto": otroSecreto} {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer "+token))
+		if _, err := AuthenticationInterceptor(testValidator())(ctx, nil, &grpc.UnaryServerInfo{}, testHandler); status.Code(err) != codes.Unauthenticated {
+			t.Errorf("%s: se esperaba Unauthenticated, got %v", nombre, err)
+		}
+	}
+}

@@ -412,3 +412,248 @@
         display: none !important;
     }
 }
+
+/* =====================================================================
+   PRESENTACIÓN WEB DEL FUT (solo pantalla)
+   El formulario se ve como portal administrativo; la IMPRESIÓN conserva
+   el formato documental de arriba (estas reglas no aplican en @media
+   print) y el PDF formal lo genera el Gateway (futpdf.go), aparte.
+   ===================================================================== */
+@media screen {
+    .fut-page {
+        max-width: 960px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        counter-reset: fut-seccion;
+    }
+
+    /* Encabezado institucional compacto: banda azul marino con acento dorado. */
+    .fut-page .fut-header {
+        margin-bottom: 0;
+        padding: 18px 22px;
+        border: none;
+        border-radius: var(--dp-radius-lg) var(--dp-radius-lg) 0 0;
+        background: linear-gradient(120deg, var(--dp-navy) 0%, var(--dp-primary) 100%);
+        color: #fff;
+        box-shadow: inset 0 -3px 0 var(--dp-gold);
+    }
+
+    .fut-page .fut-header-nombre,
+    .fut-page .fut-header p {
+        color: #fff;
+    }
+
+    .fut-page .fut-header-tipo,
+    .fut-page .fut-header-linea {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .fut-page .fut-titulo {
+        margin: 0;
+        padding: 18px 22px 2px;
+        background: var(--dp-card-bg);
+        border: 1px solid var(--dp-border);
+        border-top: none;
+        border-bottom: none;
+        font-size: 20px;
+        letter-spacing: 0;
+        text-align: left;
+        color: var(--dp-navy);
+    }
+
+    .fut-page .fut-destinatario {
+        margin: 0 0 18px;
+        padding: 0 22px 18px;
+        background: var(--dp-card-bg);
+        border: 1px solid var(--dp-border);
+        border-top: none;
+        border-radius: 0 0 var(--dp-radius-lg) var(--dp-radius-lg);
+        font-weight: 500;
+        text-align: left;
+        color: var(--dp-text-secondary);
+        box-shadow: var(--dp-shadow);
+    }
+
+    .fut-page .fut-form {
+        gap: 16px;
+    }
+
+    /* Cada sección es un panel numerado. */
+    .fut-page .fut-section,
+    .fut-page .fut-section:first-child {
+        padding: 18px 22px 20px;
+        background: var(--dp-card-bg);
+        border: 1px solid var(--dp-border);
+        border-radius: var(--dp-radius-lg);
+        box-shadow: var(--dp-shadow);
+        counter-increment: fut-seccion;
+    }
+
+    .fut-page .fut-section > .fut-section-title:first-child {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--dp-border);
+        font-size: 13.5px;
+        letter-spacing: 0.03em;
+        color: var(--dp-navy);
+    }
+
+    .fut-page .fut-section > .fut-section-title:first-child::before {
+        content: counter(fut-seccion);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: var(--dp-primary);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .fut-page .fut-grid-3 {
+        gap: 16px;
+    }
+
+    /* Adjuntos: zona de carga visible. */
+    .fut-page input[type="file"] {
+        padding: 18px 14px;
+        border: 1.5px dashed #B9C6DD;
+        border-radius: var(--dp-radius);
+        background: var(--dp-surface-2);
+        color: var(--dp-text-secondary);
+        cursor: pointer;
+        box-shadow: none;
+    }
+
+    .fut-page input[type="file"]:hover {
+        border-color: var(--dp-interactive);
+        background: var(--dp-primary-soft);
+    }
+
+    .fut-page input[type="file"]::file-selector-button {
+        margin-right: 12px;
+        padding: 7px 14px;
+        border: 1px solid var(--dp-border-strong);
+        border-radius: var(--dp-radius);
+        background: var(--dp-card-bg);
+        color: var(--dp-primary);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .fut-page .fut-file-item {
+        padding: 9px 12px;
+        background: var(--dp-card-bg);
+        border-radius: var(--dp-radius);
+    }
+
+    .fut-page .fut-fecha-valor {
+        border: 1px solid var(--dp-border);
+        background: var(--dp-surface-2);
+        border-radius: var(--dp-radius);
+    }
+
+    /* Acciones: barra fija al pie mientras se completa el formulario. */
+    .fut-page .dp-form-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        margin-top: 0;
+        padding: 14px 22px;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--dp-border);
+        border-radius: var(--dp-radius-lg);
+        box-shadow: 0 -4px 16px rgba(16, 24, 40, 0.06);
+    }
+
+    .fut-page .fut-confirmacion {
+        padding: 22px;
+        background: var(--dp-card-bg);
+        border: 1px solid var(--dp-success-border);
+        border-top: 3px solid #17B26A;
+        border-radius: var(--dp-radius-lg);
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .fut-page .fut-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 720px) {
+    .fut-page .fut-grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .fut-page .fut-section,
+    .fut-page .fut-section:first-child,
+    .fut-page .fut-header,
+    .fut-page .dp-form-actions {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+/* Impresión del cargo: tampoco el encabezado/navegación del portal. */
+@media print {
+    .dp-portal-header,
+    .dp-portal-footer,
+    .dp-portal-page-header,
+    .dp-portal-nav-item {
+        display: none !important;
+    }
+}
+
+/* Campos sueltos de sección (tipo, sumilla, fundamentación) con el estilo de formulario. */
+@media screen {
+    .fut-section > select,
+    .fut-section > input,
+    .fut-section > textarea {
+        width: 100%;
+        min-height: 40px;
+        padding: 9px 12px;
+        border: 1px solid var(--dp-border-strong);
+        border-radius: var(--dp-radius);
+        background: var(--dp-card-bg);
+        color: var(--dp-text-primary);
+        font: inherit;
+        font-size: 14px;
+        box-shadow: var(--dp-shadow);
+        outline: none;
+        transition: border-color var(--dp-transition), box-shadow var(--dp-transition);
+    }
+
+    .fut-section > textarea {
+        min-height: 120px;
+        line-height: 1.5;
+        resize: vertical;
+    }
+
+    .fut-section > select:focus,
+    .fut-section > input:focus,
+    .fut-section > textarea:focus {
+        border-color: var(--dp-interactive);
+        box-shadow: var(--dp-focus);
+    }
+}
+
+/* Número del FUT legible sobre la banda azul marino. */
+@media screen {
+    .fut-page .fut-header-numero-label {
+        color: var(--dp-gold);
+    }
+
+    .fut-page .fut-header-numero-valor {
+        color: rgba(255, 255, 255, 0.85);
+    }
+}

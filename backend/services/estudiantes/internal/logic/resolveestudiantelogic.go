@@ -26,7 +26,7 @@ func NewResolveEstudianteLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-// ResolveEstudiante (modelo maestro): resolución EXACTA para sistemas
+// ResolveEstudiante (modelo maestro; etapa 5 agrega código SIAGIE): resolución EXACTA para sistemas
 // consumidores, por código institucional o por tipo + número de documento
 // (exactamente uno de los dos criterios). Requiere "estudiantes.view" y
 // devuelve solo la identidad básica. No hay coincidencias parciales: para
@@ -39,17 +39,30 @@ func (l *ResolveEstudianteLogic) ResolveEstudiante(in *estudiantes.ResolveEstudi
 		in = &estudiantes.ResolveEstudianteRequest{}
 	}
 	codigo := validation.CleanText(in.Codigo)
+	siagie := strings.TrimSpace(in.CodigoSiagie)
 	tipo := validation.Upper(in.TipoDocumento)
 	numero := validation.Upper(in.NumeroDocumento)
 	porDocumento := tipo != "" || numero != ""
+
+	criterios := 0
+	for _, usado := range []bool{codigo != "", siagie != "", porDocumento} {
+		if usado {
+			criterios++
+		}
+	}
 
 	var (
 		found *repository.Estudiante
 		err   error
 	)
 	switch {
-	case codigo != "" && porDocumento:
-		return nil, escrituraError(l.Logger, "resolver", validation.Invalid("use un solo criterio: codigo o tipo_documento + numero_documento"))
+	case criterios > 1:
+		return nil, escrituraError(l.Logger, "resolver", validation.Invalid("use un solo criterio: codigo, codigo_siagie o tipo_documento + numero_documento"))
+	case siagie != "":
+		if err := validation.CodigoSiagie(&siagie); err != nil {
+			return nil, escrituraError(l.Logger, "resolver", err)
+		}
+		found, err = l.svcCtx.EstudianteRepository.GetByCodigoSiagie(l.ctx, siagie)
 	case codigo != "":
 		if err := validation.RequiredText("codigo", codigo, validation.MaxCodigo); err != nil {
 			return nil, escrituraError(l.Logger, "resolver", err)
@@ -64,7 +77,7 @@ func (l *ResolveEstudianteLogic) ResolveEstudiante(in *estudiantes.ResolveEstudi
 		}
 		found, err = l.svcCtx.EstudianteRepository.GetByDocumento(l.ctx, tipo, strings.TrimSpace(numero))
 	default:
-		return nil, escrituraError(l.Logger, "resolver", validation.Invalid("indique codigo o tipo_documento + numero_documento"))
+		return nil, escrituraError(l.Logger, "resolver", validation.Invalid("indique codigo, codigo_siagie o tipo_documento + numero_documento"))
 	}
 	if err != nil {
 		return nil, errorSeguro(l.Logger, "resolver", "no se pudo resolver el estudiante", err)

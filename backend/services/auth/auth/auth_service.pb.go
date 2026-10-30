@@ -1691,6 +1691,498 @@ func (x *CreateUserResponse) GetRoleNombre() string {
 	return ""
 }
 
+// Sistemas consumidores (client credentials). Un sistema externo cambia su
+// client_id + client_secret por un JWT de servicio de corta duración,
+// firmado con una clave distinta de la de usuarios (ServiceJWTSecret) y con
+// iss/aud/token_type/scope. Nunca representa a un usuario ni lleva rol.
+type IssueServiceTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientId      string                 `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	ClientSecret  string                 `protobuf:"bytes,2,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IssueServiceTokenRequest) Reset() {
+	*x = IssueServiceTokenRequest{}
+	mi := &file_auth_service_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IssueServiceTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssueServiceTokenRequest) ProtoMessage() {}
+
+func (x *IssueServiceTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IssueServiceTokenRequest.ProtoReflect.Descriptor instead.
+func (*IssueServiceTokenRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *IssueServiceTokenRequest) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *IssueServiceTokenRequest) GetClientSecret() string {
+	if x != nil {
+		return x.ClientSecret
+	}
+	return ""
+}
+
+type IssueServiceTokenResponse struct {
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	ExpiresIn   int64                  `protobuf:"varint,2,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	// Permisos autorizados, separados por espacios (claim "scope").
+	Scope         string `protobuf:"bytes,3,opt,name=scope,proto3" json:"scope,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IssueServiceTokenResponse) Reset() {
+	*x = IssueServiceTokenResponse{}
+	mi := &file_auth_service_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IssueServiceTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssueServiceTokenResponse) ProtoMessage() {}
+
+func (x *IssueServiceTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IssueServiceTokenResponse.ProtoReflect.Descriptor instead.
+func (*IssueServiceTokenResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *IssueServiceTokenResponse) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *IssueServiceTokenResponse) GetExpiresIn() int64 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
+func (x *IssueServiceTokenResponse) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+type ServiceClient struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Nombre        string                 `protobuf:"bytes,2,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	ClientId      string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Estado        string                 `protobuf:"bytes,4,opt,name=estado,proto3" json:"estado,omitempty"`
+	Permisos      []string               `protobuf:"bytes,5,rep,name=permisos,proto3" json:"permisos,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	LastUsedAt    string                 `protobuf:"bytes,7,opt,name=last_used_at,json=lastUsedAt,proto3" json:"last_used_at,omitempty"`
+	RevokedAt     string                 `protobuf:"bytes,8,opt,name=revoked_at,json=revokedAt,proto3" json:"revoked_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServiceClient) Reset() {
+	*x = ServiceClient{}
+	mi := &file_auth_service_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServiceClient) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceClient) ProtoMessage() {}
+
+func (x *ServiceClient) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceClient.ProtoReflect.Descriptor instead.
+func (*ServiceClient) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ServiceClient) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ServiceClient) GetNombre() string {
+	if x != nil {
+		return x.Nombre
+	}
+	return ""
+}
+
+func (x *ServiceClient) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *ServiceClient) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *ServiceClient) GetPermisos() []string {
+	if x != nil {
+		return x.Permisos
+	}
+	return nil
+}
+
+func (x *ServiceClient) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *ServiceClient) GetLastUsedAt() string {
+	if x != nil {
+		return x.LastUsedAt
+	}
+	return ""
+}
+
+func (x *ServiceClient) GetRevokedAt() string {
+	if x != nil {
+		return x.RevokedAt
+	}
+	return ""
+}
+
+// Alta administrativa ("integraciones.manage"): client_secret se devuelve
+// UNA sola vez; Auth guarda solo su hash.
+type CreateServiceClientRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nombre        string                 `protobuf:"bytes,1,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	Permisos      []string               `protobuf:"bytes,2,rep,name=permisos,proto3" json:"permisos,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateServiceClientRequest) Reset() {
+	*x = CreateServiceClientRequest{}
+	mi := &file_auth_service_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateServiceClientRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateServiceClientRequest) ProtoMessage() {}
+
+func (x *CreateServiceClientRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateServiceClientRequest.ProtoReflect.Descriptor instead.
+func (*CreateServiceClientRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *CreateServiceClientRequest) GetNombre() string {
+	if x != nil {
+		return x.Nombre
+	}
+	return ""
+}
+
+func (x *CreateServiceClientRequest) GetPermisos() []string {
+	if x != nil {
+		return x.Permisos
+	}
+	return nil
+}
+
+type CreateServiceClientResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Client        *ServiceClient         `protobuf:"bytes,1,opt,name=client,proto3" json:"client,omitempty"`
+	ClientSecret  string                 `protobuf:"bytes,2,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateServiceClientResponse) Reset() {
+	*x = CreateServiceClientResponse{}
+	mi := &file_auth_service_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateServiceClientResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateServiceClientResponse) ProtoMessage() {}
+
+func (x *CreateServiceClientResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateServiceClientResponse.ProtoReflect.Descriptor instead.
+func (*CreateServiceClientResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *CreateServiceClientResponse) GetClient() *ServiceClient {
+	if x != nil {
+		return x.Client
+	}
+	return nil
+}
+
+func (x *CreateServiceClientResponse) GetClientSecret() string {
+	if x != nil {
+		return x.ClientSecret
+	}
+	return ""
+}
+
+// Revocación: acepta el id (UUID) o el client_id.
+type RevokeServiceClientRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeServiceClientRequest) Reset() {
+	*x = RevokeServiceClientRequest{}
+	mi := &file_auth_service_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeServiceClientRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeServiceClientRequest) ProtoMessage() {}
+
+func (x *RevokeServiceClientRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeServiceClientRequest.ProtoReflect.Descriptor instead.
+func (*RevokeServiceClientRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *RevokeServiceClientRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type RevokeServiceClientResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Client        *ServiceClient         `protobuf:"bytes,1,opt,name=client,proto3" json:"client,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeServiceClientResponse) Reset() {
+	*x = RevokeServiceClientResponse{}
+	mi := &file_auth_service_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeServiceClientResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeServiceClientResponse) ProtoMessage() {}
+
+func (x *RevokeServiceClientResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeServiceClientResponse.ProtoReflect.Descriptor instead.
+func (*RevokeServiceClientResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *RevokeServiceClientResponse) GetClient() *ServiceClient {
+	if x != nil {
+		return x.Client
+	}
+	return nil
+}
+
+type ListServiceClientsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListServiceClientsRequest) Reset() {
+	*x = ListServiceClientsRequest{}
+	mi := &file_auth_service_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListServiceClientsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListServiceClientsRequest) ProtoMessage() {}
+
+func (x *ListServiceClientsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListServiceClientsRequest.ProtoReflect.Descriptor instead.
+func (*ListServiceClientsRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{37}
+}
+
+type ListServiceClientsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clients       []*ServiceClient       `protobuf:"bytes,1,rep,name=clients,proto3" json:"clients,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListServiceClientsResponse) Reset() {
+	*x = ListServiceClientsResponse{}
+	mi := &file_auth_service_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListServiceClientsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListServiceClientsResponse) ProtoMessage() {}
+
+func (x *ListServiceClientsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListServiceClientsResponse.ProtoReflect.Descriptor instead.
+func (*ListServiceClientsResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *ListServiceClientsResponse) GetClients() []*ServiceClient {
+	if x != nil {
+		return x.Clients
+	}
+	return nil
+}
+
 var File_auth_service_proto protoreflect.FileDescriptor
 
 const file_auth_service_proto_rawDesc = "" +
@@ -1803,7 +2295,41 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x17\n" +
 	"\arole_id\x18\x04 \x01(\tR\x06roleId\x12\x1f\n" +
 	"\vrole_nombre\x18\x05 \x01(\tR\n" +
-	"roleNombre2\xd4\a\n" +
+	"roleNombre\"\\\n" +
+	"\x18IssueServiceTokenRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\tR\bclientId\x12#\n" +
+	"\rclient_secret\x18\x02 \x01(\tR\fclientSecret\"s\n" +
+	"\x19IssueServiceTokenResponse\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12\x1d\n" +
+	"\n" +
+	"expires_in\x18\x02 \x01(\x03R\texpiresIn\x12\x14\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\"\xe8\x01\n" +
+	"\rServiceClient\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
+	"\x06nombre\x18\x02 \x01(\tR\x06nombre\x12\x1b\n" +
+	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12\x16\n" +
+	"\x06estado\x18\x04 \x01(\tR\x06estado\x12\x1a\n" +
+	"\bpermisos\x18\x05 \x03(\tR\bpermisos\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12 \n" +
+	"\flast_used_at\x18\a \x01(\tR\n" +
+	"lastUsedAt\x12\x1d\n" +
+	"\n" +
+	"revoked_at\x18\b \x01(\tR\trevokedAt\"P\n" +
+	"\x1aCreateServiceClientRequest\x12\x16\n" +
+	"\x06nombre\x18\x01 \x01(\tR\x06nombre\x12\x1a\n" +
+	"\bpermisos\x18\x02 \x03(\tR\bpermisos\"o\n" +
+	"\x1bCreateServiceClientResponse\x12+\n" +
+	"\x06client\x18\x01 \x01(\v2\x13.auth.ServiceClientR\x06client\x12#\n" +
+	"\rclient_secret\x18\x02 \x01(\tR\fclientSecret\",\n" +
+	"\x1aRevokeServiceClientRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
+	"\x1bRevokeServiceClientResponse\x12+\n" +
+	"\x06client\x18\x01 \x01(\v2\x13.auth.ServiceClientR\x06client\"\x1b\n" +
+	"\x19ListServiceClientsRequest\"K\n" +
+	"\x1aListServiceClientsResponse\x12-\n" +
+	"\aclients\x18\x01 \x03(\v2\x13.auth.ServiceClientR\aclients2\xbb\n" +
+	"\n" +
 	"\x04Auth\x12%\n" +
 	"\x04Ping\x12\r.auth.Request\x1a\x0e.auth.Response\x129\n" +
 	"\bRegister\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x120\n" +
@@ -1819,7 +2345,11 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x15UpdateRolePermissions\x12\".auth.UpdateRolePermissionsRequest\x1a#.auth.UpdateRolePermissionsResponse\x12K\n" +
 	"\x0eUpdateUserRole\x12\x1b.auth.UpdateUserRoleRequest\x1a\x1c.auth.UpdateUserRoleResponse\x12?\n" +
 	"\n" +
-	"CreateUser\x12\x17.auth.CreateUserRequest\x1a\x18.auth.CreateUserResponseB\bZ\x06./authb\x06proto3"
+	"CreateUser\x12\x17.auth.CreateUserRequest\x1a\x18.auth.CreateUserResponse\x12T\n" +
+	"\x11IssueServiceToken\x12\x1e.auth.IssueServiceTokenRequest\x1a\x1f.auth.IssueServiceTokenResponse\x12Z\n" +
+	"\x13CreateServiceClient\x12 .auth.CreateServiceClientRequest\x1a!.auth.CreateServiceClientResponse\x12Z\n" +
+	"\x13RevokeServiceClient\x12 .auth.RevokeServiceClientRequest\x1a!.auth.RevokeServiceClientResponse\x12W\n" +
+	"\x12ListServiceClients\x12\x1f.auth.ListServiceClientsRequest\x1a .auth.ListServiceClientsResponseB\bZ\x06./authb\x06proto3"
 
 var (
 	file_auth_service_proto_rawDescOnce sync.Once
@@ -1833,7 +2363,7 @@ func file_auth_service_proto_rawDescGZIP() []byte {
 	return file_auth_service_proto_rawDescData
 }
 
-var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
+var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_auth_service_proto_goTypes = []any{
 	(*Request)(nil),                       // 0: auth.Request
 	(*Response)(nil),                      // 1: auth.Response
@@ -1865,44 +2395,64 @@ var file_auth_service_proto_goTypes = []any{
 	(*UpdateUserRoleResponse)(nil),        // 27: auth.UpdateUserRoleResponse
 	(*CreateUserRequest)(nil),             // 28: auth.CreateUserRequest
 	(*CreateUserResponse)(nil),            // 29: auth.CreateUserResponse
+	(*IssueServiceTokenRequest)(nil),      // 30: auth.IssueServiceTokenRequest
+	(*IssueServiceTokenResponse)(nil),     // 31: auth.IssueServiceTokenResponse
+	(*ServiceClient)(nil),                 // 32: auth.ServiceClient
+	(*CreateServiceClientRequest)(nil),    // 33: auth.CreateServiceClientRequest
+	(*CreateServiceClientResponse)(nil),   // 34: auth.CreateServiceClientResponse
+	(*RevokeServiceClientRequest)(nil),    // 35: auth.RevokeServiceClientRequest
+	(*RevokeServiceClientResponse)(nil),   // 36: auth.RevokeServiceClientResponse
+	(*ListServiceClientsRequest)(nil),     // 37: auth.ListServiceClientsRequest
+	(*ListServiceClientsResponse)(nil),    // 38: auth.ListServiceClientsResponse
 }
 var file_auth_service_proto_depIdxs = []int32{
 	16, // 0: auth.ListRolesResponse.roles:type_name -> auth.Role
 	19, // 1: auth.ListPermissionsResponse.permissions:type_name -> auth.Permission
 	19, // 2: auth.GetRolePermissionsResponse.permissions:type_name -> auth.Permission
-	0,  // 3: auth.Auth.Ping:input_type -> auth.Request
-	2,  // 4: auth.Auth.Register:input_type -> auth.RegisterRequest
-	4,  // 5: auth.Auth.Login:input_type -> auth.LoginRequest
-	6,  // 6: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenRequest
-	8,  // 7: auth.Auth.Logout:input_type -> auth.LogoutRequest
-	10, // 8: auth.Auth.ValidateToken:input_type -> auth.ValidateTokenRequest
-	12, // 9: auth.Auth.HasPermission:input_type -> auth.HasPermissionRequest
-	14, // 10: auth.Auth.GetMyPermissions:input_type -> auth.GetMyPermissionsRequest
-	17, // 11: auth.Auth.ListRoles:input_type -> auth.ListRolesRequest
-	20, // 12: auth.Auth.ListPermissions:input_type -> auth.ListPermissionsRequest
-	22, // 13: auth.Auth.GetRolePermissions:input_type -> auth.GetRolePermissionsRequest
-	24, // 14: auth.Auth.UpdateRolePermissions:input_type -> auth.UpdateRolePermissionsRequest
-	26, // 15: auth.Auth.UpdateUserRole:input_type -> auth.UpdateUserRoleRequest
-	28, // 16: auth.Auth.CreateUser:input_type -> auth.CreateUserRequest
-	1,  // 17: auth.Auth.Ping:output_type -> auth.Response
-	3,  // 18: auth.Auth.Register:output_type -> auth.RegisterResponse
-	5,  // 19: auth.Auth.Login:output_type -> auth.LoginResponse
-	7,  // 20: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
-	9,  // 21: auth.Auth.Logout:output_type -> auth.LogoutResponse
-	11, // 22: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
-	13, // 23: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
-	15, // 24: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
-	18, // 25: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
-	21, // 26: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
-	23, // 27: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
-	25, // 28: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
-	27, // 29: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
-	29, // 30: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
-	17, // [17:31] is the sub-list for method output_type
-	3,  // [3:17] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	32, // 3: auth.CreateServiceClientResponse.client:type_name -> auth.ServiceClient
+	32, // 4: auth.RevokeServiceClientResponse.client:type_name -> auth.ServiceClient
+	32, // 5: auth.ListServiceClientsResponse.clients:type_name -> auth.ServiceClient
+	0,  // 6: auth.Auth.Ping:input_type -> auth.Request
+	2,  // 7: auth.Auth.Register:input_type -> auth.RegisterRequest
+	4,  // 8: auth.Auth.Login:input_type -> auth.LoginRequest
+	6,  // 9: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenRequest
+	8,  // 10: auth.Auth.Logout:input_type -> auth.LogoutRequest
+	10, // 11: auth.Auth.ValidateToken:input_type -> auth.ValidateTokenRequest
+	12, // 12: auth.Auth.HasPermission:input_type -> auth.HasPermissionRequest
+	14, // 13: auth.Auth.GetMyPermissions:input_type -> auth.GetMyPermissionsRequest
+	17, // 14: auth.Auth.ListRoles:input_type -> auth.ListRolesRequest
+	20, // 15: auth.Auth.ListPermissions:input_type -> auth.ListPermissionsRequest
+	22, // 16: auth.Auth.GetRolePermissions:input_type -> auth.GetRolePermissionsRequest
+	24, // 17: auth.Auth.UpdateRolePermissions:input_type -> auth.UpdateRolePermissionsRequest
+	26, // 18: auth.Auth.UpdateUserRole:input_type -> auth.UpdateUserRoleRequest
+	28, // 19: auth.Auth.CreateUser:input_type -> auth.CreateUserRequest
+	30, // 20: auth.Auth.IssueServiceToken:input_type -> auth.IssueServiceTokenRequest
+	33, // 21: auth.Auth.CreateServiceClient:input_type -> auth.CreateServiceClientRequest
+	35, // 22: auth.Auth.RevokeServiceClient:input_type -> auth.RevokeServiceClientRequest
+	37, // 23: auth.Auth.ListServiceClients:input_type -> auth.ListServiceClientsRequest
+	1,  // 24: auth.Auth.Ping:output_type -> auth.Response
+	3,  // 25: auth.Auth.Register:output_type -> auth.RegisterResponse
+	5,  // 26: auth.Auth.Login:output_type -> auth.LoginResponse
+	7,  // 27: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
+	9,  // 28: auth.Auth.Logout:output_type -> auth.LogoutResponse
+	11, // 29: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
+	13, // 30: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
+	15, // 31: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
+	18, // 32: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
+	21, // 33: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
+	23, // 34: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
+	25, // 35: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
+	27, // 36: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
+	29, // 37: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
+	31, // 38: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
+	34, // 39: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
+	36, // 40: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
+	38, // 41: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
+	24, // [24:42] is the sub-list for method output_type
+	6,  // [6:24] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_auth_service_proto_init() }
@@ -1916,7 +2466,7 @@ func file_auth_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_service_proto_rawDesc), len(file_auth_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   30,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

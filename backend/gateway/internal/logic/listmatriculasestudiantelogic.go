@@ -38,30 +38,7 @@ func (l *ListMatriculasEstudianteLogic) ListMatriculasEstudiante(req *types.List
 	}
 	matriculas := make([]types.MatriculaDTO, 0, len(out.Matriculas))
 	for _, m := range out.Matriculas {
-		dto := types.MatriculaDTO{
-			Id: m.GetId(),
-			Periodo: types.PeriodoAcademicoDTO{
-				Id: m.GetPeriodo().GetId(), Anio: m.GetPeriodo().GetAnio(),
-				Nombre: m.GetPeriodo().GetNombre(), Estado: m.GetPeriodo().GetEstado(),
-			},
-			EstadoMatricula: m.GetEstadoMatricula(),
-			FechaMatricula:  m.GetFechaMatricula(),
-			FechaRetiro:     m.GetFechaRetiro(),
-			Origen:          m.GetOrigen(),
-			Version:         m.GetVersion(),
-			Movimientos:     make([]types.MovimientoMatriculaDTO, 0, len(m.GetMovimientos())),
-		}
-		if s := m.GetSeccion(); s != nil {
-			dto.Seccion = &types.SeccionAcademicaDTO{
-				Id: s.GetId(), Nivel: s.GetNivel(), Grado: s.GetGrado(), Seccion: s.GetSeccion(), Turno: s.GetTurno(), Aula: s.GetAula(),
-			}
-		}
-		for _, mv := range m.GetMovimientos() {
-			dto.Movimientos = append(dto.Movimientos, types.MovimientoMatriculaDTO{
-				Tipo: mv.GetTipo(), Fecha: mv.GetFecha(), SeccionAnteriorId: mv.GetSeccionAnteriorId(), SeccionNuevaId: mv.GetSeccionNuevaId(),
-			})
-		}
-		matriculas = append(matriculas, dto)
+		matriculas = append(matriculas, toMatriculaDTO(m))
 	}
 	return &types.ListMatriculasEstudianteResponse{Matriculas: matriculas}, nil
 }

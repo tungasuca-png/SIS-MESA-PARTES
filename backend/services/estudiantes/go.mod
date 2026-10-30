@@ -6,6 +6,7 @@ require (
 	auth v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.10.0
+	github.com/xuri/excelize/v2 v2.11.0
 	github.com/zeromicro/go-zero v1.10.3
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
@@ -55,9 +56,14 @@ require (
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/redis/go-redis/v9 v9.21.0 // indirect
+	github.com/richardlehane/mscfb v1.0.7 // indirect
+	github.com/richardlehane/msoleps v1.0.6 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/tiendc/go-deepcopy v1.7.2 // indirect
 	github.com/titanous/json5 v1.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
+	github.com/xuri/efp v0.0.1 // indirect
+	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.21 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.21 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.21 // indirect
@@ -79,6 +85,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
@@ -102,6 +109,9 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
+	tabular v0.0.0
 )
 
 replace auth => ../auth
+
+replace tabular => ../../pkg/tabular

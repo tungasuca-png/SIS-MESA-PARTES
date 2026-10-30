@@ -126,6 +126,18 @@ type SearchFilter struct {
 	Turno    string
 	Page     int
 	PageSize int
+	// Etapa 6: clave de OrdenesBusqueda ("" = apellidos).
+	Orden string
+}
+
+// OrdenesBusqueda (etapa 6): órdenes permitidos del listado. El SQL sale de
+// esta tabla, nunca de lo que envía el cliente; siempre termina en id para
+// que la paginación sea determinista.
+var OrdenesBusqueda = map[string]string{
+	"":          "apellidos, nombres, id",
+	"apellidos": "apellidos, nombres, id",
+	"codigo":    "codigo, id",
+	"recientes": "created_at DESC, id",
 }
 
 // likeEscaper neutraliza los comodines de LIKE en lo que escribe el usuario:
@@ -141,16 +153,14 @@ var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 //
 // Todo va parametrizado: lo que envía el usuario nunca se concatena al SQL;
 // los nombres de columna de los filtros son constantes de este archivo. El
-// orden es fijo y determinista (apellidos, nombres, id): no hay orden elegido
-// por el cliente.
-func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) ([]*Estudiante, int, error) {
+// orden es determinista y sale de OrdenesBusqueda (etapa 6): el cliente elige
+// solo una clave de esa tabla.
+// condicionesBusqueda arma las condiciones del directorio (búsqueda por
+// palabras y filtros exactos), parametrizadas con param. La comparten Search
+// y la exportación, para que exportar devuelva exactamente lo que filtra la
+// tabla.
+func condicionesBusqueda(filter SearchFilter, param func(any) string) []string {
 	conds := make([]string, 0, len(filter.Terms)+5)
-	args := make([]any, 0, len(filter.Terms)+7)
-	param := func(v any) string {
-		args = append(args, v)
-		return fmt.Sprintf("$%d", len(args))
-	}
-
 	for _, term := range filter.Terms {
 		conds = append(conds, `texto_busqueda LIKE '%' || estudiantes_normalizar(`+param(likeEscaper.Replace(term))+`) || '%'`)
 	}
@@ -165,6 +175,16 @@ func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) 
 			conds = append(conds, f.col+" = "+param(f.val))
 		}
 	}
+	return conds
+}
+
+func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) ([]*Estudiante, int, error) {
+	args := make([]any, 0, len(filter.Terms)+7)
+	param := func(v any) string {
+		args = append(args, v)
+		return fmt.Sprintf("$%d", len(args))
+	}
+	conds := condicionesBusqueda(filter, param)
 
 	where := ""
 	if len(conds) > 0 {
@@ -176,12 +196,16 @@ func (r *EstudianteRepository) Search(ctx context.Context, filter SearchFilter) 
 		return nil, 0, err
 	}
 
+	orden, ok := OrdenesBusqueda[filter.Orden]
+	if !ok {
+		orden = OrdenesBusqueda[""]
+	}
 	limit := param(filter.PageSize)
 	offset := param((filter.Page - 1) * filter.PageSize)
 	rows, err := r.db.Query(ctx, `
 		SELECT `+estudianteColumns+`
 		FROM estudiantes `+where+`
-		ORDER BY apellidos, nombres, id
+		ORDER BY `+orden+`
 		LIMIT `+limit+` OFFSET `+offset, args...)
 	if err != nil {
 		return nil, 0, err

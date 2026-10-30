@@ -20,6 +20,9 @@ type ServiceContext struct {
 	DB                   *pgxpool.Pool
 	EstudianteRepository *repository.EstudianteRepository
 	JWTValidator         *security.JWTValidator
+	// ServiceTokenValidator: nil si los tokens de sistemas no están
+	// configurados (SERVICE_JWT_SECRET).
+	ServiceTokenValidator *security.ServiceTokenValidator
 
 	// AuthClient: wireado desde esta fase (FASE 5A) para que FASE 5B pueda
 	// agregar authorization.RequirePermission("estudiantes.view", ...) en
@@ -63,12 +66,24 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	log.Println("Conexión exitosa a PostgreSQL")
 
+	serviceValidator, err := security.NewServiceTokenValidator(c.ServiceJWTSecret, c.JWTSecret, c.ServiceTokenIssuer, c.ServiceTokenAudience)
+	if err != nil {
+		db.Close()
+		log.Fatalf("Configuración de tokens de servicio inválida: %v", err)
+	}
+	if serviceValidator == nil {
+		log.Println("Tokens de sistemas consumidores deshabilitados: SERVICE_JWT_SECRET no está configurado")
+	} else {
+		log.Println("Tokens de sistemas consumidores habilitados")
+	}
+
 	return &ServiceContext{
-		Config:               c,
-		DB:                   db,
-		EstudianteRepository: repository.NewEstudianteRepository(db),
-		JWTValidator:         security.NewJWTValidator(c.JWTSecret),
-		AuthClient:           authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc)),
+		Config:                c,
+		DB:                    db,
+		EstudianteRepository:  repository.NewEstudianteRepository(db),
+		JWTValidator:          security.NewJWTValidator(c.JWTSecret),
+		ServiceTokenValidator: serviceValidator,
+		AuthClient:            authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc)),
 	}
 }
 

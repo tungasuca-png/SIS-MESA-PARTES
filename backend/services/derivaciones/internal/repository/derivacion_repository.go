@@ -82,9 +82,12 @@ func (r *DerivacionRepository) Get(ctx context.Context, id string) (*Derivacion,
 // ListFilter filtra el listado de derivaciones. Los campos vacios no filtran.
 type ListFilter struct {
 	ExpedienteID string
-	Tipo         string
-	Page         int
-	PageSize     int
+	// ExpedienteIDs: nil = sin filtro; no-nil pero vacío = cero filas (el
+	// usuario no puede ver ningún expediente), nunca "sin filtro".
+	ExpedienteIDs []string
+	Tipo          string
+	Page          int
+	PageSize      int
 }
 
 func (r *DerivacionRepository) List(ctx context.Context, filter ListFilter) ([]*Derivacion, int, error) {
@@ -97,6 +100,13 @@ func (r *DerivacionRepository) List(ctx context.Context, filter ListFilter) ([]*
 	}
 	if filter.ExpedienteID != "" {
 		addCondition("expediente_id", filter.ExpedienteID)
+	} else if filter.ExpedienteIDs != nil {
+		if len(filter.ExpedienteIDs) == 0 {
+			conditions = append(conditions, "1 = 0")
+		} else {
+			args = append(args, filter.ExpedienteIDs)
+			conditions = append(conditions, fmt.Sprintf("expediente_id = ANY($%d::uuid[])", len(args)))
+		}
 	}
 	if filter.Tipo != "" {
 		addCondition("tipo", filter.Tipo)

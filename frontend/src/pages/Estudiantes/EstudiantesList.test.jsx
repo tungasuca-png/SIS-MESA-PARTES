@@ -19,6 +19,10 @@ vi.mock("../../services/estudiantesService", () => ({
     updateEstudiantePersonal: vi.fn(),
     getMatriculasEstudiante: vi.fn(),
     getFamiliaresEstudiante: vi.fn(),
+    getHistorialEstudiante: vi.fn(),
+    listPeriodos: vi.fn(),
+    listSecciones: vi.fn(),
+    listMatriculasPeriodo: vi.fn(),
 }));
 vi.mock("../../components/portal/RoleLayout", () => ({
     default: ({ title, children }) => (
@@ -59,7 +63,8 @@ describe("Directorio de estudiantes — listado", () => {
         renderEstudiantes("/estudiantes");
         expect(await screen.findByText("EST-001")).toBeTruthy();
         expect(screen.getByText("EST-002")).toBeTruthy();
-        expect(screen.getByText("DNI 12345678")).toBeTruthy();
+        expect(screen.getByText("DNI ••••5678")).toBeTruthy();
+        expect(screen.queryByText(/12345678/)).toBeNull();
         expect(screen.getByText("Sin documento")).toBeTruthy();
         expect(ultimaBusqueda()).toMatchObject({ q: "", page: 1, pageSize: 20, estado: "", nivel: "" });
         // El debounce inicial no dispara una segunda consulta idéntica.
@@ -153,8 +158,9 @@ describe("Directorio de estudiantes — permisos", () => {
     it("solo con estudiantes.view: ver sí; crear, editar y cambiar estado no", async () => {
         renderEstudiantes("/estudiantes");
         await screen.findByText("EST-001");
-        expect(screen.getAllByText("Ver").length).toBe(2);
-        expect(screen.queryByRole("button", { name: "Nuevo estudiante" })).toBeNull();
+        expect(screen.getAllByText("Ver ficha").length).toBe(2);
+        expect(screen.getAllByRole("link", { name: /Historial de/ }).length).toBe(2);
+        expect(screen.queryByRole("button", { name: "Registrar estudiante" })).toBeNull();
         expect(screen.queryByRole("button", { name: /Editar/ })).toBeNull();
         expect(screen.queryByRole("button", { name: /Cambiar estado/ })).toBeNull();
     });
@@ -163,7 +169,7 @@ describe("Directorio de estudiantes — permisos", () => {
         renderEstudiantes("/estudiantes", { permissions: ["estudiantes.view", "estudiantes.update"] });
         await screen.findByText("EST-001");
         expect(screen.getAllByRole("button", { name: /Editar/ }).length).toBe(2);
-        expect(screen.queryByRole("button", { name: "Nuevo estudiante" })).toBeNull();
+        expect(screen.queryByRole("button", { name: "Registrar estudiante" })).toBeNull();
         expect(screen.queryByRole("button", { name: /Cambiar estado/ })).toBeNull();
         cleanup();
 
@@ -175,7 +181,7 @@ describe("Directorio de estudiantes — permisos", () => {
 
         renderEstudiantes("/estudiantes", { permissions: ["estudiantes.view", "estudiantes.create"] });
         await screen.findByText("EST-001");
-        expect(screen.getByRole("button", { name: "Nuevo estudiante" })).toBeTruthy();
+        expect(screen.getByRole("button", { name: "Registrar estudiante" })).toBeTruthy();
     });
 });
 
@@ -183,7 +189,7 @@ describe("Crear estudiante", () => {
     const abrir = async () => {
         renderEstudiantes("/estudiantes", { permissions: TODOS_LOS_PERMISOS });
         await screen.findByText("EST-001");
-        fireEvent.click(screen.getByRole("button", { name: "Nuevo estudiante" }));
+        fireEvent.click(screen.getByRole("button", { name: "Registrar estudiante" }));
         return screen.getByRole("dialog", { name: "Nuevo estudiante" });
     };
 
@@ -264,7 +270,7 @@ describe("Crear estudiante con datos personales (FASE E-08)", () => {
     const abrirCon = async (permissions) => {
         renderEstudiantes("/estudiantes", { permissions });
         await screen.findByText("EST-001");
-        fireEvent.click(screen.getByRole("button", { name: "Nuevo estudiante" }));
+        fireEvent.click(screen.getByRole("button", { name: "Registrar estudiante" }));
         const dialog = screen.getByRole("dialog", { name: "Nuevo estudiante" });
         fireEvent.change(within(dialog).getByLabelText("Código *"), { target: { value: "NEW-P" } });
         fireEvent.change(within(dialog).getByLabelText("Nombres *"), { target: { value: "Ana" } });
@@ -336,5 +342,72 @@ describe("Cambiar estado desde el listado", () => {
         const fila = screen.getByText("EST-001").closest("tr");
         expect(within(fila).getByText("Inactivo")).toBeTruthy();
         expect(within(fila).getByRole("button", { name: "Cambiar estado EST-001" }).textContent).toBe("Activar");
+    });
+});
+
+describe("Directorio — orden, búsqueda global y vista por periodo", () => {
+    it("el orden se envía al backend (lista blanca) y no cuenta como criterio de búsqueda", async () => {
+        service.searchEstudiantes.mockResolvedValue(pagina([]));
+        renderEstudiantes("/estudiantes");
+        expect(await screen.findByText("Todavía no hay estudiantes registrados.")).toBeTruthy();
+        const orden = screen.getByLabelText("Ordenar por");
+        expect([...orden.options].map((o) => o.value)).toEqual(["", "codigo", "recientes"]);
+        fireEvent.change(orden, { target: { value: "recientes" } });
+        await waitFor(() => expect(ultimaBusqueda()).toMatchObject({ orden: "recientes", page: 1 }));
+        expect(await screen.findByText("Todavía no hay estudiantes registrados.")).toBeTruthy();
+    });
+
+    it("toma la búsqueda de la URL (buscador de la barra superior)", async () => {
+        renderEstudiantes("/estudiantes?q=12345678");
+        await screen.findByText("EST-001");
+        expect(ultimaBusqueda()).toMatchObject({ q: "12345678", page: 1 });
+        expect(screen.getByLabelText("Buscar estudiantes").value).toBe("12345678");
+    });
+
+    it("la vista por periodo consulta la nómina real con periodo, sección y estado", async () => {
+        service.listPeriodos.mockResolvedValue({
+            periodos: [
+                { id: "p-2025", anio: 2025, nombre: "Año escolar 2025", estado: "CERRADO" },
+                { id: "p-2026", anio: 2026, nombre: "Año escolar 2026", estado: "EN_CURSO" },
+            ],
+        });
+        service.listSecciones.mockResolvedValue({
+            secciones: [{ id: "s-1", periodo_id: "p-2026", nivel: "PRIMARIA", grado: "3", seccion: "A", turno: "MAÑANA", matriculados: 1 }],
+        });
+        service.listMatriculasPeriodo.mockResolvedValue({
+            total: 1,
+            matriculas: [
+                {
+                    matricula: { id: "m-1", estudiante_id: ana.id, estado_matricula: "MATRICULADO", seccion: { nivel: "PRIMARIA", grado: "3", seccion: "A" } },
+                    estudiante: ana,
+                },
+            ],
+        });
+        renderEstudiantes("/estudiantes");
+        await screen.findByText("EST-001");
+        fireEvent.click(screen.getByRole("tab", { name: "Por periodo y sección" }));
+
+        // Por defecto el periodo EN_CURSO.
+        await waitFor(() => expect(service.listMatriculasPeriodo).toHaveBeenCalledWith("p-2026", expect.objectContaining({ page: 1 })));
+        const tabla = await screen.findByRole("table");
+        expect(within(tabla).getByText("Matriculado")).toBeTruthy();
+        expect(screen.getByText("DNI ••••5678")).toBeTruthy();
+        expect(screen.getByRole("link", { name: /Ver ficha/ }).getAttribute("href")).toBe(`/estudiantes/${ana.id}?tab=academico`);
+
+        await waitFor(() => expect(screen.getByLabelText("Sección").options.length).toBe(2));
+        fireEvent.change(screen.getByLabelText("Sección"), { target: { value: "s-1" } });
+        fireEvent.change(screen.getByLabelText("Estado de matrícula"), { target: { value: "RETIRADO" } });
+        await waitFor(() =>
+            expect(service.listMatriculasPeriodo).toHaveBeenLastCalledWith("p-2026", expect.objectContaining({ seccionId: "s-1", estadoMatricula: "RETIRADO", page: 1 }))
+        );
+    });
+
+    it("la vista por periodo sin periodos registrados lo indica", async () => {
+        service.listPeriodos.mockResolvedValue({ periodos: [] });
+        renderEstudiantes("/estudiantes");
+        await screen.findByText("EST-001");
+        fireEvent.click(screen.getByRole("tab", { name: "Por periodo y sección" }));
+        expect(await screen.findByText(/Todavía no hay periodos académicos/)).toBeTruthy();
+        expect(service.listMatriculasPeriodo).not.toHaveBeenCalled();
     });
 });

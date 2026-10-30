@@ -1,57 +1,101 @@
+/* ============================================
+   COMPONENTES COMPARTIDOS: modales, formularios, botones y alertas.
+   Mismos nombres de clase que usa todo el frontend (dp-*).
+   ============================================ */
+
+/* ---------- Modal ---------- */
 .dp-modal-overlay {
     position: fixed;
     inset: 0;
     z-index: 50;
-    background: rgba(15, 41, 66, 0.45);
+    background: rgba(6, 27, 73, 0.5);
+    backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
     border: none;
+    animation: dp-fade 0.15s ease;
 }
 
 .dp-modal {
     width: 100%;
-    max-width: 460px;
+    max-width: 480px;
     background: var(--dp-card-bg);
-    border-radius: 14px;
-    box-shadow: 0 24px 60px rgba(27, 37, 89, 0.25);
-    padding: 22px;
+    border-radius: var(--dp-radius-lg);
+    border-top: 3px solid var(--dp-primary);
+    box-shadow: var(--dp-shadow-lg);
+    padding: 22px 24px 20px;
     max-height: 90vh;
     overflow-y: auto;
+    animation: dp-subir 0.18s ease;
 }
 
 .dp-modal-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--dp-border);
 }
 
 .dp-modal-header h2 {
     margin: 0;
     font-size: 17px;
     font-weight: 700;
+    line-height: 1.3;
     color: var(--dp-text-primary);
 }
 
 .dp-modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
     border: none;
     background: transparent;
     color: var(--dp-text-secondary);
     cursor: pointer;
-    padding: 4px;
-    border-radius: 8px;
+    border-radius: var(--dp-radius);
+    transition: background var(--dp-transition), color var(--dp-transition);
 }
 
 .dp-modal-close:hover {
     background: var(--dp-bg);
+    color: var(--dp-text-primary);
 }
 
+.dp-modal-close:focus-visible {
+    outline: none;
+    box-shadow: var(--dp-focus);
+}
+
+@keyframes dp-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes dp-subir {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dp-modal-overlay,
+    .dp-modal {
+        animation: none;
+    }
+}
+
+/* ---------- Formularios ---------- */
 .dp-form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .dp-form-group {
@@ -61,7 +105,7 @@
 }
 
 .dp-form-group label {
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--dp-text-primary);
 }
@@ -69,90 +113,255 @@
 .dp-form-group input,
 .dp-form-group select,
 .dp-form-group textarea {
-    border: 1px solid var(--dp-border);
-    border-radius: 9px;
-    padding: 10px 12px;
-    font-size: 13.5px;
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid var(--dp-border-strong);
+    border-radius: var(--dp-radius);
+    padding: 9px 12px;
+    font-size: 14px;
     font-family: inherit;
     color: var(--dp-text-primary);
-    background: var(--dp-bg);
+    background: var(--dp-card-bg);
     outline: none;
     resize: vertical;
+    box-shadow: var(--dp-shadow);
+    transition: border-color var(--dp-transition), box-shadow var(--dp-transition);
+}
+
+.dp-form-group textarea {
+    min-height: 88px;
+    line-height: 1.5;
+}
+
+.dp-form-group input::placeholder,
+.dp-form-group textarea::placeholder {
+    color: var(--dp-text-muted);
+}
+
+.dp-form-group input:hover,
+.dp-form-group select:hover,
+.dp-form-group textarea:hover {
+    border-color: #98A2B3;
 }
 
 .dp-form-group input:focus,
 .dp-form-group select:focus,
 .dp-form-group textarea:focus {
-    border-color: var(--dp-primary);
-    background: var(--dp-card-bg);
+    border-color: var(--dp-interactive);
+    box-shadow: var(--dp-focus);
+}
+
+.dp-form-group input[aria-invalid="true"],
+.dp-form-group select[aria-invalid="true"],
+.dp-form-group textarea[aria-invalid="true"] {
+    border-color: var(--dp-danger);
 }
 
 .dp-form-group input:disabled,
 .dp-form-group select:disabled,
 .dp-form-group textarea:disabled {
-    opacity: 0.6;
+    background: var(--dp-surface-2);
+    color: var(--dp-text-muted);
     cursor: not-allowed;
-}
-
-.dp-form-error {
-    margin: 0;
-    padding: 10px 12px;
-    background: #fff5f5;
-    border: 1px solid #ffd8d8;
-    border-radius: 9px;
-    color: #c62828;
-    font-size: 12.5px;
+    box-shadow: none;
 }
 
 .dp-form-hint {
-    margin: 4px 0 0;
-    font-size: 11.5px;
-    color: var(--dp-text-secondary, #68769f);
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--dp-text-secondary);
 }
 
 .dp-form-actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 10px;
-    margin-top: 4px;
+    margin-top: 6px;
+    padding-top: 16px;
+    border-top: 1px solid var(--dp-border);
 }
 
-.dp-btn-primary,
-.dp-btn-secondary {
-    border-radius: 9px;
-    padding: 9px 18px;
+/* ---------- Alertas (error, aviso, éxito, información) ---------- */
+.dp-form-error,
+.dp-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--dp-danger-border);
+    border-left: 3px solid var(--dp-danger);
+    border-radius: var(--dp-radius);
+    background: var(--dp-danger-soft);
+    color: #912018;
     font-size: 13px;
+    line-height: 1.45;
+}
+
+.dp-alert--warning {
+    border-color: var(--dp-warning-border);
+    border-left-color: #DC6803;
+    background: var(--dp-warning-bg);
+    color: var(--dp-warning-text);
+}
+
+.dp-alert--success {
+    border-color: var(--dp-success-border);
+    border-left-color: #17B26A;
+    background: var(--dp-success-bg);
+    color: var(--dp-success-text);
+}
+
+.dp-alert--info {
+    border-color: var(--dp-info-border);
+    border-left-color: var(--dp-interactive);
+    background: var(--dp-info-bg);
+    color: var(--dp-info-text);
+}
+
+/* ---------- Botones ---------- */
+.dp-btn-primary,
+.dp-btn-secondary,
+.dp-btn-ghost,
+.dp-btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--dp-radius);
+    font-size: 13.5px;
     font-weight: 600;
     font-family: inherit;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-decoration: none;
     cursor: pointer;
-    border: 1px solid transparent;
+    transition: background var(--dp-transition), border-color var(--dp-transition),
+        color var(--dp-transition), box-shadow var(--dp-transition);
 }
 
+.dp-btn-primary:focus-visible,
+.dp-btn-secondary:focus-visible,
+.dp-btn-ghost:focus-visible,
+.dp-btn-danger:focus-visible,
+.dp-btn-icon:focus-visible {
+    outline: none;
+    box-shadow: var(--dp-focus);
+}
+
+/* Primario: acción principal de la pantalla. */
 .dp-btn-primary {
     background: var(--dp-primary);
     color: #ffffff;
+    box-shadow: 0 1px 2px rgba(11, 61, 145, 0.25);
 }
 
-.dp-btn-primary:hover {
-    background: #1550c4;
+.dp-btn-primary:hover:not(:disabled) {
+    background: var(--dp-primary-hover);
 }
 
-.dp-btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.dp-btn-primary:active:not(:disabled) {
+    background: var(--dp-navy);
 }
 
+/* Secundario: acciones complementarias. */
 .dp-btn-secondary {
+    background: var(--dp-card-bg);
+    border-color: var(--dp-border-strong);
+    color: var(--dp-text-primary);
+    box-shadow: var(--dp-shadow);
+}
+
+.dp-btn-secondary:hover:not(:disabled) {
+    background: var(--dp-surface-2);
+    border-color: #98A2B3;
+}
+
+/* Ghost: acciones discretas. */
+.dp-btn-ghost {
     background: transparent;
-    border-color: var(--dp-border);
+    color: var(--dp-primary);
+}
+
+.dp-btn-ghost:hover:not(:disabled) {
+    background: var(--dp-primary-soft);
+}
+
+/* Peligro: acciones destructivas. */
+.dp-btn-danger {
+    background: var(--dp-danger);
+    color: #ffffff;
+}
+
+.dp-btn-danger:hover:not(:disabled) {
+    background: var(--dp-danger-hover);
+}
+
+/* Icono: acción compacta (siempre con aria-label). */
+.dp-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid transparent;
+    border-radius: var(--dp-radius);
+    background: transparent;
     color: var(--dp-text-secondary);
+    cursor: pointer;
+    transition: background var(--dp-transition), color var(--dp-transition);
 }
 
-.dp-btn-secondary:hover {
+.dp-btn-icon:hover:not(:disabled) {
     background: var(--dp-bg);
+    color: var(--dp-primary);
 }
 
-.dp-btn-secondary:disabled {
-    opacity: 0.6;
+.dp-btn-primary:disabled,
+.dp-btn-secondary:disabled,
+.dp-btn-ghost:disabled,
+.dp-btn-danger:disabled,
+.dp-btn-icon:disabled {
+    opacity: 0.55;
     cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Estado de carga: aria-busy="true" muestra un indicador giratorio. */
+.dp-btn-primary[aria-busy="true"]::before,
+.dp-btn-secondary[aria-busy="true"]::before,
+.dp-btn-danger[aria-busy="true"]::before {
+    content: "";
+    width: 13px;
+    height: 13px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: dp-girar 0.7s linear infinite;
+}
+
+@keyframes dp-girar {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 520px) {
+    .dp-modal {
+        padding: 18px 16px 16px;
+        max-height: 94vh;
+    }
+
+    .dp-modal-overlay {
+        padding: 10px;
+        align-items: flex-end;
+    }
+
+    .dp-form-actions > .dp-btn-primary,
+    .dp-form-actions > .dp-btn-secondary,
+    .dp-form-actions > .dp-btn-danger {
+        flex: 1 1 auto;
+    }
 }

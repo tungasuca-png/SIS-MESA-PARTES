@@ -35,7 +35,7 @@ func NewListDocumentosLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Li
 }
 
 func (l *ListDocumentosLogic) ListDocumentos(in *documentos.ListDocumentosRequest) (*documentos.ListDocumentosResponse, error) {
-	userID, _, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -84,7 +84,7 @@ func (l *ListDocumentosLogic) ListDocumentos(in *documentos.ListDocumentosReques
 	// el archivo, no el dueño del expediente (ver Paso 19, problema del
 	// PROVEIDO subido por Dirección). El ownership se resuelve siempre
 	// contra Expedientes Service, reenviando el mismo JWT.
-	if !hasViewAll {
+	if authorization.DebeVerificarExpediente(hasViewAll, role) {
 		outCtx := l.outgoingContextWithToken()
 		if filter.ExpedienteID != "" {
 			// Un expediente puntual: basta confirmar que ESE expediente es
@@ -101,11 +101,11 @@ func (l *ListDocumentosLogic) ListDocumentos(in *documentos.ListDocumentosReques
 			}
 		} else {
 			// Sin expediente puntual: se necesita el conjunto de
-			// expedientes propios del usuario. Expedientes.ListExpedientes,
-			// llamado con el MISMO JWT, ya se acota por sí solo a
-			// SolicitanteID == usuario autenticado para un rol no interno
-			// (ver ListExpedientesLogic) — no hace falta ningún RPC nuevo
-			// ni ningún JOIN entre bases de datos distintas.
+			// expedientes que el usuario puede ver. Expedientes.ListExpedientes,
+			// llamado con el MISMO JWT, ya se acota por sí solo (propios
+			// para un SOLICITANTE, los de su área para DIRECTOR/SUBDIRECTOR/
+			// DOCENTE/AUXILIAR) — no hace falta ningún RPC nuevo ni ningún
+			// JOIN entre bases de datos distintas.
 			expedienteIDs, err := l.solicitanteExpedienteIDs(outCtx)
 			if err != nil {
 				return nil, err
