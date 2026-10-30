@@ -125,6 +125,34 @@ func TestEtapa6(t *testing.T) {
 		}
 	})
 
+	// Matriz de permisos acordada: cada operación sensible depende de su
+	// permiso propio, no de "ver" ni de "editar" en general.
+	t.Run("Permisos_EspecificosPorOperacion", func(t *testing.T) {
+		const editor = "00000000-0000-4000-8000-0000000000d4" // view + update (sin change_estado)
+		h.grant(editor, "estudiantes.view")
+		h.grant(editor, "estudiantes.update")
+		e := crear(t, "Permisos", "Especificos")
+
+		// Editar no basta para activar o inactivar: exige estudiantes.change_estado.
+		_, err := h.client.ChangeEstadoEstudiante(h.as(editor), &estudiantes.ChangeEstadoEstudianteRequest{Id: e.Id, ExpectedVersion: e.Version, Estado: "INACTIVO"})
+		wantErr(t, err, codes.PermissionDenied, "permission_denied", "cambiar estado sin change_estado")
+		if _, err := h.client.UpdateEstudiante(h.as(editor), &estudiantes.UpdateEstudianteRequest{Id: e.Id, ExpectedVersion: e.Version, Nombres: strPtr("Permisos Editado")}); err != nil {
+			t.Fatalf("con estudiantes.update sí edita: %v", err)
+		}
+
+		// El directorio (estudiantes.view) no da datos personales, familia ni historial.
+		_, err = h.client.GetEstudiantePersonal(h.as(lector), &estudiantes.GetEstudiantePersonalRequest{Id: e.Id})
+		wantErr(t, err, codes.PermissionDenied, "permission_denied", "datos personales con solo estudiantes.view")
+		_, err = h.client.ListFamiliaresEstudiante(h.as(lector), &estudiantes.ListFamiliaresEstudianteRequest{EstudianteId: e.Id})
+		wantErr(t, err, codes.PermissionDenied, "permission_denied", "familia con solo estudiantes.view")
+		_, err = h.client.ListHistorialEstudiante(h.as(lector), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id})
+		wantErr(t, err, codes.PermissionDenied, "permission_denied", "historial con solo estudiantes.view")
+		// Quien mantiene el registro (estudiantes.update) sí ve el historial.
+		if _, err := h.client.ListHistorialEstudiante(h.as(editor), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id}); err != nil {
+			t.Fatalf("historial con estudiantes.update: %v", err)
+		}
+	})
+
 	t.Run("Historial_SoloCambios_SinValores", func(t *testing.T) {
 		e := crear(t, "Historia", "Cambios")
 		up, err := h.client.UpdateEstudiante(h.as(admin), &estudiantes.UpdateEstudianteRequest{Id: e.Id, ExpectedVersion: e.Version, Nombres: strPtr("Historia Editada")})
@@ -139,7 +167,10 @@ func TestEtapa6(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		resp, err := h.client.ListHistorialEstudiante(h.as(lector), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id})
+		// Revela quién editó qué: solo con estudiantes.update, no basta el directorio.
+		_, err = h.client.ListHistorialEstudiante(h.as(lector), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id})
+		wantErr(t, err, codes.PermissionDenied, "permission_denied", "historial con solo estudiantes.view")
+		resp, err := h.client.ListHistorialEstudiante(h.as(admin), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id})
 		if err != nil || resp.Total != 3 || len(resp.Eventos) != 3 {
 			t.Fatalf("historial: %+v err=%v", resp, err)
 		}
@@ -157,14 +188,14 @@ func TestEtapa6(t *testing.T) {
 				t.Fatalf("el historial no debe tener valores ni lecturas: %+v", ev)
 			}
 		}
-		pag, err := h.client.ListHistorialEstudiante(h.as(lector), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id, Page: 2, PageSize: 2})
+		pag, err := h.client.ListHistorialEstudiante(h.as(admin), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id, Page: 2, PageSize: 2})
 		if err != nil || pag.Total != 3 || len(pag.Eventos) != 1 || pag.Eventos[0].Accion != "CREATE" {
 			t.Fatalf("paginación del historial: %+v err=%v", pag, err)
 		}
-		_, err = h.client.ListHistorialEstudiante(h.as(lector), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: "00000000-0000-4000-8000-00000000dead"})
+		_, err = h.client.ListHistorialEstudiante(h.as(admin), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: "00000000-0000-4000-8000-00000000dead"})
 		wantErr(t, err, codes.NotFound, "student_not_found", "historial de inexistente")
 		_, err = h.client.ListHistorialEstudiante(h.as(familiaU), &estudiantes.ListHistorialEstudianteRequest{EstudianteId: e.Id})
-		wantErr(t, err, codes.PermissionDenied, "permission_denied", "historial sin estudiantes.view")
+		wantErr(t, err, codes.PermissionDenied, "permission_denied", "historial sin estudiantes.update")
 	})
 }
 

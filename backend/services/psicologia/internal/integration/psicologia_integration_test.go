@@ -53,7 +53,9 @@ func TestPsicologiaService(t *testing.T) {
 	docente := fixedUUID(base, 17)                // rol DOCENTE con view: el permiso manda, no el rol
 	docenteResponsable := fixedUUID(base, 20)     // existe en Usuarios, tipo_usuario=DOCENTE: NO puede ser responsable
 	solicitanteResponsable := fixedUUID(base, 21) // existe en Usuarios, tipo_usuario=SOLICITANTE: NO puede ser responsable
-	h.grant(creador, pCreate, pViewOwn, pUpdate)
+	// creador hace de psicólogo: con acceso clínico (atenciones.view) para
+	// registrar y leer el resumen del caso.
+	h.grant(creador, pCreate, pViewOwn, pUpdate, pAtView)
 	h.grant(general, pView)
 	h.grant(admin)
 	h.grant(propio, pViewOwn)
@@ -351,8 +353,12 @@ func TestPsicologiaService(t *testing.T) {
 		}
 		c := h.as(propio, "X")
 		got, err := h.client.GetExpediente(c, &psicologia.GetExpedienteRequest{Id: propioExp.Id})
-		if err != nil || got.Expediente.ResumenCaso != "TEXTO-CLINICO-SECRETO" {
+		if err != nil || got.Expediente.Id != propioExp.Id {
 			t.Fatalf("view_own sobre su expediente: %v", err)
+		}
+		// Sin psicologia.atenciones.view, el alcance no entrega el contenido clínico.
+		if got.Expediente.ResumenCaso != "" {
+			t.Fatal("view_own sin acceso clínico no debe recibir el resumen del caso")
 		}
 		if _, err := h.client.GetExpedienteByEstudiante(c, &psicologia.GetExpedienteByEstudianteRequest{EstudianteId: est(40)}); err != nil {
 			t.Fatalf("view_own por estudiante (propio): %v", err)
@@ -428,6 +434,71 @@ func TestPsicologiaService(t *testing.T) {
 		}
 	})
 
+	// ---- Contenido clínico: exige psicologia.atenciones.view ----
+	// El alcance del expediente (view/view_own) da sus datos administrativos;
+	// el resumen del caso y el motivo de cierre exigen además el permiso que
+	// protege las atenciones, para leerlos y para escribirlos.
+	t.Run("ContenidoClinico_ExigeAtencionesView", func(t *testing.T) {
+		psicologoGlobal := fixedUUID(base, 30) // view + atenciones.view (perfil acordado para PSICOLOGO)
+		gestorSinClinico := fixedUUID(base, 31) // view + create + update, sin atenciones.view
+		h.grant(psicologoGlobal, pView, pAtView)
+		h.grant(gestorSinClinico, pView, pCreate, pUpdate)
+
+		exp := open(t, est(85)) // responsable: creador, con resumen
+
+		// Alcance global + acceso clínico: ve el resumen de un expediente ajeno.
+		got, err := h.client.GetExpediente(h.as(psicologoGlobal, "PSICOLOGO"), &psicologia.GetExpedienteRequest{Id: exp.Id})
+		if err != nil || got.Expediente.ResumenCaso != "TEXTO-CLINICO-SECRETO" {
+			t.Fatalf("view + atenciones.view debe ver el resumen: %+v err=%v", got, err)
+		}
+		// Solo alcance: ve el expediente, no el resumen (por id y por estudiante).
+		g1, err := h.client.GetExpediente(h.as(general, "X"), &psicologia.GetExpedienteRequest{Id: exp.Id})
+		if err != nil || g1.Expediente.Id != exp.Id || g1.Expediente.ResumenCaso != "" {
+			t.Fatalf("view sin atenciones.view: %+v err=%v", g1, err)
+		}
+		g2, err := h.client.GetExpedienteByEstudiante(h.as(general, "X"), &psicologia.GetExpedienteByEstudianteRequest{EstudianteId: est(85)})
+		if err != nil || g2.Expediente.ResumenCaso != "" {
+			t.Fatalf("por estudiante sin atenciones.view: %+v err=%v", g2, err)
+		}
+
+		// Escribir el resumen sin poder leerlo: 403 y DENIED; nada cambia.
+		c := h.as(gestorSinClinico, "X")
+		antes := h.countAudit(gestorSinClinico, "DENIED", "")
+		_, err = h.client.UpdateExpediente(c, &psicologia.UpdateExpedienteRequest{Id: exp.Id, ResumenCaso: strPtr("sobrescrito")})
+		wantCode(t, err, codes.PermissionDenied, "escribir resumen sin atenciones.view")
+		if h.countAudit(gestorSinClinico, "DENIED", "") != antes+1 {
+			t.Fatal("se esperaba un evento DENIED")
+		}
+		// Cambiar el estado sí puede; la respuesta no trae contenido clínico.
+		upd, err := h.client.UpdateExpediente(c, &psicologia.UpdateExpedienteRequest{Id: exp.Id, Estado: strPtr("EN_SEGUIMIENTO")})
+		if err != nil || upd.Expediente.Estado != "EN_SEGUIMIENTO" || upd.Expediente.ResumenCaso != "" {
+			t.Fatalf("update de estado sin acceso clínico: %+v err=%v", upd, err)
+		}
+		// El cierre no devuelve el motivo ni el resumen a quien no tiene acceso clínico.
+		cl, err := h.client.CloseExpediente(c, &psicologia.CloseExpedienteRequest{Id: exp.Id, Motivo: "MOTIVO-CLINICO"})
+		if err != nil || cl.Expediente.Estado != "CERRADO" || cl.Expediente.MotivoCierre != "" || cl.Expediente.ResumenCaso != "" {
+			t.Fatalf("cierre sin acceso clínico: %+v err=%v", cl, err)
+		}
+		re, err := h.client.ReopenExpediente(c, &psicologia.ReopenExpedienteRequest{Id: exp.Id})
+		if err != nil || re.Expediente.ResumenCaso != "" || re.Expediente.MotivoCierre != "" {
+			t.Fatalf("reapertura sin acceso clínico: %+v err=%v", re, err)
+		}
+		// El resumen original sigue intacto (lo comprueba quien sí tiene acceso).
+		ok, _ := h.client.GetExpediente(h.as(psicologoGlobal, "PSICOLOGO"), &psicologia.GetExpedienteRequest{Id: exp.Id})
+		if ok.Expediente.ResumenCaso != "TEXTO-CLINICO-SECRETO" {
+			t.Fatal("un intento denegado no debe cambiar el resumen")
+		}
+
+		// Abrir con resumen inicial exige acceso clínico; sin resumen, no.
+		_, err = h.client.OpenExpediente(c, &psicologia.OpenExpedienteRequest{EstudianteId: est(86), ResumenCaso: "texto"})
+		wantCode(t, err, codes.PermissionDenied, "abrir con resumen sin atenciones.view")
+		sinResumen, err := h.client.OpenExpediente(c, &psicologia.OpenExpedienteRequest{EstudianteId: est(86)})
+		if err != nil {
+			t.Fatalf("abrir sin resumen: %v", err)
+		}
+		h.track(sinResumen.Expediente)
+	})
+
 	// ---- Update / Close / Reopen ----
 	t.Run("Update_ExigeUpdateYAlcance", func(t *testing.T) {
 		exp := open(t, est(70)) // responsable: creador
@@ -440,7 +511,7 @@ func TestPsicologiaService(t *testing.T) {
 		_, err = h.client.UpdateExpediente(h.as(sinAlcance, "X"), upd)
 		wantCode(t, err, codes.PermissionDenied, "update sin alcance")
 		// view_own + update pero expediente de OTRO responsable -> NotFound (oculto) + DENIED
-		_, err = h.client.UpdateExpediente(h.as(otroProf, "X"), upd)
+		_, err = h.client.UpdateExpediente(h.as(otroProf, "X"), &psicologia.UpdateExpedienteRequest{Id: exp.Id, Estado: strPtr("EN_SEGUIMIENTO")})
 		wantCode(t, err, codes.NotFound, "view_own+update sobre ajeno")
 		if h.countAudit(otroProf, "DENIED", exp.Id) < 1 {
 			t.Fatal("se esperaba DENIED por fuera de alcance")
@@ -453,8 +524,8 @@ func TestPsicologiaService(t *testing.T) {
 		if h.countAudit(creador, "UPDATE", exp.Id) != 1 {
 			t.Fatal("se esperaba 1 evento UPDATE")
 		}
-		// el sinAlcance/otroProf no modificaron nada
-		got, _ := h.client.GetExpediente(h.as(general, "X"), &psicologia.GetExpedienteRequest{Id: exp.Id})
+		// el sinAlcance/otroProf no modificaron nada (se lee con acceso clínico)
+		got, _ := h.client.GetExpediente(h.as(creador, "X"), &psicologia.GetExpedienteRequest{Id: exp.Id})
 		if got.Expediente.ResumenCaso != "nuevo resumen" {
 			t.Fatal("el resumen no debía cambiar por intentos denegados")
 		}

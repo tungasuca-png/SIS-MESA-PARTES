@@ -46,6 +46,32 @@ var permisosValidadosEnBackend = []string{
 // esta lista y la prueba lo vigila.
 var rolesClinicosPermitidos = map[string]bool{"PSICOLOGO": true, "ADMIN": true}
 
+// Matriz funcional aprobada (docs/auditorias/matriz-permisos-funcional.md):
+// lo que cada rol NO debe tener aunque se configure desde "Roles y
+// permisos". Las asignaciones positivas se hacen en la interfaz; esta lista
+// vigila que nadie asigne algo contrario a lo acordado.
+var (
+	escrituraEstudiantes = []string{"estudiantes.create", "estudiantes.update", "estudiantes.change_estado",
+		"estudiantes.personal.update", "estudiantes.familia.update", "estudiantes.matricula.update"}
+	datosSensibles = []string{"estudiantes.personal.view", "estudiantes.personal.update",
+		"estudiantes.familia.view", "estudiantes.familia.update"}
+	prohibidosPorRol = map[string][]string{
+		// Psicólogo: identidad básica (estudiantes.view) sí; datos personales,
+		// familiares y escritura del maestro, no.
+		"PSICOLOGO":   append(append([]string{}, escrituraEstudiantes...), datosSensibles...),
+		"AUXILIAR":    append(append([]string{}, escrituraEstudiantes...), datosSensibles...),
+		"DIRECTOR":    escrituraEstudiantes,
+		"SUBDIRECTOR": escrituraEstudiantes,
+		// DOCENTE: la consulta está pendiente de decisión; escritura y datos sensibles, no.
+		"DOCENTE": append(append([]string{}, escrituraEstudiantes...), datosSensibles...),
+	}
+	// ADMIN conserva sus permisos clínicos (decisión aprobada).
+	clinicosDeAdmin = []string{
+		"psicologia.expedientes.view", "psicologia.expedientes.create", "psicologia.expedientes.update",
+		"psicologia.atenciones.view", "psicologia.atenciones.create", "psicologia.atenciones.correct", "psicologia.atenciones.annul",
+	}
+)
+
 // TestPermisosEstudiantesPsicologiaPorRol valida contra la BD VIVA y por el
 // RPC real (JWT -> interceptores de producción -> HasPermission ->
 // PostgreSQL), con un usuario temporal por rol:
@@ -215,6 +241,28 @@ func TestPermisosEstudiantesPsicologiaPorRol(t *testing.T) {
 				}
 			}
 			t.Logf("%-12s %d permisos de estudiantes/psicología: %s", rol, len(concedidos), strings.Join(concedidos, ", "))
+
+			tiene := map[string]bool{}
+			for _, c := range concedidos {
+				tiene[c] = true
+			}
+			// Matriz acordada: permisos que el rol no debe tener.
+			for _, c := range prohibidosPorRol[rol] {
+				if tiene[c] {
+					t.Errorf("%s no debe tener %s según la matriz aprobada", rol, c)
+				}
+			}
+			// La matrícula queda pendiente de validación del colegio: ningún rol.
+			if tiene["estudiantes.matricula.update"] {
+				t.Errorf("estudiantes.matricula.update no debe estar asignado (pendiente de validación): %s lo tiene", rol)
+			}
+			if rol == "ADMIN" {
+				for _, c := range clinicosDeAdmin {
+					if !tiene[c] {
+						t.Errorf("ADMIN debe conservar su permiso clínico %s", c)
+					}
+				}
+			}
 		}
 	})
 }
