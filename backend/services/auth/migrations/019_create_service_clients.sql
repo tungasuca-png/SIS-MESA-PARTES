@@ -1,5 +1,10 @@
 BEGIN;
 
+-- APLICAR con auth_migrator actuando como dueño (las tablas quedan con
+-- propietario auth_owner, igual que el resto de auth_db):
+--   (echo "SET ROLE auth_owner;"; cat 019_create_service_clients.sql) | \
+--     psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1
+--
 -- Sistemas consumidores (client credentials): identidades de SISTEMA, no de
 -- usuario. Nunca tienen rol ni contraseña: obtienen un JWT de servicio de
 -- corta duración con client_id + client_secret.
@@ -57,9 +62,22 @@ INSERT INTO permissions (codigo, nombre, descripcion, modulo, estado) VALUES
     ('integraciones.manage', 'Administrar sistemas consumidores', 'Registrar, listar y revocar sistemas que consumen la API de Estudiantes', 'integraciones', TRUE)
 ON CONFLICT (codigo) DO NOTHING;
 
+-- Privilegios mínimos del rol de aplicación (mismo criterio que
+-- backend/db/roles/02_propiedad_y_permisos.sql): sin DELETE; la relación de
+-- permisos de un sistema no se modifica después de crearlo.
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'auth_app') THEN
+        GRANT SELECT, INSERT, UPDATE ON service_clients TO auth_app;
+        GRANT SELECT, INSERT ON service_client_permissions TO auth_app;
+    END IF;
+END
+$$;
+
 COMMIT;
 
 -- Down migration:
+-- REVOKE ALL ON service_client_permissions, service_clients FROM auth_app;
 -- DROP TABLE service_client_permissions, service_clients;
 -- DELETE FROM role_permissions WHERE permission_id IN (SELECT id FROM permissions WHERE codigo IN ('estudiantes.basic.view', 'integraciones.manage'));
 -- DELETE FROM permissions WHERE codigo IN ('estudiantes.basic.view', 'integraciones.manage');
