@@ -33,6 +33,11 @@ func (m *JWTManager) ValidateAccessToken(rawToken string) (*JWTClaims, error) {
 	if err != nil || !token.Valid || claims.Subject == "" {
 		return nil, ErrInvalidAccessToken
 	}
+	// Los access tokens de usuario no llevan token_type; un token que lo
+	// lleve (p. ej. uno de servicio) nunca autentica a un usuario.
+	if claims.TokenType != "" {
+		return nil, ErrInvalidAccessToken
+	}
 
 	return claims, nil
 }

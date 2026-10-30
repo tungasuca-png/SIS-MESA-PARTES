@@ -19,6 +19,14 @@ JWTSecret: ${JWT_SECRET}
 AccessTokenDuration: 15m
 RefreshTokenDuration: 168h
 
+# Sistemas consumidores (client credentials): clave PROPIA, distinta de
+# JWT_SECRET, compartida solo con Estudiantes. Sin ella, la emisión de tokens
+# de servicio queda deshabilitada (el login de usuarios no cambia).
+ServiceJWTSecret: ${SERVICE_JWT_SECRET}
+ServiceTokenIssuer: tungasuca-auth
+ServiceTokenAudience: estudiantes
+ServiceTokenDuration: 5m
+
 Middlewares:
   StatConf:
     IgnoreContentMethods:
@@ -28,3 +36,8 @@ Middlewares:
       - /auth.Auth/CreateUser
       - /auth.Auth/Logout
       - /auth.Auth/ValidateToken
+      # Client credentials: secreto de cliente en la solicitud o en la respuesta.
+      - /auth.Auth/IssueServiceToken
+      - /auth.Auth/CreateServiceClient
+      - /auth.Auth/RevokeServiceClient
+      - /auth.Auth/ListServiceClients

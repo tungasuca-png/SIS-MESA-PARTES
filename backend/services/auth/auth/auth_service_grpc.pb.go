@@ -33,6 +33,10 @@ const (
 	Auth_UpdateRolePermissions_FullMethodName = "/auth.Auth/UpdateRolePermissions"
 	Auth_UpdateUserRole_FullMethodName        = "/auth.Auth/UpdateUserRole"
 	Auth_CreateUser_FullMethodName            = "/auth.Auth/CreateUser"
+	Auth_IssueServiceToken_FullMethodName     = "/auth.Auth/IssueServiceToken"
+	Auth_CreateServiceClient_FullMethodName   = "/auth.Auth/CreateServiceClient"
+	Auth_RevokeServiceClient_FullMethodName   = "/auth.Auth/RevokeServiceClient"
+	Auth_ListServiceClients_FullMethodName    = "/auth.Auth/ListServiceClients"
 )
 
 // AuthClient is the client API for Auth service.
@@ -53,6 +57,10 @@ type AuthClient interface {
 	UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	IssueServiceToken(ctx context.Context, in *IssueServiceTokenRequest, opts ...grpc.CallOption) (*IssueServiceTokenResponse, error)
+	CreateServiceClient(ctx context.Context, in *CreateServiceClientRequest, opts ...grpc.CallOption) (*CreateServiceClientResponse, error)
+	RevokeServiceClient(ctx context.Context, in *RevokeServiceClientRequest, opts ...grpc.CallOption) (*RevokeServiceClientResponse, error)
+	ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error)
 }
 
 type authClient struct {
@@ -203,6 +211,46 @@ func (c *authClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts
 	return out, nil
 }
 
+func (c *authClient) IssueServiceToken(ctx context.Context, in *IssueServiceTokenRequest, opts ...grpc.CallOption) (*IssueServiceTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IssueServiceTokenResponse)
+	err := c.cc.Invoke(ctx, Auth_IssueServiceToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) CreateServiceClient(ctx context.Context, in *CreateServiceClientRequest, opts ...grpc.CallOption) (*CreateServiceClientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateServiceClientResponse)
+	err := c.cc.Invoke(ctx, Auth_CreateServiceClient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) RevokeServiceClient(ctx context.Context, in *RevokeServiceClientRequest, opts ...grpc.CallOption) (*RevokeServiceClientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeServiceClientResponse)
+	err := c.cc.Invoke(ctx, Auth_RevokeServiceClient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListServiceClientsResponse)
+	err := c.cc.Invoke(ctx, Auth_ListServiceClients_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility.
@@ -221,6 +269,10 @@ type AuthServer interface {
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRole(context.Context, *UpdateUserRoleRequest) (*UpdateUserRoleResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	IssueServiceToken(context.Context, *IssueServiceTokenRequest) (*IssueServiceTokenResponse, error)
+	CreateServiceClient(context.Context, *CreateServiceClientRequest) (*CreateServiceClientResponse, error)
+	RevokeServiceClient(context.Context, *RevokeServiceClientRequest) (*RevokeServiceClientResponse, error)
+	ListServiceClients(context.Context, *ListServiceClientsRequest) (*ListServiceClientsResponse, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -272,6 +324,18 @@ func (UnimplementedAuthServer) UpdateUserRole(context.Context, *UpdateUserRoleRe
 }
 func (UnimplementedAuthServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedAuthServer) IssueServiceToken(context.Context, *IssueServiceTokenRequest) (*IssueServiceTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method IssueServiceToken not implemented")
+}
+func (UnimplementedAuthServer) CreateServiceClient(context.Context, *CreateServiceClientRequest) (*CreateServiceClientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateServiceClient not implemented")
+}
+func (UnimplementedAuthServer) RevokeServiceClient(context.Context, *RevokeServiceClientRequest) (*RevokeServiceClientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeServiceClient not implemented")
+}
+func (UnimplementedAuthServer) ListServiceClients(context.Context, *ListServiceClientsRequest) (*ListServiceClientsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListServiceClients not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -546,6 +610,78 @@ func _Auth_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_IssueServiceToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IssueServiceTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).IssueServiceToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_IssueServiceToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).IssueServiceToken(ctx, req.(*IssueServiceTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_CreateServiceClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).CreateServiceClient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_CreateServiceClient_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).CreateServiceClient(ctx, req.(*CreateServiceClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_RevokeServiceClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeServiceClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).RevokeServiceClient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_RevokeServiceClient_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).RevokeServiceClient(ctx, req.(*RevokeServiceClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_ListServiceClients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListServiceClientsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).ListServiceClients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_ListServiceClients_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).ListServiceClients(ctx, req.(*ListServiceClientsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -608,6 +744,22 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUser",
 			Handler:    _Auth_CreateUser_Handler,
+		},
+		{
+			MethodName: "IssueServiceToken",
+			Handler:    _Auth_IssueServiceToken_Handler,
+		},
+		{
+			MethodName: "CreateServiceClient",
+			Handler:    _Auth_CreateServiceClient_Handler,
+		},
+		{
+			MethodName: "RevokeServiceClient",
+			Handler:    _Auth_RevokeServiceClient_Handler,
+		},
+		{
+			MethodName: "ListServiceClients",
+			Handler:    _Auth_ListServiceClients_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

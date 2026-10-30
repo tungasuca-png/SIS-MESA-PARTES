@@ -63,11 +63,6 @@ func (s *AuthServer) GetMyPermissions(ctx context.Context, in *auth.GetMyPermiss
 	return l.GetMyPermissions(in)
 }
 
-func (s *AuthServer) UpdateUserRole(ctx context.Context, in *auth.UpdateUserRoleRequest) (*auth.UpdateUserRoleResponse, error) {
-	l := logic.NewUpdateUserRoleLogic(ctx, s.svcCtx)
-	return l.UpdateUserRole(in)
-}
-
 func (s *AuthServer) ListRoles(ctx context.Context, in *auth.ListRolesRequest) (*auth.ListRolesResponse, error) {
 	l := logic.NewListRolesLogic(ctx, s.svcCtx)
 	return l.ListRoles(in)
@@ -88,7 +83,32 @@ func (s *AuthServer) UpdateRolePermissions(ctx context.Context, in *auth.UpdateR
 	return l.UpdateRolePermissions(in)
 }
 
+func (s *AuthServer) UpdateUserRole(ctx context.Context, in *auth.UpdateUserRoleRequest) (*auth.UpdateUserRoleResponse, error) {
+	l := logic.NewUpdateUserRoleLogic(ctx, s.svcCtx)
+	return l.UpdateUserRole(in)
+}
+
 func (s *AuthServer) CreateUser(ctx context.Context, in *auth.CreateUserRequest) (*auth.CreateUserResponse, error) {
 	l := logic.NewCreateUserLogic(ctx, s.svcCtx)
 	return l.CreateUser(in)
+}
+
+func (s *AuthServer) IssueServiceToken(ctx context.Context, in *auth.IssueServiceTokenRequest) (*auth.IssueServiceTokenResponse, error) {
+	l := logic.NewIssueServiceTokenLogic(ctx, s.svcCtx)
+	return l.IssueServiceToken(in)
+}
+
+func (s *AuthServer) CreateServiceClient(ctx context.Context, in *auth.CreateServiceClientRequest) (*auth.CreateServiceClientResponse, error) {
+	l := logic.NewCreateServiceClientLogic(ctx, s.svcCtx)
+	return l.CreateServiceClient(in)
+}
+
+func (s *AuthServer) RevokeServiceClient(ctx context.Context, in *auth.RevokeServiceClientRequest) (*auth.RevokeServiceClientResponse, error) {
+	l := logic.NewRevokeServiceClientLogic(ctx, s.svcCtx)
+	return l.RevokeServiceClient(in)
+}
+
+func (s *AuthServer) ListServiceClients(ctx context.Context, in *auth.ListServiceClientsRequest) (*auth.ListServiceClientsResponse, error) {
+	l := logic.NewListServiceClientsLogic(ctx, s.svcCtx)
+	return l.ListServiceClients(in)
 }

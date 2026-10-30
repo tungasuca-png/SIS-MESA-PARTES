@@ -21,4 +21,10 @@ type Config struct {
 	JWTSecret            string
 	AccessTokenDuration  time.Duration
 	RefreshTokenDuration time.Duration
+	// Tokens de sistemas consumidores (client credentials). Sin
+	// ServiceJWTSecret quedan deshabilitados; debe ser distinto de JWTSecret.
+	ServiceJWTSecret     string        `json:",optional"`
+	ServiceTokenIssuer   string        `json:",optional"`
+	ServiceTokenAudience string        `json:",optional"`
+	ServiceTokenDuration time.Duration `json:",optional"`
 }

@@ -14,36 +14,45 @@ import (
 )
 
 type (
+	CreateServiceClientRequest    = auth.CreateServiceClientRequest
+	CreateServiceClientResponse   = auth.CreateServiceClientResponse
+	CreateUserRequest             = auth.CreateUserRequest
+	CreateUserResponse            = auth.CreateUserResponse
+	GetMyPermissionsRequest       = auth.GetMyPermissionsRequest
+	GetMyPermissionsResponse      = auth.GetMyPermissionsResponse
+	GetRolePermissionsRequest     = auth.GetRolePermissionsRequest
+	GetRolePermissionsResponse    = auth.GetRolePermissionsResponse
 	HasPermissionRequest          = auth.HasPermissionRequest
 	HasPermissionResponse         = auth.HasPermissionResponse
+	IssueServiceTokenRequest      = auth.IssueServiceTokenRequest
+	IssueServiceTokenResponse     = auth.IssueServiceTokenResponse
+	ListPermissionsRequest        = auth.ListPermissionsRequest
+	ListPermissionsResponse       = auth.ListPermissionsResponse
+	ListRolesRequest              = auth.ListRolesRequest
+	ListRolesResponse             = auth.ListRolesResponse
+	ListServiceClientsRequest     = auth.ListServiceClientsRequest
+	ListServiceClientsResponse    = auth.ListServiceClientsResponse
 	LoginRequest                  = auth.LoginRequest
 	LoginResponse                 = auth.LoginResponse
 	LogoutRequest                 = auth.LogoutRequest
 	LogoutResponse                = auth.LogoutResponse
+	Permission                    = auth.Permission
 	RefreshTokenRequest           = auth.RefreshTokenRequest
 	RefreshTokenResponse          = auth.RefreshTokenResponse
 	RegisterRequest               = auth.RegisterRequest
 	RegisterResponse              = auth.RegisterResponse
 	Request                       = auth.Request
 	Response                      = auth.Response
-	ValidateTokenRequest          = auth.ValidateTokenRequest
-	ValidateTokenResponse         = auth.ValidateTokenResponse
+	RevokeServiceClientRequest    = auth.RevokeServiceClientRequest
+	RevokeServiceClientResponse   = auth.RevokeServiceClientResponse
 	Role                          = auth.Role
-	ListRolesRequest              = auth.ListRolesRequest
-	ListRolesResponse             = auth.ListRolesResponse
-	Permission                    = auth.Permission
-	ListPermissionsRequest        = auth.ListPermissionsRequest
-	ListPermissionsResponse       = auth.ListPermissionsResponse
-	GetRolePermissionsRequest     = auth.GetRolePermissionsRequest
-	GetRolePermissionsResponse    = auth.GetRolePermissionsResponse
+	ServiceClient                 = auth.ServiceClient
 	UpdateRolePermissionsRequest  = auth.UpdateRolePermissionsRequest
 	UpdateRolePermissionsResponse = auth.UpdateRolePermissionsResponse
-	GetMyPermissionsRequest       = auth.GetMyPermissionsRequest
-	GetMyPermissionsResponse      = auth.GetMyPermissionsResponse
 	UpdateUserRoleRequest         = auth.UpdateUserRoleRequest
 	UpdateUserRoleResponse        = auth.UpdateUserRoleResponse
-	CreateUserRequest             = auth.CreateUserRequest
-	CreateUserResponse            = auth.CreateUserResponse
+	ValidateTokenRequest          = auth.ValidateTokenRequest
+	ValidateTokenResponse         = auth.ValidateTokenResponse
 
 	Auth interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
@@ -53,13 +62,17 @@ type (
 		Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 		ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error)
 		HasPermission(ctx context.Context, in *HasPermissionRequest, opts ...grpc.CallOption) (*HasPermissionResponse, error)
+		GetMyPermissions(ctx context.Context, in *GetMyPermissionsRequest, opts ...grpc.CallOption) (*GetMyPermissionsResponse, error)
 		ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
 		ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
 		GetRolePermissions(ctx context.Context, in *GetRolePermissionsRequest, opts ...grpc.CallOption) (*GetRolePermissionsResponse, error)
 		UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
-		GetMyPermissions(ctx context.Context, in *GetMyPermissionsRequest, opts ...grpc.CallOption) (*GetMyPermissionsResponse, error)
 		UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error)
 		CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+		IssueServiceToken(ctx context.Context, in *IssueServiceTokenRequest, opts ...grpc.CallOption) (*IssueServiceTokenResponse, error)
+		CreateServiceClient(ctx context.Context, in *CreateServiceClientRequest, opts ...grpc.CallOption) (*CreateServiceClientResponse, error)
+		RevokeServiceClient(ctx context.Context, in *RevokeServiceClientRequest, opts ...grpc.CallOption) (*RevokeServiceClientResponse, error)
+		ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error)
 	}
 
 	defaultAuth struct {
@@ -113,16 +126,6 @@ func (m *defaultAuth) GetMyPermissions(ctx context.Context, in *GetMyPermissions
 	return client.GetMyPermissions(ctx, in, opts...)
 }
 
-func (m *defaultAuth) UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error) {
-	client := auth.NewAuthClient(m.cli.Conn())
-	return client.UpdateUserRole(ctx, in, opts...)
-}
-
-func (m *defaultAuth) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
-	client := auth.NewAuthClient(m.cli.Conn())
-	return client.CreateUser(ctx, in, opts...)
-}
-
 func (m *defaultAuth) ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.ListRoles(ctx, in, opts...)
@@ -141,4 +144,34 @@ func (m *defaultAuth) GetRolePermissions(ctx context.Context, in *GetRolePermiss
 func (m *defaultAuth) UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.UpdateRolePermissions(ctx, in, opts...)
+}
+
+func (m *defaultAuth) UpdateUserRole(ctx context.Context, in *UpdateUserRoleRequest, opts ...grpc.CallOption) (*UpdateUserRoleResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.UpdateUserRole(ctx, in, opts...)
+}
+
+func (m *defaultAuth) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.CreateUser(ctx, in, opts...)
+}
+
+func (m *defaultAuth) IssueServiceToken(ctx context.Context, in *IssueServiceTokenRequest, opts ...grpc.CallOption) (*IssueServiceTokenResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.IssueServiceToken(ctx, in, opts...)
+}
+
+func (m *defaultAuth) CreateServiceClient(ctx context.Context, in *CreateServiceClientRequest, opts ...grpc.CallOption) (*CreateServiceClientResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.CreateServiceClient(ctx, in, opts...)
+}
+
+func (m *defaultAuth) RevokeServiceClient(ctx context.Context, in *RevokeServiceClientRequest, opts ...grpc.CallOption) (*RevokeServiceClientResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.RevokeServiceClient(ctx, in, opts...)
+}
+
+func (m *defaultAuth) ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.ListServiceClients(ctx, in, opts...)
 }

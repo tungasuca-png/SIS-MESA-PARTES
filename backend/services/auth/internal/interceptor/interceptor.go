@@ -68,6 +68,14 @@ func DefaultMethodPolicies() map[string]MethodPolicy {
 		// necesariamente decidir su rol inicial, la misma responsabilidad
 		// que ese permiso ya protege, y hoy solo ADMIN lo tiene.
 		"/auth.Auth/CreateUser": ProtectedMethod("usuarios.change_role"),
+		// Client credentials: un sistema consumidor cambia client_id +
+		// client_secret por un token de servicio (público, como Login). La
+		// administración de sistemas exige su propio permiso, que no se
+		// asigna automáticamente a ningún rol (migración 019).
+		"/auth.Auth/IssueServiceToken":   PublicMethod(),
+		"/auth.Auth/CreateServiceClient": ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/RevokeServiceClient": ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/ListServiceClients":  ProtectedMethod("integraciones.manage"),
 	}
 }
 
