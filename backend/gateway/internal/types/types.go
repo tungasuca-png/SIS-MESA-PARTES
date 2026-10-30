@@ -1265,6 +1265,19 @@ type SeccionResponse struct {
 	Seccion SeccionAcademicaDTO `json:"seccion"`
 }
 
+type ServiceTokenRequest struct {
+	GrantType    string `json:"grant_type"`
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+}
+
+type ServiceTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int64  `json:"expires_in"`
+	Scope       string `json:"scope"`
+}
+
 type UpdateAreaRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`

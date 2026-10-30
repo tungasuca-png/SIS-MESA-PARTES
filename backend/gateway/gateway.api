@@ -37,6 +37,22 @@ type LoginResponse {
 	Role         string `json:"role"`
 }
 
+// Client credentials (sistemas consumidores de Estudiantes): el sistema
+// cambia client_id + client_secret por un token de servicio de corta
+// duración. grant_type debe ser "client_credentials".
+type ServiceTokenRequest {
+	GrantType    string `json:"grant_type"`
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+}
+
+type ServiceTokenResponse {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int64  `json:"expires_in"`
+	Scope       string `json:"scope"`
+}
+
 type RefreshTokenRequest {
 	RefreshToken string `json:"refresh_token"`
 }
@@ -256,6 +272,9 @@ service gateway-api {
 
 	@handler RefreshToken
 	post /api/auth/refresh (RefreshTokenRequest) returns (RefreshTokenResponse)
+
+	@handler ServiceToken
+	post /api/auth/token (ServiceTokenRequest) returns (ServiceTokenResponse)
 
 	@handler Logout
 	post /api/auth/logout (LogoutRequest) returns (LogoutResponse)

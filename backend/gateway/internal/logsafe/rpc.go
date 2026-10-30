@@ -25,6 +25,8 @@ var sensitiveRPCMethods = []string{
 	auth.Auth_Logout_FullMethodName,
 	auth.Auth_ValidateToken_FullMethodName,
 	auth.Auth_CreateUser_FullMethodName,
+	// Client credentials: client_secret en la solicitud y token en la respuesta.
+	auth.Auth_IssueServiceToken_FullMethodName,
 
 	// Psicología: identificadores de estudiantes y texto clínico (resumen_caso,
 	// motivo de cierre) en solicitudes y respuestas.

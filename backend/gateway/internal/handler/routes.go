@@ -41,6 +41,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: RegisterHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/token",
+				Handler: ServiceTokenHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/api/auth/validate",
 				Handler: ValidateTokenHandler(serverCtx),
