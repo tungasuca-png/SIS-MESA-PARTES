@@ -24,6 +24,13 @@ JWTSecret: ${JWT_SECRET}
 AuthRpc:
   Target: 127.0.0.1:8080
 
+# Sistemas consumidores (client credentials): misma clave de servicio que
+# Auth (SERVICE_JWT_SECRET, distinta de JWT_SECRET). Sin ella, solo se
+# aceptan tokens de usuario.
+ServiceJWTSecret: ${SERVICE_JWT_SECRET}
+ServiceTokenIssuer: tungasuca-auth
+ServiceTokenAudience: estudiantes
+
 # El tiempo por defecto de go-zero es 2 s por RPC: no alcanza para validar o
 # registrar cientos de estudiantes de un Excel (cada alta es su propia
 # transacción con auditoría). Solo estos métodos tienen más tiempo.

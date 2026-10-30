@@ -36,7 +36,7 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-	s.AddUnaryInterceptors(interceptor.AuthenticationInterceptor(ctx.JWTValidator))
+	s.AddUnaryInterceptors(interceptor.AuthenticationInterceptor(ctx.JWTValidator, ctx.ServiceTokenValidator))
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

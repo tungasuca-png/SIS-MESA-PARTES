@@ -26,6 +26,12 @@ type PermissionClient interface {
 // propaga tal cual — nunca se traduce en "permitido" ni cae de vuelta al
 // rol local.
 func HasPermission(ctx context.Context, client PermissionClient, userID, permission string) (bool, error) {
+	// Sistema consumidor (client credentials): sus permisos son el scope del
+	// token, firmado por Auth y de corta duración. No se consulta Auth (no es
+	// un usuario) ni se reenvía su token.
+	if service, ok := interceptor.ServiceFromContext(ctx); ok {
+		return servicePermite(service, permission), nil
+	}
 	outCtx := ctx
 	if token, ok := interceptor.TokenFromContext(ctx); ok {
 		// Auth Service exige autenticación en HasPermission (igual que en
@@ -56,4 +62,19 @@ func RequirePermission(ctx context.Context, client PermissionClient, userID, per
 		return status.Error(codes.PermissionDenied, "permission_denied: el usuario no tiene el permiso requerido")
 	}
 	return nil
+}
+
+// basicMethods: RPC que solo devuelven datos básicos (EstudianteBasico). En
+// ellos, un sistema con estudiantes.basic.view cumple el requisito de
+// estudiantes.view; en cualquier otro RPC, no.
+var basicMethods = map[string]bool{
+	"/estudiantes.Estudiantes/GetEstudiantesBasic": true,
+	"/estudiantes.Estudiantes/ResolveEstudiante":   true,
+}
+
+func servicePermite(service *interceptor.ServiceIdentity, permission string) bool {
+	if service.Permisos[permission] {
+		return true
+	}
+	return permission == "estudiantes.view" && basicMethods[service.Method] && service.Permisos["estudiantes.basic.view"]
 }

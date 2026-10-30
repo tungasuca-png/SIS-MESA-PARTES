@@ -26,6 +26,11 @@ type Config struct {
 	// en cada logic, sin tocar config/svc otra vez (mismo criterio ya usado
 	// al crear Psicología).
 	AuthRpc zrpc.RpcClientConf
+	// Tokens de sistemas consumidores (client credentials), emitidos por Auth
+	// con una clave propia. Sin ServiceJWTSecret solo se aceptan usuarios.
+	ServiceJWTSecret     string `json:",optional"`
+	ServiceTokenIssuer   string `json:",optional"`
+	ServiceTokenAudience string `json:",optional"`
 
 	// Excel: importación/exportación de estudiantes (opcional).
 	Excel ExcelConfig `json:",optional"`
