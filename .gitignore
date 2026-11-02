@@ -32,3 +32,7 @@ Thumbs.db
 # Configuración local de Claude Code (personal, no se comparte)
 .claude/settings.local.json
 
+# Respaldos de bases de datos: contienen datos personales y hashes de
+# contraseñas. Se guardan fuera del repositorio (~/.tungasuca-backups).
+backups/
+*.dump

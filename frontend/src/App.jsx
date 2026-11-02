@@ -21,9 +21,13 @@ import { lazy, Suspense } from "react";
 const EstudiantesList = lazy(() => import("./pages/Estudiantes/EstudiantesList"));
 const EstudianteDetail = lazy(() => import("./pages/Estudiantes/EstudianteDetail"));
 const PeriodosSecciones = lazy(() => import("./pages/Estudiantes/PeriodosSecciones"));
+// Reportes en un chunk propio (carga al entrar a /reportes).
+const Reportes = lazy(() => import("./pages/Reportes/Reportes"));
 const cargando = <p className="dp-table-empty">Cargando...</p>;
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
+import GoogleCallback from "./pages/Login/GoogleCallback";
+import RegistroGoogle from "./pages/Login/RegistroGoogle";
 
 function App() {
     return (
@@ -34,6 +38,12 @@ function App() {
                 path="/login"
                 element={<Login />}
             />
+
+            {/* Acceso con Google (solo solicitantes): regreso desde Google y
+                formulario obligatorio del primer registro. Públicas: la
+                sesión se crea recién al completar el registro. */}
+            <Route path="/login/google" element={<GoogleCallback />} />
+            <Route path="/registro/google" element={<RegistroGoogle />} />
 
             {/* Dashboard protegido */}
             <Route
@@ -237,6 +247,22 @@ function App() {
                     <ProtectedRoute>
                         <PermissionRoute permission="estudiantes.view">
                             <Suspense fallback={cargando}><EstudianteDetail /></Suspense>
+                        </PermissionRoute>
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Reportes (Fase 1): "reportes.view". El backend (Expedientes
+                Service) vuelve a exigir el permiso y aplica el alcance por rol;
+                este guard solo evita montar la página sin permiso. */}
+            <Route
+                path="/reportes"
+                element={
+                    <ProtectedRoute>
+                        <PermissionRoute permission="reportes.view">
+                            <Suspense fallback={cargando}>
+                                <Reportes />
+                            </Suspense>
                         </PermissionRoute>
                     </ProtectedRoute>
                 }

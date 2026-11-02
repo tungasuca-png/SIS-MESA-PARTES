@@ -39,6 +39,16 @@ UsuariosRpc:
 EstudiantesRpc:
   Target: 127.0.0.1:8087
 
+# Psicología como sistema consumidor de Estudiantes (client credentials,
+# permiso estudiantes.basic.view). Valores SOLO en backend/.env. Son
+# OBLIGATORIOS: sin ellos Psicología no inicia. Únicamente en desarrollo
+# (Mode dev o test) y con PSICOLOGIA_ALLOW_LEGACY_AUTH=true se admite el modo
+# anterior (reenviar el JWT del usuario, que necesita estudiantes.view).
+ServiceClientId: ${PSICOLOGIA_CLIENT_ID}
+ServiceClientSecret: ${PSICOLOGIA_CLIENT_SECRET}
+# Entre comillas: "true"/"false" deben leerse como texto, no como booleano YAML.
+AllowLegacyAuth: "${PSICOLOGIA_ALLOW_LEGACY_AUTH}"
+
 # go-zero registra el contenido de las solicitudes lentas/fallidas. Todo RPC
 # de Psicología puede llevar información clínica o identificadores de
 # estudiantes: se excluye el contenido de TODOS los métodos del log.
@@ -64,3 +74,5 @@ Middlewares:
       - /psicologia.Psicologia/GetAtencionVersion
       - /psicologia.Psicologia/AnnulAtencion
       - /psicologia.Psicologia/ExportAtencionPdf
+      # Búsqueda de estudiantes: la consulta puede contener un DNI.
+      - /psicologia.Psicologia/BuscarEstudiantes

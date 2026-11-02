@@ -9,7 +9,6 @@ import Icon from "../../components/dashboard/Icon";
 import AtencionesSection from "../../components/psicologia/AtencionesSection";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
-import { useEstudiantesBasic } from "../../hooks/useEstudiantesBasic";
 import {
     closeExpedientePsicologico,
     getExpedientePsicologico,
@@ -79,10 +78,6 @@ function PsicologiaExpedienteDetail() {
 
     const { usuarios, unavailable } = useUsuariosBasic(
         expediente ? [expediente.responsable_id, expediente.abierto_por] : []
-    );
-    // FASE 5D: estudiante_id se resuelve a un nombre real (Estudiantes Service).
-    const { estudiantes, unavailable: estudianteUnavailable } = useEstudiantesBasic(
-        expediente ? [expediente.estudiante_id] : []
     );
 
     const startEditing = () => {
@@ -214,11 +209,7 @@ function PsicologiaExpedienteDetail() {
                         <div>
                             <dt>Estudiante</dt>
                             <dd>
-                                <EstudianteNombre
-                                    id={expediente.estudiante_id}
-                                    estudiantes={estudiantes}
-                                    unavailable={estudianteUnavailable}
-                                />
+                                <EstudianteNombre id={expediente.estudiante_id} resumen={expediente.estudiante} />
                             </dd>
                         </div>
                         <div>

@@ -16,27 +16,34 @@ import (
 type (
 	ChangeEstadoRequest        = expedientes.ChangeEstadoRequest
 	ChangeEstadoResponse       = expedientes.ChangeEstadoResponse
+	CorregirExpedienteRequest  = expedientes.CorregirExpedienteRequest
+	CorregirExpedienteResponse = expedientes.CorregirExpedienteResponse
 	CreateExpedienteRequest    = expedientes.CreateExpedienteRequest
 	CreateExpedienteResponse   = expedientes.CreateExpedienteResponse
 	DeleteExpedienteRequest    = expedientes.DeleteExpedienteRequest
 	DeleteExpedienteResponse   = expedientes.DeleteExpedienteResponse
+	DerivarExpedienteRequest   = expedientes.DerivarExpedienteRequest
+	DerivarExpedienteResponse  = expedientes.DerivarExpedienteResponse
 	Expediente                 = expedientes.Expediente
 	GetExpedienteRequest       = expedientes.GetExpedienteRequest
 	GetExpedienteResponse      = expedientes.GetExpedienteResponse
 	ListExpedientesRequest     = expedientes.ListExpedientesRequest
 	ListExpedientesResponse    = expedientes.ListExpedientesResponse
-	UpdateExpedienteRequest    = expedientes.UpdateExpedienteRequest
-	UpdateExpedienteResponse   = expedientes.UpdateExpedienteResponse
-	UpdateAreaRequest          = expedientes.UpdateAreaRequest
-	UpdateAreaResponse         = expedientes.UpdateAreaResponse
-	DerivarExpedienteRequest   = expedientes.DerivarExpedienteRequest
-	DerivarExpedienteResponse  = expedientes.DerivarExpedienteResponse
 	RechazarExpedienteRequest  = expedientes.RechazarExpedienteRequest
 	RechazarExpedienteResponse = expedientes.RechazarExpedienteResponse
-	CorregirExpedienteRequest  = expedientes.CorregirExpedienteRequest
-	CorregirExpedienteResponse = expedientes.CorregirExpedienteResponse
+	ReporteAlcanceRequest      = expedientes.ReporteAlcanceRequest
+	ReporteAlcanceResponse     = expedientes.ReporteAlcanceResponse
+	ReporteConteo              = expedientes.ReporteConteo
+	ReporteCruce               = expedientes.ReporteCruce
+	ReporteExpedienteRef       = expedientes.ReporteExpedienteRef
+	ReporteExpedientesRequest  = expedientes.ReporteExpedientesRequest
+	ReporteExpedientesResponse = expedientes.ReporteExpedientesResponse
 	ResolverExpedienteRequest  = expedientes.ResolverExpedienteRequest
 	ResolverExpedienteResponse = expedientes.ResolverExpedienteResponse
+	UpdateAreaRequest          = expedientes.UpdateAreaRequest
+	UpdateAreaResponse         = expedientes.UpdateAreaResponse
+	UpdateExpedienteRequest    = expedientes.UpdateExpedienteRequest
+	UpdateExpedienteResponse   = expedientes.UpdateExpedienteResponse
 	ValidateDerivacionRequest  = expedientes.ValidateDerivacionRequest
 	ValidateDerivacionResponse = expedientes.ValidateDerivacionResponse
 
@@ -53,6 +60,8 @@ type (
 		CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error)
 		ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error)
 		ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error)
+		ReporteExpedientes(ctx context.Context, in *ReporteExpedientesRequest, opts ...grpc.CallOption) (*ReporteExpedientesResponse, error)
+		ReporteAlcanceExpedientes(ctx context.Context, in *ReporteAlcanceRequest, opts ...grpc.CallOption) (*ReporteAlcanceResponse, error)
 	}
 
 	defaultExpedientes struct {
@@ -124,4 +133,14 @@ func (m *defaultExpedientes) ResolverExpediente(ctx context.Context, in *Resolve
 func (m *defaultExpedientes) ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error) {
 	client := expedientes.NewExpedientesClient(m.cli.Conn())
 	return client.ValidateDerivacion(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) ReporteExpedientes(ctx context.Context, in *ReporteExpedientesRequest, opts ...grpc.CallOption) (*ReporteExpedientesResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.ReporteExpedientes(ctx, in, opts...)
+}
+
+func (m *defaultExpedientes) ReporteAlcanceExpedientes(ctx context.Context, in *ReporteAlcanceRequest, opts ...grpc.CallOption) (*ReporteAlcanceResponse, error) {
+	client := expedientes.NewExpedientesClient(m.cli.Conn())
+	return client.ReporteAlcanceExpedientes(ctx, in, opts...)
 }

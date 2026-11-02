@@ -112,3 +112,53 @@ func (s *AuthServer) ListServiceClients(ctx context.Context, in *auth.ListServic
 	l := logic.NewListServiceClientsLogic(ctx, s.svcCtx)
 	return l.ListServiceClients(in)
 }
+
+func (s *AuthServer) GrantServiceClientPermission(ctx context.Context, in *auth.ServiceClientPermissionRequest) (*auth.ServiceClientPermissionResponse, error) {
+	l := logic.NewGrantServiceClientPermissionLogic(ctx, s.svcCtx)
+	return l.GrantServiceClientPermission(in)
+}
+
+func (s *AuthServer) WithdrawServiceClientPermission(ctx context.Context, in *auth.ServiceClientPermissionRequest) (*auth.ServiceClientPermissionResponse, error) {
+	l := logic.NewWithdrawServiceClientPermissionLogic(ctx, s.svcCtx)
+	return l.WithdrawServiceClientPermission(in)
+}
+
+func (s *AuthServer) GoogleStart(ctx context.Context, in *auth.GoogleStartRequest) (*auth.GoogleStartResponse, error) {
+	l := logic.NewGoogleStartLogic(ctx, s.svcCtx)
+	return l.GoogleStart(in)
+}
+
+func (s *AuthServer) GoogleCallback(ctx context.Context, in *auth.GoogleCallbackRequest) (*auth.GoogleCallbackResponse, error) {
+	l := logic.NewGoogleCallbackLogic(ctx, s.svcCtx)
+	return l.GoogleCallback(in)
+}
+
+func (s *AuthServer) GoogleExchange(ctx context.Context, in *auth.GoogleExchangeRequest) (*auth.GoogleExchangeResponse, error) {
+	l := logic.NewGoogleExchangeLogic(ctx, s.svcCtx)
+	return l.GoogleExchange(in)
+}
+
+func (s *AuthServer) GoogleRegister(ctx context.Context, in *auth.GoogleRegisterRequest) (*auth.GoogleRegisterResponse, error) {
+	l := logic.NewGoogleRegisterLogic(ctx, s.svcCtx)
+	return l.GoogleRegister(in)
+}
+
+func (s *AuthServer) GoogleCompleteRegistration(ctx context.Context, in *auth.GoogleRegistrationRequest) (*auth.GoogleCompleteResponse, error) {
+	l := logic.NewGoogleCompleteRegistrationLogic(ctx, s.svcCtx)
+	return l.GoogleCompleteRegistration(in)
+}
+
+func (s *AuthServer) GoogleCancelRegistration(ctx context.Context, in *auth.GoogleRegistrationRequest) (*auth.GoogleCancelResponse, error) {
+	l := logic.NewGoogleCancelRegistrationLogic(ctx, s.svcCtx)
+	return l.GoogleCancelRegistration(in)
+}
+
+func (s *AuthServer) GoogleStartLink(ctx context.Context, in *auth.GoogleStartLinkRequest) (*auth.GoogleStartLinkResponse, error) {
+	l := logic.NewGoogleStartLinkLogic(ctx, s.svcCtx)
+	return l.GoogleStartLink(in)
+}
+
+func (s *AuthServer) GoogleLinkStatus(ctx context.Context, in *auth.GoogleLinkStatusRequest) (*auth.GoogleLinkStatusResponse, error) {
+	l := logic.NewGoogleLinkStatusLogic(ctx, s.svcCtx)
+	return l.GoogleLinkStatus(in)
+}

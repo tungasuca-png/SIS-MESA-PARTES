@@ -6,26 +6,20 @@ package handler
 import (
 	"net/http"
 
-	"gateway/internal/logic"
 	"gateway/internal/svc"
-	"gateway/internal/types"
+
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.RegisterRequest
-		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-			return
-		}
+// MensajeRegistroDeshabilitado: el autorregistro público con usuario y clave
+// se retiró; los solicitantes se registran con Google (y completan su DNI) o
+// reciben sus credenciales de la institución.
+const MensajeRegistroDeshabilitado = "El registro público fue deshabilitado. Usa «Continuar con Google» o solicita tus credenciales a la institución educativa."
 
-		l := logic.NewRegisterLogic(r.Context(), svcCtx)
-		resp, err := l.Register(&req)
-		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
-		}
+// RegisterHandler: POST /api/auth/register responde 410 Gone sin llamar a
+// ningún servicio. No elimina usuarios ni datos existentes.
+func RegisterHandler(_ *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		httpx.WriteJsonCtx(r.Context(), w, http.StatusGone, map[string]string{"message": MensajeRegistroDeshabilitado})
 	}
 }

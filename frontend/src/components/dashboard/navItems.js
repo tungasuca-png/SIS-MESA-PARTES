@@ -113,7 +113,7 @@ export const NAV_GROUPS = [
         id: "reportes",
         label: "Reportes",
         items: [
-            { key: "reportes", label: "Reportes", description: "Reportes del sistema.", path: null, icon: "chart", permission: "reportes.view" },
+            { key: "reportes", label: "Reportes", description: "Estadísticas de expedientes con filtros y exportación.", path: "/reportes", icon: "chart", permission: "reportes.view" },
         ],
     },
     {

@@ -1366,6 +1366,581 @@ func (x *ValidateDerivacionResponse) GetValido() bool {
 	return false
 }
 
+// ReporteExpedientes (Reportes, Fase 1): estadísticas AGREGADAS de
+// expedientes, calculadas en el servidor con las MISMAS reglas de alcance que
+// ListExpedientes (ADMIN/SECRETARIA: toda la institución; el resto del
+// personal: solo su área actual). Exige "reportes.view". Solo conteos: nunca
+// devuelve expedientes, solicitantes ni datos personales.
+//
+// Fecha usada: SIEMPRE fecha_registro (fecha de recepción), en hora de Lima.
+// desde/hasta (AAAA-MM-DD) son inclusivos y opcionales. Todos los filtros se
+// combinan (AND) y afectan a todas las agrupaciones.
+type ReporteExpedientesRequest struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Desde     string                 `protobuf:"bytes,1,opt,name=desde,proto3" json:"desde,omitempty"`
+	Hasta     string                 `protobuf:"bytes,2,opt,name=hasta,proto3" json:"hasta,omitempty"`
+	Estado    string                 `protobuf:"bytes,3,opt,name=estado,proto3" json:"estado,omitempty"`
+	Tipo      string                 `protobuf:"bytes,4,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	Prioridad string                 `protobuf:"bytes,5,opt,name=prioridad,proto3" json:"prioridad,omitempty"`
+	Area      string                 `protobuf:"bytes,6,opt,name=area,proto3" json:"area,omitempty"`
+	// Fase 2 (opcionales; sin ellos la respuesta es la de la Fase 1):
+	// granularidad DIA | SEMANA | MES de la serie "serie" (por fecha de
+	// registro); incluir_registros agrega los conteos por usuario registrador
+	// (solo para el reporte de actividad del Gateway, que los agrupa por ROL
+	// y nunca expone identificadores).
+	Granularidad     string `protobuf:"bytes,7,opt,name=granularidad,proto3" json:"granularidad,omitempty"`
+	IncluirRegistros bool   `protobuf:"varint,8,opt,name=incluir_registros,json=incluirRegistros,proto3" json:"incluir_registros,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ReporteExpedientesRequest) Reset() {
+	*x = ReporteExpedientesRequest{}
+	mi := &file_expedientes_service_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteExpedientesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteExpedientesRequest) ProtoMessage() {}
+
+func (x *ReporteExpedientesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteExpedientesRequest.ProtoReflect.Descriptor instead.
+func (*ReporteExpedientesRequest) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ReporteExpedientesRequest) GetDesde() string {
+	if x != nil {
+		return x.Desde
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetHasta() string {
+	if x != nil {
+		return x.Hasta
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetPrioridad() string {
+	if x != nil {
+		return x.Prioridad
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetArea() string {
+	if x != nil {
+		return x.Area
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetGranularidad() string {
+	if x != nil {
+		return x.Granularidad
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesRequest) GetIncluirRegistros() bool {
+	if x != nil {
+		return x.IncluirRegistros
+	}
+	return false
+}
+
+// Celda de una tabla cruzada (fila x columna).
+type ReporteCruce struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Fila          string                 `protobuf:"bytes,1,opt,name=fila,proto3" json:"fila,omitempty"`
+	Columna       string                 `protobuf:"bytes,2,opt,name=columna,proto3" json:"columna,omitempty"`
+	Cantidad      int32                  `protobuf:"varint,3,opt,name=cantidad,proto3" json:"cantidad,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteCruce) Reset() {
+	*x = ReporteCruce{}
+	mi := &file_expedientes_service_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteCruce) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteCruce) ProtoMessage() {}
+
+func (x *ReporteCruce) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteCruce.ProtoReflect.Descriptor instead.
+func (*ReporteCruce) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ReporteCruce) GetFila() string {
+	if x != nil {
+		return x.Fila
+	}
+	return ""
+}
+
+func (x *ReporteCruce) GetColumna() string {
+	if x != nil {
+		return x.Columna
+	}
+	return ""
+}
+
+func (x *ReporteCruce) GetCantidad() int32 {
+	if x != nil {
+		return x.Cantidad
+	}
+	return 0
+}
+
+type ReporteConteo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clave         string                 `protobuf:"bytes,1,opt,name=clave,proto3" json:"clave,omitempty"`
+	Cantidad      int32                  `protobuf:"varint,2,opt,name=cantidad,proto3" json:"cantidad,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteConteo) Reset() {
+	*x = ReporteConteo{}
+	mi := &file_expedientes_service_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteConteo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteConteo) ProtoMessage() {}
+
+func (x *ReporteConteo) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteConteo.ProtoReflect.Descriptor instead.
+func (*ReporteConteo) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ReporteConteo) GetClave() string {
+	if x != nil {
+		return x.Clave
+	}
+	return ""
+}
+
+func (x *ReporteConteo) GetCantidad() int32 {
+	if x != nil {
+		return x.Cantidad
+	}
+	return 0
+}
+
+type ReporteExpedientesResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Total int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	// Catálogo completo (incluye ceros), en orden estable.
+	PorEstado    []*ReporteConteo `protobuf:"bytes,2,rep,name=por_estado,json=porEstado,proto3" json:"por_estado,omitempty"`
+	PorTipo      []*ReporteConteo `protobuf:"bytes,3,rep,name=por_tipo,json=porTipo,proto3" json:"por_tipo,omitempty"`
+	PorPrioridad []*ReporteConteo `protobuf:"bytes,4,rep,name=por_prioridad,json=porPrioridad,proto3" json:"por_prioridad,omitempty"`
+	PorArea      []*ReporteConteo `protobuf:"bytes,5,rep,name=por_area,json=porArea,proto3" json:"por_area,omitempty"`
+	// Mes de registro (AAAA-MM), continuo y con ceros, del primer al último mes
+	// del periodo (o de los datos, si no se indica periodo).
+	PorMes []*ReporteConteo `protobuf:"bytes,6,rep,name=por_mes,json=porMes,proto3" json:"por_mes,omitempty"`
+	// Pendientes = PENDIENTE + EN_PROCESO; antigüedad en días desde
+	// fecha_registro hasta hoy (rangos 0-3, 4-7, 8-15, 16-30, 31+). No es un
+	// indicador de incumplimiento: no existen plazos institucionales.
+	Pendientes              int32            `protobuf:"varint,7,opt,name=pendientes,proto3" json:"pendientes,omitempty"`
+	PendientesPorAntiguedad []*ReporteConteo `protobuf:"bytes,8,rep,name=pendientes_por_antiguedad,json=pendientesPorAntiguedad,proto3" json:"pendientes_por_antiguedad,omitempty"`
+	// INSTITUCION o AREA (el alcance real aplicado según el rol).
+	Alcance     string `protobuf:"bytes,9,opt,name=alcance,proto3" json:"alcance,omitempty"`
+	AreaAlcance string `protobuf:"bytes,10,opt,name=area_alcance,json=areaAlcance,proto3" json:"area_alcance,omitempty"`
+	// Momento de cálculo (RFC 3339).
+	Generado string `protobuf:"bytes,11,opt,name=generado,proto3" json:"generado,omitempty"`
+	// Fase 2: serie continua por la granularidad pedida (claves AAAA-MM-DD
+	// para DIA y SEMANA —lunes—, AAAA-MM para MES); vacía si no se pidió.
+	Serie        []*ReporteConteo `protobuf:"bytes,12,rep,name=serie,proto3" json:"serie,omitempty"`
+	Granularidad string           `protobuf:"bytes,13,opt,name=granularidad,proto3" json:"granularidad,omitempty"`
+	// Tablas cruzadas con el estado ACTUAL (solo celdas con valor).
+	AreaEstado []*ReporteCruce `protobuf:"bytes,14,rep,name=area_estado,json=areaEstado,proto3" json:"area_estado,omitempty"`
+	TipoEstado []*ReporteCruce `protobuf:"bytes,15,rep,name=tipo_estado,json=tipoEstado,proto3" json:"tipo_estado,omitempty"`
+	// Solo con incluir_registros: clave = ID del usuario que registró.
+	RegistrosPorUsuario []*ReporteConteo `protobuf:"bytes,16,rep,name=registros_por_usuario,json=registrosPorUsuario,proto3" json:"registros_por_usuario,omitempty"`
+	// Solo con granularidad: celdas (fila = clave del periodo de la serie,
+	// columna = estado ACTUAL) con cantidad > 0. Registros por periodo según
+	// su estado actual; no es historial de estados.
+	SerieEstado   []*ReporteCruce `protobuf:"bytes,17,rep,name=serie_estado,json=serieEstado,proto3" json:"serie_estado,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteExpedientesResponse) Reset() {
+	*x = ReporteExpedientesResponse{}
+	mi := &file_expedientes_service_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteExpedientesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteExpedientesResponse) ProtoMessage() {}
+
+func (x *ReporteExpedientesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteExpedientesResponse.ProtoReflect.Descriptor instead.
+func (*ReporteExpedientesResponse) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ReporteExpedientesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ReporteExpedientesResponse) GetPorEstado() []*ReporteConteo {
+	if x != nil {
+		return x.PorEstado
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetPorTipo() []*ReporteConteo {
+	if x != nil {
+		return x.PorTipo
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetPorPrioridad() []*ReporteConteo {
+	if x != nil {
+		return x.PorPrioridad
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetPorArea() []*ReporteConteo {
+	if x != nil {
+		return x.PorArea
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetPorMes() []*ReporteConteo {
+	if x != nil {
+		return x.PorMes
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetPendientes() int32 {
+	if x != nil {
+		return x.Pendientes
+	}
+	return 0
+}
+
+func (x *ReporteExpedientesResponse) GetPendientesPorAntiguedad() []*ReporteConteo {
+	if x != nil {
+		return x.PendientesPorAntiguedad
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetAlcance() string {
+	if x != nil {
+		return x.Alcance
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesResponse) GetAreaAlcance() string {
+	if x != nil {
+		return x.AreaAlcance
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesResponse) GetGenerado() string {
+	if x != nil {
+		return x.Generado
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesResponse) GetSerie() []*ReporteConteo {
+	if x != nil {
+		return x.Serie
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetGranularidad() string {
+	if x != nil {
+		return x.Granularidad
+	}
+	return ""
+}
+
+func (x *ReporteExpedientesResponse) GetAreaEstado() []*ReporteCruce {
+	if x != nil {
+		return x.AreaEstado
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetTipoEstado() []*ReporteCruce {
+	if x != nil {
+		return x.TipoEstado
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetRegistrosPorUsuario() []*ReporteConteo {
+	if x != nil {
+		return x.RegistrosPorUsuario
+	}
+	return nil
+}
+
+func (x *ReporteExpedientesResponse) GetSerieEstado() []*ReporteCruce {
+	if x != nil {
+		return x.SerieEstado
+	}
+	return nil
+}
+
+// ReporteAlcanceExpedientes (Fase 2): IDs y tipo de los expedientes ACTIVOS
+// visibles para el usuario (mismo permiso "reportes.view" y mismo alcance que
+// ReporteExpedientes). Lo usan Derivaciones y Documentos para sus reportes:
+// así excluyen bajas lógicas y respetan el alcance sin leer esta base.
+type ReporteAlcanceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tipo          string                 `protobuf:"bytes,1,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteAlcanceRequest) Reset() {
+	*x = ReporteAlcanceRequest{}
+	mi := &file_expedientes_service_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteAlcanceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteAlcanceRequest) ProtoMessage() {}
+
+func (x *ReporteAlcanceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteAlcanceRequest.ProtoReflect.Descriptor instead.
+func (*ReporteAlcanceRequest) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ReporteAlcanceRequest) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+type ReporteExpedienteRef struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Tipo          string                 `protobuf:"bytes,2,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteExpedienteRef) Reset() {
+	*x = ReporteExpedienteRef{}
+	mi := &file_expedientes_service_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteExpedienteRef) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteExpedienteRef) ProtoMessage() {}
+
+func (x *ReporteExpedienteRef) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteExpedienteRef.ProtoReflect.Descriptor instead.
+func (*ReporteExpedienteRef) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ReporteExpedienteRef) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ReporteExpedienteRef) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+type ReporteAlcanceResponse struct {
+	state       protoimpl.MessageState  `protogen:"open.v1"`
+	Expedientes []*ReporteExpedienteRef `protobuf:"bytes,1,rep,name=expedientes,proto3" json:"expedientes,omitempty"`
+	// INSTITUCION o AREA, como en ReporteExpedientes.
+	Alcance       string `protobuf:"bytes,2,opt,name=alcance,proto3" json:"alcance,omitempty"`
+	AreaAlcance   string `protobuf:"bytes,3,opt,name=area_alcance,json=areaAlcance,proto3" json:"area_alcance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteAlcanceResponse) Reset() {
+	*x = ReporteAlcanceResponse{}
+	mi := &file_expedientes_service_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteAlcanceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteAlcanceResponse) ProtoMessage() {}
+
+func (x *ReporteAlcanceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteAlcanceResponse.ProtoReflect.Descriptor instead.
+func (*ReporteAlcanceResponse) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ReporteAlcanceResponse) GetExpedientes() []*ReporteExpedienteRef {
+	if x != nil {
+		return x.Expedientes
+	}
+	return nil
+}
+
+func (x *ReporteAlcanceResponse) GetAlcance() string {
+	if x != nil {
+		return x.Alcance
+	}
+	return ""
+}
+
+func (x *ReporteAlcanceResponse) GetAreaAlcance() string {
+	if x != nil {
+		return x.AreaAlcance
+	}
+	return ""
+}
+
 var File_expedientes_service_proto protoreflect.FileDescriptor
 
 const file_expedientes_service_proto_rawDesc = "" +
@@ -1469,7 +2044,57 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\rexpediente_id\x18\x01 \x01(\tR\fexpedienteId\x12!\n" +
 	"\farea_destino\x18\x02 \x01(\tR\vareaDestino\"4\n" +
 	"\x1aValidateDerivacionResponse\x12\x16\n" +
-	"\x06valido\x18\x01 \x01(\bR\x06valido2\x8a\t\n" +
+	"\x06valido\x18\x01 \x01(\bR\x06valido\"\xf6\x01\n" +
+	"\x19ReporteExpedientesRequest\x12\x14\n" +
+	"\x05desde\x18\x01 \x01(\tR\x05desde\x12\x14\n" +
+	"\x05hasta\x18\x02 \x01(\tR\x05hasta\x12\x16\n" +
+	"\x06estado\x18\x03 \x01(\tR\x06estado\x12\x12\n" +
+	"\x04tipo\x18\x04 \x01(\tR\x04tipo\x12\x1c\n" +
+	"\tprioridad\x18\x05 \x01(\tR\tprioridad\x12\x12\n" +
+	"\x04area\x18\x06 \x01(\tR\x04area\x12\"\n" +
+	"\fgranularidad\x18\a \x01(\tR\fgranularidad\x12+\n" +
+	"\x11incluir_registros\x18\b \x01(\bR\x10incluirRegistros\"X\n" +
+	"\fReporteCruce\x12\x12\n" +
+	"\x04fila\x18\x01 \x01(\tR\x04fila\x12\x18\n" +
+	"\acolumna\x18\x02 \x01(\tR\acolumna\x12\x1a\n" +
+	"\bcantidad\x18\x03 \x01(\x05R\bcantidad\"A\n" +
+	"\rReporteConteo\x12\x14\n" +
+	"\x05clave\x18\x01 \x01(\tR\x05clave\x12\x1a\n" +
+	"\bcantidad\x18\x02 \x01(\x05R\bcantidad\"\xfe\x06\n" +
+	"\x1aReporteExpedientesResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x129\n" +
+	"\n" +
+	"por_estado\x18\x02 \x03(\v2\x1a.expedientes.ReporteConteoR\tporEstado\x125\n" +
+	"\bpor_tipo\x18\x03 \x03(\v2\x1a.expedientes.ReporteConteoR\aporTipo\x12?\n" +
+	"\rpor_prioridad\x18\x04 \x03(\v2\x1a.expedientes.ReporteConteoR\fporPrioridad\x125\n" +
+	"\bpor_area\x18\x05 \x03(\v2\x1a.expedientes.ReporteConteoR\aporArea\x123\n" +
+	"\apor_mes\x18\x06 \x03(\v2\x1a.expedientes.ReporteConteoR\x06porMes\x12\x1e\n" +
+	"\n" +
+	"pendientes\x18\a \x01(\x05R\n" +
+	"pendientes\x12V\n" +
+	"\x19pendientes_por_antiguedad\x18\b \x03(\v2\x1a.expedientes.ReporteConteoR\x17pendientesPorAntiguedad\x12\x18\n" +
+	"\aalcance\x18\t \x01(\tR\aalcance\x12!\n" +
+	"\farea_alcance\x18\n" +
+	" \x01(\tR\vareaAlcance\x12\x1a\n" +
+	"\bgenerado\x18\v \x01(\tR\bgenerado\x120\n" +
+	"\x05serie\x18\f \x03(\v2\x1a.expedientes.ReporteConteoR\x05serie\x12\"\n" +
+	"\fgranularidad\x18\r \x01(\tR\fgranularidad\x12:\n" +
+	"\varea_estado\x18\x0e \x03(\v2\x19.expedientes.ReporteCruceR\n" +
+	"areaEstado\x12:\n" +
+	"\vtipo_estado\x18\x0f \x03(\v2\x19.expedientes.ReporteCruceR\n" +
+	"tipoEstado\x12N\n" +
+	"\x15registros_por_usuario\x18\x10 \x03(\v2\x1a.expedientes.ReporteConteoR\x13registrosPorUsuario\x12<\n" +
+	"\fserie_estado\x18\x11 \x03(\v2\x19.expedientes.ReporteCruceR\vserieEstado\"+\n" +
+	"\x15ReporteAlcanceRequest\x12\x12\n" +
+	"\x04tipo\x18\x01 \x01(\tR\x04tipo\":\n" +
+	"\x14ReporteExpedienteRef\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04tipo\x18\x02 \x01(\tR\x04tipo\"\x9a\x01\n" +
+	"\x16ReporteAlcanceResponse\x12C\n" +
+	"\vexpedientes\x18\x01 \x03(\v2!.expedientes.ReporteExpedienteRefR\vexpedientes\x12\x18\n" +
+	"\aalcance\x18\x02 \x01(\tR\aalcance\x12!\n" +
+	"\farea_alcance\x18\x03 \x01(\tR\vareaAlcance2\xd7\n" +
+	"\n" +
 	"\vExpedientes\x12_\n" +
 	"\x10CreateExpediente\x12$.expedientes.CreateExpedienteRequest\x1a%.expedientes.CreateExpedienteResponse\x12V\n" +
 	"\rGetExpediente\x12!.expedientes.GetExpedienteRequest\x1a\".expedientes.GetExpedienteResponse\x12\\\n" +
@@ -1483,7 +2108,9 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x12RechazarExpediente\x12&.expedientes.RechazarExpedienteRequest\x1a'.expedientes.RechazarExpedienteResponse\x12e\n" +
 	"\x12CorregirExpediente\x12&.expedientes.CorregirExpedienteRequest\x1a'.expedientes.CorregirExpedienteResponse\x12e\n" +
 	"\x12ResolverExpediente\x12&.expedientes.ResolverExpedienteRequest\x1a'.expedientes.ResolverExpedienteResponse\x12e\n" +
-	"\x12ValidateDerivacion\x12&.expedientes.ValidateDerivacionRequest\x1a'.expedientes.ValidateDerivacionResponseB\x0fZ\r./expedientesb\x06proto3"
+	"\x12ValidateDerivacion\x12&.expedientes.ValidateDerivacionRequest\x1a'.expedientes.ValidateDerivacionResponse\x12e\n" +
+	"\x12ReporteExpedientes\x12&.expedientes.ReporteExpedientesRequest\x1a'.expedientes.ReporteExpedientesResponse\x12d\n" +
+	"\x19ReporteAlcanceExpedientes\x12\".expedientes.ReporteAlcanceRequest\x1a#.expedientes.ReporteAlcanceResponseB\x0fZ\r./expedientesb\x06proto3"
 
 var (
 	file_expedientes_service_proto_rawDescOnce sync.Once
@@ -1497,7 +2124,7 @@ func file_expedientes_service_proto_rawDescGZIP() []byte {
 	return file_expedientes_service_proto_rawDescData
 }
 
-var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_expedientes_service_proto_goTypes = []any{
 	(*Expediente)(nil),                 // 0: expedientes.Expediente
 	(*CreateExpedienteRequest)(nil),    // 1: expedientes.CreateExpedienteRequest
@@ -1524,6 +2151,13 @@ var file_expedientes_service_proto_goTypes = []any{
 	(*ResolverExpedienteResponse)(nil), // 22: expedientes.ResolverExpedienteResponse
 	(*ValidateDerivacionRequest)(nil),  // 23: expedientes.ValidateDerivacionRequest
 	(*ValidateDerivacionResponse)(nil), // 24: expedientes.ValidateDerivacionResponse
+	(*ReporteExpedientesRequest)(nil),  // 25: expedientes.ReporteExpedientesRequest
+	(*ReporteCruce)(nil),               // 26: expedientes.ReporteCruce
+	(*ReporteConteo)(nil),              // 27: expedientes.ReporteConteo
+	(*ReporteExpedientesResponse)(nil), // 28: expedientes.ReporteExpedientesResponse
+	(*ReporteAlcanceRequest)(nil),      // 29: expedientes.ReporteAlcanceRequest
+	(*ReporteExpedienteRef)(nil),       // 30: expedientes.ReporteExpedienteRef
+	(*ReporteAlcanceResponse)(nil),     // 31: expedientes.ReporteAlcanceResponse
 }
 var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 0: expedientes.CreateExpedienteResponse.expediente:type_name -> expedientes.Expediente
@@ -1536,35 +2170,51 @@ var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 7: expedientes.RechazarExpedienteResponse.expediente:type_name -> expedientes.Expediente
 	0,  // 8: expedientes.CorregirExpedienteResponse.expediente:type_name -> expedientes.Expediente
 	0,  // 9: expedientes.ResolverExpedienteResponse.expediente:type_name -> expedientes.Expediente
-	1,  // 10: expedientes.Expedientes.CreateExpediente:input_type -> expedientes.CreateExpedienteRequest
-	3,  // 11: expedientes.Expedientes.GetExpediente:input_type -> expedientes.GetExpedienteRequest
-	5,  // 12: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
-	7,  // 13: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
-	9,  // 14: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
-	11, // 15: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
-	13, // 16: expedientes.Expedientes.UpdateArea:input_type -> expedientes.UpdateAreaRequest
-	15, // 17: expedientes.Expedientes.DerivarExpediente:input_type -> expedientes.DerivarExpedienteRequest
-	17, // 18: expedientes.Expedientes.RechazarExpediente:input_type -> expedientes.RechazarExpedienteRequest
-	19, // 19: expedientes.Expedientes.CorregirExpediente:input_type -> expedientes.CorregirExpedienteRequest
-	21, // 20: expedientes.Expedientes.ResolverExpediente:input_type -> expedientes.ResolverExpedienteRequest
-	23, // 21: expedientes.Expedientes.ValidateDerivacion:input_type -> expedientes.ValidateDerivacionRequest
-	2,  // 22: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
-	4,  // 23: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
-	6,  // 24: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
-	8,  // 25: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
-	10, // 26: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
-	12, // 27: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
-	14, // 28: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
-	16, // 29: expedientes.Expedientes.DerivarExpediente:output_type -> expedientes.DerivarExpedienteResponse
-	18, // 30: expedientes.Expedientes.RechazarExpediente:output_type -> expedientes.RechazarExpedienteResponse
-	20, // 31: expedientes.Expedientes.CorregirExpediente:output_type -> expedientes.CorregirExpedienteResponse
-	22, // 32: expedientes.Expedientes.ResolverExpediente:output_type -> expedientes.ResolverExpedienteResponse
-	24, // 33: expedientes.Expedientes.ValidateDerivacion:output_type -> expedientes.ValidateDerivacionResponse
-	22, // [22:34] is the sub-list for method output_type
-	10, // [10:22] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	27, // 10: expedientes.ReporteExpedientesResponse.por_estado:type_name -> expedientes.ReporteConteo
+	27, // 11: expedientes.ReporteExpedientesResponse.por_tipo:type_name -> expedientes.ReporteConteo
+	27, // 12: expedientes.ReporteExpedientesResponse.por_prioridad:type_name -> expedientes.ReporteConteo
+	27, // 13: expedientes.ReporteExpedientesResponse.por_area:type_name -> expedientes.ReporteConteo
+	27, // 14: expedientes.ReporteExpedientesResponse.por_mes:type_name -> expedientes.ReporteConteo
+	27, // 15: expedientes.ReporteExpedientesResponse.pendientes_por_antiguedad:type_name -> expedientes.ReporteConteo
+	27, // 16: expedientes.ReporteExpedientesResponse.serie:type_name -> expedientes.ReporteConteo
+	26, // 17: expedientes.ReporteExpedientesResponse.area_estado:type_name -> expedientes.ReporteCruce
+	26, // 18: expedientes.ReporteExpedientesResponse.tipo_estado:type_name -> expedientes.ReporteCruce
+	27, // 19: expedientes.ReporteExpedientesResponse.registros_por_usuario:type_name -> expedientes.ReporteConteo
+	26, // 20: expedientes.ReporteExpedientesResponse.serie_estado:type_name -> expedientes.ReporteCruce
+	30, // 21: expedientes.ReporteAlcanceResponse.expedientes:type_name -> expedientes.ReporteExpedienteRef
+	1,  // 22: expedientes.Expedientes.CreateExpediente:input_type -> expedientes.CreateExpedienteRequest
+	3,  // 23: expedientes.Expedientes.GetExpediente:input_type -> expedientes.GetExpedienteRequest
+	5,  // 24: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
+	7,  // 25: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
+	9,  // 26: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
+	11, // 27: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
+	13, // 28: expedientes.Expedientes.UpdateArea:input_type -> expedientes.UpdateAreaRequest
+	15, // 29: expedientes.Expedientes.DerivarExpediente:input_type -> expedientes.DerivarExpedienteRequest
+	17, // 30: expedientes.Expedientes.RechazarExpediente:input_type -> expedientes.RechazarExpedienteRequest
+	19, // 31: expedientes.Expedientes.CorregirExpediente:input_type -> expedientes.CorregirExpedienteRequest
+	21, // 32: expedientes.Expedientes.ResolverExpediente:input_type -> expedientes.ResolverExpedienteRequest
+	23, // 33: expedientes.Expedientes.ValidateDerivacion:input_type -> expedientes.ValidateDerivacionRequest
+	25, // 34: expedientes.Expedientes.ReporteExpedientes:input_type -> expedientes.ReporteExpedientesRequest
+	29, // 35: expedientes.Expedientes.ReporteAlcanceExpedientes:input_type -> expedientes.ReporteAlcanceRequest
+	2,  // 36: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
+	4,  // 37: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
+	6,  // 38: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
+	8,  // 39: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
+	10, // 40: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
+	12, // 41: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
+	14, // 42: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
+	16, // 43: expedientes.Expedientes.DerivarExpediente:output_type -> expedientes.DerivarExpedienteResponse
+	18, // 44: expedientes.Expedientes.RechazarExpediente:output_type -> expedientes.RechazarExpedienteResponse
+	20, // 45: expedientes.Expedientes.CorregirExpediente:output_type -> expedientes.CorregirExpedienteResponse
+	22, // 46: expedientes.Expedientes.ResolverExpediente:output_type -> expedientes.ResolverExpedienteResponse
+	24, // 47: expedientes.Expedientes.ValidateDerivacion:output_type -> expedientes.ValidateDerivacionResponse
+	28, // 48: expedientes.Expedientes.ReporteExpedientes:output_type -> expedientes.ReporteExpedientesResponse
+	31, // 49: expedientes.Expedientes.ReporteAlcanceExpedientes:output_type -> expedientes.ReporteAlcanceResponse
+	36, // [36:50] is the sub-list for method output_type
+	22, // [22:36] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_expedientes_service_proto_init() }
@@ -1578,7 +2228,7 @@ func file_expedientes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_expedientes_service_proto_rawDesc), len(file_expedientes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   25,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

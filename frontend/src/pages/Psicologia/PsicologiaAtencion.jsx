@@ -5,9 +5,9 @@ import HojaAtencion from "../../components/psicologia/HojaAtencion";
 import AtencionEstadoBadge from "../../components/psicologia/AtencionEstadoBadge";
 import AccionModal from "../../components/psicologia/AccionModal";
 import NombreResuelto from "../../components/psicologia/NombreResuelto";
+import EstudianteNombre from "../../components/dashboard/EstudianteNombre";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
-import { useEstudiantesBasic } from "../../hooks/useEstudiantesBasic";
 import {
     annulAtencion,
     correctAtencion,
@@ -119,9 +119,6 @@ function PsicologiaAtencion({ nueva = false }) {
     }, [dirty]);
 
     const version = versionVista?.version ?? atencion?.version;
-    const { estudiantes, unavailable: estudianteUnavailable } = useEstudiantesBasic(
-        expediente ? [expediente.estudiante_id] : []
-    );
     const { usuarios, unavailable } = useUsuariosBasic(
         [atencion?.autor_id, atencion?.registrada_por, atencion?.anulada_por, version?.creada_por].filter(Boolean)
     );
@@ -339,12 +336,7 @@ function PsicologiaAtencion({ nueva = false }) {
                     <div>
                         <dt>Estudiante</dt>
                         <dd>
-                            <NombreResuelto
-                                id={expediente?.estudiante_id}
-                                items={estudiantes}
-                                unavailable={estudianteUnavailable}
-                                esUsuario={false}
-                            />
+                            <EstudianteNombre id={expediente?.estudiante_id} resumen={expediente?.estudiante} />
                         </dd>
                     </div>
                     <div>

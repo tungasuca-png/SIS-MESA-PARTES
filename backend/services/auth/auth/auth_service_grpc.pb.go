@@ -19,24 +19,34 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Auth_Ping_FullMethodName                  = "/auth.Auth/Ping"
-	Auth_Register_FullMethodName              = "/auth.Auth/Register"
-	Auth_Login_FullMethodName                 = "/auth.Auth/Login"
-	Auth_RefreshToken_FullMethodName          = "/auth.Auth/RefreshToken"
-	Auth_Logout_FullMethodName                = "/auth.Auth/Logout"
-	Auth_ValidateToken_FullMethodName         = "/auth.Auth/ValidateToken"
-	Auth_HasPermission_FullMethodName         = "/auth.Auth/HasPermission"
-	Auth_GetMyPermissions_FullMethodName      = "/auth.Auth/GetMyPermissions"
-	Auth_ListRoles_FullMethodName             = "/auth.Auth/ListRoles"
-	Auth_ListPermissions_FullMethodName       = "/auth.Auth/ListPermissions"
-	Auth_GetRolePermissions_FullMethodName    = "/auth.Auth/GetRolePermissions"
-	Auth_UpdateRolePermissions_FullMethodName = "/auth.Auth/UpdateRolePermissions"
-	Auth_UpdateUserRole_FullMethodName        = "/auth.Auth/UpdateUserRole"
-	Auth_CreateUser_FullMethodName            = "/auth.Auth/CreateUser"
-	Auth_IssueServiceToken_FullMethodName     = "/auth.Auth/IssueServiceToken"
-	Auth_CreateServiceClient_FullMethodName   = "/auth.Auth/CreateServiceClient"
-	Auth_RevokeServiceClient_FullMethodName   = "/auth.Auth/RevokeServiceClient"
-	Auth_ListServiceClients_FullMethodName    = "/auth.Auth/ListServiceClients"
+	Auth_Ping_FullMethodName                            = "/auth.Auth/Ping"
+	Auth_Register_FullMethodName                        = "/auth.Auth/Register"
+	Auth_Login_FullMethodName                           = "/auth.Auth/Login"
+	Auth_RefreshToken_FullMethodName                    = "/auth.Auth/RefreshToken"
+	Auth_Logout_FullMethodName                          = "/auth.Auth/Logout"
+	Auth_ValidateToken_FullMethodName                   = "/auth.Auth/ValidateToken"
+	Auth_HasPermission_FullMethodName                   = "/auth.Auth/HasPermission"
+	Auth_GetMyPermissions_FullMethodName                = "/auth.Auth/GetMyPermissions"
+	Auth_ListRoles_FullMethodName                       = "/auth.Auth/ListRoles"
+	Auth_ListPermissions_FullMethodName                 = "/auth.Auth/ListPermissions"
+	Auth_GetRolePermissions_FullMethodName              = "/auth.Auth/GetRolePermissions"
+	Auth_UpdateRolePermissions_FullMethodName           = "/auth.Auth/UpdateRolePermissions"
+	Auth_UpdateUserRole_FullMethodName                  = "/auth.Auth/UpdateUserRole"
+	Auth_CreateUser_FullMethodName                      = "/auth.Auth/CreateUser"
+	Auth_IssueServiceToken_FullMethodName               = "/auth.Auth/IssueServiceToken"
+	Auth_CreateServiceClient_FullMethodName             = "/auth.Auth/CreateServiceClient"
+	Auth_RevokeServiceClient_FullMethodName             = "/auth.Auth/RevokeServiceClient"
+	Auth_ListServiceClients_FullMethodName              = "/auth.Auth/ListServiceClients"
+	Auth_GrantServiceClientPermission_FullMethodName    = "/auth.Auth/GrantServiceClientPermission"
+	Auth_WithdrawServiceClientPermission_FullMethodName = "/auth.Auth/WithdrawServiceClientPermission"
+	Auth_GoogleStart_FullMethodName                     = "/auth.Auth/GoogleStart"
+	Auth_GoogleCallback_FullMethodName                  = "/auth.Auth/GoogleCallback"
+	Auth_GoogleExchange_FullMethodName                  = "/auth.Auth/GoogleExchange"
+	Auth_GoogleRegister_FullMethodName                  = "/auth.Auth/GoogleRegister"
+	Auth_GoogleCompleteRegistration_FullMethodName      = "/auth.Auth/GoogleCompleteRegistration"
+	Auth_GoogleCancelRegistration_FullMethodName        = "/auth.Auth/GoogleCancelRegistration"
+	Auth_GoogleStartLink_FullMethodName                 = "/auth.Auth/GoogleStartLink"
+	Auth_GoogleLinkStatus_FullMethodName                = "/auth.Auth/GoogleLinkStatus"
 )
 
 // AuthClient is the client API for Auth service.
@@ -61,6 +71,16 @@ type AuthClient interface {
 	CreateServiceClient(ctx context.Context, in *CreateServiceClientRequest, opts ...grpc.CallOption) (*CreateServiceClientResponse, error)
 	RevokeServiceClient(ctx context.Context, in *RevokeServiceClientRequest, opts ...grpc.CallOption) (*RevokeServiceClientResponse, error)
 	ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error)
+	GrantServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error)
+	WithdrawServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error)
+	GoogleStart(ctx context.Context, in *GoogleStartRequest, opts ...grpc.CallOption) (*GoogleStartResponse, error)
+	GoogleCallback(ctx context.Context, in *GoogleCallbackRequest, opts ...grpc.CallOption) (*GoogleCallbackResponse, error)
+	GoogleExchange(ctx context.Context, in *GoogleExchangeRequest, opts ...grpc.CallOption) (*GoogleExchangeResponse, error)
+	GoogleRegister(ctx context.Context, in *GoogleRegisterRequest, opts ...grpc.CallOption) (*GoogleRegisterResponse, error)
+	GoogleCompleteRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCompleteResponse, error)
+	GoogleCancelRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCancelResponse, error)
+	GoogleStartLink(ctx context.Context, in *GoogleStartLinkRequest, opts ...grpc.CallOption) (*GoogleStartLinkResponse, error)
+	GoogleLinkStatus(ctx context.Context, in *GoogleLinkStatusRequest, opts ...grpc.CallOption) (*GoogleLinkStatusResponse, error)
 }
 
 type authClient struct {
@@ -251,6 +271,106 @@ func (c *authClient) ListServiceClients(ctx context.Context, in *ListServiceClie
 	return out, nil
 }
 
+func (c *authClient) GrantServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ServiceClientPermissionResponse)
+	err := c.cc.Invoke(ctx, Auth_GrantServiceClientPermission_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) WithdrawServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ServiceClientPermissionResponse)
+	err := c.cc.Invoke(ctx, Auth_WithdrawServiceClientPermission_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleStart(ctx context.Context, in *GoogleStartRequest, opts ...grpc.CallOption) (*GoogleStartResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleStartResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleStart_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleCallback(ctx context.Context, in *GoogleCallbackRequest, opts ...grpc.CallOption) (*GoogleCallbackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleCallbackResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleCallback_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleExchange(ctx context.Context, in *GoogleExchangeRequest, opts ...grpc.CallOption) (*GoogleExchangeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleExchangeResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleExchange_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleRegister(ctx context.Context, in *GoogleRegisterRequest, opts ...grpc.CallOption) (*GoogleRegisterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleRegisterResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleRegister_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleCompleteRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCompleteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleCompleteResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleCompleteRegistration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleCancelRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCancelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleCancelResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleCancelRegistration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleStartLink(ctx context.Context, in *GoogleStartLinkRequest, opts ...grpc.CallOption) (*GoogleStartLinkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleStartLinkResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleStartLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GoogleLinkStatus(ctx context.Context, in *GoogleLinkStatusRequest, opts ...grpc.CallOption) (*GoogleLinkStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GoogleLinkStatusResponse)
+	err := c.cc.Invoke(ctx, Auth_GoogleLinkStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility.
@@ -273,6 +393,16 @@ type AuthServer interface {
 	CreateServiceClient(context.Context, *CreateServiceClientRequest) (*CreateServiceClientResponse, error)
 	RevokeServiceClient(context.Context, *RevokeServiceClientRequest) (*RevokeServiceClientResponse, error)
 	ListServiceClients(context.Context, *ListServiceClientsRequest) (*ListServiceClientsResponse, error)
+	GrantServiceClientPermission(context.Context, *ServiceClientPermissionRequest) (*ServiceClientPermissionResponse, error)
+	WithdrawServiceClientPermission(context.Context, *ServiceClientPermissionRequest) (*ServiceClientPermissionResponse, error)
+	GoogleStart(context.Context, *GoogleStartRequest) (*GoogleStartResponse, error)
+	GoogleCallback(context.Context, *GoogleCallbackRequest) (*GoogleCallbackResponse, error)
+	GoogleExchange(context.Context, *GoogleExchangeRequest) (*GoogleExchangeResponse, error)
+	GoogleRegister(context.Context, *GoogleRegisterRequest) (*GoogleRegisterResponse, error)
+	GoogleCompleteRegistration(context.Context, *GoogleRegistrationRequest) (*GoogleCompleteResponse, error)
+	GoogleCancelRegistration(context.Context, *GoogleRegistrationRequest) (*GoogleCancelResponse, error)
+	GoogleStartLink(context.Context, *GoogleStartLinkRequest) (*GoogleStartLinkResponse, error)
+	GoogleLinkStatus(context.Context, *GoogleLinkStatusRequest) (*GoogleLinkStatusResponse, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -336,6 +466,36 @@ func (UnimplementedAuthServer) RevokeServiceClient(context.Context, *RevokeServi
 }
 func (UnimplementedAuthServer) ListServiceClients(context.Context, *ListServiceClientsRequest) (*ListServiceClientsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListServiceClients not implemented")
+}
+func (UnimplementedAuthServer) GrantServiceClientPermission(context.Context, *ServiceClientPermissionRequest) (*ServiceClientPermissionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GrantServiceClientPermission not implemented")
+}
+func (UnimplementedAuthServer) WithdrawServiceClientPermission(context.Context, *ServiceClientPermissionRequest) (*ServiceClientPermissionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method WithdrawServiceClientPermission not implemented")
+}
+func (UnimplementedAuthServer) GoogleStart(context.Context, *GoogleStartRequest) (*GoogleStartResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleStart not implemented")
+}
+func (UnimplementedAuthServer) GoogleCallback(context.Context, *GoogleCallbackRequest) (*GoogleCallbackResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleCallback not implemented")
+}
+func (UnimplementedAuthServer) GoogleExchange(context.Context, *GoogleExchangeRequest) (*GoogleExchangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleExchange not implemented")
+}
+func (UnimplementedAuthServer) GoogleRegister(context.Context, *GoogleRegisterRequest) (*GoogleRegisterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleRegister not implemented")
+}
+func (UnimplementedAuthServer) GoogleCompleteRegistration(context.Context, *GoogleRegistrationRequest) (*GoogleCompleteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleCompleteRegistration not implemented")
+}
+func (UnimplementedAuthServer) GoogleCancelRegistration(context.Context, *GoogleRegistrationRequest) (*GoogleCancelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleCancelRegistration not implemented")
+}
+func (UnimplementedAuthServer) GoogleStartLink(context.Context, *GoogleStartLinkRequest) (*GoogleStartLinkResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleStartLink not implemented")
+}
+func (UnimplementedAuthServer) GoogleLinkStatus(context.Context, *GoogleLinkStatusRequest) (*GoogleLinkStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GoogleLinkStatus not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -682,6 +842,186 @@ func _Auth_ListServiceClients_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_GrantServiceClientPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceClientPermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GrantServiceClientPermission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GrantServiceClientPermission_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GrantServiceClientPermission(ctx, req.(*ServiceClientPermissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_WithdrawServiceClientPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceClientPermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).WithdrawServiceClientPermission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_WithdrawServiceClientPermission_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).WithdrawServiceClientPermission(ctx, req.(*ServiceClientPermissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleStartRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleStart(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleStart_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleStart(ctx, req.(*GoogleStartRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleCallbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleCallback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleCallback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleCallback(ctx, req.(*GoogleCallbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleExchange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleExchangeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleExchange(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleExchange_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleExchange(ctx, req.(*GoogleExchangeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleRegisterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleRegister(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleRegister_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleRegister(ctx, req.(*GoogleRegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleCompleteRegistration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleRegistrationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleCompleteRegistration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleCompleteRegistration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleCompleteRegistration(ctx, req.(*GoogleRegistrationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleCancelRegistration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleRegistrationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleCancelRegistration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleCancelRegistration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleCancelRegistration(ctx, req.(*GoogleRegistrationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleStartLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleStartLinkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleStartLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleStartLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleStartLink(ctx, req.(*GoogleStartLinkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GoogleLinkStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleLinkStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GoogleLinkStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GoogleLinkStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GoogleLinkStatus(ctx, req.(*GoogleLinkStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -760,6 +1100,46 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListServiceClients",
 			Handler:    _Auth_ListServiceClients_Handler,
+		},
+		{
+			MethodName: "GrantServiceClientPermission",
+			Handler:    _Auth_GrantServiceClientPermission_Handler,
+		},
+		{
+			MethodName: "WithdrawServiceClientPermission",
+			Handler:    _Auth_WithdrawServiceClientPermission_Handler,
+		},
+		{
+			MethodName: "GoogleStart",
+			Handler:    _Auth_GoogleStart_Handler,
+		},
+		{
+			MethodName: "GoogleCallback",
+			Handler:    _Auth_GoogleCallback_Handler,
+		},
+		{
+			MethodName: "GoogleExchange",
+			Handler:    _Auth_GoogleExchange_Handler,
+		},
+		{
+			MethodName: "GoogleRegister",
+			Handler:    _Auth_GoogleRegister_Handler,
+		},
+		{
+			MethodName: "GoogleCompleteRegistration",
+			Handler:    _Auth_GoogleCompleteRegistration_Handler,
+		},
+		{
+			MethodName: "GoogleCancelRegistration",
+			Handler:    _Auth_GoogleCancelRegistration_Handler,
+		},
+		{
+			MethodName: "GoogleStartLink",
+			Handler:    _Auth_GoogleStartLink_Handler,
+		},
+		{
+			MethodName: "GoogleLinkStatus",
+			Handler:    _Auth_GoogleLinkStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

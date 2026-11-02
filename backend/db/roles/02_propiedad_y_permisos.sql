@@ -43,6 +43,42 @@ GRANT SELECT, INSERT, DELETE         ON role_permissions TO auth_app;
 GRANT SELECT, INSERT, UPDATE         ON refresh_tokens   TO auth_app;
 GRANT SELECT, INSERT, UPDATE         ON permissions      TO auth_app;
 GRANT SELECT                         ON roles            TO auth_app;
+-- Tablas creadas por migraciones posteriores a la FASE 6N-3. El REVOKE de
+-- arriba también las alcanza, así que se vuelven a conceder aquí (mismo
+-- mínimo que cada migración) para que reejecutar este script no rompa Auth.
+-- Condicional: en una base nueva este script corre antes de esas migraciones,
+-- y entonces son ellas las que conceden.
+--   019 + 020: service_clients / service_client_permissions (DELETE solo en
+--              la relación de permisos de un sistema).
+--   022:       user_auth_providers (nunca DELETE).
+--   023:       oauth_login_codes (nunca DELETE); auth_eventos solo INSERT
+--              (auditoría de solo escritura: auth_app no la lee).
+--              cancelar_registro_google_pendiente(uuid): única vía para
+--              compensar un autorregistro con Google (auth_app no tiene
+--              DELETE sobre usuarios); EXECUTE solo para auth_app.
+DO $$ BEGIN
+    IF to_regclass('public.service_clients') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.service_clients TO auth_app;
+    END IF;
+    IF to_regclass('public.service_client_permissions') IS NOT NULL THEN
+        GRANT SELECT, INSERT, DELETE ON public.service_client_permissions TO auth_app;
+    END IF;
+    IF to_regclass('public.user_auth_providers') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.user_auth_providers TO auth_app;
+    END IF;
+    IF to_regclass('public.oauth_login_codes') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.oauth_login_codes TO auth_app;
+    END IF;
+    IF to_regclass('public.auth_eventos') IS NOT NULL THEN
+        GRANT INSERT ON public.auth_eventos TO auth_app;
+    END IF;
+    IF to_regprocedure('public.cancelar_registro_google_pendiente(uuid)') IS NOT NULL THEN
+        ALTER FUNCTION public.cancelar_registro_google_pendiente(uuid) OWNER TO auth_owner;
+        REVOKE ALL ON FUNCTION public.cancelar_registro_google_pendiente(uuid) FROM PUBLIC;
+        REVOKE ALL ON FUNCTION public.cancelar_registro_google_pendiente(uuid) FROM auth_tester;
+        GRANT EXECUTE ON FUNCTION public.cancelar_registro_google_pendiente(uuid) TO auth_app;
+    END IF;
+END $$;
 -- user_profiles: sin privilegios (Auth no la usa en ejecución).
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO auth_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE auth_owner IN SCHEMA public

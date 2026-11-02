@@ -29,6 +29,9 @@ type ServiceContext struct {
 	// Unavailable y nada más cambia.
 	ServiceClientRepository *repository.ServiceClientRepository
 	ServiceTokenIssuer      *security.ServiceTokenIssuer
+	// Acceso con Google (solo SOLICITANTES).
+	GoogleRepository *repository.GoogleRepository
+	Google           security.GoogleProvider
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -108,6 +111,16 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		log.Println("Tokens de servicio habilitados (client credentials)")
 	}
 
+	google := security.NewGoogleOIDC(security.GoogleConfig{
+		ClientID: c.Google.ClientID, ClientSecret: c.Google.ClientSecret,
+		RedirectURL: c.Google.RedirectURL, Issuer: c.Google.Issuer,
+	})
+	if google.Configurado() {
+		log.Println("Acceso con Google habilitado (solo SOLICITANTES)")
+	} else {
+		log.Println("Acceso con Google deshabilitado: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o GOOGLE_REDIRECT_URL no configurados")
+	}
+
 	return &ServiceContext{
 		Config:                   c,
 		DB:                       db,
@@ -120,6 +133,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		JWTManager:               security.NewJWTManager(c.JWTSecret, c.AccessTokenDuration),
 		ServiceClientRepository:  repository.NewServiceClientRepository(db),
 		ServiceTokenIssuer:       serviceIssuer,
+		GoogleRepository:         repository.NewGoogleRepository(db),
+		Google:                   google,
 	}
 }
 

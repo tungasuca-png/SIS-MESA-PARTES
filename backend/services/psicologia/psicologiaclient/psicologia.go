@@ -14,44 +14,47 @@ import (
 )
 
 type (
+	AnnulAtencionRequest              = psicologia.AnnulAtencionRequest
+	AtencionContenido                 = psicologia.AtencionContenido
+	AtencionPsicologica               = psicologia.AtencionPsicologica
+	AtencionResponse                  = psicologia.AtencionResponse
+	AtencionResumen                   = psicologia.AtencionResumen
+	AtencionVersion                   = psicologia.AtencionVersion
+	AtencionVersionResumen            = psicologia.AtencionVersionResumen
+	BuscarEstudiantesRequest          = psicologia.BuscarEstudiantesRequest
+	BuscarEstudiantesResponse         = psicologia.BuscarEstudiantesResponse
 	CloseExpedienteRequest            = psicologia.CloseExpedienteRequest
 	CloseExpedienteResponse           = psicologia.CloseExpedienteResponse
+	CorrectAtencionRequest            = psicologia.CorrectAtencionRequest
+	CreateAtencionDraftRequest        = psicologia.CreateAtencionDraftRequest
+	DiscardAtencionDraftRequest       = psicologia.DiscardAtencionDraftRequest
+	DiscardAtencionDraftResponse      = psicologia.DiscardAtencionDraftResponse
+	EstudianteBusqueda                = psicologia.EstudianteBusqueda
+	EstudianteResumen                 = psicologia.EstudianteResumen
 	ExpedientePsicologico             = psicologia.ExpedientePsicologico
+	ExportAtencionPdfRequest          = psicologia.ExportAtencionPdfRequest
+	ExportAtencionPdfResponse         = psicologia.ExportAtencionPdfResponse
+	GetAtencionRequest                = psicologia.GetAtencionRequest
+	GetAtencionVersionRequest         = psicologia.GetAtencionVersionRequest
 	GetExpedienteByEstudianteRequest  = psicologia.GetExpedienteByEstudianteRequest
 	GetExpedienteByEstudianteResponse = psicologia.GetExpedienteByEstudianteResponse
 	GetExpedienteRequest              = psicologia.GetExpedienteRequest
 	GetExpedienteResponse             = psicologia.GetExpedienteResponse
+	ListAtencionVersionsRequest       = psicologia.ListAtencionVersionsRequest
+	ListAtencionVersionsResponse      = psicologia.ListAtencionVersionsResponse
+	ListAtencionesRequest             = psicologia.ListAtencionesRequest
+	ListAtencionesResponse            = psicologia.ListAtencionesResponse
 	ListExpedientesRequest            = psicologia.ListExpedientesRequest
 	ListExpedientesResponse           = psicologia.ListExpedientesResponse
+	OpcionCatalogo                    = psicologia.OpcionCatalogo
 	OpenExpedienteRequest             = psicologia.OpenExpedienteRequest
 	OpenExpedienteResponse            = psicologia.OpenExpedienteResponse
+	RegisterAtencionRequest           = psicologia.RegisterAtencionRequest
 	ReopenExpedienteRequest           = psicologia.ReopenExpedienteRequest
 	ReopenExpedienteResponse          = psicologia.ReopenExpedienteResponse
+	UpdateAtencionDraftRequest        = psicologia.UpdateAtencionDraftRequest
 	UpdateExpedienteRequest           = psicologia.UpdateExpedienteRequest
 	UpdateExpedienteResponse          = psicologia.UpdateExpedienteResponse
-
-	AnnulAtencionRequest         = psicologia.AnnulAtencionRequest
-	AtencionContenido            = psicologia.AtencionContenido
-	AtencionPsicologica          = psicologia.AtencionPsicologica
-	AtencionResponse             = psicologia.AtencionResponse
-	AtencionResumen              = psicologia.AtencionResumen
-	AtencionVersion              = psicologia.AtencionVersion
-	AtencionVersionResumen       = psicologia.AtencionVersionResumen
-	CorrectAtencionRequest       = psicologia.CorrectAtencionRequest
-	CreateAtencionDraftRequest   = psicologia.CreateAtencionDraftRequest
-	DiscardAtencionDraftRequest  = psicologia.DiscardAtencionDraftRequest
-	DiscardAtencionDraftResponse = psicologia.DiscardAtencionDraftResponse
-	ExportAtencionPdfRequest     = psicologia.ExportAtencionPdfRequest
-	ExportAtencionPdfResponse    = psicologia.ExportAtencionPdfResponse
-	GetAtencionRequest           = psicologia.GetAtencionRequest
-	GetAtencionVersionRequest    = psicologia.GetAtencionVersionRequest
-	ListAtencionVersionsRequest  = psicologia.ListAtencionVersionsRequest
-	ListAtencionVersionsResponse = psicologia.ListAtencionVersionsResponse
-	ListAtencionesRequest        = psicologia.ListAtencionesRequest
-	ListAtencionesResponse       = psicologia.ListAtencionesResponse
-	OpcionCatalogo               = psicologia.OpcionCatalogo
-	RegisterAtencionRequest      = psicologia.RegisterAtencionRequest
-	UpdateAtencionDraftRequest   = psicologia.UpdateAtencionDraftRequest
 
 	Psicologia interface {
 		OpenExpediente(ctx context.Context, in *OpenExpedienteRequest, opts ...grpc.CallOption) (*OpenExpedienteResponse, error)
@@ -72,6 +75,7 @@ type (
 		GetAtencionVersion(ctx context.Context, in *GetAtencionVersionRequest, opts ...grpc.CallOption) (*AtencionResponse, error)
 		AnnulAtencion(ctx context.Context, in *AnnulAtencionRequest, opts ...grpc.CallOption) (*AtencionResponse, error)
 		ExportAtencionPdf(ctx context.Context, in *ExportAtencionPdfRequest, opts ...grpc.CallOption) (*ExportAtencionPdfResponse, error)
+		BuscarEstudiantes(ctx context.Context, in *BuscarEstudiantesRequest, opts ...grpc.CallOption) (*BuscarEstudiantesResponse, error)
 	}
 
 	defaultPsicologia struct {
@@ -173,4 +177,9 @@ func (m *defaultPsicologia) AnnulAtencion(ctx context.Context, in *AnnulAtencion
 func (m *defaultPsicologia) ExportAtencionPdf(ctx context.Context, in *ExportAtencionPdfRequest, opts ...grpc.CallOption) (*ExportAtencionPdfResponse, error) {
 	client := psicologia.NewPsicologiaClient(m.cli.Conn())
 	return client.ExportAtencionPdf(ctx, in, opts...)
+}
+
+func (m *defaultPsicologia) BuscarEstudiantes(ctx context.Context, in *BuscarEstudiantesRequest, opts ...grpc.CallOption) (*BuscarEstudiantesResponse, error) {
+	client := psicologia.NewPsicologiaClient(m.cli.Conn())
+	return client.BuscarEstudiantes(ctx, in, opts...)
 }

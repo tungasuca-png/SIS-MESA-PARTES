@@ -107,6 +107,24 @@ message UpsertUsuarioResponse {
 // el propio usuario puede tocar sobre sí mismo (ver Paso 22D/22B):
 // nombres, apellidos, DNI, tipo_usuario y activo permanecen fuera de este
 // RPC (edición administrativa, no implementada todavía).
+// Autoperfil del SOLICITANTE que se registró con Google. El id sale del JWT
+// (nunca de la solicitud) y el tipo es siempre SOLICITANTE (rol firmado en el
+// token). Solo crea el perfil si no existe: un reintento devuelve el existente
+// (created = false) y nunca sobrescribe datos. DNI duplicado -> AlreadyExists.
+message CreateMyProfileRequest {
+  string nombres = 1;
+  string apellidos = 2;
+  string dni = 3;
+  string telefono = 4;
+  string correo = 5;
+  string direccion = 6;
+}
+
+message CreateMyProfileResponse {
+  Usuario usuario = 1;
+  bool created = 2;
+}
+
 message UpdateMyProfileRequest {
   string telefono = 1;
   string correo = 2;
@@ -139,5 +157,6 @@ service Usuarios {
   rpc SearchUsuarios(SearchUsuariosRequest) returns (SearchUsuariosResponse);
   rpc UpsertUsuario(UpsertUsuarioRequest) returns (UpsertUsuarioResponse);
   rpc UpdateMyProfile(UpdateMyProfileRequest) returns (UpdateMyProfileResponse);
+  rpc CreateMyProfile(CreateMyProfileRequest) returns (CreateMyProfileResponse);
   rpc UpdateUsuarioRole(UpdateUsuarioRoleRequest) returns (UpdateUsuarioRoleResponse);
 }

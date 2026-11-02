@@ -136,3 +136,58 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Mi perfil: cuenta de Google (vinculación con reautenticación). */
+.mdp-google {
+    margin-top: 16px;
+}
+
+.mdp-google-estado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 0;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.mdp-google-insignia {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--dp-badge-done-bg);
+    color: var(--dp-badge-done-text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mdp-google-insignia--no {
+    background: var(--dp-surface-2);
+    color: var(--dp-text-secondary);
+}
+
+.mdp-google-ok {
+    margin: 8px 0;
+    font-size: 14px;
+    color: var(--dp-badge-done-text);
+}
+
+.mdp-google-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.mdp-google-fila .dp-form-group {
+    flex: 1 1 220px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 560px) {
+    .mdp-google-fila .dp-btn-primary {
+        width: 100%;
+    }
+}

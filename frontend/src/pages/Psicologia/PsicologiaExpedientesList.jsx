@@ -9,7 +9,6 @@ import Icon from "../../components/dashboard/Icon";
 import BuscarAlumnoPanel from "../../components/psicologia/BuscarAlumnoPanel";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
-import { useEstudiantesBasic } from "../../hooks/useEstudiantesBasic";
 import { listExpedientesPsicologicos } from "../../services/psicologiaService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDate } from "../../utils/format";
@@ -41,8 +40,14 @@ function PsicologiaExpedientesList() {
     const [refreshKey, setRefreshKey] = useState(0);
 
     const canCreate = can("psicologia.expedientes.create");
-    // El buscador consulta Estudiantes Service ("estudiantes.view").
-    const canBuscarAlumno = can("estudiantes.view");
+    // El buscador consulta la búsqueda de Psicología (credencial de servicio):
+    // misma regla que el backend (BuscarEstudiantes), basta uno de estos
+    // permisos; el usuario NO necesita estudiantes.view.
+    const canBuscarAlumno = can([
+        "psicologia.expedientes.view",
+        "psicologia.expedientes.view_own",
+        "psicologia.expedientes.create",
+    ]);
 
     useEffect(() => {
         let active = true;
@@ -69,11 +74,8 @@ function PsicologiaExpedientesList() {
     }, [estado, page, refreshKey]);
 
     const { usuarios, unavailable } = useUsuariosBasic(items.map((item) => item.responsable_id));
-    // FASE 5D: estudiante_id ahora se resuelve a un nombre real (Estudiantes
-    // Service), igual que responsable_id se resuelve contra Usuarios Service.
-    const { estudiantes, unavailable: estudiantesUnavailable } = useEstudiantesBasic(
-        items.map((item) => item.estudiante_id)
-    );
+    // El nombre del estudiante llega resuelto por Psicología en cada
+    // expediente (item.estudiante): el frontend no consulta Estudiantes.
 
     const handleEstadoChange = (event) => {
         const value = event.target.value;
@@ -143,11 +145,7 @@ function PsicologiaExpedientesList() {
                                         <tr key={item.id}>
                                             <td className="dp-table-code">{item.codigo}</td>
                                             <td>
-                                                <EstudianteNombre
-                                                    id={item.estudiante_id}
-                                                    estudiantes={estudiantes}
-                                                    unavailable={estudiantesUnavailable}
-                                                />
+                                                <EstudianteNombre id={item.estudiante_id} resumen={item.estudiante} />
                                             </td>
                                             <td>
                                                 <SolicitanteNombre

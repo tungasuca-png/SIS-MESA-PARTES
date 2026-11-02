@@ -14,6 +14,8 @@ import (
 )
 
 type (
+	CreateMyProfileRequest    = usuarios.CreateMyProfileRequest
+	CreateMyProfileResponse   = usuarios.CreateMyProfileResponse
 	GetUsuarioBasicRequest    = usuarios.GetUsuarioBasicRequest
 	GetUsuarioBasicResponse   = usuarios.GetUsuarioBasicResponse
 	GetUsuarioRequest         = usuarios.GetUsuarioRequest
@@ -24,12 +26,12 @@ type (
 	ListUsuariosResponse      = usuarios.ListUsuariosResponse
 	SearchUsuariosRequest     = usuarios.SearchUsuariosRequest
 	SearchUsuariosResponse    = usuarios.SearchUsuariosResponse
-	UpsertUsuarioRequest      = usuarios.UpsertUsuarioRequest
-	UpsertUsuarioResponse     = usuarios.UpsertUsuarioResponse
 	UpdateMyProfileRequest    = usuarios.UpdateMyProfileRequest
 	UpdateMyProfileResponse   = usuarios.UpdateMyProfileResponse
 	UpdateUsuarioRoleRequest  = usuarios.UpdateUsuarioRoleRequest
 	UpdateUsuarioRoleResponse = usuarios.UpdateUsuarioRoleResponse
+	UpsertUsuarioRequest      = usuarios.UpsertUsuarioRequest
+	UpsertUsuarioResponse     = usuarios.UpsertUsuarioResponse
 	Usuario                   = usuarios.Usuario
 	UsuarioBasic              = usuarios.UsuarioBasic
 
@@ -41,6 +43,7 @@ type (
 		SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 		UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
 		UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
+		CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error)
 		UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error)
 	}
 
@@ -88,6 +91,11 @@ func (m *defaultUsuarios) UpsertUsuario(ctx context.Context, in *UpsertUsuarioRe
 func (m *defaultUsuarios) UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error) {
 	client := usuarios.NewUsuariosClient(m.cli.Conn())
 	return client.UpdateMyProfile(ctx, in, opts...)
+}
+
+func (m *defaultUsuarios) CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.CreateMyProfile(ctx, in, opts...)
 }
 
 func (m *defaultUsuarios) UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error) {

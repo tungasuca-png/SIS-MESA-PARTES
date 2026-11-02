@@ -23,6 +23,9 @@ type (
 	GetDocumentoResponse      = documentos.GetDocumentoResponse
 	ListDocumentosRequest     = documentos.ListDocumentosRequest
 	ListDocumentosResponse    = documentos.ListDocumentosResponse
+	ReporteDocConteo          = documentos.ReporteDocConteo
+	ReporteDocumentosRequest  = documentos.ReporteDocumentosRequest
+	ReporteDocumentosResponse = documentos.ReporteDocumentosResponse
 	UploadDocumentoRequest    = documentos.UploadDocumentoRequest
 	UploadDocumentoResponse   = documentos.UploadDocumentoResponse
 
@@ -32,6 +35,7 @@ type (
 		DownloadDocumento(ctx context.Context, in *DownloadDocumentoRequest, opts ...grpc.CallOption) (*DownloadDocumentoResponse, error)
 		ListDocumentos(ctx context.Context, in *ListDocumentosRequest, opts ...grpc.CallOption) (*ListDocumentosResponse, error)
 		DeleteDocumento(ctx context.Context, in *DeleteDocumentoRequest, opts ...grpc.CallOption) (*DeleteDocumentoResponse, error)
+		ReporteDocumentos(ctx context.Context, in *ReporteDocumentosRequest, opts ...grpc.CallOption) (*ReporteDocumentosResponse, error)
 	}
 
 	defaultDocumentos struct {
@@ -68,4 +72,9 @@ func (m *defaultDocumentos) ListDocumentos(ctx context.Context, in *ListDocument
 func (m *defaultDocumentos) DeleteDocumento(ctx context.Context, in *DeleteDocumentoRequest, opts ...grpc.CallOption) (*DeleteDocumentoResponse, error) {
 	client := documentos.NewDocumentosClient(m.cli.Conn())
 	return client.DeleteDocumento(ctx, in, opts...)
+}
+
+func (m *defaultDocumentos) ReporteDocumentos(ctx context.Context, in *ReporteDocumentosRequest, opts ...grpc.CallOption) (*ReporteDocumentosResponse, error) {
+	client := documentos.NewDocumentosClient(m.cli.Conn())
+	return client.ReporteDocumentos(ctx, in, opts...)
 }

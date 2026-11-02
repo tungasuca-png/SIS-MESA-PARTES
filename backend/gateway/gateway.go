@@ -11,6 +11,7 @@ import (
 	"gateway/internal/config"
 	"gateway/internal/errorsafe"
 	"gateway/internal/handler"
+	"gateway/internal/limite"
 	"gateway/internal/logsafe"
 	"gateway/internal/svc"
 
@@ -50,6 +51,9 @@ func main() {
 	server.Use(logsafe.AccessLog)
 	// Cabeceras de seguridad en todas las respuestas (nosniff, no-store, ...).
 	server.Use(cabeceras.Seguridad)
+	// Límites de tasa: emisión de tokens (por IP) y búsquedas/resolución de
+	// estudiantes (por credencial e IP). 429 sin detalles.
+	server.Use(limite.Nuevo(limite.RutasPorDefecto(), c.ConfiarProxyLocal).Middleware)
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)

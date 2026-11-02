@@ -24,6 +24,7 @@ const (
 	Documentos_DownloadDocumento_FullMethodName = "/documentos.Documentos/DownloadDocumento"
 	Documentos_ListDocumentos_FullMethodName    = "/documentos.Documentos/ListDocumentos"
 	Documentos_DeleteDocumento_FullMethodName   = "/documentos.Documentos/DeleteDocumento"
+	Documentos_ReporteDocumentos_FullMethodName = "/documentos.Documentos/ReporteDocumentos"
 )
 
 // DocumentosClient is the client API for Documentos service.
@@ -35,6 +36,7 @@ type DocumentosClient interface {
 	DownloadDocumento(ctx context.Context, in *DownloadDocumentoRequest, opts ...grpc.CallOption) (*DownloadDocumentoResponse, error)
 	ListDocumentos(ctx context.Context, in *ListDocumentosRequest, opts ...grpc.CallOption) (*ListDocumentosResponse, error)
 	DeleteDocumento(ctx context.Context, in *DeleteDocumentoRequest, opts ...grpc.CallOption) (*DeleteDocumentoResponse, error)
+	ReporteDocumentos(ctx context.Context, in *ReporteDocumentosRequest, opts ...grpc.CallOption) (*ReporteDocumentosResponse, error)
 }
 
 type documentosClient struct {
@@ -95,6 +97,16 @@ func (c *documentosClient) DeleteDocumento(ctx context.Context, in *DeleteDocume
 	return out, nil
 }
 
+func (c *documentosClient) ReporteDocumentos(ctx context.Context, in *ReporteDocumentosRequest, opts ...grpc.CallOption) (*ReporteDocumentosResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReporteDocumentosResponse)
+	err := c.cc.Invoke(ctx, Documentos_ReporteDocumentos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DocumentosServer is the server API for Documentos service.
 // All implementations must embed UnimplementedDocumentosServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type DocumentosServer interface {
 	DownloadDocumento(context.Context, *DownloadDocumentoRequest) (*DownloadDocumentoResponse, error)
 	ListDocumentos(context.Context, *ListDocumentosRequest) (*ListDocumentosResponse, error)
 	DeleteDocumento(context.Context, *DeleteDocumentoRequest) (*DeleteDocumentoResponse, error)
+	ReporteDocumentos(context.Context, *ReporteDocumentosRequest) (*ReporteDocumentosResponse, error)
 	mustEmbedUnimplementedDocumentosServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedDocumentosServer) ListDocumentos(context.Context, *ListDocume
 }
 func (UnimplementedDocumentosServer) DeleteDocumento(context.Context, *DeleteDocumentoRequest) (*DeleteDocumentoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDocumento not implemented")
+}
+func (UnimplementedDocumentosServer) ReporteDocumentos(context.Context, *ReporteDocumentosRequest) (*ReporteDocumentosResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReporteDocumentos not implemented")
 }
 func (UnimplementedDocumentosServer) mustEmbedUnimplementedDocumentosServer() {}
 func (UnimplementedDocumentosServer) testEmbeddedByValue()                    {}
@@ -240,6 +256,24 @@ func _Documentos_DeleteDocumento_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Documentos_ReporteDocumentos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReporteDocumentosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocumentosServer).ReporteDocumentos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Documentos_ReporteDocumentos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocumentosServer).ReporteDocumentos(ctx, req.(*ReporteDocumentosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Documentos_ServiceDesc is the grpc.ServiceDesc for Documentos service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var Documentos_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDocumento",
 			Handler:    _Documentos_DeleteDocumento_Handler,
+		},
+		{
+			MethodName: "ReporteDocumentos",
+			Handler:    _Documentos_ReporteDocumentos_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

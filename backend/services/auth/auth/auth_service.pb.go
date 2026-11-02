@@ -2103,6 +2103,114 @@ func (x *RevokeServiceClientResponse) GetClient() *ServiceClient {
 	return nil
 }
 
+// Otorgar / retirar UN permiso a un sistema consumidor existente, sin
+// recrearlo ni tocar sus credenciales ("integraciones.manage"). Solo
+// permisos asignables a sistemas. Idempotentes: changed=false si no había
+// nada que hacer.
+type ServiceClientPermissionRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ClientId       string                 `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	PermissionCode string                 `protobuf:"bytes,2,opt,name=permission_code,json=permissionCode,proto3" json:"permission_code,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ServiceClientPermissionRequest) Reset() {
+	*x = ServiceClientPermissionRequest{}
+	mi := &file_auth_service_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServiceClientPermissionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceClientPermissionRequest) ProtoMessage() {}
+
+func (x *ServiceClientPermissionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceClientPermissionRequest.ProtoReflect.Descriptor instead.
+func (*ServiceClientPermissionRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *ServiceClientPermissionRequest) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *ServiceClientPermissionRequest) GetPermissionCode() string {
+	if x != nil {
+		return x.PermissionCode
+	}
+	return ""
+}
+
+type ServiceClientPermissionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Client        *ServiceClient         `protobuf:"bytes,1,opt,name=client,proto3" json:"client,omitempty"`
+	Changed       bool                   `protobuf:"varint,2,opt,name=changed,proto3" json:"changed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServiceClientPermissionResponse) Reset() {
+	*x = ServiceClientPermissionResponse{}
+	mi := &file_auth_service_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServiceClientPermissionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceClientPermissionResponse) ProtoMessage() {}
+
+func (x *ServiceClientPermissionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceClientPermissionResponse.ProtoReflect.Descriptor instead.
+func (*ServiceClientPermissionResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *ServiceClientPermissionResponse) GetClient() *ServiceClient {
+	if x != nil {
+		return x.Client
+	}
+	return nil
+}
+
+func (x *ServiceClientPermissionResponse) GetChanged() bool {
+	if x != nil {
+		return x.Changed
+	}
+	return false
+}
+
 type ListServiceClientsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -2111,7 +2219,7 @@ type ListServiceClientsRequest struct {
 
 func (x *ListServiceClientsRequest) Reset() {
 	*x = ListServiceClientsRequest{}
-	mi := &file_auth_service_proto_msgTypes[37]
+	mi := &file_auth_service_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2123,7 +2231,7 @@ func (x *ListServiceClientsRequest) String() string {
 func (*ListServiceClientsRequest) ProtoMessage() {}
 
 func (x *ListServiceClientsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[37]
+	mi := &file_auth_service_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2136,7 +2244,7 @@ func (x *ListServiceClientsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListServiceClientsRequest.ProtoReflect.Descriptor instead.
 func (*ListServiceClientsRequest) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{37}
+	return file_auth_service_proto_rawDescGZIP(), []int{39}
 }
 
 type ListServiceClientsResponse struct {
@@ -2148,7 +2256,7 @@ type ListServiceClientsResponse struct {
 
 func (x *ListServiceClientsResponse) Reset() {
 	*x = ListServiceClientsResponse{}
-	mi := &file_auth_service_proto_msgTypes[38]
+	mi := &file_auth_service_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2160,7 +2268,7 @@ func (x *ListServiceClientsResponse) String() string {
 func (*ListServiceClientsResponse) ProtoMessage() {}
 
 func (x *ListServiceClientsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[38]
+	mi := &file_auth_service_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2173,7 +2281,7 @@ func (x *ListServiceClientsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListServiceClientsResponse.ProtoReflect.Descriptor instead.
 func (*ListServiceClientsResponse) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{38}
+	return file_auth_service_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ListServiceClientsResponse) GetClients() []*ServiceClient {
@@ -2181,6 +2289,808 @@ func (x *ListServiceClientsResponse) GetClients() []*ServiceClient {
 		return x.Clients
 	}
 	return nil
+}
+
+type GoogleStartRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleStartRequest) Reset() {
+	*x = GoogleStartRequest{}
+	mi := &file_auth_service_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleStartRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleStartRequest) ProtoMessage() {}
+
+func (x *GoogleStartRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleStartRequest.ProtoReflect.Descriptor instead.
+func (*GoogleStartRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{41}
+}
+
+// state, nonce y verifier PKCE generados por Auth; el Gateway los guarda en
+// una cookie HttpOnly y los devuelve en el callback.
+type GoogleStartResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Nonce         string                 `protobuf:"bytes,3,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	Verifier      string                 `protobuf:"bytes,4,opt,name=verifier,proto3" json:"verifier,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleStartResponse) Reset() {
+	*x = GoogleStartResponse{}
+	mi := &file_auth_service_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleStartResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleStartResponse) ProtoMessage() {}
+
+func (x *GoogleStartResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleStartResponse.ProtoReflect.Descriptor instead.
+func (*GoogleStartResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *GoogleStartResponse) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *GoogleStartResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *GoogleStartResponse) GetNonce() string {
+	if x != nil {
+		return x.Nonce
+	}
+	return ""
+}
+
+func (x *GoogleStartResponse) GetVerifier() string {
+	if x != nil {
+		return x.Verifier
+	}
+	return ""
+}
+
+type GoogleCallbackRequest struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Code     string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	Verifier string                 `protobuf:"bytes,2,opt,name=verifier,proto3" json:"verifier,omitempty"`
+	Nonce    string                 `protobuf:"bytes,3,opt,name=nonce,proto3" json:"nonce,omitempty"`
+	// Código de VINCULACION (cookie HttpOnly del Gateway); vacío en login/registro.
+	LinkCode      string `protobuf:"bytes,4,opt,name=link_code,json=linkCode,proto3" json:"link_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleCallbackRequest) Reset() {
+	*x = GoogleCallbackRequest{}
+	mi := &file_auth_service_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleCallbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleCallbackRequest) ProtoMessage() {}
+
+func (x *GoogleCallbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleCallbackRequest.ProtoReflect.Descriptor instead.
+func (*GoogleCallbackRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *GoogleCallbackRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *GoogleCallbackRequest) GetVerifier() string {
+	if x != nil {
+		return x.Verifier
+	}
+	return ""
+}
+
+func (x *GoogleCallbackRequest) GetNonce() string {
+	if x != nil {
+		return x.Nonce
+	}
+	return ""
+}
+
+func (x *GoogleCallbackRequest) GetLinkCode() string {
+	if x != nil {
+		return x.LinkCode
+	}
+	return ""
+}
+
+// result: LOGIN (canjear por sesión), REGISTRO (formulario obligatorio) o
+// VINCULADO (Google quedó vinculado a la cuenta autenticada).
+type GoogleCallbackResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Result        string                 `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	LoginCode     string                 `protobuf:"bytes,2,opt,name=login_code,json=loginCode,proto3" json:"login_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleCallbackResponse) Reset() {
+	*x = GoogleCallbackResponse{}
+	mi := &file_auth_service_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleCallbackResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleCallbackResponse) ProtoMessage() {}
+
+func (x *GoogleCallbackResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleCallbackResponse.ProtoReflect.Descriptor instead.
+func (*GoogleCallbackResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *GoogleCallbackResponse) GetResult() string {
+	if x != nil {
+		return x.Result
+	}
+	return ""
+}
+
+func (x *GoogleCallbackResponse) GetLoginCode() string {
+	if x != nil {
+		return x.LoginCode
+	}
+	return ""
+}
+
+type GoogleExchangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LoginCode     string                 `protobuf:"bytes,1,opt,name=login_code,json=loginCode,proto3" json:"login_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleExchangeRequest) Reset() {
+	*x = GoogleExchangeRequest{}
+	mi := &file_auth_service_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleExchangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleExchangeRequest) ProtoMessage() {}
+
+func (x *GoogleExchangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleExchangeRequest.ProtoReflect.Descriptor instead.
+func (*GoogleExchangeRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *GoogleExchangeRequest) GetLoginCode() string {
+	if x != nil {
+		return x.LoginCode
+	}
+	return ""
+}
+
+// result: SESION (session con la misma forma que Login) o
+// REGISTRO_PENDIENTE (datos verificados por Google para el formulario).
+type GoogleExchangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Result        string                 `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	Session       *LoginResponse         `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Nombres       string                 `protobuf:"bytes,4,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	Apellidos     string                 `protobuf:"bytes,5,opt,name=apellidos,proto3" json:"apellidos,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleExchangeResponse) Reset() {
+	*x = GoogleExchangeResponse{}
+	mi := &file_auth_service_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleExchangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleExchangeResponse) ProtoMessage() {}
+
+func (x *GoogleExchangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleExchangeResponse.ProtoReflect.Descriptor instead.
+func (*GoogleExchangeResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *GoogleExchangeResponse) GetResult() string {
+	if x != nil {
+		return x.Result
+	}
+	return ""
+}
+
+func (x *GoogleExchangeResponse) GetSession() *LoginResponse {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+func (x *GoogleExchangeResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *GoogleExchangeResponse) GetNombres() string {
+	if x != nil {
+		return x.Nombres
+	}
+	return ""
+}
+
+func (x *GoogleExchangeResponse) GetApellidos() string {
+	if x != nil {
+		return x.Apellidos
+	}
+	return ""
+}
+
+// Paso 1 del registro: crea (o retoma) la cuenta SOLICITANTE con el DNI.
+// profile_token es un access token del nuevo usuario SOLO para que el Gateway
+// cree su perfil en Usuarios Service; nunca llega al navegador.
+type GoogleRegisterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LoginCode     string                 `protobuf:"bytes,1,opt,name=login_code,json=loginCode,proto3" json:"login_code,omitempty"`
+	Dni           string                 `protobuf:"bytes,2,opt,name=dni,proto3" json:"dni,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleRegisterRequest) Reset() {
+	*x = GoogleRegisterRequest{}
+	mi := &file_auth_service_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleRegisterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleRegisterRequest) ProtoMessage() {}
+
+func (x *GoogleRegisterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleRegisterRequest.ProtoReflect.Descriptor instead.
+func (*GoogleRegisterRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *GoogleRegisterRequest) GetLoginCode() string {
+	if x != nil {
+		return x.LoginCode
+	}
+	return ""
+}
+
+func (x *GoogleRegisterRequest) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+type GoogleRegisterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Dni           string                 `protobuf:"bytes,2,opt,name=dni,proto3" json:"dni,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	ProfileToken  string                 `protobuf:"bytes,4,opt,name=profile_token,json=profileToken,proto3" json:"profile_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleRegisterResponse) Reset() {
+	*x = GoogleRegisterResponse{}
+	mi := &file_auth_service_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleRegisterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleRegisterResponse) ProtoMessage() {}
+
+func (x *GoogleRegisterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleRegisterResponse.ProtoReflect.Descriptor instead.
+func (*GoogleRegisterResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *GoogleRegisterResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GoogleRegisterResponse) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+func (x *GoogleRegisterResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *GoogleRegisterResponse) GetProfileToken() string {
+	if x != nil {
+		return x.ProfileToken
+	}
+	return ""
+}
+
+// Paso 2 (perfil creado) o compensación (perfil rechazado).
+type GoogleRegistrationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LoginCode     string                 `protobuf:"bytes,1,opt,name=login_code,json=loginCode,proto3" json:"login_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleRegistrationRequest) Reset() {
+	*x = GoogleRegistrationRequest{}
+	mi := &file_auth_service_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleRegistrationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleRegistrationRequest) ProtoMessage() {}
+
+func (x *GoogleRegistrationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleRegistrationRequest.ProtoReflect.Descriptor instead.
+func (*GoogleRegistrationRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *GoogleRegistrationRequest) GetLoginCode() string {
+	if x != nil {
+		return x.LoginCode
+	}
+	return ""
+}
+
+type GoogleCompleteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Session       *LoginResponse         `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleCompleteResponse) Reset() {
+	*x = GoogleCompleteResponse{}
+	mi := &file_auth_service_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleCompleteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleCompleteResponse) ProtoMessage() {}
+
+func (x *GoogleCompleteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleCompleteResponse.ProtoReflect.Descriptor instead.
+func (*GoogleCompleteResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *GoogleCompleteResponse) GetSession() *LoginResponse {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+type GoogleCancelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cancelled     bool                   `protobuf:"varint,1,opt,name=cancelled,proto3" json:"cancelled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleCancelResponse) Reset() {
+	*x = GoogleCancelResponse{}
+	mi := &file_auth_service_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleCancelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleCancelResponse) ProtoMessage() {}
+
+func (x *GoogleCancelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleCancelResponse.ProtoReflect.Descriptor instead.
+func (*GoogleCancelResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *GoogleCancelResponse) GetCancelled() bool {
+	if x != nil {
+		return x.Cancelled
+	}
+	return false
+}
+
+// Vinculación: el usuario autenticado vuelve a demostrar el control de su
+// cuenta con su clave actual.
+type GoogleStartLinkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Password      string                 `protobuf:"bytes,1,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleStartLinkRequest) Reset() {
+	*x = GoogleStartLinkRequest{}
+	mi := &file_auth_service_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleStartLinkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleStartLinkRequest) ProtoMessage() {}
+
+func (x *GoogleStartLinkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleStartLinkRequest.ProtoReflect.Descriptor instead.
+func (*GoogleStartLinkRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *GoogleStartLinkRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type GoogleStartLinkResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LinkCode      string                 `protobuf:"bytes,1,opt,name=link_code,json=linkCode,proto3" json:"link_code,omitempty"`
+	ExpiresIn     int64                  `protobuf:"varint,2,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleStartLinkResponse) Reset() {
+	*x = GoogleStartLinkResponse{}
+	mi := &file_auth_service_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleStartLinkResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleStartLinkResponse) ProtoMessage() {}
+
+func (x *GoogleStartLinkResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleStartLinkResponse.ProtoReflect.Descriptor instead.
+func (*GoogleStartLinkResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{53}
+}
+
+func (x *GoogleStartLinkResponse) GetLinkCode() string {
+	if x != nil {
+		return x.LinkCode
+	}
+	return ""
+}
+
+func (x *GoogleStartLinkResponse) GetExpiresIn() int64 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
+type GoogleLinkStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleLinkStatusRequest) Reset() {
+	*x = GoogleLinkStatusRequest{}
+	mi := &file_auth_service_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleLinkStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleLinkStatusRequest) ProtoMessage() {}
+
+func (x *GoogleLinkStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleLinkStatusRequest.ProtoReflect.Descriptor instead.
+func (*GoogleLinkStatusRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{54}
+}
+
+type GoogleLinkStatusResponse struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Linked bool                   `protobuf:"varint,1,opt,name=linked,proto3" json:"linked,omitempty"`
+	Email  string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	// available: Google está configurado en el servidor.
+	Available     bool `protobuf:"varint,3,opt,name=available,proto3" json:"available,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoogleLinkStatusResponse) Reset() {
+	*x = GoogleLinkStatusResponse{}
+	mi := &file_auth_service_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoogleLinkStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoogleLinkStatusResponse) ProtoMessage() {}
+
+func (x *GoogleLinkStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoogleLinkStatusResponse.ProtoReflect.Descriptor instead.
+func (*GoogleLinkStatusResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *GoogleLinkStatusResponse) GetLinked() bool {
+	if x != nil {
+		return x.Linked
+	}
+	return false
+}
+
+func (x *GoogleLinkStatusResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *GoogleLinkStatusResponse) GetAvailable() bool {
+	if x != nil {
+		return x.Available
+	}
+	return false
 }
 
 var File_auth_service_proto protoreflect.FileDescriptor
@@ -2325,11 +3235,67 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x1aRevokeServiceClientRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
 	"\x1bRevokeServiceClientResponse\x12+\n" +
-	"\x06client\x18\x01 \x01(\v2\x13.auth.ServiceClientR\x06client\"\x1b\n" +
+	"\x06client\x18\x01 \x01(\v2\x13.auth.ServiceClientR\x06client\"f\n" +
+	"\x1eServiceClientPermissionRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\tR\bclientId\x12'\n" +
+	"\x0fpermission_code\x18\x02 \x01(\tR\x0epermissionCode\"h\n" +
+	"\x1fServiceClientPermissionResponse\x12+\n" +
+	"\x06client\x18\x01 \x01(\v2\x13.auth.ServiceClientR\x06client\x12\x18\n" +
+	"\achanged\x18\x02 \x01(\bR\achanged\"\x1b\n" +
 	"\x19ListServiceClientsRequest\"K\n" +
 	"\x1aListServiceClientsResponse\x12-\n" +
-	"\aclients\x18\x01 \x03(\v2\x13.auth.ServiceClientR\aclients2\xbb\n" +
+	"\aclients\x18\x01 \x03(\v2\x13.auth.ServiceClientR\aclients\"\x14\n" +
+	"\x12GoogleStartRequest\"o\n" +
+	"\x13GoogleStartResponse\x12\x10\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x14\n" +
+	"\x05nonce\x18\x03 \x01(\tR\x05nonce\x12\x1a\n" +
+	"\bverifier\x18\x04 \x01(\tR\bverifier\"z\n" +
+	"\x15GoogleCallbackRequest\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x1a\n" +
+	"\bverifier\x18\x02 \x01(\tR\bverifier\x12\x14\n" +
+	"\x05nonce\x18\x03 \x01(\tR\x05nonce\x12\x1b\n" +
+	"\tlink_code\x18\x04 \x01(\tR\blinkCode\"O\n" +
+	"\x16GoogleCallbackResponse\x12\x16\n" +
+	"\x06result\x18\x01 \x01(\tR\x06result\x12\x1d\n" +
 	"\n" +
+	"login_code\x18\x02 \x01(\tR\tloginCode\"6\n" +
+	"\x15GoogleExchangeRequest\x12\x1d\n" +
+	"\n" +
+	"login_code\x18\x01 \x01(\tR\tloginCode\"\xad\x01\n" +
+	"\x16GoogleExchangeResponse\x12\x16\n" +
+	"\x06result\x18\x01 \x01(\tR\x06result\x12-\n" +
+	"\asession\x18\x02 \x01(\v2\x13.auth.LoginResponseR\asession\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x18\n" +
+	"\anombres\x18\x04 \x01(\tR\anombres\x12\x1c\n" +
+	"\tapellidos\x18\x05 \x01(\tR\tapellidos\"H\n" +
+	"\x15GoogleRegisterRequest\x12\x1d\n" +
+	"\n" +
+	"login_code\x18\x01 \x01(\tR\tloginCode\x12\x10\n" +
+	"\x03dni\x18\x02 \x01(\tR\x03dni\"~\n" +
+	"\x16GoogleRegisterResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x10\n" +
+	"\x03dni\x18\x02 \x01(\tR\x03dni\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12#\n" +
+	"\rprofile_token\x18\x04 \x01(\tR\fprofileToken\":\n" +
+	"\x19GoogleRegistrationRequest\x12\x1d\n" +
+	"\n" +
+	"login_code\x18\x01 \x01(\tR\tloginCode\"G\n" +
+	"\x16GoogleCompleteResponse\x12-\n" +
+	"\asession\x18\x01 \x01(\v2\x13.auth.LoginResponseR\asession\"4\n" +
+	"\x14GoogleCancelResponse\x12\x1c\n" +
+	"\tcancelled\x18\x01 \x01(\bR\tcancelled\"4\n" +
+	"\x16GoogleStartLinkRequest\x12\x1a\n" +
+	"\bpassword\x18\x01 \x01(\tR\bpassword\"U\n" +
+	"\x17GoogleStartLinkResponse\x12\x1b\n" +
+	"\tlink_code\x18\x01 \x01(\tR\blinkCode\x12\x1d\n" +
+	"\n" +
+	"expires_in\x18\x02 \x01(\x03R\texpiresIn\"\x19\n" +
+	"\x17GoogleLinkStatusRequest\"f\n" +
+	"\x18GoogleLinkStatusResponse\x12\x16\n" +
+	"\x06linked\x18\x01 \x01(\bR\x06linked\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1c\n" +
+	"\tavailable\x18\x03 \x01(\bR\tavailable2\x9c\x11\n" +
 	"\x04Auth\x12%\n" +
 	"\x04Ping\x12\r.auth.Request\x1a\x0e.auth.Response\x129\n" +
 	"\bRegister\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x120\n" +
@@ -2349,7 +3315,17 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x11IssueServiceToken\x12\x1e.auth.IssueServiceTokenRequest\x1a\x1f.auth.IssueServiceTokenResponse\x12Z\n" +
 	"\x13CreateServiceClient\x12 .auth.CreateServiceClientRequest\x1a!.auth.CreateServiceClientResponse\x12Z\n" +
 	"\x13RevokeServiceClient\x12 .auth.RevokeServiceClientRequest\x1a!.auth.RevokeServiceClientResponse\x12W\n" +
-	"\x12ListServiceClients\x12\x1f.auth.ListServiceClientsRequest\x1a .auth.ListServiceClientsResponseB\bZ\x06./authb\x06proto3"
+	"\x12ListServiceClients\x12\x1f.auth.ListServiceClientsRequest\x1a .auth.ListServiceClientsResponse\x12k\n" +
+	"\x1cGrantServiceClientPermission\x12$.auth.ServiceClientPermissionRequest\x1a%.auth.ServiceClientPermissionResponse\x12n\n" +
+	"\x1fWithdrawServiceClientPermission\x12$.auth.ServiceClientPermissionRequest\x1a%.auth.ServiceClientPermissionResponse\x12B\n" +
+	"\vGoogleStart\x12\x18.auth.GoogleStartRequest\x1a\x19.auth.GoogleStartResponse\x12K\n" +
+	"\x0eGoogleCallback\x12\x1b.auth.GoogleCallbackRequest\x1a\x1c.auth.GoogleCallbackResponse\x12K\n" +
+	"\x0eGoogleExchange\x12\x1b.auth.GoogleExchangeRequest\x1a\x1c.auth.GoogleExchangeResponse\x12K\n" +
+	"\x0eGoogleRegister\x12\x1b.auth.GoogleRegisterRequest\x1a\x1c.auth.GoogleRegisterResponse\x12[\n" +
+	"\x1aGoogleCompleteRegistration\x12\x1f.auth.GoogleRegistrationRequest\x1a\x1c.auth.GoogleCompleteResponse\x12W\n" +
+	"\x18GoogleCancelRegistration\x12\x1f.auth.GoogleRegistrationRequest\x1a\x1a.auth.GoogleCancelResponse\x12N\n" +
+	"\x0fGoogleStartLink\x12\x1c.auth.GoogleStartLinkRequest\x1a\x1d.auth.GoogleStartLinkResponse\x12Q\n" +
+	"\x10GoogleLinkStatus\x12\x1d.auth.GoogleLinkStatusRequest\x1a\x1e.auth.GoogleLinkStatusResponseB\bZ\x06./authb\x06proto3"
 
 var (
 	file_auth_service_proto_rawDescOnce sync.Once
@@ -2363,47 +3339,64 @@ func file_auth_service_proto_rawDescGZIP() []byte {
 	return file_auth_service_proto_rawDescData
 }
 
-var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
 var file_auth_service_proto_goTypes = []any{
-	(*Request)(nil),                       // 0: auth.Request
-	(*Response)(nil),                      // 1: auth.Response
-	(*RegisterRequest)(nil),               // 2: auth.RegisterRequest
-	(*RegisterResponse)(nil),              // 3: auth.RegisterResponse
-	(*LoginRequest)(nil),                  // 4: auth.LoginRequest
-	(*LoginResponse)(nil),                 // 5: auth.LoginResponse
-	(*RefreshTokenRequest)(nil),           // 6: auth.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),          // 7: auth.RefreshTokenResponse
-	(*LogoutRequest)(nil),                 // 8: auth.LogoutRequest
-	(*LogoutResponse)(nil),                // 9: auth.LogoutResponse
-	(*ValidateTokenRequest)(nil),          // 10: auth.ValidateTokenRequest
-	(*ValidateTokenResponse)(nil),         // 11: auth.ValidateTokenResponse
-	(*HasPermissionRequest)(nil),          // 12: auth.HasPermissionRequest
-	(*HasPermissionResponse)(nil),         // 13: auth.HasPermissionResponse
-	(*GetMyPermissionsRequest)(nil),       // 14: auth.GetMyPermissionsRequest
-	(*GetMyPermissionsResponse)(nil),      // 15: auth.GetMyPermissionsResponse
-	(*Role)(nil),                          // 16: auth.Role
-	(*ListRolesRequest)(nil),              // 17: auth.ListRolesRequest
-	(*ListRolesResponse)(nil),             // 18: auth.ListRolesResponse
-	(*Permission)(nil),                    // 19: auth.Permission
-	(*ListPermissionsRequest)(nil),        // 20: auth.ListPermissionsRequest
-	(*ListPermissionsResponse)(nil),       // 21: auth.ListPermissionsResponse
-	(*GetRolePermissionsRequest)(nil),     // 22: auth.GetRolePermissionsRequest
-	(*GetRolePermissionsResponse)(nil),    // 23: auth.GetRolePermissionsResponse
-	(*UpdateRolePermissionsRequest)(nil),  // 24: auth.UpdateRolePermissionsRequest
-	(*UpdateRolePermissionsResponse)(nil), // 25: auth.UpdateRolePermissionsResponse
-	(*UpdateUserRoleRequest)(nil),         // 26: auth.UpdateUserRoleRequest
-	(*UpdateUserRoleResponse)(nil),        // 27: auth.UpdateUserRoleResponse
-	(*CreateUserRequest)(nil),             // 28: auth.CreateUserRequest
-	(*CreateUserResponse)(nil),            // 29: auth.CreateUserResponse
-	(*IssueServiceTokenRequest)(nil),      // 30: auth.IssueServiceTokenRequest
-	(*IssueServiceTokenResponse)(nil),     // 31: auth.IssueServiceTokenResponse
-	(*ServiceClient)(nil),                 // 32: auth.ServiceClient
-	(*CreateServiceClientRequest)(nil),    // 33: auth.CreateServiceClientRequest
-	(*CreateServiceClientResponse)(nil),   // 34: auth.CreateServiceClientResponse
-	(*RevokeServiceClientRequest)(nil),    // 35: auth.RevokeServiceClientRequest
-	(*RevokeServiceClientResponse)(nil),   // 36: auth.RevokeServiceClientResponse
-	(*ListServiceClientsRequest)(nil),     // 37: auth.ListServiceClientsRequest
-	(*ListServiceClientsResponse)(nil),    // 38: auth.ListServiceClientsResponse
+	(*Request)(nil),                         // 0: auth.Request
+	(*Response)(nil),                        // 1: auth.Response
+	(*RegisterRequest)(nil),                 // 2: auth.RegisterRequest
+	(*RegisterResponse)(nil),                // 3: auth.RegisterResponse
+	(*LoginRequest)(nil),                    // 4: auth.LoginRequest
+	(*LoginResponse)(nil),                   // 5: auth.LoginResponse
+	(*RefreshTokenRequest)(nil),             // 6: auth.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),            // 7: auth.RefreshTokenResponse
+	(*LogoutRequest)(nil),                   // 8: auth.LogoutRequest
+	(*LogoutResponse)(nil),                  // 9: auth.LogoutResponse
+	(*ValidateTokenRequest)(nil),            // 10: auth.ValidateTokenRequest
+	(*ValidateTokenResponse)(nil),           // 11: auth.ValidateTokenResponse
+	(*HasPermissionRequest)(nil),            // 12: auth.HasPermissionRequest
+	(*HasPermissionResponse)(nil),           // 13: auth.HasPermissionResponse
+	(*GetMyPermissionsRequest)(nil),         // 14: auth.GetMyPermissionsRequest
+	(*GetMyPermissionsResponse)(nil),        // 15: auth.GetMyPermissionsResponse
+	(*Role)(nil),                            // 16: auth.Role
+	(*ListRolesRequest)(nil),                // 17: auth.ListRolesRequest
+	(*ListRolesResponse)(nil),               // 18: auth.ListRolesResponse
+	(*Permission)(nil),                      // 19: auth.Permission
+	(*ListPermissionsRequest)(nil),          // 20: auth.ListPermissionsRequest
+	(*ListPermissionsResponse)(nil),         // 21: auth.ListPermissionsResponse
+	(*GetRolePermissionsRequest)(nil),       // 22: auth.GetRolePermissionsRequest
+	(*GetRolePermissionsResponse)(nil),      // 23: auth.GetRolePermissionsResponse
+	(*UpdateRolePermissionsRequest)(nil),    // 24: auth.UpdateRolePermissionsRequest
+	(*UpdateRolePermissionsResponse)(nil),   // 25: auth.UpdateRolePermissionsResponse
+	(*UpdateUserRoleRequest)(nil),           // 26: auth.UpdateUserRoleRequest
+	(*UpdateUserRoleResponse)(nil),          // 27: auth.UpdateUserRoleResponse
+	(*CreateUserRequest)(nil),               // 28: auth.CreateUserRequest
+	(*CreateUserResponse)(nil),              // 29: auth.CreateUserResponse
+	(*IssueServiceTokenRequest)(nil),        // 30: auth.IssueServiceTokenRequest
+	(*IssueServiceTokenResponse)(nil),       // 31: auth.IssueServiceTokenResponse
+	(*ServiceClient)(nil),                   // 32: auth.ServiceClient
+	(*CreateServiceClientRequest)(nil),      // 33: auth.CreateServiceClientRequest
+	(*CreateServiceClientResponse)(nil),     // 34: auth.CreateServiceClientResponse
+	(*RevokeServiceClientRequest)(nil),      // 35: auth.RevokeServiceClientRequest
+	(*RevokeServiceClientResponse)(nil),     // 36: auth.RevokeServiceClientResponse
+	(*ServiceClientPermissionRequest)(nil),  // 37: auth.ServiceClientPermissionRequest
+	(*ServiceClientPermissionResponse)(nil), // 38: auth.ServiceClientPermissionResponse
+	(*ListServiceClientsRequest)(nil),       // 39: auth.ListServiceClientsRequest
+	(*ListServiceClientsResponse)(nil),      // 40: auth.ListServiceClientsResponse
+	(*GoogleStartRequest)(nil),              // 41: auth.GoogleStartRequest
+	(*GoogleStartResponse)(nil),             // 42: auth.GoogleStartResponse
+	(*GoogleCallbackRequest)(nil),           // 43: auth.GoogleCallbackRequest
+	(*GoogleCallbackResponse)(nil),          // 44: auth.GoogleCallbackResponse
+	(*GoogleExchangeRequest)(nil),           // 45: auth.GoogleExchangeRequest
+	(*GoogleExchangeResponse)(nil),          // 46: auth.GoogleExchangeResponse
+	(*GoogleRegisterRequest)(nil),           // 47: auth.GoogleRegisterRequest
+	(*GoogleRegisterResponse)(nil),          // 48: auth.GoogleRegisterResponse
+	(*GoogleRegistrationRequest)(nil),       // 49: auth.GoogleRegistrationRequest
+	(*GoogleCompleteResponse)(nil),          // 50: auth.GoogleCompleteResponse
+	(*GoogleCancelResponse)(nil),            // 51: auth.GoogleCancelResponse
+	(*GoogleStartLinkRequest)(nil),          // 52: auth.GoogleStartLinkRequest
+	(*GoogleStartLinkResponse)(nil),         // 53: auth.GoogleStartLinkResponse
+	(*GoogleLinkStatusRequest)(nil),         // 54: auth.GoogleLinkStatusRequest
+	(*GoogleLinkStatusResponse)(nil),        // 55: auth.GoogleLinkStatusResponse
 }
 var file_auth_service_proto_depIdxs = []int32{
 	16, // 0: auth.ListRolesResponse.roles:type_name -> auth.Role
@@ -2411,48 +3404,71 @@ var file_auth_service_proto_depIdxs = []int32{
 	19, // 2: auth.GetRolePermissionsResponse.permissions:type_name -> auth.Permission
 	32, // 3: auth.CreateServiceClientResponse.client:type_name -> auth.ServiceClient
 	32, // 4: auth.RevokeServiceClientResponse.client:type_name -> auth.ServiceClient
-	32, // 5: auth.ListServiceClientsResponse.clients:type_name -> auth.ServiceClient
-	0,  // 6: auth.Auth.Ping:input_type -> auth.Request
-	2,  // 7: auth.Auth.Register:input_type -> auth.RegisterRequest
-	4,  // 8: auth.Auth.Login:input_type -> auth.LoginRequest
-	6,  // 9: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenRequest
-	8,  // 10: auth.Auth.Logout:input_type -> auth.LogoutRequest
-	10, // 11: auth.Auth.ValidateToken:input_type -> auth.ValidateTokenRequest
-	12, // 12: auth.Auth.HasPermission:input_type -> auth.HasPermissionRequest
-	14, // 13: auth.Auth.GetMyPermissions:input_type -> auth.GetMyPermissionsRequest
-	17, // 14: auth.Auth.ListRoles:input_type -> auth.ListRolesRequest
-	20, // 15: auth.Auth.ListPermissions:input_type -> auth.ListPermissionsRequest
-	22, // 16: auth.Auth.GetRolePermissions:input_type -> auth.GetRolePermissionsRequest
-	24, // 17: auth.Auth.UpdateRolePermissions:input_type -> auth.UpdateRolePermissionsRequest
-	26, // 18: auth.Auth.UpdateUserRole:input_type -> auth.UpdateUserRoleRequest
-	28, // 19: auth.Auth.CreateUser:input_type -> auth.CreateUserRequest
-	30, // 20: auth.Auth.IssueServiceToken:input_type -> auth.IssueServiceTokenRequest
-	33, // 21: auth.Auth.CreateServiceClient:input_type -> auth.CreateServiceClientRequest
-	35, // 22: auth.Auth.RevokeServiceClient:input_type -> auth.RevokeServiceClientRequest
-	37, // 23: auth.Auth.ListServiceClients:input_type -> auth.ListServiceClientsRequest
-	1,  // 24: auth.Auth.Ping:output_type -> auth.Response
-	3,  // 25: auth.Auth.Register:output_type -> auth.RegisterResponse
-	5,  // 26: auth.Auth.Login:output_type -> auth.LoginResponse
-	7,  // 27: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
-	9,  // 28: auth.Auth.Logout:output_type -> auth.LogoutResponse
-	11, // 29: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
-	13, // 30: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
-	15, // 31: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
-	18, // 32: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
-	21, // 33: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
-	23, // 34: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
-	25, // 35: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
-	27, // 36: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
-	29, // 37: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
-	31, // 38: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
-	34, // 39: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
-	36, // 40: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
-	38, // 41: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
-	24, // [24:42] is the sub-list for method output_type
-	6,  // [6:24] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	32, // 5: auth.ServiceClientPermissionResponse.client:type_name -> auth.ServiceClient
+	32, // 6: auth.ListServiceClientsResponse.clients:type_name -> auth.ServiceClient
+	5,  // 7: auth.GoogleExchangeResponse.session:type_name -> auth.LoginResponse
+	5,  // 8: auth.GoogleCompleteResponse.session:type_name -> auth.LoginResponse
+	0,  // 9: auth.Auth.Ping:input_type -> auth.Request
+	2,  // 10: auth.Auth.Register:input_type -> auth.RegisterRequest
+	4,  // 11: auth.Auth.Login:input_type -> auth.LoginRequest
+	6,  // 12: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenRequest
+	8,  // 13: auth.Auth.Logout:input_type -> auth.LogoutRequest
+	10, // 14: auth.Auth.ValidateToken:input_type -> auth.ValidateTokenRequest
+	12, // 15: auth.Auth.HasPermission:input_type -> auth.HasPermissionRequest
+	14, // 16: auth.Auth.GetMyPermissions:input_type -> auth.GetMyPermissionsRequest
+	17, // 17: auth.Auth.ListRoles:input_type -> auth.ListRolesRequest
+	20, // 18: auth.Auth.ListPermissions:input_type -> auth.ListPermissionsRequest
+	22, // 19: auth.Auth.GetRolePermissions:input_type -> auth.GetRolePermissionsRequest
+	24, // 20: auth.Auth.UpdateRolePermissions:input_type -> auth.UpdateRolePermissionsRequest
+	26, // 21: auth.Auth.UpdateUserRole:input_type -> auth.UpdateUserRoleRequest
+	28, // 22: auth.Auth.CreateUser:input_type -> auth.CreateUserRequest
+	30, // 23: auth.Auth.IssueServiceToken:input_type -> auth.IssueServiceTokenRequest
+	33, // 24: auth.Auth.CreateServiceClient:input_type -> auth.CreateServiceClientRequest
+	35, // 25: auth.Auth.RevokeServiceClient:input_type -> auth.RevokeServiceClientRequest
+	39, // 26: auth.Auth.ListServiceClients:input_type -> auth.ListServiceClientsRequest
+	37, // 27: auth.Auth.GrantServiceClientPermission:input_type -> auth.ServiceClientPermissionRequest
+	37, // 28: auth.Auth.WithdrawServiceClientPermission:input_type -> auth.ServiceClientPermissionRequest
+	41, // 29: auth.Auth.GoogleStart:input_type -> auth.GoogleStartRequest
+	43, // 30: auth.Auth.GoogleCallback:input_type -> auth.GoogleCallbackRequest
+	45, // 31: auth.Auth.GoogleExchange:input_type -> auth.GoogleExchangeRequest
+	47, // 32: auth.Auth.GoogleRegister:input_type -> auth.GoogleRegisterRequest
+	49, // 33: auth.Auth.GoogleCompleteRegistration:input_type -> auth.GoogleRegistrationRequest
+	49, // 34: auth.Auth.GoogleCancelRegistration:input_type -> auth.GoogleRegistrationRequest
+	52, // 35: auth.Auth.GoogleStartLink:input_type -> auth.GoogleStartLinkRequest
+	54, // 36: auth.Auth.GoogleLinkStatus:input_type -> auth.GoogleLinkStatusRequest
+	1,  // 37: auth.Auth.Ping:output_type -> auth.Response
+	3,  // 38: auth.Auth.Register:output_type -> auth.RegisterResponse
+	5,  // 39: auth.Auth.Login:output_type -> auth.LoginResponse
+	7,  // 40: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
+	9,  // 41: auth.Auth.Logout:output_type -> auth.LogoutResponse
+	11, // 42: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
+	13, // 43: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
+	15, // 44: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
+	18, // 45: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
+	21, // 46: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
+	23, // 47: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
+	25, // 48: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
+	27, // 49: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
+	29, // 50: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
+	31, // 51: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
+	34, // 52: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
+	36, // 53: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
+	40, // 54: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
+	38, // 55: auth.Auth.GrantServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
+	38, // 56: auth.Auth.WithdrawServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
+	42, // 57: auth.Auth.GoogleStart:output_type -> auth.GoogleStartResponse
+	44, // 58: auth.Auth.GoogleCallback:output_type -> auth.GoogleCallbackResponse
+	46, // 59: auth.Auth.GoogleExchange:output_type -> auth.GoogleExchangeResponse
+	48, // 60: auth.Auth.GoogleRegister:output_type -> auth.GoogleRegisterResponse
+	50, // 61: auth.Auth.GoogleCompleteRegistration:output_type -> auth.GoogleCompleteResponse
+	51, // 62: auth.Auth.GoogleCancelRegistration:output_type -> auth.GoogleCancelResponse
+	53, // 63: auth.Auth.GoogleStartLink:output_type -> auth.GoogleStartLinkResponse
+	55, // 64: auth.Auth.GoogleLinkStatus:output_type -> auth.GoogleLinkStatusResponse
+	37, // [37:65] is the sub-list for method output_type
+	9,  // [9:37] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_auth_service_proto_init() }
@@ -2466,7 +3482,7 @@ func file_auth_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_service_proto_rawDesc), len(file_auth_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   39,
+			NumMessages:   56,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

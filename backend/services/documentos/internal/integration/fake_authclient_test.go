@@ -110,6 +110,46 @@ func (c *scriptedAuthClient) ListServiceClients(context.Context, *authclient.Lis
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) GrantServiceClientPermission(context.Context, *authclient.ServiceClientPermissionRequest, ...grpc.CallOption) (*authclient.ServiceClientPermissionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) WithdrawServiceClientPermission(context.Context, *authclient.ServiceClientPermissionRequest, ...grpc.CallOption) (*authclient.ServiceClientPermissionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleStart(context.Context, *authclient.GoogleStartRequest, ...grpc.CallOption) (*authclient.GoogleStartResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleCallback(context.Context, *authclient.GoogleCallbackRequest, ...grpc.CallOption) (*authclient.GoogleCallbackResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleExchange(context.Context, *authclient.GoogleExchangeRequest, ...grpc.CallOption) (*authclient.GoogleExchangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleRegister(context.Context, *authclient.GoogleRegisterRequest, ...grpc.CallOption) (*authclient.GoogleRegisterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleCompleteRegistration(context.Context, *authclient.GoogleRegistrationRequest, ...grpc.CallOption) (*authclient.GoogleCompleteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleCancelRegistration(context.Context, *authclient.GoogleRegistrationRequest, ...grpc.CallOption) (*authclient.GoogleCancelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleStartLink(context.Context, *authclient.GoogleStartLinkRequest, ...grpc.CallOption) (*authclient.GoogleStartLinkResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleLinkStatus(context.Context, *authclient.GoogleLinkStatusRequest, ...grpc.CallOption) (*authclient.GoogleLinkStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 // fakeExpedientesClient (Paso 19C) es un doble de prueba SOLO para
 // TestDocumentosIntegration: esa suite usa un expediente_id y un
 // solicitante_id SINTÉTICOS (fixedUUID) que nunca existen en
@@ -211,5 +251,16 @@ func (c *fakeExpedientesClient) ResolverExpediente(context.Context, *expedientes
 // -- no usado por Documentos, solo necesario para que este doble siga
 // satisfaciendo la interfaz completa.
 func (c *fakeExpedientesClient) ValidateDerivacion(context.Context, *expedientesclient.ValidateDerivacionRequest, ...grpc.CallOption) (*expedientesclient.ValidateDerivacionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+// ReporteExpedientes (Reportes, Fase 1): añadido a expedientesclient.Expedientes
+// -- no usado por Documentos, solo necesario para satisfacer la interfaz.
+func (c *fakeExpedientesClient) ReporteExpedientes(context.Context, *expedientesclient.ReporteExpedientesRequest, ...grpc.CallOption) (*expedientesclient.ReporteExpedientesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+// ReporteAlcanceExpedientes (Reportes, Fase 2): no usado en estas pruebas.
+func (c *fakeExpedientesClient) ReporteAlcanceExpedientes(context.Context, *expedientesclient.ReporteAlcanceRequest, ...grpc.CallOption) (*expedientesclient.ReporteAlcanceResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }

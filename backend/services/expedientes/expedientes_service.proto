@@ -156,6 +156,98 @@ message ValidateDerivacionResponse {
   bool valido = 1;
 }
 
+// ReporteExpedientes (Reportes, Fase 1): estadísticas AGREGADAS de
+// expedientes, calculadas en el servidor con las MISMAS reglas de alcance que
+// ListExpedientes (ADMIN/SECRETARIA: toda la institución; el resto del
+// personal: solo su área actual). Exige "reportes.view". Solo conteos: nunca
+// devuelve expedientes, solicitantes ni datos personales.
+//
+// Fecha usada: SIEMPRE fecha_registro (fecha de recepción), en hora de Lima.
+// desde/hasta (AAAA-MM-DD) son inclusivos y opcionales. Todos los filtros se
+// combinan (AND) y afectan a todas las agrupaciones.
+message ReporteExpedientesRequest {
+  string desde = 1;
+  string hasta = 2;
+  string estado = 3;
+  string tipo = 4;
+  string prioridad = 5;
+  string area = 6;
+  // Fase 2 (opcionales; sin ellos la respuesta es la de la Fase 1):
+  // granularidad DIA | SEMANA | MES de la serie "serie" (por fecha de
+  // registro); incluir_registros agrega los conteos por usuario registrador
+  // (solo para el reporte de actividad del Gateway, que los agrupa por ROL
+  // y nunca expone identificadores).
+  string granularidad = 7;
+  bool incluir_registros = 8;
+}
+
+// Celda de una tabla cruzada (fila x columna).
+message ReporteCruce {
+  string fila = 1;
+  string columna = 2;
+  int32 cantidad = 3;
+}
+
+message ReporteConteo {
+  string clave = 1;
+  int32 cantidad = 2;
+}
+
+message ReporteExpedientesResponse {
+  int32 total = 1;
+  // Catálogo completo (incluye ceros), en orden estable.
+  repeated ReporteConteo por_estado = 2;
+  repeated ReporteConteo por_tipo = 3;
+  repeated ReporteConteo por_prioridad = 4;
+  repeated ReporteConteo por_area = 5;
+  // Mes de registro (AAAA-MM), continuo y con ceros, del primer al último mes
+  // del periodo (o de los datos, si no se indica periodo).
+  repeated ReporteConteo por_mes = 6;
+  // Pendientes = PENDIENTE + EN_PROCESO; antigüedad en días desde
+  // fecha_registro hasta hoy (rangos 0-3, 4-7, 8-15, 16-30, 31+). No es un
+  // indicador de incumplimiento: no existen plazos institucionales.
+  int32 pendientes = 7;
+  repeated ReporteConteo pendientes_por_antiguedad = 8;
+  // INSTITUCION o AREA (el alcance real aplicado según el rol).
+  string alcance = 9;
+  string area_alcance = 10;
+  // Momento de cálculo (RFC 3339).
+  string generado = 11;
+  // Fase 2: serie continua por la granularidad pedida (claves AAAA-MM-DD
+  // para DIA y SEMANA —lunes—, AAAA-MM para MES); vacía si no se pidió.
+  repeated ReporteConteo serie = 12;
+  string granularidad = 13;
+  // Tablas cruzadas con el estado ACTUAL (solo celdas con valor).
+  repeated ReporteCruce area_estado = 14;
+  repeated ReporteCruce tipo_estado = 15;
+  // Solo con incluir_registros: clave = ID del usuario que registró.
+  repeated ReporteConteo registros_por_usuario = 16;
+  // Solo con granularidad: celdas (fila = clave del periodo de la serie,
+  // columna = estado ACTUAL) con cantidad > 0. Registros por periodo según
+  // su estado actual; no es historial de estados.
+  repeated ReporteCruce serie_estado = 17;
+}
+
+// ReporteAlcanceExpedientes (Fase 2): IDs y tipo de los expedientes ACTIVOS
+// visibles para el usuario (mismo permiso "reportes.view" y mismo alcance que
+// ReporteExpedientes). Lo usan Derivaciones y Documentos para sus reportes:
+// así excluyen bajas lógicas y respetan el alcance sin leer esta base.
+message ReporteAlcanceRequest {
+  string tipo = 1;
+}
+
+message ReporteExpedienteRef {
+  string id = 1;
+  string tipo = 2;
+}
+
+message ReporteAlcanceResponse {
+  repeated ReporteExpedienteRef expedientes = 1;
+  // INSTITUCION o AREA, como en ReporteExpedientes.
+  string alcance = 2;
+  string area_alcance = 3;
+}
+
 service Expedientes {
   rpc CreateExpediente(CreateExpedienteRequest) returns (CreateExpedienteResponse);
   rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
@@ -169,4 +261,6 @@ service Expedientes {
   rpc CorregirExpediente(CorregirExpedienteRequest) returns (CorregirExpedienteResponse);
   rpc ResolverExpediente(ResolverExpedienteRequest) returns (ResolverExpedienteResponse);
   rpc ValidateDerivacion(ValidateDerivacionRequest) returns (ValidateDerivacionResponse);
+  rpc ReporteExpedientes(ReporteExpedientesRequest) returns (ReporteExpedientesResponse);
+  rpc ReporteAlcanceExpedientes(ReporteAlcanceRequest) returns (ReporteAlcanceResponse);
 }

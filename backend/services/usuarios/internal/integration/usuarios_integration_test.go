@@ -126,6 +126,46 @@ func (c *scriptedAuthClient) ListServiceClients(context.Context, *authclient.Lis
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) GrantServiceClientPermission(context.Context, *authclient.ServiceClientPermissionRequest, ...grpc.CallOption) (*authclient.ServiceClientPermissionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) WithdrawServiceClientPermission(context.Context, *authclient.ServiceClientPermissionRequest, ...grpc.CallOption) (*authclient.ServiceClientPermissionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleStart(context.Context, *authclient.GoogleStartRequest, ...grpc.CallOption) (*authclient.GoogleStartResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleCallback(context.Context, *authclient.GoogleCallbackRequest, ...grpc.CallOption) (*authclient.GoogleCallbackResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleExchange(context.Context, *authclient.GoogleExchangeRequest, ...grpc.CallOption) (*authclient.GoogleExchangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleRegister(context.Context, *authclient.GoogleRegisterRequest, ...grpc.CallOption) (*authclient.GoogleRegisterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleCompleteRegistration(context.Context, *authclient.GoogleRegistrationRequest, ...grpc.CallOption) (*authclient.GoogleCompleteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleCancelRegistration(context.Context, *authclient.GoogleRegistrationRequest, ...grpc.CallOption) (*authclient.GoogleCancelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleStartLink(context.Context, *authclient.GoogleStartLinkRequest, ...grpc.CallOption) (*authclient.GoogleStartLinkResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GoogleLinkStatus(context.Context, *authclient.GoogleLinkStatusRequest, ...grpc.CallOption) (*authclient.GoogleLinkStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 func TestUsuariosIntegration(t *testing.T) {
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")

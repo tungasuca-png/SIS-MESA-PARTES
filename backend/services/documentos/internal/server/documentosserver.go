@@ -47,3 +47,8 @@ func (s *DocumentosServer) DeleteDocumento(ctx context.Context, in *documentos.D
 	l := logic.NewDeleteDocumentoLogic(ctx, s.svcCtx)
 	return l.DeleteDocumento(in)
 }
+
+func (s *DocumentosServer) ReporteDocumentos(ctx context.Context, in *documentos.ReporteDocumentosRequest) (*documentos.ReporteDocumentosResponse, error) {
+	l := logic.NewReporteDocumentosLogic(ctx, s.svcCtx)
+	return l.ReporteDocumentos(in)
+}

@@ -28,6 +28,7 @@ const (
 	Estudiantes_GetEstudiantePersonal_FullMethodName           = "/estudiantes.Estudiantes/GetEstudiantePersonal"
 	Estudiantes_UpdateEstudiantePersonal_FullMethodName        = "/estudiantes.Estudiantes/UpdateEstudiantePersonal"
 	Estudiantes_ResolveEstudiante_FullMethodName               = "/estudiantes.Estudiantes/ResolveEstudiante"
+	Estudiantes_BuscarEstudiantesSeleccion_FullMethodName      = "/estudiantes.Estudiantes/BuscarEstudiantesSeleccion"
 	Estudiantes_ListPosiblesDuplicados_FullMethodName          = "/estudiantes.Estudiantes/ListPosiblesDuplicados"
 	Estudiantes_ListMatriculasEstudiante_FullMethodName        = "/estudiantes.Estudiantes/ListMatriculasEstudiante"
 	Estudiantes_ListFamiliaresEstudiante_FullMethodName        = "/estudiantes.Estudiantes/ListFamiliaresEstudiante"
@@ -77,6 +78,7 @@ type EstudiantesClient interface {
 	GetEstudiantePersonal(ctx context.Context, in *GetEstudiantePersonalRequest, opts ...grpc.CallOption) (*GetEstudiantePersonalResponse, error)
 	UpdateEstudiantePersonal(ctx context.Context, in *UpdateEstudiantePersonalRequest, opts ...grpc.CallOption) (*UpdateEstudiantePersonalResponse, error)
 	ResolveEstudiante(ctx context.Context, in *ResolveEstudianteRequest, opts ...grpc.CallOption) (*ResolveEstudianteResponse, error)
+	BuscarEstudiantesSeleccion(ctx context.Context, in *BuscarEstudiantesSeleccionRequest, opts ...grpc.CallOption) (*BuscarEstudiantesSeleccionResponse, error)
 	ListPosiblesDuplicados(ctx context.Context, in *ListPosiblesDuplicadosRequest, opts ...grpc.CallOption) (*ListPosiblesDuplicadosResponse, error)
 	ListMatriculasEstudiante(ctx context.Context, in *ListMatriculasEstudianteRequest, opts ...grpc.CallOption) (*ListMatriculasEstudianteResponse, error)
 	ListFamiliaresEstudiante(ctx context.Context, in *ListFamiliaresEstudianteRequest, opts ...grpc.CallOption) (*ListFamiliaresEstudianteResponse, error)
@@ -212,6 +214,16 @@ func (c *estudiantesClient) ResolveEstudiante(ctx context.Context, in *ResolveEs
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResolveEstudianteResponse)
 	err := c.cc.Invoke(ctx, Estudiantes_ResolveEstudiante_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *estudiantesClient) BuscarEstudiantesSeleccion(ctx context.Context, in *BuscarEstudiantesSeleccionRequest, opts ...grpc.CallOption) (*BuscarEstudiantesSeleccionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BuscarEstudiantesSeleccionResponse)
+	err := c.cc.Invoke(ctx, Estudiantes_BuscarEstudiantesSeleccion_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -571,6 +583,7 @@ type EstudiantesServer interface {
 	GetEstudiantePersonal(context.Context, *GetEstudiantePersonalRequest) (*GetEstudiantePersonalResponse, error)
 	UpdateEstudiantePersonal(context.Context, *UpdateEstudiantePersonalRequest) (*UpdateEstudiantePersonalResponse, error)
 	ResolveEstudiante(context.Context, *ResolveEstudianteRequest) (*ResolveEstudianteResponse, error)
+	BuscarEstudiantesSeleccion(context.Context, *BuscarEstudiantesSeleccionRequest) (*BuscarEstudiantesSeleccionResponse, error)
 	ListPosiblesDuplicados(context.Context, *ListPosiblesDuplicadosRequest) (*ListPosiblesDuplicadosResponse, error)
 	ListMatriculasEstudiante(context.Context, *ListMatriculasEstudianteRequest) (*ListMatriculasEstudianteResponse, error)
 	ListFamiliaresEstudiante(context.Context, *ListFamiliaresEstudianteRequest) (*ListFamiliaresEstudianteResponse, error)
@@ -648,6 +661,9 @@ func (UnimplementedEstudiantesServer) UpdateEstudiantePersonal(context.Context, 
 }
 func (UnimplementedEstudiantesServer) ResolveEstudiante(context.Context, *ResolveEstudianteRequest) (*ResolveEstudianteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResolveEstudiante not implemented")
+}
+func (UnimplementedEstudiantesServer) BuscarEstudiantesSeleccion(context.Context, *BuscarEstudiantesSeleccionRequest) (*BuscarEstudiantesSeleccionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BuscarEstudiantesSeleccion not implemented")
 }
 func (UnimplementedEstudiantesServer) ListPosiblesDuplicados(context.Context, *ListPosiblesDuplicadosRequest) (*ListPosiblesDuplicadosResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListPosiblesDuplicados not implemented")
@@ -930,6 +946,24 @@ func _Estudiantes_ResolveEstudiante_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EstudiantesServer).ResolveEstudiante(ctx, req.(*ResolveEstudianteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Estudiantes_BuscarEstudiantesSeleccion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BuscarEstudiantesSeleccionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EstudiantesServer).BuscarEstudiantesSeleccion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Estudiantes_BuscarEstudiantesSeleccion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EstudiantesServer).BuscarEstudiantesSeleccion(ctx, req.(*BuscarEstudiantesSeleccionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1588,6 +1622,10 @@ var Estudiantes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResolveEstudiante",
 			Handler:    _Estudiantes_ResolveEstudiante_Handler,
+		},
+		{
+			MethodName: "BuscarEstudiantesSeleccion",
+			Handler:    _Estudiantes_BuscarEstudiantesSeleccion_Handler,
 		},
 		{
 			MethodName: "ListPosiblesDuplicados",

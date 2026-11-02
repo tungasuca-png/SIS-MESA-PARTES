@@ -42,4 +42,15 @@ type Config struct {
 	// svc.EstudianteVerifier para confirmar que estudiante_id existe antes de
 	// abrir un expediente.
 	EstudiantesRpc zrpc.RpcClientConf
+	// Credenciales de Psicología como sistema consumidor de Estudiantes
+	// (client credentials, permiso estudiantes.basic.view). Solo desde
+	// variables de entorno (PSICOLOGIA_CLIENT_ID / PSICOLOGIA_CLIENT_SECRET),
+	// nunca en el YAML ni en el repositorio. OBLIGATORIAS: ver
+	// svc.ResolverModoEstudiantes.
+	ServiceClientId     string `json:",optional"`
+	ServiceClientSecret string `json:",optional"`
+	// AllowLegacyAuth (PSICOLOGIA_ALLOW_LEGACY_AUTH, "false" por defecto):
+	// solo con Mode dev o test permite arrancar sin credenciales reenviando
+	// el JWT del usuario. En cualquier otro Mode impide el arranque.
+	AllowLegacyAuth string `json:",optional"`
 }

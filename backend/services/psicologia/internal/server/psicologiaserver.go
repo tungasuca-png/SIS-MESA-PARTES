@@ -103,3 +103,8 @@ func (s *PsicologiaServer) AnnulAtencion(ctx context.Context, in *psicologia.Ann
 func (s *PsicologiaServer) ExportAtencionPdf(ctx context.Context, in *psicologia.ExportAtencionPdfRequest) (*psicologia.ExportAtencionPdfResponse, error) {
 	return logic.NewAtencionLogic(ctx, s.svcCtx).ExportAtencionPdf(in)
 }
+
+func (s *PsicologiaServer) BuscarEstudiantes(ctx context.Context, in *psicologia.BuscarEstudiantesRequest) (*psicologia.BuscarEstudiantesResponse, error) {
+	l := logic.NewBuscarEstudiantesLogic(ctx, s.svcCtx)
+	return l.BuscarEstudiantes(in)
+}

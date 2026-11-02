@@ -26,6 +26,7 @@ const (
 	Usuarios_SearchUsuarios_FullMethodName    = "/usuarios.Usuarios/SearchUsuarios"
 	Usuarios_UpsertUsuario_FullMethodName     = "/usuarios.Usuarios/UpsertUsuario"
 	Usuarios_UpdateMyProfile_FullMethodName   = "/usuarios.Usuarios/UpdateMyProfile"
+	Usuarios_CreateMyProfile_FullMethodName   = "/usuarios.Usuarios/CreateMyProfile"
 	Usuarios_UpdateUsuarioRole_FullMethodName = "/usuarios.Usuarios/UpdateUsuarioRole"
 )
 
@@ -40,6 +41,7 @@ type UsuariosClient interface {
 	SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 	UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
 	UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
+	CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error)
 	UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error)
 }
 
@@ -121,6 +123,16 @@ func (c *usuariosClient) UpdateMyProfile(ctx context.Context, in *UpdateMyProfil
 	return out, nil
 }
 
+func (c *usuariosClient) CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateMyProfileResponse)
+	err := c.cc.Invoke(ctx, Usuarios_CreateMyProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *usuariosClient) UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateUsuarioRoleResponse)
@@ -142,6 +154,7 @@ type UsuariosServer interface {
 	SearchUsuarios(context.Context, *SearchUsuariosRequest) (*SearchUsuariosResponse, error)
 	UpsertUsuario(context.Context, *UpsertUsuarioRequest) (*UpsertUsuarioResponse, error)
 	UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error)
+	CreateMyProfile(context.Context, *CreateMyProfileRequest) (*CreateMyProfileResponse, error)
 	UpdateUsuarioRole(context.Context, *UpdateUsuarioRoleRequest) (*UpdateUsuarioRoleResponse, error)
 	mustEmbedUnimplementedUsuariosServer()
 }
@@ -173,6 +186,9 @@ func (UnimplementedUsuariosServer) UpsertUsuario(context.Context, *UpsertUsuario
 }
 func (UnimplementedUsuariosServer) UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMyProfile not implemented")
+}
+func (UnimplementedUsuariosServer) CreateMyProfile(context.Context, *CreateMyProfileRequest) (*CreateMyProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateMyProfile not implemented")
 }
 func (UnimplementedUsuariosServer) UpdateUsuarioRole(context.Context, *UpdateUsuarioRoleRequest) (*UpdateUsuarioRoleResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUsuarioRole not implemented")
@@ -324,6 +340,24 @@ func _Usuarios_UpdateMyProfile_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Usuarios_CreateMyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMyProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).CreateMyProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_CreateMyProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).CreateMyProfile(ctx, req.(*CreateMyProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Usuarios_UpdateUsuarioRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateUsuarioRoleRequest)
 	if err := dec(in); err != nil {
@@ -376,6 +410,10 @@ var Usuarios_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMyProfile",
 			Handler:    _Usuarios_UpdateMyProfile_Handler,
+		},
+		{
+			MethodName: "CreateMyProfile",
+			Handler:    _Usuarios_CreateMyProfile_Handler,
 		},
 		{
 			MethodName: "UpdateUsuarioRole",

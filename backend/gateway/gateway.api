@@ -37,6 +37,69 @@ type LoginResponse {
 	Role         string `json:"role"`
 }
 
+// ---- Acceso con Google (OpenID Connect + PKCE), solo SOLICITANTES ----
+// iniciar y callback responden con redirecciones (302) y cookies HttpOnly;
+// los códigos de un solo uso viajan al frontend en el fragmento (#) de la URL,
+// nunca JWT ni refresh tokens.
+type GoogleIniciarRequest {
+	// "vincular": usa la cookie de vinculación creada por /google/vincular.
+	Modo string `form:"modo,optional"`
+}
+
+type GoogleCallbackRequest {
+	Code  string `form:"code,optional"`
+	State string `form:"state,optional"`
+	Error string `form:"error,optional"`
+}
+
+type GoogleRedireccionResponse {}
+
+type GoogleCanjearRequest {
+	Codigo string `json:"codigo"`
+}
+
+// resultado: SESION (sesion con la misma forma que /api/auth/login) o
+// REGISTRO_PENDIENTE (datos que Google verificó para el formulario).
+type GoogleCanjearResponse {
+	Resultado string         `json:"resultado"`
+	Sesion    *LoginResponse `json:"sesion,omitempty"`
+	Correo    string         `json:"correo,omitempty"`
+	Nombres   string         `json:"nombres,omitempty"`
+	Apellidos string         `json:"apellidos,omitempty"`
+}
+
+// Formulario obligatorio del registro. El rol NO se recibe: siempre
+// SOLICITANTE. El correo tampoco: es el que Google verificó.
+type GoogleRegistroRequest {
+	Codigo          string `json:"codigo"`
+	Dni             string `json:"dni"`
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno,optional"`
+	Telefono        string `json:"telefono,optional"`
+	Direccion       string `json:"direccion,optional"`
+}
+
+type GoogleVincularRequest {
+	Authorization string `header:"Authorization,optional"`
+	Clave         string `json:"clave"`
+}
+
+type GoogleVincularResponse {
+	Url      string `json:"url"`
+	ExpiraEn int64  `json:"expira_en"`
+}
+
+type GoogleEstadoRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type GoogleEstadoResponse {
+	Vinculado  bool   `json:"vinculado"`
+	Correo     string `json:"correo"`
+	Disponible bool   `json:"disponible"`
+}
+
 // Client credentials (sistemas consumidores de Estudiantes): el sistema
 // cambia client_id + client_secret por un token de servicio de corta
 // duración. grant_type debe ser "client_credentials".
@@ -264,8 +327,27 @@ type ExportFutPdfResponse {
 }
 
 service gateway-api {
+	// Deshabilitado: responde 410 Gone (el autorregistro es solo con Google).
 	@handler Register
 	post /api/auth/register (RegisterRequest) returns (RegisterResponse)
+
+	@handler GoogleIniciar
+	get /api/auth/google/iniciar (GoogleIniciarRequest) returns (GoogleRedireccionResponse)
+
+	@handler GoogleCallback
+	get /api/auth/google/callback (GoogleCallbackRequest) returns (GoogleRedireccionResponse)
+
+	@handler GoogleCanjear
+	post /api/auth/google/canjear (GoogleCanjearRequest) returns (GoogleCanjearResponse)
+
+	@handler GoogleRegistro
+	post /api/auth/google/registro (GoogleRegistroRequest) returns (LoginResponse)
+
+	@handler GoogleVincular
+	post /api/auth/google/vincular (GoogleVincularRequest) returns (GoogleVincularResponse)
+
+	@handler GoogleEstado
+	get /api/auth/google/estado (GoogleEstadoRequest) returns (GoogleEstadoResponse)
 
 	@handler Login
 	post /api/auth/login (LoginRequest) returns (LoginResponse)
@@ -735,6 +817,35 @@ type ExpedientePsicologicoDTO {
 	ResumenCaso   string `json:"resumen_caso"`
 	CreatedAt     string `json:"created_at"`
 	UpdatedAt     string `json:"updated_at"`
+	// Resumen del estudiante resuelto por Psicología (solo el nombre).
+	Estudiante *EstudianteResumenDTO `json:"estudiante,omitempty"`
+}
+
+// resolucion: RESUELTO | NO_ENCONTRADO | NO_DISPONIBLE.
+type EstudianteResumenDTO {
+	NombreCompleto string `json:"nombre_completo"`
+	Resolucion     string `json:"resolucion"`
+}
+
+// Búsqueda de estudiantes para seleccionarlos (Psicología). POST: la consulta
+// puede ser un DNI y nunca viaja en la URL. Solo id, nombre, grado y sección.
+type BuscarPsicologiaEstudiantesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `json:"q"`
+	Page          int32  `json:"page,optional"`
+	PageSize      int32  `json:"page_size,optional"`
+}
+
+type EstudianteBusquedaDTO {
+	Id             string `json:"id"`
+	NombreCompleto string `json:"nombre_completo"`
+	Grado          string `json:"grado"`
+	Seccion        string `json:"seccion"`
+}
+
+type BuscarPsicologiaEstudiantesResponse {
+	Estudiantes []EstudianteBusquedaDTO `json:"estudiantes"`
+	Total       int32                   `json:"total"`
 }
 
 type PsicologiaExpedienteResponse {
@@ -796,6 +907,9 @@ service gateway-api {
 
 	@handler GetPsicologiaExpedienteByEstudiante
 	get /api/psicologia/estudiantes/:id/expediente (GetPsicologiaExpedienteByEstudianteRequest) returns (PsicologiaExpedienteResponse)
+
+	@handler BuscarPsicologiaEstudiantes
+	post /api/psicologia/estudiantes/buscar (BuscarPsicologiaEstudiantesRequest) returns (BuscarPsicologiaEstudiantesResponse)
 
 	@handler ListPsicologiaExpedientes
 	get /api/psicologia/expedientes (ListPsicologiaExpedientesRequest) returns (ListPsicologiaExpedientesResponse)
@@ -1215,6 +1329,22 @@ type ResolveEstudianteRequest {
 
 type ResolveEstudianteResponse {
 	Estudiante EstudianteBasicoDTO `json:"estudiante"`
+}
+
+// Búsqueda de SELECCIÓN para sistemas consumidores (client credentials,
+// scope estudiantes.search.basic; un JWT humano no la sustituye). POST: la
+// consulta puede ser un DNI completo y nunca viaja en la URL. Responde solo
+// id, nombre completo, grado y sección (nunca DNI ni SIAGIE).
+type BuscarEstudiantesSeleccionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `json:"q"`
+	Page          int32  `json:"page,optional"`
+	PageSize      int32  `json:"page_size,optional"`
+}
+
+type BuscarEstudiantesSeleccionResponse {
+	Estudiantes []EstudianteBusquedaDTO `json:"estudiantes"`
+	Total       int32                   `json:"total"`
 }
 
 type GrupoPosibleDuplicadoDTO {
@@ -1646,6 +1776,10 @@ service gateway-api {
 	@handler ResolveEstudiante
 	post /api/estudiantes/resolver (ResolveEstudianteRequest) returns (ResolveEstudianteResponse)
 
+	// API de solo lectura para sistemas consumidores (token de servicio).
+	@handler BuscarEstudiantesSeleccion
+	post /api/estudiantes/seleccion/buscar (BuscarEstudiantesSeleccionRequest) returns (BuscarEstudiantesSeleccionResponse)
+
 	@handler ListPosiblesDuplicados
 	get /api/estudiantes/duplicados (ListPosiblesDuplicadosRequest) returns (ListPosiblesDuplicadosResponse)
 
@@ -1940,5 +2074,243 @@ service gateway-api {
 
 	@handler EliminarPlantillaDatos
 	post /api/estudiantes/datos/plantillas/:plantilla_id/eliminar (EliminarPlantillaDatosRequest) returns (EliminarPlantillaDatosResponse)
+}
+
+// ---- Reportes (Fase 1) ----
+// Estadísticas AGREGADAS de expedientes calculadas en Expedientes Service
+// (una sola consulta GROUP BY). Exige "reportes.view" (lo valida el servicio)
+// y aplica el mismo alcance por rol que el listado. Fecha usada: siempre
+// fecha_registro (recepción), en hora de Lima; desde/hasta (AAAA-MM-DD)
+// inclusivos. Solo conteos: sin expedientes individuales ni datos personales.
+type ReporteExpedientesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+	// Fase 2 (opcional): DIA | SEMANA | MES para el campo "serie".
+	Granularidad string `form:"granularidad,optional"`
+}
+
+type ReporteCruceDTO {
+	Fila     string `json:"fila"`
+	Columna  string `json:"columna"`
+	Cantidad int32  `json:"cantidad"`
+}
+
+type ReporteConteoDTO {
+	Clave    string `json:"clave"`
+	Cantidad int32  `json:"cantidad"`
+}
+
+type ReporteExpedientesResponse {
+	Total                   int32              `json:"total"`
+	PorEstado               []ReporteConteoDTO `json:"por_estado"`
+	PorTipo                 []ReporteConteoDTO `json:"por_tipo"`
+	PorPrioridad            []ReporteConteoDTO `json:"por_prioridad"`
+	PorArea                 []ReporteConteoDTO `json:"por_area"`
+	PorMes                  []ReporteConteoDTO `json:"por_mes"`
+	Pendientes              int32              `json:"pendientes"`
+	PendientesPorAntiguedad []ReporteConteoDTO `json:"pendientes_por_antiguedad"`
+	Alcance                 string             `json:"alcance"`
+	AreaAlcance             string             `json:"area_alcance"`
+	Generado                string             `json:"generado"`
+	// Fase 2: serie por la granularidad pedida y tablas cruzadas (estado actual).
+	Serie        []ReporteConteoDTO `json:"serie"`
+	Granularidad string             `json:"granularidad"`
+	AreaEstado   []ReporteCruceDTO  `json:"area_estado"`
+	TipoEstado   []ReporteCruceDTO  `json:"tipo_estado"`
+	// Evolución por estado ACTUAL (con granularidad): fila = clave del periodo
+	// de la serie, columna = estado; solo celdas con valor.
+	SerieEstado []ReporteCruceDTO `json:"serie_estado"`
+}
+
+// Exportación del MISMO reporte (mismos filtros) a xlsx o csv.
+type ExportarReporteExpedientesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Formato       string `form:"formato"`
+	// Fase 2: RESUMEN (por defecto, archivo de la Fase 1) o EXPEDIENTES
+	// (serie por granularidad y tablas cruzadas).
+	Vista        string `form:"vista,optional"`
+	Granularidad string `form:"granularidad,optional"`
+	Desde        string `form:"desde,optional"`
+	Hasta        string `form:"hasta,optional"`
+	Estado       string `form:"estado,optional"`
+	Tipo         string `form:"tipo,optional"`
+	Prioridad    string `form:"prioridad,optional"`
+	Area         string `form:"area,optional"`
+}
+
+type ArchivoReporteResponse {
+	Nombre          string `json:"nombre"`
+	Mime            string `json:"mime"`
+	ContenidoBase64 string `json:"contenido_base64"`
+}
+
+service gateway-api {
+	@handler ReporteExpedientes
+	get /api/reportes/expedientes (ReporteExpedientesRequest) returns (ReporteExpedientesResponse)
+
+	@handler ExportarReporteExpedientes
+	get /api/reportes/expedientes/exportar (ExportarReporteExpedientesRequest) returns (ArchivoReporteResponse)
+}
+
+// ---- Reportes (Fase 2) ----
+// Todos exigen "reportes.view" y aplican el mismo alcance por rol. Solo
+// conteos: sin registros individuales, nombres, DNI ni textos libres.
+type ReportePeriodoRequest {
+	Authorization string `header:"Authorization,optional"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Granularidad  string `form:"granularidad,optional"`
+}
+
+type ExportarReportePeriodoRequest {
+	Authorization string `header:"Authorization,optional"`
+	Formato       string `form:"formato"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Granularidad  string `form:"granularidad,optional"`
+}
+
+type ReporteFlujoDTO {
+	Origen   string `json:"origen"`
+	Destino  string `json:"destino"`
+	Cantidad int32  `json:"cantidad"`
+}
+
+// Derivaciones: fecha usada = fecha de la derivación. Origen/destino
+// normalizados a códigos de área (SIN_CLASIFICAR si son irreconocibles).
+type ReporteDerivacionesResponse {
+	Total            int32              `json:"total"`
+	PorDestino       []ReporteConteoDTO `json:"por_destino"`
+	PorOrigen        []ReporteConteoDTO `json:"por_origen"`
+	Flujo            []ReporteFlujoDTO  `json:"flujo"`
+	PorTipoTramite   []ReporteConteoDTO `json:"por_tipo_tramite"`
+	Serie            []ReporteConteoDTO `json:"serie"`
+	Granularidad     string             `json:"granularidad"`
+	OtrosMovimientos []ReporteConteoDTO `json:"otros_movimientos"`
+	SinClasificar    int32              `json:"sin_clasificar"`
+	Alcance          string             `json:"alcance"`
+	AreaAlcance      string             `json:"area_alcance"`
+	Generado         string             `json:"generado"`
+}
+
+// Documentos: fecha usada = fecha de registro del documento.
+type ReporteDocumentosResponse {
+	Total            int32              `json:"total"`
+	PorTipoDocumento []ReporteConteoDTO `json:"por_tipo_documento"`
+	PorTipoTramite   []ReporteConteoDTO `json:"por_tipo_tramite"`
+	Serie            []ReporteConteoDTO `json:"serie"`
+	Granularidad     string             `json:"granularidad"`
+	Alcance          string             `json:"alcance"`
+	AreaAlcance      string             `json:"area_alcance"`
+	Generado         string             `json:"generado"`
+}
+
+// Actividad institucional agrupada por ROL (nunca por persona).
+// movimientos_registrados: todos los movimientos (derivaciones, notificaciones,
+// asignaciones, recepciones y aprobaciones); derivaciones_registradas es la
+// parte de tipo DERIVACION. total = expedientes + movimientos + documentos.
+type ActividadRolDTO {
+	Rol                     string `json:"rol"`
+	ExpedientesRegistrados  int32  `json:"expedientes_registrados"`
+	MovimientosRegistrados  int32  `json:"movimientos_registrados"`
+	DerivacionesRegistradas int32  `json:"derivaciones_registradas"`
+	DocumentosSubidos       int32  `json:"documentos_subidos"`
+	Total                   int32  `json:"total"`
+}
+
+type ReporteActividadResponse {
+	Roles       []ActividadRolDTO `json:"roles"`
+	Alcance     string            `json:"alcance"`
+	AreaAlcance string            `json:"area_alcance"`
+	Generado    string            `json:"generado"`
+}
+
+// Comparación de periodos (sobre la fecha de registro de los expedientes).
+// modo: ANTERIOR (mismo número de días inmediatamente antes), ANIO_ANTERIOR
+// o PERSONALIZADO (desde_b/hasta_b). Las variaciones solo se calculan si
+// ambos periodos tienen al menos 10 expedientes.
+type ReporteComparacionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Desde         string `form:"desde"`
+	Hasta         string `form:"hasta"`
+	Modo          string `form:"modo,optional"`
+	DesdeB        string `form:"desde_b,optional"`
+	HastaB        string `form:"hasta_b,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+}
+
+type ExportarReporteComparacionRequest {
+	Authorization string `header:"Authorization,optional"`
+	Formato       string `form:"formato"`
+	Desde         string `form:"desde"`
+	Hasta         string `form:"hasta"`
+	Modo          string `form:"modo,optional"`
+	DesdeB        string `form:"desde_b,optional"`
+	HastaB        string `form:"hasta_b,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+}
+
+type ComparacionFilaDTO {
+	Grupo          string  `json:"grupo"`
+	Clave          string  `json:"clave"`
+	Actual         int32   `json:"actual"`
+	Anterior       int32   `json:"anterior"`
+	TieneVariacion bool    `json:"tiene_variacion"`
+	Variacion      float64 `json:"variacion"`
+}
+
+type ReporteComparacionResponse {
+	DesdeA      string               `json:"desde_a"`
+	HastaA      string               `json:"hasta_a"`
+	DesdeB      string               `json:"desde_b"`
+	HastaB      string               `json:"hasta_b"`
+	TotalA      int32                `json:"total_a"`
+	TotalB      int32                `json:"total_b"`
+	Comparable  bool                 `json:"comparable"`
+	Minimo      int32                `json:"minimo"`
+	Mensaje     string               `json:"mensaje"`
+	Filas       []ComparacionFilaDTO `json:"filas"`
+	Alcance     string               `json:"alcance"`
+	AreaAlcance string               `json:"area_alcance"`
+	Generado    string               `json:"generado"`
+}
+
+service gateway-api {
+	@handler ReporteDerivaciones
+	get /api/reportes/derivaciones (ReportePeriodoRequest) returns (ReporteDerivacionesResponse)
+
+	@handler ExportarReporteDerivaciones
+	get /api/reportes/derivaciones/exportar (ExportarReportePeriodoRequest) returns (ArchivoReporteResponse)
+
+	@handler ReporteDocumentos
+	get /api/reportes/documentos (ReportePeriodoRequest) returns (ReporteDocumentosResponse)
+
+	@handler ExportarReporteDocumentos
+	get /api/reportes/documentos/exportar (ExportarReportePeriodoRequest) returns (ArchivoReporteResponse)
+
+	@handler ReporteActividad
+	get /api/reportes/actividad (ReportePeriodoRequest) returns (ReporteActividadResponse)
+
+	@handler ExportarReporteActividad
+	get /api/reportes/actividad/exportar (ExportarReportePeriodoRequest) returns (ArchivoReporteResponse)
+
+	@handler ReporteComparacion
+	get /api/reportes/comparacion (ReporteComparacionRequest) returns (ReporteComparacionResponse)
+
+	@handler ExportarReporteComparacion
+	get /api/reportes/comparacion/exportar (ExportarReporteComparacionRequest) returns (ArchivoReporteResponse)
 }
 

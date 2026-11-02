@@ -16,6 +16,36 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodGet,
+				Path:    "/api/auth/google/callback",
+				Handler: GoogleCallbackHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/google/canjear",
+				Handler: GoogleCanjearHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/auth/google/estado",
+				Handler: GoogleEstadoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/auth/google/iniciar",
+				Handler: GoogleIniciarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/google/registro",
+				Handler: GoogleRegistroHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/google/vincular",
+				Handler: GoogleVincularHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/api/auth/login",
 				Handler: LoginHandler(serverCtx),
@@ -254,6 +284,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/psicologia/estudiantes/:id/expediente",
 				Handler: OpenPsicologiaExpedienteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/psicologia/estudiantes/buscar",
+				Handler: BuscarPsicologiaEstudiantesHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -505,6 +540,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/estudiantes/resolver",
 				Handler: ResolveEstudianteHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/estudiantes/seleccion/buscar",
+				Handler: BuscarEstudiantesSeleccionHandler(serverCtx),
+			},
 		},
 	)
 
@@ -580,5 +620,65 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 		rest.WithTimeout(70000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/expedientes",
+				Handler: ReporteExpedientesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/expedientes/exportar",
+				Handler: ExportarReporteExpedientesHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/actividad",
+				Handler: ReporteActividadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/actividad/exportar",
+				Handler: ExportarReporteActividadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/comparacion",
+				Handler: ReporteComparacionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/comparacion/exportar",
+				Handler: ExportarReporteComparacionHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/derivaciones",
+				Handler: ReporteDerivacionesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/derivaciones/exportar",
+				Handler: ExportarReporteDerivacionesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/documentos",
+				Handler: ReporteDocumentosHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/reportes/documentos/exportar",
+				Handler: ExportarReporteDocumentosHandler(serverCtx),
+			},
+		},
 	)
 }

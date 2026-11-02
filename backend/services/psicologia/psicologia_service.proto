@@ -20,6 +20,16 @@ message ExpedientePsicologico {
   string resumen_caso = 10;
   string created_at = 11;
   string updated_at = 12;
+  // Resumen del estudiante resuelto por Psicología con su credencial de
+  // servicio (solo el nombre; nunca documento ni datos académicos).
+  EstudianteResumen estudiante = 13;
+}
+
+// resolucion: RESUELTO | NO_ENCONTRADO | NO_DISPONIBLE (Estudiantes o Auth no
+// respondieron; el expediente se entrega igual).
+message EstudianteResumen {
+  string nombre_completo = 1;
+  string resolucion = 2;
 }
 
 message OpenExpedienteRequest {
@@ -253,6 +263,28 @@ message ExportAtencionPdfResponse {
   bytes contenido = 2;
 }
 
+// Búsqueda de estudiantes para seleccionarlos (nuevo expediente, buscar
+// alumno). Exige psicologia.expedientes.create, .view o .view_own. q admite
+// nombres, apellidos y DNI completo; la respuesta nunca incluye documento,
+// códigos ni estados.
+message BuscarEstudiantesRequest {
+  string q = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message EstudianteBusqueda {
+  string id = 1;
+  string nombre_completo = 2;
+  string grado = 3;
+  string seccion = 4;
+}
+
+message BuscarEstudiantesResponse {
+  repeated EstudianteBusqueda estudiantes = 1;
+  int32 total = 2;
+}
+
 service Psicologia {
   rpc OpenExpediente(OpenExpedienteRequest) returns (OpenExpedienteResponse);
   rpc GetExpediente(GetExpedienteRequest) returns (GetExpedienteResponse);
@@ -273,4 +305,6 @@ service Psicologia {
   rpc GetAtencionVersion(GetAtencionVersionRequest) returns (AtencionResponse);
   rpc AnnulAtencion(AnnulAtencionRequest) returns (AtencionResponse);
   rpc ExportAtencionPdf(ExportAtencionPdfRequest) returns (ExportAtencionPdfResponse);
+
+  rpc BuscarEstudiantes(BuscarEstudiantesRequest) returns (BuscarEstudiantesResponse);
 }

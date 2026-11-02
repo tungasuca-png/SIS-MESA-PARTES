@@ -262,3 +262,45 @@ func loadInScope(ctx context.Context, sc *svc.ServiceContext, userID, id string)
 	}
 	return exp, s.responsableFilter(userID), nil
 }
+
+// Resolución del resumen del estudiante en cada expediente devuelto.
+const (
+	resolucionResuelto     = "RESUELTO"
+	resolucionNoEncontrado = "NO_ENCONTRADO"
+	resolucionNoDisponible = "NO_DISPONIBLE"
+)
+
+// completarEstudiantes agrega a cada expediente el nombre de su estudiante,
+// con UNA consulta por lote a Estudiantes (credencial de servicio) para todos
+// los IDs únicos de la respuesta. El nombre es informativo: si Estudiantes o
+// Auth fallan, el expediente se entrega igual con NO_DISPONIBLE (nunca falla
+// la respuesta por esto) y el error se registra sin identificadores.
+func completarEstudiantes(ctx context.Context, sc *svc.ServiceContext, expedientes ...*psicologia.ExpedientePsicologico) {
+	if len(expedientes) == 0 {
+		return
+	}
+	ids := make([]string, 0, len(expedientes))
+	for _, e := range expedientes {
+		ids = append(ids, e.EstudianteId)
+	}
+	var nombres map[string]string
+	var err error
+	if sc.EstudiantesResumen == nil {
+		err = status.Error(codes.Unavailable, "resolución de estudiantes no configurada")
+	} else {
+		nombres, err = sc.EstudiantesResumen.Resumenes(ctx, ids)
+	}
+	if err != nil {
+		logx.WithContext(ctx).Errorf("no se pudo resolver el nombre de los estudiantes (%s); se devuelven como NO_DISPONIBLE", status.Code(err))
+	}
+	for _, e := range expedientes {
+		switch nombre, ok := nombres[strings.ToLower(e.EstudianteId)]; {
+		case err != nil:
+			e.Estudiante = &psicologia.EstudianteResumen{Resolucion: resolucionNoDisponible}
+		case ok:
+			e.Estudiante = &psicologia.EstudianteResumen{NombreCompleto: nombre, Resolucion: resolucionResuelto}
+		default:
+			e.Estudiante = &psicologia.EstudianteResumen{Resolucion: resolucionNoEncontrado}
+		}
+	}
+}

@@ -4,6 +4,7 @@ import PortalLayout from "../../components/portal/PortalLayout";
 import { useAuth } from "../../hooks/useAuth";
 import { getUsuario } from "../../services/usuariosService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
+import VinculoGoogle from "./VinculoGoogle";
 import "./mesaDePartes.css";
 
 // Usuarios Service SÍ tiene un perfil completo (nombres, apellidos, DNI,
@@ -116,6 +117,8 @@ function MiPerfil() {
                     Por el momento no es posible editar esta información desde aquí.
                 </p>
             </section>
+
+            <VinculoGoogle />
         </PortalLayout>
     );
 }

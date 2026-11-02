@@ -19,18 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Expedientes_CreateExpediente_FullMethodName   = "/expedientes.Expedientes/CreateExpediente"
-	Expedientes_GetExpediente_FullMethodName      = "/expedientes.Expedientes/GetExpediente"
-	Expedientes_ListExpedientes_FullMethodName    = "/expedientes.Expedientes/ListExpedientes"
-	Expedientes_UpdateExpediente_FullMethodName   = "/expedientes.Expedientes/UpdateExpediente"
-	Expedientes_ChangeEstado_FullMethodName       = "/expedientes.Expedientes/ChangeEstado"
-	Expedientes_DeleteExpediente_FullMethodName   = "/expedientes.Expedientes/DeleteExpediente"
-	Expedientes_UpdateArea_FullMethodName         = "/expedientes.Expedientes/UpdateArea"
-	Expedientes_DerivarExpediente_FullMethodName  = "/expedientes.Expedientes/DerivarExpediente"
-	Expedientes_RechazarExpediente_FullMethodName = "/expedientes.Expedientes/RechazarExpediente"
-	Expedientes_CorregirExpediente_FullMethodName = "/expedientes.Expedientes/CorregirExpediente"
-	Expedientes_ResolverExpediente_FullMethodName = "/expedientes.Expedientes/ResolverExpediente"
-	Expedientes_ValidateDerivacion_FullMethodName = "/expedientes.Expedientes/ValidateDerivacion"
+	Expedientes_CreateExpediente_FullMethodName          = "/expedientes.Expedientes/CreateExpediente"
+	Expedientes_GetExpediente_FullMethodName             = "/expedientes.Expedientes/GetExpediente"
+	Expedientes_ListExpedientes_FullMethodName           = "/expedientes.Expedientes/ListExpedientes"
+	Expedientes_UpdateExpediente_FullMethodName          = "/expedientes.Expedientes/UpdateExpediente"
+	Expedientes_ChangeEstado_FullMethodName              = "/expedientes.Expedientes/ChangeEstado"
+	Expedientes_DeleteExpediente_FullMethodName          = "/expedientes.Expedientes/DeleteExpediente"
+	Expedientes_UpdateArea_FullMethodName                = "/expedientes.Expedientes/UpdateArea"
+	Expedientes_DerivarExpediente_FullMethodName         = "/expedientes.Expedientes/DerivarExpediente"
+	Expedientes_RechazarExpediente_FullMethodName        = "/expedientes.Expedientes/RechazarExpediente"
+	Expedientes_CorregirExpediente_FullMethodName        = "/expedientes.Expedientes/CorregirExpediente"
+	Expedientes_ResolverExpediente_FullMethodName        = "/expedientes.Expedientes/ResolverExpediente"
+	Expedientes_ValidateDerivacion_FullMethodName        = "/expedientes.Expedientes/ValidateDerivacion"
+	Expedientes_ReporteExpedientes_FullMethodName        = "/expedientes.Expedientes/ReporteExpedientes"
+	Expedientes_ReporteAlcanceExpedientes_FullMethodName = "/expedientes.Expedientes/ReporteAlcanceExpedientes"
 )
 
 // ExpedientesClient is the client API for Expedientes service.
@@ -49,6 +51,8 @@ type ExpedientesClient interface {
 	CorregirExpediente(ctx context.Context, in *CorregirExpedienteRequest, opts ...grpc.CallOption) (*CorregirExpedienteResponse, error)
 	ResolverExpediente(ctx context.Context, in *ResolverExpedienteRequest, opts ...grpc.CallOption) (*ResolverExpedienteResponse, error)
 	ValidateDerivacion(ctx context.Context, in *ValidateDerivacionRequest, opts ...grpc.CallOption) (*ValidateDerivacionResponse, error)
+	ReporteExpedientes(ctx context.Context, in *ReporteExpedientesRequest, opts ...grpc.CallOption) (*ReporteExpedientesResponse, error)
+	ReporteAlcanceExpedientes(ctx context.Context, in *ReporteAlcanceRequest, opts ...grpc.CallOption) (*ReporteAlcanceResponse, error)
 }
 
 type expedientesClient struct {
@@ -179,6 +183,26 @@ func (c *expedientesClient) ValidateDerivacion(ctx context.Context, in *Validate
 	return out, nil
 }
 
+func (c *expedientesClient) ReporteExpedientes(ctx context.Context, in *ReporteExpedientesRequest, opts ...grpc.CallOption) (*ReporteExpedientesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReporteExpedientesResponse)
+	err := c.cc.Invoke(ctx, Expedientes_ReporteExpedientes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *expedientesClient) ReporteAlcanceExpedientes(ctx context.Context, in *ReporteAlcanceRequest, opts ...grpc.CallOption) (*ReporteAlcanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReporteAlcanceResponse)
+	err := c.cc.Invoke(ctx, Expedientes_ReporteAlcanceExpedientes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExpedientesServer is the server API for Expedientes service.
 // All implementations must embed UnimplementedExpedientesServer
 // for forward compatibility.
@@ -195,6 +219,8 @@ type ExpedientesServer interface {
 	CorregirExpediente(context.Context, *CorregirExpedienteRequest) (*CorregirExpedienteResponse, error)
 	ResolverExpediente(context.Context, *ResolverExpedienteRequest) (*ResolverExpedienteResponse, error)
 	ValidateDerivacion(context.Context, *ValidateDerivacionRequest) (*ValidateDerivacionResponse, error)
+	ReporteExpedientes(context.Context, *ReporteExpedientesRequest) (*ReporteExpedientesResponse, error)
+	ReporteAlcanceExpedientes(context.Context, *ReporteAlcanceRequest) (*ReporteAlcanceResponse, error)
 	mustEmbedUnimplementedExpedientesServer()
 }
 
@@ -240,6 +266,12 @@ func (UnimplementedExpedientesServer) ResolverExpediente(context.Context, *Resol
 }
 func (UnimplementedExpedientesServer) ValidateDerivacion(context.Context, *ValidateDerivacionRequest) (*ValidateDerivacionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ValidateDerivacion not implemented")
+}
+func (UnimplementedExpedientesServer) ReporteExpedientes(context.Context, *ReporteExpedientesRequest) (*ReporteExpedientesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReporteExpedientes not implemented")
+}
+func (UnimplementedExpedientesServer) ReporteAlcanceExpedientes(context.Context, *ReporteAlcanceRequest) (*ReporteAlcanceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReporteAlcanceExpedientes not implemented")
 }
 func (UnimplementedExpedientesServer) mustEmbedUnimplementedExpedientesServer() {}
 func (UnimplementedExpedientesServer) testEmbeddedByValue()                     {}
@@ -478,6 +510,42 @@ func _Expedientes_ValidateDerivacion_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Expedientes_ReporteExpedientes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReporteExpedientesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).ReporteExpedientes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_ReporteExpedientes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).ReporteExpedientes(ctx, req.(*ReporteExpedientesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Expedientes_ReporteAlcanceExpedientes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReporteAlcanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExpedientesServer).ReporteAlcanceExpedientes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Expedientes_ReporteAlcanceExpedientes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExpedientesServer).ReporteAlcanceExpedientes(ctx, req.(*ReporteAlcanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Expedientes_ServiceDesc is the grpc.ServiceDesc for Expedientes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -532,6 +600,14 @@ var Expedientes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ValidateDerivacion",
 			Handler:    _Expedientes_ValidateDerivacion_Handler,
+		},
+		{
+			MethodName: "ReporteExpedientes",
+			Handler:    _Expedientes_ReporteExpedientes_Handler,
+		},
+		{
+			MethodName: "ReporteAlcanceExpedientes",
+			Handler:    _Expedientes_ReporteAlcanceExpedientes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

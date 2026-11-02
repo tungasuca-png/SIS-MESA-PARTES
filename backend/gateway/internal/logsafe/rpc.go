@@ -4,6 +4,7 @@ import (
 	"auth/auth"
 	"estudiantes/estudiantes"
 	"psicologia/psicologia"
+	"usuarios/usuarios"
 
 	"github.com/zeromicro/go-zero/zrpc"
 )
@@ -27,6 +28,17 @@ var sensitiveRPCMethods = []string{
 	auth.Auth_CreateUser_FullMethodName,
 	// Client credentials: client_secret en la solicitud y token en la respuesta.
 	auth.Auth_IssueServiceToken_FullMethodName,
+	// Google: códigos de autorización, verificadores PKCE, códigos de un solo
+	// uso, clave de reautenticación, DNI y tokens.
+	auth.Auth_GoogleStart_FullMethodName,
+	auth.Auth_GoogleCallback_FullMethodName,
+	auth.Auth_GoogleExchange_FullMethodName,
+	auth.Auth_GoogleRegister_FullMethodName,
+	auth.Auth_GoogleCompleteRegistration_FullMethodName,
+	auth.Auth_GoogleCancelRegistration_FullMethodName,
+	auth.Auth_GoogleStartLink_FullMethodName,
+	// Usuarios: perfil propio con DNI y datos personales.
+	usuarios.Usuarios_CreateMyProfile_FullMethodName,
 
 	// Psicología: identificadores de estudiantes y texto clínico (resumen_caso,
 	// motivo de cierre) en solicitudes y respuestas.
@@ -50,6 +62,8 @@ var sensitiveRPCMethods = []string{
 	psicologia.Psicologia_GetAtencionVersion_FullMethodName,
 	psicologia.Psicologia_AnnulAtencion_FullMethodName,
 	psicologia.Psicologia_ExportAtencionPdf_FullMethodName,
+	// Búsqueda de estudiantes: la consulta puede ser un DNI.
+	psicologia.Psicologia_BuscarEstudiantes_FullMethodName,
 
 	// Estudiantes: nombres y datos de matrícula de estudiantes (solicitud y/o
 	// respuesta) — datos personales de menores de edad.
@@ -65,6 +79,8 @@ var sensitiveRPCMethods = []string{
 	estudiantes.Estudiantes_UpdateEstudiantePersonal_FullMethodName,
 	// Modelo maestro: resolución (documento), duplicados, matrícula y familia.
 	estudiantes.Estudiantes_ResolveEstudiante_FullMethodName,
+	// Búsqueda de selección para sistemas consumidores (la consulta puede ser un DNI).
+	estudiantes.Estudiantes_BuscarEstudiantesSeleccion_FullMethodName,
 	estudiantes.Estudiantes_ListPosiblesDuplicados_FullMethodName,
 	estudiantes.Estudiantes_ListMatriculasEstudiante_FullMethodName,
 	estudiantes.Estudiantes_ListFamiliaresEstudiante_FullMethodName,

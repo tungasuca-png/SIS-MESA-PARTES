@@ -82,3 +82,13 @@ func (s *ExpedientesServer) ValidateDerivacion(ctx context.Context, in *expedien
 	l := logic.NewValidateDerivacionLogic(ctx, s.svcCtx)
 	return l.ValidateDerivacion(in)
 }
+
+func (s *ExpedientesServer) ReporteExpedientes(ctx context.Context, in *expedientes.ReporteExpedientesRequest) (*expedientes.ReporteExpedientesResponse, error) {
+	l := logic.NewReporteExpedientesLogic(ctx, s.svcCtx)
+	return l.ReporteExpedientes(in)
+}
+
+func (s *ExpedientesServer) ReporteAlcanceExpedientes(ctx context.Context, in *expedientes.ReporteAlcanceRequest) (*expedientes.ReporteAlcanceResponse, error) {
+	l := logic.NewReporteAlcanceExpedientesLogic(ctx, s.svcCtx)
+	return l.ReporteAlcanceExpedientes(in)
+}

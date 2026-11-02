@@ -110,7 +110,9 @@ func finishRead(ctx context.Context, sc *svc.ServiceContext, s scope, userID str
 	if err := auditView(ctx, sc, userID, exp.ID, exp.EstudianteID, ""); err != nil {
 		return nil, err
 	}
-	return &psicologia.GetExpedienteResponse{Expediente: toProto(exp, clinico)}, nil
+	out := toProto(exp, clinico)
+	completarEstudiantes(ctx, sc, out)
+	return &psicologia.GetExpedienteResponse{Expediente: out}, nil
 }
 
 type ListExpedientesLogic struct {
@@ -166,5 +168,6 @@ func (l *ListExpedientesLogic) ListExpedientes(in *psicologia.ListExpedientesReq
 	for _, item := range items {
 		out = append(out, toProto(item, false))
 	}
+	completarEstudiantes(l.ctx, l.svcCtx, out...)
 	return &psicologia.ListExpedientesResponse{Expedientes: out, Total: int32(total)}, nil
 }

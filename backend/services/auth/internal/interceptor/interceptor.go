@@ -72,10 +72,25 @@ func DefaultMethodPolicies() map[string]MethodPolicy {
 		// client_secret por un token de servicio (público, como Login). La
 		// administración de sistemas exige su propio permiso, que no se
 		// asigna automáticamente a ningún rol (migración 019).
-		"/auth.Auth/IssueServiceToken":   PublicMethod(),
-		"/auth.Auth/CreateServiceClient": ProtectedMethod("integraciones.manage"),
-		"/auth.Auth/RevokeServiceClient": ProtectedMethod("integraciones.manage"),
-		"/auth.Auth/ListServiceClients":  ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/IssueServiceToken": PublicMethod(),
+		// Google (solo SOLICITANTES). Inicio, callback, canje, registro y su
+		// confirmación/compensación son públicos: su autoridad es un código
+		// de un solo uso emitido por Auth (y el ID token validado de Google).
+		// Iniciar la vinculación y consultar su estado exigen sesión.
+		"/auth.Auth/GoogleStart":                PublicMethod(),
+		"/auth.Auth/GoogleCallback":             PublicMethod(),
+		"/auth.Auth/GoogleExchange":             PublicMethod(),
+		"/auth.Auth/GoogleRegister":             PublicMethod(),
+		"/auth.Auth/GoogleCompleteRegistration": PublicMethod(),
+		"/auth.Auth/GoogleCancelRegistration":   PublicMethod(),
+		"/auth.Auth/GoogleStartLink":            AuthenticatedMethod(),
+		"/auth.Auth/GoogleLinkStatus":           AuthenticatedMethod(),
+		"/auth.Auth/CreateServiceClient":        ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/RevokeServiceClient":        ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/ListServiceClients":         ProtectedMethod("integraciones.manage"),
+		// Otorgar / retirar un permiso a un sistema existente (sin recrearlo).
+		"/auth.Auth/GrantServiceClientPermission":    ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/WithdrawServiceClientPermission": ProtectedMethod("integraciones.manage"),
 	}
 }
 

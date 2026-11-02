@@ -58,6 +58,11 @@ func (s *UsuariosServer) UpdateMyProfile(ctx context.Context, in *usuarios.Updat
 	return l.UpdateMyProfile(in)
 }
 
+func (s *UsuariosServer) CreateMyProfile(ctx context.Context, in *usuarios.CreateMyProfileRequest) (*usuarios.CreateMyProfileResponse, error) {
+	l := logic.NewCreateMyProfileLogic(ctx, s.svcCtx)
+	return l.CreateMyProfile(in)
+}
+
 func (s *UsuariosServer) UpdateUsuarioRole(ctx context.Context, in *usuarios.UpdateUsuarioRoleRequest) (*usuarios.UpdateUsuarioRoleResponse, error) {
 	l := logic.NewUpdateUsuarioRoleLogic(ctx, s.svcCtx)
 	return l.UpdateUsuarioRole(in)

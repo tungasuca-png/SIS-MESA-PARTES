@@ -1,7 +1,8 @@
 import { useAuth } from "../../hooks/useAuth";
 
-// Nombre de un usuario o estudiante ya resuelto (useUsuariosBasic /
-// useEstudiantesBasic). A diferencia de SolicitanteNombre/EstudianteNombre,
+// Nombre de un usuario ya resuelto (useUsuariosBasic). El estudiante usa
+// EstudianteNombre con el resumen que entrega Psicología. A diferencia de
+// SolicitanteNombre/EstudianteNombre,
 // nunca muestra el UUID (ni acortado ni como tooltip): las pantallas de
 // atenciones no exponen identificadores internos.
 function NombreResuelto({ id, items, unavailable, esUsuario = true }) {

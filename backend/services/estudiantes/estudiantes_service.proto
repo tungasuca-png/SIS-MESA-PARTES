@@ -901,6 +901,29 @@ message EliminarPlantillaDatosResponse {
   bool eliminada = 1;
 }
 
+// Búsqueda MÍNIMA para seleccionar un estudiante, exclusiva de sistemas
+// consumidores con "estudiantes.search.basic" (p. ej. Psicología). q admite
+// nombres, apellidos y DNI completo (8 dígitos, coincidencia exacta); nunca
+// código interno ni SIAGIE. Solo registros ACTIVO. La respuesta NO incluye
+// documento, códigos ni estados. page_size máximo 20.
+message BuscarEstudiantesSeleccionRequest {
+  string q = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message EstudianteSeleccion {
+  string id = 1;
+  string nombre_completo = 2;
+  string grado = 3;
+  string seccion = 4;
+}
+
+message BuscarEstudiantesSeleccionResponse {
+  repeated EstudianteSeleccion estudiantes = 1;
+  int32 total = 2;
+}
+
 service Estudiantes {
   rpc GetEstudiante(GetEstudianteRequest) returns (GetEstudianteResponse);
   rpc SearchEstudiantes(SearchEstudiantesRequest) returns (SearchEstudiantesResponse);
@@ -911,6 +934,7 @@ service Estudiantes {
   rpc GetEstudiantePersonal(GetEstudiantePersonalRequest) returns (GetEstudiantePersonalResponse);
   rpc UpdateEstudiantePersonal(UpdateEstudiantePersonalRequest) returns (UpdateEstudiantePersonalResponse);
   rpc ResolveEstudiante(ResolveEstudianteRequest) returns (ResolveEstudianteResponse);
+  rpc BuscarEstudiantesSeleccion(BuscarEstudiantesSeleccionRequest) returns (BuscarEstudiantesSeleccionResponse);
   rpc ListPosiblesDuplicados(ListPosiblesDuplicadosRequest) returns (ListPosiblesDuplicadosResponse);
   rpc ListMatriculasEstudiante(ListMatriculasEstudianteRequest) returns (ListMatriculasEstudianteResponse);
   rpc ListFamiliaresEstudiante(ListFamiliaresEstudianteRequest) returns (ListFamiliaresEstudianteResponse);

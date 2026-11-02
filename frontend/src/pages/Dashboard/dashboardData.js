@@ -1,4 +1,5 @@
 import { getExpedientes } from "../../services/expedientesService";
+import { getReporteExpedientes } from "../../services/reportesService";
 import { ESTADOS, TIPOS } from "../../constants/expedientes";
 
 // Métricas del Dashboard calculadas SOLO con el endpoint real de listado de
@@ -12,8 +13,36 @@ import { ESTADOS, TIPOS } from "../../constants/expedientes";
 
 const contar = async (filtros) => (await getExpedientes({ ...filtros, page: 1, pageSize: 1 })).total ?? 0;
 
+// Con "reportes.view" las cifras salen del endpoint agregado de Reportes
+// (GET /api/reportes/expedientes: mismo alcance por rol y mismo universo
+// —expedientes activos— que el listado), con menos consultas. Si ese
+// endpoint falla (p. ej. aún no desplegado), se vuelve al cálculo con el
+// listado, así el Dashboard nunca queda sin cifras por esta optimización.
+const cantidad = (conteos, clave) => conteos?.find((c) => c.clave === clave)?.cantidad ?? 0;
+
+async function resumenConReporte(recientes) {
+    const [listado, reporte, urgentes] = await Promise.all([
+        getExpedientes({ page: 1, pageSize: recientes }),
+        getReporteExpedientes(),
+        getReporteExpedientes({ prioridad: "URGENTE" }),
+    ]);
+    return {
+        total: reporte.total ?? 0,
+        porEstado: Object.fromEntries(ESTADOS.map((estado) => [estado.value, cantidad(reporte.por_estado, estado.value)])),
+        urgentesAbiertos: cantidad(urgentes.por_estado, "PENDIENTE") + cantidad(urgentes.por_estado, "EN_PROCESO"),
+        recientes: listado.expedientes || [],
+    };
+}
+
 // Indicadores + expedientes recientes (se refrescan en vivo).
-export async function cargarResumen({ recientes = 6 } = {}) {
+export async function cargarResumen({ recientes = 6, conReporte = false } = {}) {
+    if (conReporte) {
+        try {
+            return await resumenConReporte(recientes);
+        } catch {
+            // Se usa el cálculo con el listado (abajo).
+        }
+    }
     const [listado, porEstado, urgentes] = await Promise.all([
         getExpedientes({ page: 1, pageSize: recientes }),
         Promise.all(ESTADOS.map((estado) => contar({ estado: estado.value }))),
@@ -30,8 +59,17 @@ export async function cargarResumen({ recientes = 6 } = {}) {
 
 // Expedientes por tipo (todos los tipos válidos del backend), de mayor a
 // menor, sin los tipos en cero.
-export async function cargarPorTipo() {
-    const totales = await Promise.all(TIPOS.map((tipo) => contar({ tipo: tipo.value })));
+export async function cargarPorTipo({ conReporte = false } = {}) {
+    let totales = null;
+    if (conReporte) {
+        try {
+            const reporte = await getReporteExpedientes();
+            totales = TIPOS.map((tipo) => cantidad(reporte.por_tipo, tipo.value));
+        } catch {
+            totales = null; // cálculo con el listado (abajo)
+        }
+    }
+    if (!totales) totales = await Promise.all(TIPOS.map((tipo) => contar({ tipo: tipo.value })));
     return TIPOS.map((tipo, i) => ({ key: tipo.value, label: tipo.label, value: totales[i] }))
         .filter((item) => item.value > 0)
         .sort((a, b) => b.value - a.value);

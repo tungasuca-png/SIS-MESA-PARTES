@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Derivaciones_CrearDerivacion_FullMethodName  = "/derivaciones.Derivaciones/CrearDerivacion"
-	Derivaciones_GetDerivacion_FullMethodName    = "/derivaciones.Derivaciones/GetDerivacion"
-	Derivaciones_ListDerivaciones_FullMethodName = "/derivaciones.Derivaciones/ListDerivaciones"
+	Derivaciones_CrearDerivacion_FullMethodName     = "/derivaciones.Derivaciones/CrearDerivacion"
+	Derivaciones_GetDerivacion_FullMethodName       = "/derivaciones.Derivaciones/GetDerivacion"
+	Derivaciones_ListDerivaciones_FullMethodName    = "/derivaciones.Derivaciones/ListDerivaciones"
+	Derivaciones_ReporteDerivaciones_FullMethodName = "/derivaciones.Derivaciones/ReporteDerivaciones"
 )
 
 // DerivacionesClient is the client API for Derivaciones service.
@@ -31,6 +32,7 @@ type DerivacionesClient interface {
 	CrearDerivacion(ctx context.Context, in *CrearDerivacionRequest, opts ...grpc.CallOption) (*CrearDerivacionResponse, error)
 	GetDerivacion(ctx context.Context, in *GetDerivacionRequest, opts ...grpc.CallOption) (*GetDerivacionResponse, error)
 	ListDerivaciones(ctx context.Context, in *ListDerivacionesRequest, opts ...grpc.CallOption) (*ListDerivacionesResponse, error)
+	ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error)
 }
 
 type derivacionesClient struct {
@@ -71,6 +73,16 @@ func (c *derivacionesClient) ListDerivaciones(ctx context.Context, in *ListDeriv
 	return out, nil
 }
 
+func (c *derivacionesClient) ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReporteDerivacionesResponse)
+	err := c.cc.Invoke(ctx, Derivaciones_ReporteDerivaciones_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DerivacionesServer is the server API for Derivaciones service.
 // All implementations must embed UnimplementedDerivacionesServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type DerivacionesServer interface {
 	CrearDerivacion(context.Context, *CrearDerivacionRequest) (*CrearDerivacionResponse, error)
 	GetDerivacion(context.Context, *GetDerivacionRequest) (*GetDerivacionResponse, error)
 	ListDerivaciones(context.Context, *ListDerivacionesRequest) (*ListDerivacionesResponse, error)
+	ReporteDerivaciones(context.Context, *ReporteDerivacionesRequest) (*ReporteDerivacionesResponse, error)
 	mustEmbedUnimplementedDerivacionesServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedDerivacionesServer) GetDerivacion(context.Context, *GetDeriva
 }
 func (UnimplementedDerivacionesServer) ListDerivaciones(context.Context, *ListDerivacionesRequest) (*ListDerivacionesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListDerivaciones not implemented")
+}
+func (UnimplementedDerivacionesServer) ReporteDerivaciones(context.Context, *ReporteDerivacionesRequest) (*ReporteDerivacionesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReporteDerivaciones not implemented")
 }
 func (UnimplementedDerivacionesServer) mustEmbedUnimplementedDerivacionesServer() {}
 func (UnimplementedDerivacionesServer) testEmbeddedByValue()                      {}
@@ -172,6 +188,24 @@ func _Derivaciones_ListDerivaciones_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Derivaciones_ReporteDerivaciones_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReporteDerivacionesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DerivacionesServer).ReporteDerivaciones(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Derivaciones_ReporteDerivaciones_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DerivacionesServer).ReporteDerivaciones(ctx, req.(*ReporteDerivacionesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Derivaciones_ServiceDesc is the grpc.ServiceDesc for Derivaciones service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var Derivaciones_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDerivaciones",
 			Handler:    _Derivaciones_ListDerivaciones_Handler,
+		},
+		{
+			MethodName: "ReporteDerivaciones",
+			Handler:    _Derivaciones_ReporteDerivaciones_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"auth/authclient"
@@ -33,10 +34,22 @@ type EstudianteVerifier interface {
 }
 
 // EstudianteDirectory obtiene el nombre del estudiante para el PDF de la Hoja
-// de Atención (misma implementación real que EstudianteVerifier, con el JWT
-// del usuario). nil = el PDF no puede generarse (fail-closed).
+// de Atención (misma implementación real que EstudianteVerifier: con la
+// credencial de servicio si está configurada, si no con el JWT del usuario).
+// nil = el PDF no puede generarse (fail-closed).
 type EstudianteDirectory interface {
 	NombreCompleto(ctx context.Context, estudianteID string) (string, error)
+}
+
+// EstudianteResumidor resuelve por lote el nombre de los estudiantes de una
+// respuesta (id en minúsculas -> nombre; ausente = no existe).
+type EstudianteResumidor interface {
+	Resumenes(ctx context.Context, ids []string) (map[string]string, error)
+}
+
+// EstudianteBuscador: búsqueda mínima de estudiantes para seleccionarlos.
+type EstudianteBuscador interface {
+	Buscar(ctx context.Context, q string, page, pageSize int32) (*estudiantesclient.BuscarEstudiantesSeleccionResponse, error)
 }
 
 type ServiceContext struct {
@@ -50,6 +63,9 @@ type ServiceContext struct {
 	UsuariosClient usuariosclient.Usuarios
 	Estudiantes    EstudianteVerifier
 	EstudiantesDir EstudianteDirectory
+	// nil = los resúmenes quedan NO_DISPONIBLE y la búsqueda no está disponible.
+	EstudiantesResumen  EstudianteResumidor
+	EstudiantesBuscador EstudianteBuscador
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -102,18 +118,35 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	log.Printf("Cifrado clínico listo (clave activa %q)", cifrador.ActiveKeyID())
 
-	estudiantes := NewEstudianteVerifier(estudiantesclient.NewEstudiantes(zrpc.MustNewClient(c.EstudiantesRpc)))
+	authClient := authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc))
+
+	// Credencial de servicio para consultar Estudiantes (obligatoria salvo
+	// modo anterior explícito en desarrollo). Nunca se imprimen los valores.
+	modo, err := ResolverModoEstudiantes(c.Mode, c.ServiceClientId, c.ServiceClientSecret, c.AllowLegacyAuth)
+	if err != nil {
+		db.Close()
+		log.Fatalf("Psicología no inicia: %v", err)
+	}
+	var tokens *ServiceTokenProvider
+	if modo == ModoServicio {
+		tokens = NewServiceTokenProvider(authClient, strings.TrimSpace(c.ServiceClientId), strings.TrimSpace(c.ServiceClientSecret))
+	}
+	log.Printf("Estudiantes: consultas como %s (Mode %s)", modo, c.Mode)
+
+	estudiantes := NewEstudianteVerifier(estudiantesclient.NewEstudiantes(zrpc.MustNewClient(c.EstudiantesRpc)), tokens)
 	return &ServiceContext{
-		Config:         c,
-		DB:             db,
-		ExpedienteRepo: repository.NewExpedienteRepository(db, cifrador),
-		AtencionRepo:   repository.NewAtencionRepository(db, cifrador),
-		AuditoriaRepo:  repository.NewAuditoriaRepository(db),
-		JWTValidator:   security.NewJWTValidator(c.JWTSecret),
-		AuthClient:     authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc)),
-		UsuariosClient: usuariosclient.NewUsuarios(zrpc.MustNewClient(c.UsuariosRpc)),
-		Estudiantes:    estudiantes,
-		EstudiantesDir: estudiantes,
+		Config:              c,
+		DB:                  db,
+		ExpedienteRepo:      repository.NewExpedienteRepository(db, cifrador),
+		AtencionRepo:        repository.NewAtencionRepository(db, cifrador),
+		AuditoriaRepo:       repository.NewAuditoriaRepository(db),
+		JWTValidator:        security.NewJWTValidator(c.JWTSecret),
+		AuthClient:          authClient,
+		UsuariosClient:      usuariosclient.NewUsuarios(zrpc.MustNewClient(c.UsuariosRpc)),
+		Estudiantes:         estudiantes,
+		EstudiantesDir:      estudiantes,
+		EstudiantesResumen:  estudiantes,
+		EstudiantesBuscador: estudiantes,
 	}
 }
 

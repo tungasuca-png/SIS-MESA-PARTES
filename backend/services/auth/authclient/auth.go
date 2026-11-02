@@ -14,45 +14,62 @@ import (
 )
 
 type (
-	CreateServiceClientRequest    = auth.CreateServiceClientRequest
-	CreateServiceClientResponse   = auth.CreateServiceClientResponse
-	CreateUserRequest             = auth.CreateUserRequest
-	CreateUserResponse            = auth.CreateUserResponse
-	GetMyPermissionsRequest       = auth.GetMyPermissionsRequest
-	GetMyPermissionsResponse      = auth.GetMyPermissionsResponse
-	GetRolePermissionsRequest     = auth.GetRolePermissionsRequest
-	GetRolePermissionsResponse    = auth.GetRolePermissionsResponse
-	HasPermissionRequest          = auth.HasPermissionRequest
-	HasPermissionResponse         = auth.HasPermissionResponse
-	IssueServiceTokenRequest      = auth.IssueServiceTokenRequest
-	IssueServiceTokenResponse     = auth.IssueServiceTokenResponse
-	ListPermissionsRequest        = auth.ListPermissionsRequest
-	ListPermissionsResponse       = auth.ListPermissionsResponse
-	ListRolesRequest              = auth.ListRolesRequest
-	ListRolesResponse             = auth.ListRolesResponse
-	ListServiceClientsRequest     = auth.ListServiceClientsRequest
-	ListServiceClientsResponse    = auth.ListServiceClientsResponse
-	LoginRequest                  = auth.LoginRequest
-	LoginResponse                 = auth.LoginResponse
-	LogoutRequest                 = auth.LogoutRequest
-	LogoutResponse                = auth.LogoutResponse
-	Permission                    = auth.Permission
-	RefreshTokenRequest           = auth.RefreshTokenRequest
-	RefreshTokenResponse          = auth.RefreshTokenResponse
-	RegisterRequest               = auth.RegisterRequest
-	RegisterResponse              = auth.RegisterResponse
-	Request                       = auth.Request
-	Response                      = auth.Response
-	RevokeServiceClientRequest    = auth.RevokeServiceClientRequest
-	RevokeServiceClientResponse   = auth.RevokeServiceClientResponse
-	Role                          = auth.Role
-	ServiceClient                 = auth.ServiceClient
-	UpdateRolePermissionsRequest  = auth.UpdateRolePermissionsRequest
-	UpdateRolePermissionsResponse = auth.UpdateRolePermissionsResponse
-	UpdateUserRoleRequest         = auth.UpdateUserRoleRequest
-	UpdateUserRoleResponse        = auth.UpdateUserRoleResponse
-	ValidateTokenRequest          = auth.ValidateTokenRequest
-	ValidateTokenResponse         = auth.ValidateTokenResponse
+	CreateServiceClientRequest      = auth.CreateServiceClientRequest
+	CreateServiceClientResponse     = auth.CreateServiceClientResponse
+	CreateUserRequest               = auth.CreateUserRequest
+	CreateUserResponse              = auth.CreateUserResponse
+	GetMyPermissionsRequest         = auth.GetMyPermissionsRequest
+	GetMyPermissionsResponse        = auth.GetMyPermissionsResponse
+	GetRolePermissionsRequest       = auth.GetRolePermissionsRequest
+	GetRolePermissionsResponse      = auth.GetRolePermissionsResponse
+	GoogleCallbackRequest           = auth.GoogleCallbackRequest
+	GoogleCallbackResponse          = auth.GoogleCallbackResponse
+	GoogleCancelResponse            = auth.GoogleCancelResponse
+	GoogleCompleteResponse          = auth.GoogleCompleteResponse
+	GoogleExchangeRequest           = auth.GoogleExchangeRequest
+	GoogleExchangeResponse          = auth.GoogleExchangeResponse
+	GoogleLinkStatusRequest         = auth.GoogleLinkStatusRequest
+	GoogleLinkStatusResponse        = auth.GoogleLinkStatusResponse
+	GoogleRegisterRequest           = auth.GoogleRegisterRequest
+	GoogleRegisterResponse          = auth.GoogleRegisterResponse
+	GoogleRegistrationRequest       = auth.GoogleRegistrationRequest
+	GoogleStartLinkRequest          = auth.GoogleStartLinkRequest
+	GoogleStartLinkResponse         = auth.GoogleStartLinkResponse
+	GoogleStartRequest              = auth.GoogleStartRequest
+	GoogleStartResponse             = auth.GoogleStartResponse
+	HasPermissionRequest            = auth.HasPermissionRequest
+	HasPermissionResponse           = auth.HasPermissionResponse
+	IssueServiceTokenRequest        = auth.IssueServiceTokenRequest
+	IssueServiceTokenResponse       = auth.IssueServiceTokenResponse
+	ListPermissionsRequest          = auth.ListPermissionsRequest
+	ListPermissionsResponse         = auth.ListPermissionsResponse
+	ListRolesRequest                = auth.ListRolesRequest
+	ListRolesResponse               = auth.ListRolesResponse
+	ListServiceClientsRequest       = auth.ListServiceClientsRequest
+	ListServiceClientsResponse      = auth.ListServiceClientsResponse
+	LoginRequest                    = auth.LoginRequest
+	LoginResponse                   = auth.LoginResponse
+	LogoutRequest                   = auth.LogoutRequest
+	LogoutResponse                  = auth.LogoutResponse
+	Permission                      = auth.Permission
+	RefreshTokenRequest             = auth.RefreshTokenRequest
+	RefreshTokenResponse            = auth.RefreshTokenResponse
+	RegisterRequest                 = auth.RegisterRequest
+	RegisterResponse                = auth.RegisterResponse
+	Request                         = auth.Request
+	Response                        = auth.Response
+	RevokeServiceClientRequest      = auth.RevokeServiceClientRequest
+	RevokeServiceClientResponse     = auth.RevokeServiceClientResponse
+	Role                            = auth.Role
+	ServiceClient                   = auth.ServiceClient
+	ServiceClientPermissionRequest  = auth.ServiceClientPermissionRequest
+	ServiceClientPermissionResponse = auth.ServiceClientPermissionResponse
+	UpdateRolePermissionsRequest    = auth.UpdateRolePermissionsRequest
+	UpdateRolePermissionsResponse   = auth.UpdateRolePermissionsResponse
+	UpdateUserRoleRequest           = auth.UpdateUserRoleRequest
+	UpdateUserRoleResponse          = auth.UpdateUserRoleResponse
+	ValidateTokenRequest            = auth.ValidateTokenRequest
+	ValidateTokenResponse           = auth.ValidateTokenResponse
 
 	Auth interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
@@ -73,6 +90,16 @@ type (
 		CreateServiceClient(ctx context.Context, in *CreateServiceClientRequest, opts ...grpc.CallOption) (*CreateServiceClientResponse, error)
 		RevokeServiceClient(ctx context.Context, in *RevokeServiceClientRequest, opts ...grpc.CallOption) (*RevokeServiceClientResponse, error)
 		ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error)
+		GrantServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error)
+		WithdrawServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error)
+		GoogleStart(ctx context.Context, in *GoogleStartRequest, opts ...grpc.CallOption) (*GoogleStartResponse, error)
+		GoogleCallback(ctx context.Context, in *GoogleCallbackRequest, opts ...grpc.CallOption) (*GoogleCallbackResponse, error)
+		GoogleExchange(ctx context.Context, in *GoogleExchangeRequest, opts ...grpc.CallOption) (*GoogleExchangeResponse, error)
+		GoogleRegister(ctx context.Context, in *GoogleRegisterRequest, opts ...grpc.CallOption) (*GoogleRegisterResponse, error)
+		GoogleCompleteRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCompleteResponse, error)
+		GoogleCancelRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCancelResponse, error)
+		GoogleStartLink(ctx context.Context, in *GoogleStartLinkRequest, opts ...grpc.CallOption) (*GoogleStartLinkResponse, error)
+		GoogleLinkStatus(ctx context.Context, in *GoogleLinkStatusRequest, opts ...grpc.CallOption) (*GoogleLinkStatusResponse, error)
 	}
 
 	defaultAuth struct {
@@ -174,4 +201,54 @@ func (m *defaultAuth) RevokeServiceClient(ctx context.Context, in *RevokeService
 func (m *defaultAuth) ListServiceClients(ctx context.Context, in *ListServiceClientsRequest, opts ...grpc.CallOption) (*ListServiceClientsResponse, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.ListServiceClients(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GrantServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GrantServiceClientPermission(ctx, in, opts...)
+}
+
+func (m *defaultAuth) WithdrawServiceClientPermission(ctx context.Context, in *ServiceClientPermissionRequest, opts ...grpc.CallOption) (*ServiceClientPermissionResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.WithdrawServiceClientPermission(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleStart(ctx context.Context, in *GoogleStartRequest, opts ...grpc.CallOption) (*GoogleStartResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleStart(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleCallback(ctx context.Context, in *GoogleCallbackRequest, opts ...grpc.CallOption) (*GoogleCallbackResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleCallback(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleExchange(ctx context.Context, in *GoogleExchangeRequest, opts ...grpc.CallOption) (*GoogleExchangeResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleExchange(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleRegister(ctx context.Context, in *GoogleRegisterRequest, opts ...grpc.CallOption) (*GoogleRegisterResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleRegister(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleCompleteRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCompleteResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleCompleteRegistration(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleCancelRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCancelResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleCancelRegistration(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleStartLink(ctx context.Context, in *GoogleStartLinkRequest, opts ...grpc.CallOption) (*GoogleStartLinkResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleStartLink(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GoogleLinkStatus(ctx context.Context, in *GoogleLinkStatusRequest, opts ...grpc.CallOption) (*GoogleLinkStatusResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GoogleLinkStatus(ctx, in, opts...)
 }

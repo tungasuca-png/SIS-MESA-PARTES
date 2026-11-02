@@ -70,6 +70,8 @@ function Dashboard() {
     const navigate = useNavigate();
     const esSolicitante = user?.role === "SOLICITANTE";
     const verMetricas = can("expedientes.view") && !esSolicitante;
+    // Con reportes.view, las cifras salen del endpoint agregado (menos consultas).
+    const conReporte = can("reportes.view");
 
     const [resumen, setResumen] = useState(null);
     const [errorResumen, setErrorResumen] = useState("");
@@ -91,7 +93,7 @@ function Dashboard() {
     useEffect(() => {
         if (!verMetricas) return undefined;
         let activo = true;
-        cargarResumen()
+        cargarResumen({ conReporte })
             .then((datos) => {
                 if (!activo) return;
                 setResumen(datos);
@@ -104,18 +106,18 @@ function Dashboard() {
         return () => {
             activo = false;
         };
-    }, [vivo, verMetricas]);
+    }, [vivo, verMetricas, conReporte]);
 
     useEffect(() => {
         if (!verMetricas) return undefined;
         let activo = true;
-        cargarPorTipo()
+        cargarPorTipo({ conReporte })
             .then((items) => activo && setTipos({ cargando: false, error: "", items }))
             .catch((err) => activo && setTipos((prev) => ({ ...prev, cargando: false, error: friendlyErrorMessage(err) })));
         return () => {
             activo = false;
         };
-    }, [refrescoGraficos, verMetricas]);
+    }, [refrescoGraficos, verMetricas, conReporte]);
 
     useEffect(() => {
         if (!verMetricas) return undefined;

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -136,6 +137,31 @@ func (r *UsuarioRepository) List(ctx context.Context, filter ListFilter) ([]*Usu
 
 // Upsert crea o actualiza el perfil asociado a un UUID que ya existe en Auth.
 // El id siempre viene de afuera: este servicio no genera identidades.
+// CreateIfNotExists: crea el perfil solo si no existe (ON CONFLICT DO
+// NOTHING). Devuelve el existente con creado = false si ya estaba: un
+// reintento nunca sobrescribe datos. El índice único de DNI decide los
+// duplicados (ErrDniExists).
+func (r *UsuarioRepository) CreateIfNotExists(ctx context.Context, u *Usuario) (*Usuario, bool, error) {
+	saved, err := scanUsuario(r.db.QueryRow(ctx, `
+		INSERT INTO usuarios (id, nombres, apellidos, dni, telefono, correo, direccion, tipo_usuario)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (id) DO NOTHING
+		RETURNING `+usuarioColumns,
+		u.ID, u.Nombres, u.Apellidos, u.DNI, u.Telefono, u.Correo, u.Direccion, u.TipoUsuario,
+	))
+	if err == nil {
+		return saved, true, nil
+	}
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return nil, false, classifyUniqueViolation(err)
+	}
+	existing, err := r.FindByID(ctx, u.ID)
+	if err != nil {
+		return nil, false, err
+	}
+	return existing, false, nil
+}
+
 func (r *UsuarioRepository) Upsert(ctx context.Context, u *Usuario) (*Usuario, error) {
 	saved, err := scanUsuario(r.db.QueryRow(ctx, `
 		INSERT INTO usuarios (id, nombres, apellidos, dni, telefono, correo, direccion, tipo_usuario)

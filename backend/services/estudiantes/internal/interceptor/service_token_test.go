@@ -213,9 +213,41 @@ func TestSistemaConPermisoAutorizado(t *testing.T) {
 	if r := invocar(t, tok.firmar(t), metodoBasic, "estudiantes.view"); r.err != nil {
 		t.Fatalf("basic.view debe permitir GetEstudiantesBasic: %v", r.err)
 	}
-	tok.scope = "estudiantes.create estudiantes.view"
-	if r := invocar(t, tok.firmar(t), "/estudiantes.Estudiantes/CreateEstudiante", "estudiantes.create"); r.err != nil {
-		t.Fatalf("se esperaba acceso a CreateEstudiante: %v", r.err)
+	tok.scope = "estudiantes.view"
+	if r := invocar(t, tok.firmar(t), metodoGet, "estudiantes.view"); r.err != nil {
+		t.Fatalf("estudiantes.view debe seguir permitiendo GetEstudiante a sistemas existentes: %v", r.err)
+	}
+}
+
+// FASE 3 — solo lectura: ningún sistema crea, actualiza, matricula ni lee
+// datos personales, AUNQUE su token tuviera el permiso (p. ej. un cliente
+// antiguo con permisos de escritura). La logic nunca se ejecuta.
+func TestSistemaSoloLectura(t *testing.T) {
+	tok := base()
+	tok.scope = "estudiantes.view estudiantes.basic.view estudiantes.personal.view estudiantes.create estudiantes.update estudiantes.matricula.update"
+	casos := map[string]string{
+		"/estudiantes.Estudiantes/CreateEstudiante":      "estudiantes.create",
+		"/estudiantes.Estudiantes/UpdateEstudiante":      "estudiantes.update",
+		"/estudiantes.Estudiantes/MatricularEstudiante":  "estudiantes.matricula.update",
+		"/estudiantes.Estudiantes/GetEstudiantePersonal": "estudiantes.personal.view",
+	}
+	for metodo, permiso := range casos {
+		r := invocar(t, tok.firmar(t), metodo, permiso)
+		if status.Code(r.err) != codes.PermissionDenied || r.llamado {
+			t.Fatalf("%s: se esperaba PermissionDenied sin ejecutar: %v", metodo, r.err)
+		}
+		if interceptor.ServiceMethods[metodo] {
+			t.Fatalf("%s no debe figurar en ServiceMethods", metodo)
+		}
+	}
+}
+
+// Un usuario humano conserva esas operaciones (las decide su rol, no esta lista).
+func TestUsuarioConservaEscritura(t *testing.T) {
+	for _, metodo := range []string{"/estudiantes.Estudiantes/CreateEstudiante", "/estudiantes.Estudiantes/UpdateEstudiante", "/estudiantes.Estudiantes/MatricularEstudiante", "/estudiantes.Estudiantes/GetEstudiantePersonal"} {
+		if r := invocar(t, tokenUsuario(t, claveUsuarios, nil), metodo, "estudiantes.update"); r.err != nil || !r.llamado {
+			t.Fatalf("%s: el usuario debe llegar a la logic: %v", metodo, r.err)
+		}
 	}
 }
 
@@ -254,5 +286,35 @@ func TestValidadorDeServicioConfiguracion(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer "+base().firmar(t)))
 	if _, err := icpt(ctx, nil, &grpc.UnaryServerInfo{FullMethod: metodoGet}, func(context.Context, any) (any, error) { return nil, nil }); status.Code(err) != codes.Unauthenticated {
 		t.Fatalf("se esperaba Unauthenticated: %v", err)
+	}
+}
+
+// BuscarEstudiantesSeleccion exige estudiantes.search.basic: ni basic.view ni
+// estudiantes.view lo sustituyen (permiso independiente, sin ampliar otros).
+func TestBusquedaSeleccionExigeSearchBasic(t *testing.T) {
+	const metodo = "/estudiantes.Estudiantes/BuscarEstudiantesSeleccion"
+	casos := map[string]struct {
+		scope    string
+		esperado codes.Code
+	}{
+		"con search.basic":            {"estudiantes.basic.view estudiantes.search.basic", codes.OK},
+		"solo basic.view":             {"estudiantes.basic.view", codes.PermissionDenied},
+		"estudiantes.view sin search": {"estudiantes.view", codes.PermissionDenied},
+	}
+	for nombre, c := range casos {
+		t.Run(nombre, func(t *testing.T) {
+			tok := base()
+			tok.scope = c.scope
+			r := invocar(t, tok.firmar(t), metodo, "estudiantes.search.basic")
+			if status.Code(r.err) != c.esperado {
+				t.Fatalf("se esperaba %v: %v", c.esperado, r.err)
+			}
+		})
+	}
+	// basic.view sigue sin cubrir la búsqueda amplia SearchEstudiantes.
+	tok := base()
+	tok.scope = "estudiantes.basic.view estudiantes.search.basic"
+	if r := invocar(t, tok.firmar(t), "/estudiantes.Estudiantes/SearchEstudiantes", "estudiantes.view"); status.Code(r.err) != codes.PermissionDenied {
+		t.Fatalf("SearchEstudiantes no debe abrirse con search.basic: %v", r.err)
 	}
 }

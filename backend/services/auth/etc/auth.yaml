@@ -27,6 +27,14 @@ ServiceTokenIssuer: tungasuca-auth
 ServiceTokenAudience: estudiantes
 ServiceTokenDuration: 5m
 
+# Acceso con Google (solo SOLICITANTES). Valores en backend/.env; sin ellos el
+# acceso con Google responde "no configurado" y el login por DNI no cambia.
+Google:
+  ClientID: "${GOOGLE_CLIENT_ID}"
+  ClientSecret: "${GOOGLE_CLIENT_SECRET}"
+  RedirectURL: "${GOOGLE_REDIRECT_URL}"
+  Issuer: "${GOOGLE_OIDC_ISSUER}"
+
 Middlewares:
   StatConf:
     IgnoreContentMethods:
@@ -41,3 +49,13 @@ Middlewares:
       - /auth.Auth/CreateServiceClient
       - /auth.Auth/RevokeServiceClient
       - /auth.Auth/ListServiceClients
+      # Google: códigos de autorización, verificadores PKCE, códigos de un
+      # solo uso y tokens en la solicitud o en la respuesta.
+      - /auth.Auth/GoogleStart
+      - /auth.Auth/GoogleCallback
+      - /auth.Auth/GoogleExchange
+      - /auth.Auth/GoogleRegister
+      - /auth.Auth/GoogleCompleteRegistration
+      - /auth.Auth/GoogleCancelRegistration
+      - /auth.Auth/GoogleStartLink
+      - /auth.Auth/GoogleLinkStatus

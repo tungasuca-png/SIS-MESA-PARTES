@@ -1,53 +1,33 @@
 import { Link } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
-import { shortId } from "../../utils/format";
 
 /**
- * Muestra el nombre del estudiante resuelto por Estudiantes Service. Mismo
- * criterio que SolicitanteNombre.jsx: distingue "no existe" de "servicio no
- * disponible" de "todavía resolviendo", sin mostrar el UUID salvo como
- * respaldo cuando no hay nada mejor que mostrar.
+ * Nombre del estudiante de un expediente psicológico, tal como lo resolvió
+ * Psicología con su credencial de servicio (expediente.estudiante:
+ * { nombre_completo, resolucion }). El frontend no consulta Estudiantes.
+ *
+ * resolucion: RESUELTO (nombre) | NO_ENCONTRADO | NO_DISPONIBLE. Nunca muestra
+ * el UUID, ni como texto ni como tooltip.
  *
  * Con "estudiantes.view" el nombre enlaza a la ficha del estudiante (por su
  * UUID estable); sin ese permiso es solo texto. La ficha aplica sus propios
  * permisos: el enlace no da acceso a nada adicional.
  */
-function EstudianteNombre({ id, estudiantes, unavailable }) {
+function EstudianteNombre({ id, resumen }) {
     const { can } = usePermissions();
     if (!id) return <span className="dp-usuario-fallback">—</span>;
-
-    const resuelto = estudiantes?.get(id);
-    if (resuelto) {
+    if (resumen?.resolucion === "RESUELTO" && resumen.nombre_completo) {
         return can("estudiantes.view") ? (
-            <Link to={`/estudiantes/${id}`} title="Ver ficha del estudiante">
-                {resuelto.nombre_completo}
-            </Link>
+            <Link to={`/estudiantes/${id}`}>{resumen.nombre_completo}</Link>
         ) : (
-            <span title={id}>{resuelto.nombre_completo}</span>
+            <span>{resumen.nombre_completo}</span>
         );
     }
-
-    if (estudiantes?.has(id)) {
-        return (
-            <span className="dp-usuario-fallback" title={id}>
-                Estudiante no encontrado
-            </span>
-        );
+    if (resumen?.resolucion === "NO_ENCONTRADO") {
+        return <span className="dp-usuario-fallback">Estudiante no encontrado</span>;
     }
-
-    if (unavailable) {
-        return (
-            <span className="dp-usuario-fallback" title={id}>
-                Estudiante no disponible
-            </span>
-        );
-    }
-
-    return (
-        <span className="dp-usuario-fallback" title={id}>
-            {shortId(id)}
-        </span>
-    );
+    // NO_DISPONIBLE (o sin resumen): Estudiantes/Auth no respondieron.
+    return <span className="dp-usuario-fallback">Nombre no disponible</span>;
 }
 
 export default EstudianteNombre;

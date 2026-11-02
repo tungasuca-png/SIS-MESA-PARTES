@@ -152,11 +152,15 @@ func TestEmitirTokenServicio_NoRegistraSecretosNiTokens(t *testing.T) {
 }
 
 func TestValidarPermisosSistema(t *testing.T) {
-	ok, err := validarPermisosSistema([]string{" estudiantes.view", "estudiantes.view", "estudiantes.matricula.update"})
-	if err != nil || strings.Join(ok, ",") != "estudiantes.matricula.update,estudiantes.view" {
+	ok, err := validarPermisosSistema([]string{" estudiantes.search.basic", "estudiantes.basic.view", "estudiantes.basic.view"})
+	if err != nil || strings.Join(ok, ",") != "estudiantes.basic.view,estudiantes.search.basic" {
 		t.Fatalf("normalización inesperada: %v %v", ok, err)
 	}
-	for _, malos := range [][]string{nil, {""}, {"roles.view"}, {"usuarios.change_role"}, {"integraciones.manage"}, {"estudiantes.view", "expedientes.view"}} {
+	// Solo lectura mínima: nada de registro completo, datos personales,
+	// escritura, matrícula ni permisos humanos/administrativos.
+	for _, malos := range [][]string{nil, {""}, {"roles.view"}, {"usuarios.change_role"}, {"integraciones.manage"}, {"estudiantes.view", "expedientes.view"},
+		{"estudiantes.view"}, {"estudiantes.personal.view"}, {"estudiantes.create"}, {"estudiantes.update"}, {"estudiantes.matricula.update"},
+		{"estudiantes.basic.view", "estudiantes.create"}} {
 		if _, err := validarPermisosSistema(malos); codigo(err) != codes.InvalidArgument {
 			t.Fatalf("%v debió rechazarse: %v", malos, err)
 		}

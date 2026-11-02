@@ -40,6 +40,45 @@ usar la contraseña de `TG_SECRETS_DIR/migrators.env`.)
 
 Toda migración nueva debe conceder explícitamente a `auth_app` / `<s>_user` los
 privilegios que necesite: el rol de aplicación ya no es dueño de nada.
+
+**Y además debe añadirlos a `02_propiedad_y_permisos.sql`** (bloque condicional
+con `to_regclass`): ese script hace `REVOKE ALL ON ALL TABLES ... FROM auth_app`
+y, si una tabla no figura en él, reejecutarlo le quita a `auth_app` lo que la
+migración le concedió. Hoy cubre las migraciones de Auth hasta la 023
+(019/020 `service_clients*`, 022 `user_auth_providers`, 023
+`oauth_login_codes`, `auth_eventos` y la función
+`cancelar_registro_google_pendiente(uuid)`).
+
+## Orden de aplicación
+
+1. `01_roles.sql` (tg_admin): crea `<s>_owner`, `<s>_migrator`, `<s>_tester` y
+   los roles de aplicación. Idempotente.
+2. Contraseñas por stdin (ver arriba).
+3. Bases nuevas: crearlas con dueño `<s>_owner` y las extensiones
+   (`pgcrypto`, `citext`) como tg_admin.
+4. `02_propiedad_y_permisos.sql` (tg_admin): dueños y privilegios mínimos.
+   Idempotente y **reejecutable en cualquier momento**: deja a `auth_app`
+   exactamente con el mínimo declarado, también para las tablas de
+   migraciones posteriores que ya existan.
+5. Migraciones de cada servicio, en orden numérico, con `<s>_migrator` +
+   `SET ROLE <s>_owner`. Cada una concede lo suyo a la aplicación.
+6. Tras añadir una migración con permisos nuevos: actualizar el bloque
+   correspondiente de `02_propiedad_y_permisos.sql` en el mismo cambio.
+
+Privilegios esperados de `auth_app` en `auth_db` (cualquier otro es un error):
+
+| Tabla | Privilegios |
+|---|---|
+| `usuarios` | SELECT, INSERT, UPDATE (**nunca DELETE**) |
+| `usuario_roles`, `role_permissions` | SELECT, INSERT, DELETE |
+| `refresh_tokens`, `permissions` | SELECT, INSERT, UPDATE |
+| `roles` | SELECT |
+| `user_profiles` | ninguno |
+| `service_clients` | SELECT, INSERT, UPDATE |
+| `service_client_permissions` | SELECT, INSERT, DELETE |
+| `user_auth_providers`, `oauth_login_codes` | SELECT, INSERT, UPDATE |
+| `auth_eventos` | INSERT (sin lectura) |
+| función `cancelar_registro_google_pendiente(uuid)` | EXECUTE (SECURITY DEFINER, dueño `auth_owner`; nadie más) |
 En las bases de Mesa de Partes y para los roles `<s>_tester`, los privilegios por
 defecto (`ALTER DEFAULT PRIVILEGES`) ya cubren las tablas nuevas creadas por
 `<s>_owner`.

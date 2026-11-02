@@ -8,7 +8,6 @@ import (
 
 	"auth/auth"
 	"auth/internal/repository"
-	"auth/internal/security"
 	"auth/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -86,39 +85,7 @@ func (l *LoginLogic) Login(in *auth.LoginRequest) (*auth.LoginResponse, error) {
 		return nil, status.Error(codes.Internal, "no se pudo actualizar el estado del login")
 	}
 
-	accessToken, expiresIn, err := l.svcCtx.JWTManager.GenerateAccessToken(
-		user.ID,
-		user.Username,
-		roles[0],
-	)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "no se pudo generar el token")
-	}
-	refreshToken, refreshTokenHash, err := security.GenerateRefreshToken()
-	if err != nil {
-		return nil, status.Error(codes.Internal, "no se pudo generar el refresh token")
-	}
-	if l.svcCtx.Config.RefreshTokenDuration <= 0 {
-		return nil, status.Error(codes.Internal, "la duración del refresh token no está configurada")
-	}
-	if err := l.svcCtx.RefreshTokenRepository.Create(
-		l.ctx,
-		user.ID,
-		refreshTokenHash,
-		time.Now().Add(l.svcCtx.Config.RefreshTokenDuration),
-	); err != nil {
-		return nil, status.Error(codes.Internal, "no se pudo guardar el refresh token")
-	}
-
-	return &auth.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		ExpiresIn:    int64(expiresIn / time.Second),
-		UserId:       user.ID,
-		Username:     user.Username,
-		Email:        user.Email,
-		Role:         roles[0],
-	}, nil
+	return emitirSesion(l.ctx, l.svcCtx, user, roles[0])
 }
 
 func invalidCredentialsError() error {

@@ -123,7 +123,7 @@ describe("Psicología — enlace a la ficha del estudiante", () => {
         render(
             <AuthContext.Provider value={{ user: { id: "u", role: "ADMIN" }, permissions, loading: false, isAuthenticated: true }}>
                 <MemoryRouter>
-                    <EstudianteNombre id={ana.id} estudiantes={new Map([[ana.id, { nombre_completo: "Ana Lucía Pérez Soto" }]])} />
+                    <EstudianteNombre id={ana.id} resumen={{ nombre_completo: "Ana Lucía Pérez Soto", resolucion: "RESUELTO" }} />
                 </MemoryRouter>
             </AuthContext.Provider>
         );
