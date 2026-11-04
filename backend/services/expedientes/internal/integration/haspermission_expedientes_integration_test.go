@@ -242,8 +242,8 @@ func TestHasPermissionIntegration(t *testing.T) {
 		trackExpediente(created.Expediente.Id)
 
 		_, err = client.GetExpediente(authCtx(userB, "SOLICITANTE"), &expedientes.GetExpedienteRequest{Id: created.Expediente.Id})
-		if status.Code(err) != codes.PermissionDenied {
-			t.Fatalf("se esperaba PermissionDenied: otro solicitante no debe ver un expediente ajeno, got %v", err)
+		if status.Code(err) != codes.NotFound {
+			t.Fatalf("se esperaba NotFound (igual que un id inexistente): otro solicitante no debe ver ni detectar un expediente ajeno, got %v", err)
 		}
 	})
 

@@ -106,3 +106,5 @@ Middlewares:
       - /estudiantes.Estudiantes/ListPlantillasDatos
       - /estudiantes.Estudiantes/GuardarPlantillaDatos
       - /estudiantes.Estudiantes/EliminarPlantillaDatos
+      # Búsqueda mínima para selección: la consulta puede contener un DNI.
+      - /estudiantes.Estudiantes/BuscarEstudiantesSeleccion

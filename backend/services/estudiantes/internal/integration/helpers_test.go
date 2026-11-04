@@ -55,6 +55,10 @@ func (c *scriptedAuthClient) HasPermission(_ context.Context, in *authclient.Has
 
 const testJWTSecret = "estudiantes-integration-test-secret"
 
+// testServiceSecret: clave de tokens de servicio SOLO de prueba (distinta de
+// la de usuarios, como exige el validador).
+const testServiceSecret = "estudiantes-integration-service-secret-0002"
+
 func requireIntegration(t *testing.T) {
 	t.Helper()
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
@@ -84,7 +88,13 @@ func appPassword(t *testing.T) string {
 }
 
 func appDatabaseURL(t *testing.T) string {
-	return fmt.Sprintf("postgres://estudiantes_user:%s@127.0.0.1:5433/estudiantes_db?sslmode=disable", appPassword(t))
+	// ESTUDIANTES_TEST_DB_ADDR: host:puerto de una base AISLADA (p. ej. un
+	// contenedor desechable); por defecto, el puerto local habitual.
+	addr := strings.TrimSpace(os.Getenv("ESTUDIANTES_TEST_DB_ADDR"))
+	if addr == "" {
+		addr = "127.0.0.1:5433"
+	}
+	return fmt.Sprintf("postgres://estudiantes_user:%s@%s/estudiantes_db?sslmode=disable", appPassword(t), addr)
 }
 
 // adminDatabaseURL: dueño de la tabla (auth_user, mismo patrón que las demás
@@ -149,7 +159,11 @@ func newHarness(t *testing.T) *harness {
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.AuthenticationInterceptor(h.svcCtx.JWTValidator)))
+	serviceValidator, err := security.NewServiceTokenValidator(testServiceSecret, testJWTSecret, "", "")
+	if err != nil || serviceValidator == nil {
+		t.Fatalf("validador de servicio: %v", err)
+	}
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.AuthenticationInterceptor(h.svcCtx.JWTValidator, serviceValidator)))
 	estudiantes.RegisterEstudiantesServer(grpcServer, server.NewEstudiantesServer(h.svcCtx))
 	go func() { _ = grpcServer.Serve(listener) }()
 	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
@@ -183,6 +197,20 @@ func (h *harness) tokenFor(userID string) string {
 
 func (h *harness) as(userID string) context.Context {
 	return metadata.AppendToOutgoingContext(h.ctx, "authorization", "Bearer "+h.tokenFor(userID))
+}
+
+// asService: llamada de un sistema consumidor (token de servicio ficticio)
+// con el scope indicado.
+func (h *harness) asService(scope string) context.Context {
+	ahora := time.Now()
+	claims := security.ServiceClaims{TokenType: "service", ClientID: "cli_0123456789abcdef0123456789abcdef", Scope: scope,
+		RegisteredClaims: jwt.RegisteredClaims{Issuer: "tungasuca-auth", Subject: "7b0f6d2e-1c1a-4c43-9d55-0a6a8f1b2c3d",
+			Audience: jwt.ClaimStrings{"estudiantes"}, IssuedAt: jwt.NewNumericDate(ahora), ExpiresAt: jwt.NewNumericDate(ahora.Add(5 * time.Minute))}}
+	tok, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(testServiceSecret))
+	if err != nil {
+		h.t.Fatalf("firmar token de servicio: %v", err)
+	}
+	return metadata.AppendToOutgoingContext(h.ctx, "authorization", "Bearer "+tok)
 }
 
 // seed inserta un estudiante por SQL directo (no hay RPC de alta en esta

@@ -1,0 +1,542 @@
+/* Reportes (Fase 1). Reutiliza paneles, indicadores y gráficos del
+   Dashboard; aquí solo lo propio de la pantalla y la hoja de impresión. */
+
+.rp-filtros {
+    margin-bottom: 16px;
+}
+
+.rp-filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.rp-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--dp-text-secondary);
+}
+
+.rp-campo input,
+.rp-campo select {
+    min-height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--dp-border-strong);
+    border-radius: var(--dp-radius-sm);
+    background: var(--dp-card-bg);
+    color: var(--dp-text-primary);
+    font: inherit;
+    font-weight: 400;
+}
+
+.rp-campo input:focus-visible,
+.rp-campo select:focus-visible {
+    outline: 2px solid var(--dp-focus);
+    outline-offset: 1px;
+}
+
+.rp-filtros-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.rp-atajos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.rp-atajo {
+    padding: 6px 12px;
+    border: 1px solid var(--dp-border);
+    border-radius: 999px;
+    background: var(--dp-surface-2);
+    color: var(--dp-text-secondary);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.rp-atajo:hover {
+    border-color: var(--dp-primary);
+    color: var(--dp-primary);
+}
+
+.rp-filtros-botones {
+    display: flex;
+    gap: 8px;
+}
+
+.rp-aplicados {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    color: var(--dp-text-muted);
+}
+
+.rp-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.rp-panel-ancho {
+    margin-bottom: 16px;
+}
+
+.rp-vacio {
+    margin-bottom: 16px;
+    text-align: center;
+    color: var(--dp-text-muted);
+}
+
+.rp-tabla .rp-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.rp-tabla tfoot th,
+.rp-tabla tfoot td {
+    padding: 12px 14px;
+    border-top: 2px solid var(--dp-border-strong);
+    font-size: 13.5px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.rp-tabla tfoot th:first-child {
+    padding-left: 22px;
+}
+
+.rp-tabla tfoot td:last-child {
+    padding-right: 22px;
+}
+
+.rp-tabla tfoot td.rp-num {
+    text-align: right;
+}
+
+.rp-actualizando {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.rp-print-only {
+    display: none;
+}
+
+@media (max-width: 1280px) {
+    .rp-filtros-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .rp-grid,
+    .rp-kpis {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .rp-filtros-grid,
+    .rp-grid,
+    .rp-kpis {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rp-filtros-botones {
+        width: 100%;
+    }
+
+    .rp-filtros-botones button {
+        flex: 1;
+    }
+
+    .rp-tabla {
+        min-width: 0;
+    }
+
+    .rp-tabla thead th {
+        white-space: normal;
+    }
+
+    .rp-tabla th,
+    .rp-tabla td,
+    .rp-tabla thead th:first-child,
+    .rp-tabla tbody td:first-child,
+    .rp-tabla tfoot th:first-child,
+    .rp-tabla thead th:last-child,
+    .rp-tabla tbody td:last-child,
+    .rp-tabla tfoot td:last-child {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+/* Impresión: sin menú, encabezado de la app, filtros ni botones; con el
+   encabezado del reporte (periodo, filtros, alcance y fecha). */
+@media print {
+    .dp-sidebar,
+    .dp-header,
+    .dp-overlay,
+    .rp-filtros,
+    .rp-acciones,
+    .rp-intro,
+    .db-intro-actions {
+        display: none !important;
+    }
+
+    .rp-print-only {
+        display: block;
+    }
+
+    .dashboard-shell,
+    .dp-content,
+    .dp-main {
+        display: block;
+        padding: 0;
+        background: #fff;
+    }
+
+    .rp-print-head {
+        margin-bottom: 12px;
+        font-size: 10pt;
+        color: #000;
+    }
+
+    .rp-print-head p {
+        margin: 2px 0;
+    }
+
+    .rp-print-title {
+        font-size: 14pt;
+        font-weight: 700;
+    }
+
+    .dp-panel,
+    .dp-stat-card {
+        box-shadow: none;
+        border: 1px solid #999;
+        break-inside: avoid;
+    }
+
+    .rp-grid,
+    .rp-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rp-actualizando {
+        opacity: 1;
+    }
+}
+
+/* ---- Fase 2: pestañas, notas, tablas cruzadas y comparación ---- */
+
+.rp-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--dp-border);
+}
+
+.rp-pestana {
+    padding: 9px 14px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: none;
+    color: var(--dp-text-secondary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rp-pestana:hover {
+    color: var(--dp-primary);
+}
+
+.rp-pestana.is-active {
+    border-bottom-color: var(--dp-primary);
+    color: var(--dp-primary);
+}
+
+.rp-pestana:focus-visible {
+    outline: 2px solid var(--dp-focus);
+    outline-offset: 2px;
+}
+
+.rp-campo select:disabled {
+    background: var(--dp-surface-2);
+    color: var(--dp-text-muted);
+    cursor: not-allowed;
+}
+
+.rp-info {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+    color: var(--dp-text-secondary);
+}
+
+.rp-nota {
+    margin: -4px 0 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--dp-info-border);
+    border-radius: var(--dp-radius-sm);
+    background: var(--dp-info-bg);
+    color: var(--dp-info-text);
+    font-size: 0.82rem;
+}
+
+.rp-kpis--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rp-cruce .rp-cero {
+    color: var(--dp-text-muted);
+}
+
+.rp-total-fila {
+    font-weight: 700;
+}
+
+.rp-comparacion-cabecera {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.rp-insuficiente {
+    margin-bottom: 16px;
+}
+
+.rp-tabla .rp-sube {
+    color: var(--dp-success-text);
+    font-weight: 600;
+}
+
+.rp-tabla .rp-baja {
+    color: var(--dp-danger);
+    font-weight: 600;
+}
+
+.rp-tabla .rp-cero {
+    color: var(--dp-text-muted);
+}
+
+@media (max-width: 900px) {
+    .rp-kpis--3,
+    .rp-comparacion-cabecera {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .rp-pestanas {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .rp-pestana {
+        white-space: nowrap;
+    }
+}
+
+@media print {
+    .rp-pestanas {
+        display: none !important;
+    }
+
+    .rp-info {
+        display: none;
+    }
+}
+
+/* ---- Mejora incremental: estados vacíos, notas, evolución por estado y
+   tendencias ---- */
+
+/* Colores de estado del gráfico (validados para daltonismo; el ámbar siempre
+   va con leyenda, tooltip y tabla). Misma semántica que las insignias. */
+.rp-barras,
+.rp-leyenda,
+.rp-barras-tooltip {
+    --rp-c-pendiente: #C98A00;
+    --rp-c-en_proceso: #1769C2;
+    --rp-c-observado: #D9467A;
+    --rp-c-atendido: #1F7A4D;
+}
+
+.rp-vacio {
+    padding: 28px 20px;
+}
+
+.rp-vacio-titulo {
+    margin: 0;
+    color: var(--dp-text-primary);
+    font-weight: 600;
+}
+
+.rp-vacio-ayuda {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    color: var(--dp-text-muted);
+}
+
+.rp-pie {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    color: var(--dp-text-secondary);
+}
+
+.rp-pie--kpis {
+    margin: -6px 0 16px;
+}
+
+.rp-tabla .rp-pct,
+.rp-tabla .rp-sub {
+    color: var(--dp-text-secondary);
+}
+
+.rp-comparacion-cabecera {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+    .rp-comparacion-cabecera {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.rp-tendencia {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.rp-tendencia-simbolo {
+    font-size: 0.7em;
+}
+
+.rp-tendencia--sube {
+    color: var(--dp-success-text);
+}
+
+.rp-tendencia--baja {
+    color: var(--dp-danger);
+}
+
+.rp-tendencia--igual {
+    color: var(--dp-text-secondary);
+}
+
+.rp-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    color: var(--dp-text-secondary);
+}
+
+.rp-leyenda li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rp-leyenda-marca {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--rp-c);
+}
+
+.rp-barra {
+    fill: var(--rp-c);
+}
+
+.rp-estado--pendiente {
+    --rp-c: var(--rp-c-pendiente);
+}
+
+.rp-estado--en_proceso {
+    --rp-c: var(--rp-c-en_proceso);
+}
+
+.rp-estado--observado {
+    --rp-c: var(--rp-c-observado);
+}
+
+.rp-estado--atendido {
+    --rp-c: var(--rp-c-atendido);
+}
+
+.rp-barras-foco {
+    fill: var(--dp-primary);
+    opacity: 0.05;
+}
+
+.rp-barras-tooltip {
+    gap: 2px;
+}
+
+.rp-barras-tooltip-fila {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--dp-text-secondary);
+}
+
+.rp-barras-tooltip-fila strong {
+    margin-left: auto;
+    padding-left: 12px;
+    color: var(--dp-text-primary);
+}
+
+@media print {
+    .rp-barra {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .rp-leyenda-marca {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* Encabezados de tabla en varias líneas: las tablas de 6 o 7 columnas caben
+   sin esconder la última columna. */
+.dp-table.rp-tabla thead th {
+    white-space: normal;
+    vertical-align: bottom;
+}
+
+/* "Comparar con" muestra el nombre completo del modo. */
+.rp-campo--doble {
+    grid-column: span 2;
+}
+
+@media (max-width: 640px) {
+    .rp-campo--doble {
+        grid-column: auto;
+    }
+}

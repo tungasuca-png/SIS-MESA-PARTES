@@ -9,6 +9,10 @@ func toExpedientePsicologicoDTO(e *psicologiaclient.ExpedientePsicologico) types
 	if e == nil {
 		return types.ExpedientePsicologicoDTO{}
 	}
+	var estudiante *types.EstudianteResumenDTO
+	if r := e.Estudiante; r != nil {
+		estudiante = &types.EstudianteResumenDTO{NombreCompleto: r.NombreCompleto, Resolucion: r.Resolucion}
+	}
 	return types.ExpedientePsicologicoDTO{
 		Id:            e.Id,
 		EstudianteId:  e.EstudianteId,
@@ -22,5 +26,6 @@ func toExpedientePsicologicoDTO(e *psicologiaclient.ExpedientePsicologico) types
 		ResumenCaso:   e.ResumenCaso,
 		CreatedAt:     e.CreatedAt,
 		UpdatedAt:     e.UpdatedAt,
+		Estudiante:    estudiante,
 	}
 }

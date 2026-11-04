@@ -96,7 +96,9 @@ func (l *OpenExpedienteLogic) OpenExpediente(in *psicologia.OpenExpedienteReques
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo abrir el expediente psicológico")
 	}
-	return &psicologia.OpenExpedienteResponse{Expediente: toProto(exp, clinico)}, nil
+	out := toProto(exp, clinico)
+	completarEstudiantes(l.ctx, l.svcCtx, out)
+	return &psicologia.OpenExpedienteResponse{Expediente: out}, nil
 }
 
 // ---- UpdateExpediente ----
@@ -179,7 +181,9 @@ func (l *UpdateExpedienteLogic) UpdateExpediente(in *psicologia.UpdateExpediente
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo actualizar el expediente psicológico")
 	}
-	return &psicologia.UpdateExpedienteResponse{Expediente: toProto(updated, clinico)}, nil
+	out := toProto(updated, clinico)
+	completarEstudiantes(l.ctx, l.svcCtx, out)
+	return &psicologia.UpdateExpedienteResponse{Expediente: out}, nil
 }
 
 // ---- CloseExpediente ----
@@ -231,7 +235,9 @@ func (l *CloseExpedienteLogic) CloseExpediente(in *psicologia.CloseExpedienteReq
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo cerrar el expediente psicológico")
 	}
-	return &psicologia.CloseExpedienteResponse{Expediente: toProto(closed, clinico)}, nil
+	out := toProto(closed, clinico)
+	completarEstudiantes(l.ctx, l.svcCtx, out)
+	return &psicologia.CloseExpedienteResponse{Expediente: out}, nil
 }
 
 // ---- ReopenExpediente ----
@@ -282,5 +288,7 @@ func (l *ReopenExpedienteLogic) ReopenExpediente(in *psicologia.ReopenExpediente
 	if err != nil {
 		return nil, repoError(l.ctx, err, "no se pudo reabrir el expediente psicológico")
 	}
-	return &psicologia.ReopenExpedienteResponse{Expediente: toProto(reopened, clinico)}, nil
+	out := toProto(reopened, clinico)
+	completarEstudiantes(l.ctx, l.svcCtx, out)
+	return &psicologia.ReopenExpedienteResponse{Expediente: out}, nil
 }

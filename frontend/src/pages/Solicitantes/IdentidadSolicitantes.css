@@ -1,0 +1,119 @@
+.id-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.id-subtitle {
+    margin: 4px 0 0;
+    color: var(--dp-text-muted, #6b7280);
+    font-size: 13px;
+    max-width: 60ch;
+}
+
+.id-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.id-tab {
+    padding: 6px 12px;
+    border: 1px solid var(--dp-border, #e2e6ec);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.id-tab[aria-selected="true"] {
+    background: var(--dp-primary, #0b3d91);
+    border-color: var(--dp-primary, #0b3d91);
+    color: #fff;
+}
+
+.id-banner {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.id-banner--ok {
+    background: #ecfdf3;
+    border: 1px solid #abefc6;
+    color: #067647;
+}
+
+.id-conflicto {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #fef3f2;
+    border: 1px solid #fecdca;
+    color: #b42318;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.id-dni {
+    font-variant-numeric: tabular-nums;
+}
+
+.id-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.id-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--dp-border, #e2e6ec);
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.id-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.id-btn--peligro {
+    color: #b42318;
+}
+
+.id-formulario {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+    max-width: 360px;
+}
+
+.id-formulario select,
+.id-formulario textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--dp-border, #e2e6ec);
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+}
+
+.id-paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 13px;
+}

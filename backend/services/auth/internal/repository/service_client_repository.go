@@ -147,3 +147,48 @@ func (r *ServiceClientRepository) List(ctx context.Context) ([]*ServiceClient, e
 	}
 	return out, rows.Err()
 }
+
+// ErrPermisoNoCatalogado: el código no existe o está inactivo en permissions
+// (p. ej. la migración que lo registra aún no se aplicó).
+var ErrPermisoNoCatalogado = errors.New("permission not in catalog or inactive")
+
+// SQL de otorgar/retirar: solo service_client_permissions (lectura de
+// permissions para resolver el código). Nunca toca role_permissions ni
+// roles; una prueba lo verifica sobre estas constantes.
+const (
+	sqlPermisoCatalogado = `SELECT id FROM permissions WHERE codigo = $1 AND estado = TRUE`
+	sqlOtorgarPermiso    = `INSERT INTO service_client_permissions (service_client_id, permission_id)
+		VALUES ($1, $2)
+		ON CONFLICT (service_client_id, permission_id) DO NOTHING`
+	sqlRetirarPermiso = `DELETE FROM service_client_permissions
+		WHERE service_client_id = $1
+		  AND permission_id IN (SELECT id FROM permissions WHERE codigo = $2)`
+)
+
+// AddPermission asocia el permiso al cliente. agregado=false si ya lo tenía
+// (idempotente).
+func (r *ServiceClientRepository) AddPermission(ctx context.Context, serviceClientID, codigo string) (bool, error) {
+	var permisoID string
+	err := r.db.QueryRow(ctx, sqlPermisoCatalogado, codigo).Scan(&permisoID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, ErrPermisoNoCatalogado
+	}
+	if err != nil {
+		return false, err
+	}
+	tag, err := r.db.Exec(ctx, sqlOtorgarPermiso, serviceClientID, permisoID)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() == 1, nil
+}
+
+// RemovePermission quita la asociación. retirado=false si no existía
+// (idempotente).
+func (r *ServiceClientRepository) RemovePermission(ctx context.Context, serviceClientID, codigo string) (bool, error) {
+	tag, err := r.db.Exec(ctx, sqlRetirarPermiso, serviceClientID, codigo)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { searchEstudiantes } from "../../services/estudiantesService";
+import { buscarEstudiantesPsicologia } from "../../services/psicologiaService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import Icon from "./Icon";
 import "./EstudianteSelector.css";
@@ -8,13 +8,13 @@ const MIN_QUERY_LENGTH = 2;
 const PAGE_SIZE = 10;
 const DEBOUNCE_MS = 350;
 
-// EstudianteSelector: buscador real de estudiantes por DNI, nombre o
-// apellido (FASE 5D) — reemplaza el ingreso manual del UUID en el
-// formulario de "Nuevo expediente psicológico". Consume GET /api/estudiantes
-// (Estudiantes Service, protegido por "estudiantes.view"; ver
-// estudiantesService.js). El backend sigue siendo la única autoridad real:
-// esto solo evita que el usuario tenga que escribir/copiar un UUID, no
-// reemplaza la validación de OpenExpediente contra Estudiantes Service.
+// EstudianteSelector: buscador de estudiantes por nombres, apellidos o DNI
+// completo para "Nuevo expediente psicológico" y "Buscar alumno". Consume
+// POST /api/psicologia/estudiantes/buscar: Psicología exige los permisos
+// psicologia.expedientes.* del usuario y consulta Estudiantes con su
+// credencial de servicio (el usuario NO necesita estudiantes.view). Solo
+// recibe y muestra nombre, grado y sección: nunca el DNI ni códigos, aunque
+// se haya buscado por DNI. El backend sigue validando OpenExpediente.
 //
 // value: el estudiante YA seleccionado ({id, nombreCompleto, ...}) o null.
 // onChange(estudianteBasico | null): se llama al seleccionar o al limpiar.
@@ -31,7 +31,7 @@ function EstudianteSelector({ id, value, onChange, disabled }) {
     const runSearch = (q, pageToLoad, append) => {
         const requestId = ++requestRef.current;
         if (!append) setStatus("loading");
-        searchEstudiantes({ q, page: pageToLoad, pageSize: PAGE_SIZE })
+        buscarEstudiantesPsicologia({ q, page: pageToLoad, pageSize: PAGE_SIZE })
             .then((data) => {
                 if (requestRef.current !== requestId) return; // respuesta obsoleta
                 const items = data.estudiantes || [];
@@ -103,10 +103,7 @@ function EstudianteSelector({ id, value, onChange, disabled }) {
                 <div className="dp-estudiante-selected">
                     <div>
                         <p className="dp-estudiante-selected-name">{value.nombre_completo}</p>
-                        <p className="dp-estudiante-selected-meta">
-                            {value.numero_documento && <>DNI: {value.numero_documento} · </>}
-                            {[value.nivel, value.grado && `${value.grado}.º`, value.seccion].filter(Boolean).join(" ")}
-                        </p>
+                        <p className="dp-estudiante-selected-meta">{gradoSeccion(value)}</p>
                     </div>
                     {!disabled && (
                         <button type="button" className="dp-btn-secondary" onClick={handleChangeStudent}>
@@ -129,7 +126,7 @@ function EstudianteSelector({ id, value, onChange, disabled }) {
                     value={query}
                     onChange={handleQueryChange}
                     disabled={disabled}
-                    placeholder="Buscar por DNI, nombre o apellido..."
+                    placeholder="Buscar por nombres, apellidos o DNI completo..."
                     autoComplete="off"
                 />
             </div>
@@ -151,12 +148,7 @@ function EstudianteSelector({ id, value, onChange, disabled }) {
                             onClick={() => handleSelect(item)}
                         >
                             <span className="dp-estudiante-result-name">{item.nombre_completo}</span>
-                            <span className="dp-estudiante-result-meta">
-                                {item.numero_documento && <>DNI: {item.numero_documento} · </>}
-                                Código: {item.codigo}
-                                {item.nivel && <> · {[item.nivel, item.grado && `${item.grado}.º`, item.seccion].filter(Boolean).join(" ")}</>}
-                                {item.estado_matricula && <> · {item.estado_matricula}</>}
-                            </span>
+                            <span className="dp-estudiante-result-meta">{gradoSeccion(item)}</span>
                         </button>
                     ))}
                     {results.length < total && (
@@ -168,6 +160,11 @@ function EstudianteSelector({ id, value, onChange, disabled }) {
             )}
         </div>
     );
+}
+
+// "3.º B": lo único que se muestra además del nombre (distingue homónimos).
+function gradoSeccion(estudiante) {
+    return [estudiante.grado && `${estudiante.grado}.º`, estudiante.seccion].filter(Boolean).join(" ");
 }
 
 export default EstudianteSelector;

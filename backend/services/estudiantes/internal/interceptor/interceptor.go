@@ -39,23 +39,22 @@ type ServiceIdentity struct {
 	Method   string // RPC invocado (FullMethod)
 }
 
-// ServiceMethods: únicos RPC que un sistema consumidor puede invocar. El
-// resto (familia, importación/exportación, plantillas, historial,
-// duplicados, cambios de estado y de matrícula, datos personales en
-// escritura) es exclusivo de usuarios. Cada uno sigue exigiendo además su
+// ServiceMethods: únicos RPC que un sistema consumidor puede invocar. SOLO
+// LECTURA: ningún sistema crea, actualiza, matricula ni lee datos personales,
+// aunque su scope tuviera el permiso. El resto (altas, actualizaciones,
+// matrícula, datos personales, familia, importación/exportación, plantillas,
+// historial, duplicados, cambios de estado) es exclusivo de usuarios. Cada uno sigue exigiendo además su
 // permiso real dentro de su logic.
 var ServiceMethods = map[string]bool{
 	"/estudiantes.Estudiantes/GetEstudiante":            true,
 	"/estudiantes.Estudiantes/SearchEstudiantes":        true,
 	"/estudiantes.Estudiantes/GetEstudiantesBasic":      true,
 	"/estudiantes.Estudiantes/ResolveEstudiante":        true,
-	"/estudiantes.Estudiantes/GetEstudiantePersonal":    true,
-	"/estudiantes.Estudiantes/CreateEstudiante":         true,
-	"/estudiantes.Estudiantes/UpdateEstudiante":         true,
 	"/estudiantes.Estudiantes/ListMatriculasEstudiante": true,
-	"/estudiantes.Estudiantes/MatricularEstudiante":     true,
 	"/estudiantes.Estudiantes/ListPeriodos":             true,
 	"/estudiantes.Estudiantes/ListSecciones":            true,
+	// Búsqueda mínima para selección: exige estudiantes.search.basic.
+	"/estudiantes.Estudiantes/BuscarEstudiantesSeleccion": true,
 }
 
 // AuthenticationInterceptor exige un access token válido en la metadata

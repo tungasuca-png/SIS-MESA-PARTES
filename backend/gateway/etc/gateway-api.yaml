@@ -30,3 +30,9 @@ EstudiantesRpc:
 # método en logsafe.ProtectSensitiveRPCLogs (se conservan los errores).
 Middlewares:
   Log: false
+
+# Acceso con Google (solo SOLICITANTES). Valores en backend/.env:
+# GOOGLE_COOKIE_SECURE=true en producción (HTTPS); FRONTEND_URL vacío = mismo
+# origen que el Gateway (proxy de Vite en desarrollo).
+GoogleCookieSegura: "${GOOGLE_COOKIE_SECURE}"
+FrontendURL: "${FRONTEND_URL}"

@@ -51,8 +51,62 @@ message ListDerivacionesResponse {
   int32 total = 2;
 }
 
+// ReporteDerivaciones (Reportes, Fase 2): conteos AGREGADOS de derivaciones,
+// sin registros individuales ni textos libres. Exige "reportes.view". Solo
+// considera derivaciones de expedientes ACTIVOS y visibles para el usuario
+// (alcance que entrega Expedientes.ReporteAlcanceExpedientes). Fecha usada:
+// fecha de la derivación (hora de Lima). Origen/destino se normalizan a
+// códigos de área; lo irreconocible es SIN_CLASIFICAR (el texto original,
+// que puede contener nombres de usuario, nunca sale del servicio).
+message ReporteDerivacionesRequest {
+  string desde = 1;
+  string hasta = 2;
+  string tipo_tramite = 3;
+  string granularidad = 4;
+  // Solo para el reporte de actividad del Gateway (agrupa por rol).
+  bool incluir_registros = 5;
+}
+
+message ReporteDerivConteo {
+  string clave = 1;
+  int32 cantidad = 2;
+}
+
+message ReporteDerivFlujo {
+  string origen = 1;
+  string destino = 2;
+  int32 cantidad = 3;
+}
+
+message ReporteDerivacionesResponse {
+  // Derivaciones entre áreas (tipo DERIVACION; incluye devoluciones a
+  // Secretaría, que hoy no se distinguen como rechazo).
+  int32 total = 1;
+  repeated ReporteDerivConteo por_destino = 2;
+  repeated ReporteDerivConteo por_origen = 3;
+  repeated ReporteDerivFlujo flujo = 4;
+  repeated ReporteDerivConteo por_tipo_tramite = 5;
+  repeated ReporteDerivConteo serie = 6;
+  string granularidad = 7;
+  // Otros movimientos (NOTIFICACION, ASIGNACION, RECEPCION, APROBACION):
+  // solo cantidad por tipo.
+  repeated ReporteDerivConteo otros_movimientos = 8;
+  // Derivaciones con origen o destino SIN_CLASIFICAR.
+  int32 sin_clasificar = 9;
+  // Solo con incluir_registros: clave = ID del usuario que registró.
+  repeated ReporteDerivConteo registros_por_usuario = 10;
+  string generado = 11;
+  // Alcance aplicado (lo informa Expedientes): INSTITUCION o AREA.
+  string alcance = 12;
+  string area_alcance = 13;
+  // Solo con incluir_registros: como registros_por_usuario pero SOLO del
+  // tipo DERIVACION (registros_por_usuario cuenta todos los movimientos).
+  repeated ReporteDerivConteo derivaciones_por_usuario = 14;
+}
+
 service Derivaciones {
   rpc CrearDerivacion(CrearDerivacionRequest) returns (CrearDerivacionResponse);
   rpc GetDerivacion(GetDerivacionRequest) returns (GetDerivacionResponse);
   rpc ListDerivaciones(ListDerivacionesRequest) returns (ListDerivacionesResponse);
+  rpc ReporteDerivaciones(ReporteDerivacionesRequest) returns (ReporteDerivacionesResponse);
 }

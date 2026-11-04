@@ -4,6 +4,7 @@ import PortalLayout from "../../components/portal/PortalLayout";
 import { useAuth } from "../../hooks/useAuth";
 import { getUsuario } from "../../services/usuariosService";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
+import VinculoGoogle from "./VinculoGoogle";
 import "./mesaDePartes.css";
 
 // Usuarios Service SÍ tiene un perfil completo (nombres, apellidos, DNI,
@@ -87,6 +88,15 @@ function MiPerfil() {
                                     <dd>{perfil.dni}</dd>
                                 </div>
                             )}
+                            {!perfil.dni && perfil.identidad_pendiente && (
+                                <div>
+                                    <dt>DNI declarado</dt>
+                                    <dd>
+                                        {perfil.dni_declarado}{" "}
+                                        <span className="mp-identidad-pendiente">Identidad pendiente de verificación</span>
+                                    </dd>
+                                </div>
+                            )}
                             {perfil.telefono && (
                                 <div>
                                     <dt>Teléfono</dt>
@@ -116,6 +126,8 @@ function MiPerfil() {
                     Por el momento no es posible editar esta información desde aquí.
                 </p>
             </section>
+
+            <VinculoGoogle />
         </PortalLayout>
     );
 }

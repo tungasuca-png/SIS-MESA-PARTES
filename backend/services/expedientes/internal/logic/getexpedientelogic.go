@@ -64,7 +64,9 @@ func (l *GetExpedienteLogic) GetExpediente(in *expedientes.GetExpedienteRequest)
 				return nil, status.Error(codes.PermissionDenied, "no tiene acceso a este expediente")
 			}
 		} else if found.SolicitanteID != userID {
-			return nil, status.Error(codes.PermissionDenied, "no tiene acceso a este expediente")
+			// Un solicitante no distingue un expediente ajeno de uno
+			// inexistente: misma respuesta (no revela que el id existe).
+			return nil, status.Error(codes.NotFound, "expediente no encontrado")
 		}
 	}
 

@@ -39,6 +39,9 @@ type ExpedientePsicologico struct {
 	ResumenCaso   string                 `protobuf:"bytes,10,opt,name=resumen_caso,json=resumenCaso,proto3" json:"resumen_caso,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Resumen del estudiante resuelto por Psicología con su credencial de
+	// servicio (solo el nombre; nunca documento ni datos académicos).
+	Estudiante    *EstudianteResumen `protobuf:"bytes,13,opt,name=estudiante,proto3" json:"estudiante,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -157,6 +160,67 @@ func (x *ExpedientePsicologico) GetUpdatedAt() string {
 	return ""
 }
 
+func (x *ExpedientePsicologico) GetEstudiante() *EstudianteResumen {
+	if x != nil {
+		return x.Estudiante
+	}
+	return nil
+}
+
+// resolucion: RESUELTO | NO_ENCONTRADO | NO_DISPONIBLE (Estudiantes o Auth no
+// respondieron; el expediente se entrega igual).
+type EstudianteResumen struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	NombreCompleto string                 `protobuf:"bytes,1,opt,name=nombre_completo,json=nombreCompleto,proto3" json:"nombre_completo,omitempty"`
+	Resolucion     string                 `protobuf:"bytes,2,opt,name=resolucion,proto3" json:"resolucion,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EstudianteResumen) Reset() {
+	*x = EstudianteResumen{}
+	mi := &file_psicologia_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EstudianteResumen) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EstudianteResumen) ProtoMessage() {}
+
+func (x *EstudianteResumen) ProtoReflect() protoreflect.Message {
+	mi := &file_psicologia_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EstudianteResumen.ProtoReflect.Descriptor instead.
+func (*EstudianteResumen) Descriptor() ([]byte, []int) {
+	return file_psicologia_service_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EstudianteResumen) GetNombreCompleto() string {
+	if x != nil {
+		return x.NombreCompleto
+	}
+	return ""
+}
+
+func (x *EstudianteResumen) GetResolucion() string {
+	if x != nil {
+		return x.Resolucion
+	}
+	return ""
+}
+
 type OpenExpedienteRequest struct {
 	state        protoimpl.MessageState `protogen:"open.v1"`
 	EstudianteId string                 `protobuf:"bytes,1,opt,name=estudiante_id,json=estudianteId,proto3" json:"estudiante_id,omitempty"`
@@ -169,7 +233,7 @@ type OpenExpedienteRequest struct {
 
 func (x *OpenExpedienteRequest) Reset() {
 	*x = OpenExpedienteRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[1]
+	mi := &file_psicologia_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -181,7 +245,7 @@ func (x *OpenExpedienteRequest) String() string {
 func (*OpenExpedienteRequest) ProtoMessage() {}
 
 func (x *OpenExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[1]
+	mi := &file_psicologia_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -194,7 +258,7 @@ func (x *OpenExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*OpenExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{1}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *OpenExpedienteRequest) GetEstudianteId() string {
@@ -227,7 +291,7 @@ type OpenExpedienteResponse struct {
 
 func (x *OpenExpedienteResponse) Reset() {
 	*x = OpenExpedienteResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[2]
+	mi := &file_psicologia_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -239,7 +303,7 @@ func (x *OpenExpedienteResponse) String() string {
 func (*OpenExpedienteResponse) ProtoMessage() {}
 
 func (x *OpenExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[2]
+	mi := &file_psicologia_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -252,7 +316,7 @@ func (x *OpenExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*OpenExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{2}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *OpenExpedienteResponse) GetExpediente() *ExpedientePsicologico {
@@ -271,7 +335,7 @@ type GetExpedienteRequest struct {
 
 func (x *GetExpedienteRequest) Reset() {
 	*x = GetExpedienteRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[3]
+	mi := &file_psicologia_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -283,7 +347,7 @@ func (x *GetExpedienteRequest) String() string {
 func (*GetExpedienteRequest) ProtoMessage() {}
 
 func (x *GetExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[3]
+	mi := &file_psicologia_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -296,7 +360,7 @@ func (x *GetExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*GetExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{3}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetExpedienteRequest) GetId() string {
@@ -315,7 +379,7 @@ type GetExpedienteResponse struct {
 
 func (x *GetExpedienteResponse) Reset() {
 	*x = GetExpedienteResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[4]
+	mi := &file_psicologia_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -327,7 +391,7 @@ func (x *GetExpedienteResponse) String() string {
 func (*GetExpedienteResponse) ProtoMessage() {}
 
 func (x *GetExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[4]
+	mi := &file_psicologia_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -340,7 +404,7 @@ func (x *GetExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*GetExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{4}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetExpedienteResponse) GetExpediente() *ExpedientePsicologico {
@@ -359,7 +423,7 @@ type GetExpedienteByEstudianteRequest struct {
 
 func (x *GetExpedienteByEstudianteRequest) Reset() {
 	*x = GetExpedienteByEstudianteRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[5]
+	mi := &file_psicologia_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -371,7 +435,7 @@ func (x *GetExpedienteByEstudianteRequest) String() string {
 func (*GetExpedienteByEstudianteRequest) ProtoMessage() {}
 
 func (x *GetExpedienteByEstudianteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[5]
+	mi := &file_psicologia_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -384,7 +448,7 @@ func (x *GetExpedienteByEstudianteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExpedienteByEstudianteRequest.ProtoReflect.Descriptor instead.
 func (*GetExpedienteByEstudianteRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{5}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetExpedienteByEstudianteRequest) GetEstudianteId() string {
@@ -403,7 +467,7 @@ type GetExpedienteByEstudianteResponse struct {
 
 func (x *GetExpedienteByEstudianteResponse) Reset() {
 	*x = GetExpedienteByEstudianteResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[6]
+	mi := &file_psicologia_service_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +479,7 @@ func (x *GetExpedienteByEstudianteResponse) String() string {
 func (*GetExpedienteByEstudianteResponse) ProtoMessage() {}
 
 func (x *GetExpedienteByEstudianteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[6]
+	mi := &file_psicologia_service_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -428,7 +492,7 @@ func (x *GetExpedienteByEstudianteResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetExpedienteByEstudianteResponse.ProtoReflect.Descriptor instead.
 func (*GetExpedienteByEstudianteResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{6}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetExpedienteByEstudianteResponse) GetExpediente() *ExpedientePsicologico {
@@ -449,7 +513,7 @@ type ListExpedientesRequest struct {
 
 func (x *ListExpedientesRequest) Reset() {
 	*x = ListExpedientesRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[7]
+	mi := &file_psicologia_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -461,7 +525,7 @@ func (x *ListExpedientesRequest) String() string {
 func (*ListExpedientesRequest) ProtoMessage() {}
 
 func (x *ListExpedientesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[7]
+	mi := &file_psicologia_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -474,7 +538,7 @@ func (x *ListExpedientesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExpedientesRequest.ProtoReflect.Descriptor instead.
 func (*ListExpedientesRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{7}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListExpedientesRequest) GetEstado() string {
@@ -509,7 +573,7 @@ type ListExpedientesResponse struct {
 
 func (x *ListExpedientesResponse) Reset() {
 	*x = ListExpedientesResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[8]
+	mi := &file_psicologia_service_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -521,7 +585,7 @@ func (x *ListExpedientesResponse) String() string {
 func (*ListExpedientesResponse) ProtoMessage() {}
 
 func (x *ListExpedientesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[8]
+	mi := &file_psicologia_service_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -534,7 +598,7 @@ func (x *ListExpedientesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExpedientesResponse.ProtoReflect.Descriptor instead.
 func (*ListExpedientesResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{8}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListExpedientesResponse) GetExpedientes() []*ExpedientePsicologico {
@@ -565,7 +629,7 @@ type UpdateExpedienteRequest struct {
 
 func (x *UpdateExpedienteRequest) Reset() {
 	*x = UpdateExpedienteRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[9]
+	mi := &file_psicologia_service_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -577,7 +641,7 @@ func (x *UpdateExpedienteRequest) String() string {
 func (*UpdateExpedienteRequest) ProtoMessage() {}
 
 func (x *UpdateExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[9]
+	mi := &file_psicologia_service_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -590,7 +654,7 @@ func (x *UpdateExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*UpdateExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{9}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateExpedienteRequest) GetId() string {
@@ -630,7 +694,7 @@ type UpdateExpedienteResponse struct {
 
 func (x *UpdateExpedienteResponse) Reset() {
 	*x = UpdateExpedienteResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[10]
+	mi := &file_psicologia_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -642,7 +706,7 @@ func (x *UpdateExpedienteResponse) String() string {
 func (*UpdateExpedienteResponse) ProtoMessage() {}
 
 func (x *UpdateExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[10]
+	mi := &file_psicologia_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -655,7 +719,7 @@ func (x *UpdateExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*UpdateExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{10}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateExpedienteResponse) GetExpediente() *ExpedientePsicologico {
@@ -675,7 +739,7 @@ type CloseExpedienteRequest struct {
 
 func (x *CloseExpedienteRequest) Reset() {
 	*x = CloseExpedienteRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[11]
+	mi := &file_psicologia_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -687,7 +751,7 @@ func (x *CloseExpedienteRequest) String() string {
 func (*CloseExpedienteRequest) ProtoMessage() {}
 
 func (x *CloseExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[11]
+	mi := &file_psicologia_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -700,7 +764,7 @@ func (x *CloseExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*CloseExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{11}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CloseExpedienteRequest) GetId() string {
@@ -726,7 +790,7 @@ type CloseExpedienteResponse struct {
 
 func (x *CloseExpedienteResponse) Reset() {
 	*x = CloseExpedienteResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[12]
+	mi := &file_psicologia_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +802,7 @@ func (x *CloseExpedienteResponse) String() string {
 func (*CloseExpedienteResponse) ProtoMessage() {}
 
 func (x *CloseExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[12]
+	mi := &file_psicologia_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +815,7 @@ func (x *CloseExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*CloseExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{12}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *CloseExpedienteResponse) GetExpediente() *ExpedientePsicologico {
@@ -772,7 +836,7 @@ type ReopenExpedienteRequest struct {
 
 func (x *ReopenExpedienteRequest) Reset() {
 	*x = ReopenExpedienteRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[13]
+	mi := &file_psicologia_service_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -784,7 +848,7 @@ func (x *ReopenExpedienteRequest) String() string {
 func (*ReopenExpedienteRequest) ProtoMessage() {}
 
 func (x *ReopenExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[13]
+	mi := &file_psicologia_service_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -797,7 +861,7 @@ func (x *ReopenExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReopenExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*ReopenExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{13}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ReopenExpedienteRequest) GetId() string {
@@ -823,7 +887,7 @@ type ReopenExpedienteResponse struct {
 
 func (x *ReopenExpedienteResponse) Reset() {
 	*x = ReopenExpedienteResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[14]
+	mi := &file_psicologia_service_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -835,7 +899,7 @@ func (x *ReopenExpedienteResponse) String() string {
 func (*ReopenExpedienteResponse) ProtoMessage() {}
 
 func (x *ReopenExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[14]
+	mi := &file_psicologia_service_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -848,7 +912,7 @@ func (x *ReopenExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReopenExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*ReopenExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{14}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ReopenExpedienteResponse) GetExpediente() *ExpedientePsicologico {
@@ -882,7 +946,7 @@ type AtencionContenido struct {
 
 func (x *AtencionContenido) Reset() {
 	*x = AtencionContenido{}
-	mi := &file_psicologia_service_proto_msgTypes[15]
+	mi := &file_psicologia_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -894,7 +958,7 @@ func (x *AtencionContenido) String() string {
 func (*AtencionContenido) ProtoMessage() {}
 
 func (x *AtencionContenido) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[15]
+	mi := &file_psicologia_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -907,7 +971,7 @@ func (x *AtencionContenido) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AtencionContenido.ProtoReflect.Descriptor instead.
 func (*AtencionContenido) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{15}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *AtencionContenido) GetFechaAtencion() string {
@@ -1026,7 +1090,7 @@ type OpcionCatalogo struct {
 
 func (x *OpcionCatalogo) Reset() {
 	*x = OpcionCatalogo{}
-	mi := &file_psicologia_service_proto_msgTypes[16]
+	mi := &file_psicologia_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1102,7 @@ func (x *OpcionCatalogo) String() string {
 func (*OpcionCatalogo) ProtoMessage() {}
 
 func (x *OpcionCatalogo) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[16]
+	mi := &file_psicologia_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,7 +1115,7 @@ func (x *OpcionCatalogo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpcionCatalogo.ProtoReflect.Descriptor instead.
 func (*OpcionCatalogo) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{16}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *OpcionCatalogo) GetCodigo() string {
@@ -1083,7 +1147,7 @@ type AtencionVersion struct {
 
 func (x *AtencionVersion) Reset() {
 	*x = AtencionVersion{}
-	mi := &file_psicologia_service_proto_msgTypes[17]
+	mi := &file_psicologia_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1095,7 +1159,7 @@ func (x *AtencionVersion) String() string {
 func (*AtencionVersion) ProtoMessage() {}
 
 func (x *AtencionVersion) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[17]
+	mi := &file_psicologia_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1108,7 +1172,7 @@ func (x *AtencionVersion) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AtencionVersion.ProtoReflect.Descriptor instead.
 func (*AtencionVersion) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{17}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *AtencionVersion) GetNumeroVersion() int32 {
@@ -1183,7 +1247,7 @@ type AtencionPsicologica struct {
 
 func (x *AtencionPsicologica) Reset() {
 	*x = AtencionPsicologica{}
-	mi := &file_psicologia_service_proto_msgTypes[18]
+	mi := &file_psicologia_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1195,7 +1259,7 @@ func (x *AtencionPsicologica) String() string {
 func (*AtencionPsicologica) ProtoMessage() {}
 
 func (x *AtencionPsicologica) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[18]
+	mi := &file_psicologia_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1208,7 +1272,7 @@ func (x *AtencionPsicologica) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AtencionPsicologica.ProtoReflect.Descriptor instead.
 func (*AtencionPsicologica) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{18}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *AtencionPsicologica) GetId() string {
@@ -1335,7 +1399,7 @@ type AtencionResumen struct {
 
 func (x *AtencionResumen) Reset() {
 	*x = AtencionResumen{}
-	mi := &file_psicologia_service_proto_msgTypes[19]
+	mi := &file_psicologia_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1347,7 +1411,7 @@ func (x *AtencionResumen) String() string {
 func (*AtencionResumen) ProtoMessage() {}
 
 func (x *AtencionResumen) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[19]
+	mi := &file_psicologia_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1360,7 +1424,7 @@ func (x *AtencionResumen) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AtencionResumen.ProtoReflect.Descriptor instead.
 func (*AtencionResumen) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{19}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *AtencionResumen) GetId() string {
@@ -1445,7 +1509,7 @@ type AtencionVersionResumen struct {
 
 func (x *AtencionVersionResumen) Reset() {
 	*x = AtencionVersionResumen{}
-	mi := &file_psicologia_service_proto_msgTypes[20]
+	mi := &file_psicologia_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1457,7 +1521,7 @@ func (x *AtencionVersionResumen) String() string {
 func (*AtencionVersionResumen) ProtoMessage() {}
 
 func (x *AtencionVersionResumen) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[20]
+	mi := &file_psicologia_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1470,7 +1534,7 @@ func (x *AtencionVersionResumen) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AtencionVersionResumen.ProtoReflect.Descriptor instead.
 func (*AtencionVersionResumen) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{20}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *AtencionVersionResumen) GetNumeroVersion() int32 {
@@ -1510,7 +1574,7 @@ type AtencionResponse struct {
 
 func (x *AtencionResponse) Reset() {
 	*x = AtencionResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[21]
+	mi := &file_psicologia_service_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1522,7 +1586,7 @@ func (x *AtencionResponse) String() string {
 func (*AtencionResponse) ProtoMessage() {}
 
 func (x *AtencionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[21]
+	mi := &file_psicologia_service_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1535,7 +1599,7 @@ func (x *AtencionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AtencionResponse.ProtoReflect.Descriptor instead.
 func (*AtencionResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{21}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AtencionResponse) GetAtencion() *AtencionPsicologica {
@@ -1555,7 +1619,7 @@ type CreateAtencionDraftRequest struct {
 
 func (x *CreateAtencionDraftRequest) Reset() {
 	*x = CreateAtencionDraftRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[22]
+	mi := &file_psicologia_service_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1567,7 +1631,7 @@ func (x *CreateAtencionDraftRequest) String() string {
 func (*CreateAtencionDraftRequest) ProtoMessage() {}
 
 func (x *CreateAtencionDraftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[22]
+	mi := &file_psicologia_service_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1580,7 +1644,7 @@ func (x *CreateAtencionDraftRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAtencionDraftRequest.ProtoReflect.Descriptor instead.
 func (*CreateAtencionDraftRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{22}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CreateAtencionDraftRequest) GetExpedienteId() string {
@@ -1608,7 +1672,7 @@ type UpdateAtencionDraftRequest struct {
 
 func (x *UpdateAtencionDraftRequest) Reset() {
 	*x = UpdateAtencionDraftRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[23]
+	mi := &file_psicologia_service_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1620,7 +1684,7 @@ func (x *UpdateAtencionDraftRequest) String() string {
 func (*UpdateAtencionDraftRequest) ProtoMessage() {}
 
 func (x *UpdateAtencionDraftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[23]
+	mi := &file_psicologia_service_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1633,7 +1697,7 @@ func (x *UpdateAtencionDraftRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateAtencionDraftRequest.ProtoReflect.Descriptor instead.
 func (*UpdateAtencionDraftRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{23}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *UpdateAtencionDraftRequest) GetId() string {
@@ -1667,7 +1731,7 @@ type RegisterAtencionRequest struct {
 
 func (x *RegisterAtencionRequest) Reset() {
 	*x = RegisterAtencionRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[24]
+	mi := &file_psicologia_service_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1679,7 +1743,7 @@ func (x *RegisterAtencionRequest) String() string {
 func (*RegisterAtencionRequest) ProtoMessage() {}
 
 func (x *RegisterAtencionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[24]
+	mi := &file_psicologia_service_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1692,7 +1756,7 @@ func (x *RegisterAtencionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAtencionRequest.ProtoReflect.Descriptor instead.
 func (*RegisterAtencionRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{24}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *RegisterAtencionRequest) GetId() string {
@@ -1719,7 +1783,7 @@ type DiscardAtencionDraftRequest struct {
 
 func (x *DiscardAtencionDraftRequest) Reset() {
 	*x = DiscardAtencionDraftRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[25]
+	mi := &file_psicologia_service_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1731,7 +1795,7 @@ func (x *DiscardAtencionDraftRequest) String() string {
 func (*DiscardAtencionDraftRequest) ProtoMessage() {}
 
 func (x *DiscardAtencionDraftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[25]
+	mi := &file_psicologia_service_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1744,7 +1808,7 @@ func (x *DiscardAtencionDraftRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiscardAtencionDraftRequest.ProtoReflect.Descriptor instead.
 func (*DiscardAtencionDraftRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{25}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *DiscardAtencionDraftRequest) GetId() string {
@@ -1769,7 +1833,7 @@ type DiscardAtencionDraftResponse struct {
 
 func (x *DiscardAtencionDraftResponse) Reset() {
 	*x = DiscardAtencionDraftResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[26]
+	mi := &file_psicologia_service_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1781,7 +1845,7 @@ func (x *DiscardAtencionDraftResponse) String() string {
 func (*DiscardAtencionDraftResponse) ProtoMessage() {}
 
 func (x *DiscardAtencionDraftResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[26]
+	mi := &file_psicologia_service_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1794,7 +1858,7 @@ func (x *DiscardAtencionDraftResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiscardAtencionDraftResponse.ProtoReflect.Descriptor instead.
 func (*DiscardAtencionDraftResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{26}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{27}
 }
 
 type GetAtencionRequest struct {
@@ -1806,7 +1870,7 @@ type GetAtencionRequest struct {
 
 func (x *GetAtencionRequest) Reset() {
 	*x = GetAtencionRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[27]
+	mi := &file_psicologia_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1818,7 +1882,7 @@ func (x *GetAtencionRequest) String() string {
 func (*GetAtencionRequest) ProtoMessage() {}
 
 func (x *GetAtencionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[27]
+	mi := &file_psicologia_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1831,7 +1895,7 @@ func (x *GetAtencionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAtencionRequest.ProtoReflect.Descriptor instead.
 func (*GetAtencionRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{27}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetAtencionRequest) GetId() string {
@@ -1853,7 +1917,7 @@ type ListAtencionesRequest struct {
 
 func (x *ListAtencionesRequest) Reset() {
 	*x = ListAtencionesRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[28]
+	mi := &file_psicologia_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1865,7 +1929,7 @@ func (x *ListAtencionesRequest) String() string {
 func (*ListAtencionesRequest) ProtoMessage() {}
 
 func (x *ListAtencionesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[28]
+	mi := &file_psicologia_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1878,7 +1942,7 @@ func (x *ListAtencionesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAtencionesRequest.ProtoReflect.Descriptor instead.
 func (*ListAtencionesRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{28}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ListAtencionesRequest) GetExpedienteId() string {
@@ -1919,7 +1983,7 @@ type ListAtencionesResponse struct {
 
 func (x *ListAtencionesResponse) Reset() {
 	*x = ListAtencionesResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[29]
+	mi := &file_psicologia_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1931,7 +1995,7 @@ func (x *ListAtencionesResponse) String() string {
 func (*ListAtencionesResponse) ProtoMessage() {}
 
 func (x *ListAtencionesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[29]
+	mi := &file_psicologia_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1944,7 +2008,7 @@ func (x *ListAtencionesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAtencionesResponse.ProtoReflect.Descriptor instead.
 func (*ListAtencionesResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{29}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListAtencionesResponse) GetAtenciones() []*AtencionResumen {
@@ -1973,7 +2037,7 @@ type CorrectAtencionRequest struct {
 
 func (x *CorrectAtencionRequest) Reset() {
 	*x = CorrectAtencionRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[30]
+	mi := &file_psicologia_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1985,7 +2049,7 @@ func (x *CorrectAtencionRequest) String() string {
 func (*CorrectAtencionRequest) ProtoMessage() {}
 
 func (x *CorrectAtencionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[30]
+	mi := &file_psicologia_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1998,7 +2062,7 @@ func (x *CorrectAtencionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CorrectAtencionRequest.ProtoReflect.Descriptor instead.
 func (*CorrectAtencionRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{30}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *CorrectAtencionRequest) GetId() string {
@@ -2038,7 +2102,7 @@ type ListAtencionVersionsRequest struct {
 
 func (x *ListAtencionVersionsRequest) Reset() {
 	*x = ListAtencionVersionsRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[31]
+	mi := &file_psicologia_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2050,7 +2114,7 @@ func (x *ListAtencionVersionsRequest) String() string {
 func (*ListAtencionVersionsRequest) ProtoMessage() {}
 
 func (x *ListAtencionVersionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[31]
+	mi := &file_psicologia_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2063,7 +2127,7 @@ func (x *ListAtencionVersionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAtencionVersionsRequest.ProtoReflect.Descriptor instead.
 func (*ListAtencionVersionsRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{31}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListAtencionVersionsRequest) GetId() string {
@@ -2082,7 +2146,7 @@ type ListAtencionVersionsResponse struct {
 
 func (x *ListAtencionVersionsResponse) Reset() {
 	*x = ListAtencionVersionsResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[32]
+	mi := &file_psicologia_service_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2094,7 +2158,7 @@ func (x *ListAtencionVersionsResponse) String() string {
 func (*ListAtencionVersionsResponse) ProtoMessage() {}
 
 func (x *ListAtencionVersionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[32]
+	mi := &file_psicologia_service_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2107,7 +2171,7 @@ func (x *ListAtencionVersionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAtencionVersionsResponse.ProtoReflect.Descriptor instead.
 func (*ListAtencionVersionsResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{32}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ListAtencionVersionsResponse) GetVersiones() []*AtencionVersionResumen {
@@ -2127,7 +2191,7 @@ type GetAtencionVersionRequest struct {
 
 func (x *GetAtencionVersionRequest) Reset() {
 	*x = GetAtencionVersionRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[33]
+	mi := &file_psicologia_service_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2139,7 +2203,7 @@ func (x *GetAtencionVersionRequest) String() string {
 func (*GetAtencionVersionRequest) ProtoMessage() {}
 
 func (x *GetAtencionVersionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[33]
+	mi := &file_psicologia_service_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2152,7 +2216,7 @@ func (x *GetAtencionVersionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAtencionVersionRequest.ProtoReflect.Descriptor instead.
 func (*GetAtencionVersionRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{33}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *GetAtencionVersionRequest) GetId() string {
@@ -2179,7 +2243,7 @@ type AnnulAtencionRequest struct {
 
 func (x *AnnulAtencionRequest) Reset() {
 	*x = AnnulAtencionRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[34]
+	mi := &file_psicologia_service_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2191,7 +2255,7 @@ func (x *AnnulAtencionRequest) String() string {
 func (*AnnulAtencionRequest) ProtoMessage() {}
 
 func (x *AnnulAtencionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[34]
+	mi := &file_psicologia_service_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2204,7 +2268,7 @@ func (x *AnnulAtencionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnnulAtencionRequest.ProtoReflect.Descriptor instead.
 func (*AnnulAtencionRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{34}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *AnnulAtencionRequest) GetId() string {
@@ -2231,7 +2295,7 @@ type ExportAtencionPdfRequest struct {
 
 func (x *ExportAtencionPdfRequest) Reset() {
 	*x = ExportAtencionPdfRequest{}
-	mi := &file_psicologia_service_proto_msgTypes[35]
+	mi := &file_psicologia_service_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2243,7 +2307,7 @@ func (x *ExportAtencionPdfRequest) String() string {
 func (*ExportAtencionPdfRequest) ProtoMessage() {}
 
 func (x *ExportAtencionPdfRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[35]
+	mi := &file_psicologia_service_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2256,7 +2320,7 @@ func (x *ExportAtencionPdfRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportAtencionPdfRequest.ProtoReflect.Descriptor instead.
 func (*ExportAtencionPdfRequest) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{35}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ExportAtencionPdfRequest) GetId() string {
@@ -2283,7 +2347,7 @@ type ExportAtencionPdfResponse struct {
 
 func (x *ExportAtencionPdfResponse) Reset() {
 	*x = ExportAtencionPdfResponse{}
-	mi := &file_psicologia_service_proto_msgTypes[36]
+	mi := &file_psicologia_service_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2295,7 +2359,7 @@ func (x *ExportAtencionPdfResponse) String() string {
 func (*ExportAtencionPdfResponse) ProtoMessage() {}
 
 func (x *ExportAtencionPdfResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_psicologia_service_proto_msgTypes[36]
+	mi := &file_psicologia_service_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2308,7 +2372,7 @@ func (x *ExportAtencionPdfResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportAtencionPdfResponse.ProtoReflect.Descriptor instead.
 func (*ExportAtencionPdfResponse) Descriptor() ([]byte, []int) {
-	return file_psicologia_service_proto_rawDescGZIP(), []int{36}
+	return file_psicologia_service_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ExportAtencionPdfResponse) GetNombre() string {
@@ -2325,12 +2389,196 @@ func (x *ExportAtencionPdfResponse) GetContenido() []byte {
 	return nil
 }
 
+// Búsqueda de estudiantes para seleccionarlos (nuevo expediente, buscar
+// alumno). Exige psicologia.expedientes.create, .view o .view_own. q admite
+// nombres, apellidos y DNI completo; la respuesta nunca incluye documento,
+// códigos ni estados.
+type BuscarEstudiantesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Q             string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BuscarEstudiantesRequest) Reset() {
+	*x = BuscarEstudiantesRequest{}
+	mi := &file_psicologia_service_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BuscarEstudiantesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BuscarEstudiantesRequest) ProtoMessage() {}
+
+func (x *BuscarEstudiantesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_psicologia_service_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BuscarEstudiantesRequest.ProtoReflect.Descriptor instead.
+func (*BuscarEstudiantesRequest) Descriptor() ([]byte, []int) {
+	return file_psicologia_service_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *BuscarEstudiantesRequest) GetQ() string {
+	if x != nil {
+		return x.Q
+	}
+	return ""
+}
+
+func (x *BuscarEstudiantesRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *BuscarEstudiantesRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type EstudianteBusqueda struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	NombreCompleto string                 `protobuf:"bytes,2,opt,name=nombre_completo,json=nombreCompleto,proto3" json:"nombre_completo,omitempty"`
+	Grado          string                 `protobuf:"bytes,3,opt,name=grado,proto3" json:"grado,omitempty"`
+	Seccion        string                 `protobuf:"bytes,4,opt,name=seccion,proto3" json:"seccion,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EstudianteBusqueda) Reset() {
+	*x = EstudianteBusqueda{}
+	mi := &file_psicologia_service_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EstudianteBusqueda) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EstudianteBusqueda) ProtoMessage() {}
+
+func (x *EstudianteBusqueda) ProtoReflect() protoreflect.Message {
+	mi := &file_psicologia_service_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EstudianteBusqueda.ProtoReflect.Descriptor instead.
+func (*EstudianteBusqueda) Descriptor() ([]byte, []int) {
+	return file_psicologia_service_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *EstudianteBusqueda) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *EstudianteBusqueda) GetNombreCompleto() string {
+	if x != nil {
+		return x.NombreCompleto
+	}
+	return ""
+}
+
+func (x *EstudianteBusqueda) GetGrado() string {
+	if x != nil {
+		return x.Grado
+	}
+	return ""
+}
+
+func (x *EstudianteBusqueda) GetSeccion() string {
+	if x != nil {
+		return x.Seccion
+	}
+	return ""
+}
+
+type BuscarEstudiantesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Estudiantes   []*EstudianteBusqueda  `protobuf:"bytes,1,rep,name=estudiantes,proto3" json:"estudiantes,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BuscarEstudiantesResponse) Reset() {
+	*x = BuscarEstudiantesResponse{}
+	mi := &file_psicologia_service_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BuscarEstudiantesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BuscarEstudiantesResponse) ProtoMessage() {}
+
+func (x *BuscarEstudiantesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_psicologia_service_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BuscarEstudiantesResponse.ProtoReflect.Descriptor instead.
+func (*BuscarEstudiantesResponse) Descriptor() ([]byte, []int) {
+	return file_psicologia_service_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *BuscarEstudiantesResponse) GetEstudiantes() []*EstudianteBusqueda {
+	if x != nil {
+		return x.Estudiantes
+	}
+	return nil
+}
+
+func (x *BuscarEstudiantesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_psicologia_service_proto protoreflect.FileDescriptor
 
 const file_psicologia_service_proto_rawDesc = "" +
 	"\n" +
 	"\x18psicologia_service.proto\x12\n" +
-	"psicologia\"\x94\x03\n" +
+	"psicologia\"\xd3\x03\n" +
 	"\x15ExpedientePsicologico\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
 	"\restudiante_id\x18\x02 \x01(\tR\festudianteId\x12\x16\n" +
@@ -2347,7 +2595,15 @@ const file_psicologia_service_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"\x86\x01\n" +
+	"updated_at\x18\f \x01(\tR\tupdatedAt\x12=\n" +
+	"\n" +
+	"estudiante\x18\r \x01(\v2\x1d.psicologia.EstudianteResumenR\n" +
+	"estudiante\"\\\n" +
+	"\x11EstudianteResumen\x12'\n" +
+	"\x0fnombre_completo\x18\x01 \x01(\tR\x0enombreCompleto\x12\x1e\n" +
+	"\n" +
+	"resolucion\x18\x02 \x01(\tR\n" +
+	"resolucion\"\x86\x01\n" +
 	"\x15OpenExpedienteRequest\x12#\n" +
 	"\restudiante_id\x18\x01 \x01(\tR\festudianteId\x12%\n" +
 	"\x0eresponsable_id\x18\x02 \x01(\tR\rresponsableId\x12!\n" +
@@ -2517,7 +2773,19 @@ const file_psicologia_service_proto_rawDesc = "" +
 	"\x0enumero_version\x18\x02 \x01(\x05R\rnumeroVersion\"Q\n" +
 	"\x19ExportAtencionPdfResponse\x12\x16\n" +
 	"\x06nombre\x18\x01 \x01(\tR\x06nombre\x12\x1c\n" +
-	"\tcontenido\x18\x02 \x01(\fR\tcontenido2\x9b\r\n" +
+	"\tcontenido\x18\x02 \x01(\fR\tcontenido\"Y\n" +
+	"\x18BuscarEstudiantesRequest\x12\f\n" +
+	"\x01q\x18\x01 \x01(\tR\x01q\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"}\n" +
+	"\x12EstudianteBusqueda\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0fnombre_completo\x18\x02 \x01(\tR\x0enombreCompleto\x12\x14\n" +
+	"\x05grado\x18\x03 \x01(\tR\x05grado\x12\x18\n" +
+	"\aseccion\x18\x04 \x01(\tR\aseccion\"s\n" +
+	"\x19BuscarEstudiantesResponse\x12@\n" +
+	"\vestudiantes\x18\x01 \x03(\v2\x1e.psicologia.EstudianteBusquedaR\vestudiantes\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total2\xfd\r\n" +
 	"\n" +
 	"Psicologia\x12W\n" +
 	"\x0eOpenExpediente\x12!.psicologia.OpenExpedienteRequest\x1a\".psicologia.OpenExpedienteResponse\x12T\n" +
@@ -2537,7 +2805,8 @@ const file_psicologia_service_proto_rawDesc = "" +
 	"\x14ListAtencionVersions\x12'.psicologia.ListAtencionVersionsRequest\x1a(.psicologia.ListAtencionVersionsResponse\x12Y\n" +
 	"\x12GetAtencionVersion\x12%.psicologia.GetAtencionVersionRequest\x1a\x1c.psicologia.AtencionResponse\x12O\n" +
 	"\rAnnulAtencion\x12 .psicologia.AnnulAtencionRequest\x1a\x1c.psicologia.AtencionResponse\x12`\n" +
-	"\x11ExportAtencionPdf\x12$.psicologia.ExportAtencionPdfRequest\x1a%.psicologia.ExportAtencionPdfResponseB\x0eZ\f./psicologiab\x06proto3"
+	"\x11ExportAtencionPdf\x12$.psicologia.ExportAtencionPdfRequest\x1a%.psicologia.ExportAtencionPdfResponse\x12`\n" +
+	"\x11BuscarEstudiantes\x12$.psicologia.BuscarEstudiantesRequest\x1a%.psicologia.BuscarEstudiantesResponseB\x0eZ\f./psicologiab\x06proto3"
 
 var (
 	file_psicologia_service_proto_rawDescOnce sync.Once
@@ -2551,106 +2820,114 @@ func file_psicologia_service_proto_rawDescGZIP() []byte {
 	return file_psicologia_service_proto_rawDescData
 }
 
-var file_psicologia_service_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_psicologia_service_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_psicologia_service_proto_goTypes = []any{
 	(*ExpedientePsicologico)(nil),             // 0: psicologia.ExpedientePsicologico
-	(*OpenExpedienteRequest)(nil),             // 1: psicologia.OpenExpedienteRequest
-	(*OpenExpedienteResponse)(nil),            // 2: psicologia.OpenExpedienteResponse
-	(*GetExpedienteRequest)(nil),              // 3: psicologia.GetExpedienteRequest
-	(*GetExpedienteResponse)(nil),             // 4: psicologia.GetExpedienteResponse
-	(*GetExpedienteByEstudianteRequest)(nil),  // 5: psicologia.GetExpedienteByEstudianteRequest
-	(*GetExpedienteByEstudianteResponse)(nil), // 6: psicologia.GetExpedienteByEstudianteResponse
-	(*ListExpedientesRequest)(nil),            // 7: psicologia.ListExpedientesRequest
-	(*ListExpedientesResponse)(nil),           // 8: psicologia.ListExpedientesResponse
-	(*UpdateExpedienteRequest)(nil),           // 9: psicologia.UpdateExpedienteRequest
-	(*UpdateExpedienteResponse)(nil),          // 10: psicologia.UpdateExpedienteResponse
-	(*CloseExpedienteRequest)(nil),            // 11: psicologia.CloseExpedienteRequest
-	(*CloseExpedienteResponse)(nil),           // 12: psicologia.CloseExpedienteResponse
-	(*ReopenExpedienteRequest)(nil),           // 13: psicologia.ReopenExpedienteRequest
-	(*ReopenExpedienteResponse)(nil),          // 14: psicologia.ReopenExpedienteResponse
-	(*AtencionContenido)(nil),                 // 15: psicologia.AtencionContenido
-	(*OpcionCatalogo)(nil),                    // 16: psicologia.OpcionCatalogo
-	(*AtencionVersion)(nil),                   // 17: psicologia.AtencionVersion
-	(*AtencionPsicologica)(nil),               // 18: psicologia.AtencionPsicologica
-	(*AtencionResumen)(nil),                   // 19: psicologia.AtencionResumen
-	(*AtencionVersionResumen)(nil),            // 20: psicologia.AtencionVersionResumen
-	(*AtencionResponse)(nil),                  // 21: psicologia.AtencionResponse
-	(*CreateAtencionDraftRequest)(nil),        // 22: psicologia.CreateAtencionDraftRequest
-	(*UpdateAtencionDraftRequest)(nil),        // 23: psicologia.UpdateAtencionDraftRequest
-	(*RegisterAtencionRequest)(nil),           // 24: psicologia.RegisterAtencionRequest
-	(*DiscardAtencionDraftRequest)(nil),       // 25: psicologia.DiscardAtencionDraftRequest
-	(*DiscardAtencionDraftResponse)(nil),      // 26: psicologia.DiscardAtencionDraftResponse
-	(*GetAtencionRequest)(nil),                // 27: psicologia.GetAtencionRequest
-	(*ListAtencionesRequest)(nil),             // 28: psicologia.ListAtencionesRequest
-	(*ListAtencionesResponse)(nil),            // 29: psicologia.ListAtencionesResponse
-	(*CorrectAtencionRequest)(nil),            // 30: psicologia.CorrectAtencionRequest
-	(*ListAtencionVersionsRequest)(nil),       // 31: psicologia.ListAtencionVersionsRequest
-	(*ListAtencionVersionsResponse)(nil),      // 32: psicologia.ListAtencionVersionsResponse
-	(*GetAtencionVersionRequest)(nil),         // 33: psicologia.GetAtencionVersionRequest
-	(*AnnulAtencionRequest)(nil),              // 34: psicologia.AnnulAtencionRequest
-	(*ExportAtencionPdfRequest)(nil),          // 35: psicologia.ExportAtencionPdfRequest
-	(*ExportAtencionPdfResponse)(nil),         // 36: psicologia.ExportAtencionPdfResponse
+	(*EstudianteResumen)(nil),                 // 1: psicologia.EstudianteResumen
+	(*OpenExpedienteRequest)(nil),             // 2: psicologia.OpenExpedienteRequest
+	(*OpenExpedienteResponse)(nil),            // 3: psicologia.OpenExpedienteResponse
+	(*GetExpedienteRequest)(nil),              // 4: psicologia.GetExpedienteRequest
+	(*GetExpedienteResponse)(nil),             // 5: psicologia.GetExpedienteResponse
+	(*GetExpedienteByEstudianteRequest)(nil),  // 6: psicologia.GetExpedienteByEstudianteRequest
+	(*GetExpedienteByEstudianteResponse)(nil), // 7: psicologia.GetExpedienteByEstudianteResponse
+	(*ListExpedientesRequest)(nil),            // 8: psicologia.ListExpedientesRequest
+	(*ListExpedientesResponse)(nil),           // 9: psicologia.ListExpedientesResponse
+	(*UpdateExpedienteRequest)(nil),           // 10: psicologia.UpdateExpedienteRequest
+	(*UpdateExpedienteResponse)(nil),          // 11: psicologia.UpdateExpedienteResponse
+	(*CloseExpedienteRequest)(nil),            // 12: psicologia.CloseExpedienteRequest
+	(*CloseExpedienteResponse)(nil),           // 13: psicologia.CloseExpedienteResponse
+	(*ReopenExpedienteRequest)(nil),           // 14: psicologia.ReopenExpedienteRequest
+	(*ReopenExpedienteResponse)(nil),          // 15: psicologia.ReopenExpedienteResponse
+	(*AtencionContenido)(nil),                 // 16: psicologia.AtencionContenido
+	(*OpcionCatalogo)(nil),                    // 17: psicologia.OpcionCatalogo
+	(*AtencionVersion)(nil),                   // 18: psicologia.AtencionVersion
+	(*AtencionPsicologica)(nil),               // 19: psicologia.AtencionPsicologica
+	(*AtencionResumen)(nil),                   // 20: psicologia.AtencionResumen
+	(*AtencionVersionResumen)(nil),            // 21: psicologia.AtencionVersionResumen
+	(*AtencionResponse)(nil),                  // 22: psicologia.AtencionResponse
+	(*CreateAtencionDraftRequest)(nil),        // 23: psicologia.CreateAtencionDraftRequest
+	(*UpdateAtencionDraftRequest)(nil),        // 24: psicologia.UpdateAtencionDraftRequest
+	(*RegisterAtencionRequest)(nil),           // 25: psicologia.RegisterAtencionRequest
+	(*DiscardAtencionDraftRequest)(nil),       // 26: psicologia.DiscardAtencionDraftRequest
+	(*DiscardAtencionDraftResponse)(nil),      // 27: psicologia.DiscardAtencionDraftResponse
+	(*GetAtencionRequest)(nil),                // 28: psicologia.GetAtencionRequest
+	(*ListAtencionesRequest)(nil),             // 29: psicologia.ListAtencionesRequest
+	(*ListAtencionesResponse)(nil),            // 30: psicologia.ListAtencionesResponse
+	(*CorrectAtencionRequest)(nil),            // 31: psicologia.CorrectAtencionRequest
+	(*ListAtencionVersionsRequest)(nil),       // 32: psicologia.ListAtencionVersionsRequest
+	(*ListAtencionVersionsResponse)(nil),      // 33: psicologia.ListAtencionVersionsResponse
+	(*GetAtencionVersionRequest)(nil),         // 34: psicologia.GetAtencionVersionRequest
+	(*AnnulAtencionRequest)(nil),              // 35: psicologia.AnnulAtencionRequest
+	(*ExportAtencionPdfRequest)(nil),          // 36: psicologia.ExportAtencionPdfRequest
+	(*ExportAtencionPdfResponse)(nil),         // 37: psicologia.ExportAtencionPdfResponse
+	(*BuscarEstudiantesRequest)(nil),          // 38: psicologia.BuscarEstudiantesRequest
+	(*EstudianteBusqueda)(nil),                // 39: psicologia.EstudianteBusqueda
+	(*BuscarEstudiantesResponse)(nil),         // 40: psicologia.BuscarEstudiantesResponse
 }
 var file_psicologia_service_proto_depIdxs = []int32{
-	0,  // 0: psicologia.OpenExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
-	0,  // 1: psicologia.GetExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
-	0,  // 2: psicologia.GetExpedienteByEstudianteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
-	0,  // 3: psicologia.ListExpedientesResponse.expedientes:type_name -> psicologia.ExpedientePsicologico
-	0,  // 4: psicologia.UpdateExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
-	0,  // 5: psicologia.CloseExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
-	0,  // 6: psicologia.ReopenExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
-	15, // 7: psicologia.AtencionVersion.contenido:type_name -> psicologia.AtencionContenido
-	16, // 8: psicologia.AtencionVersion.motivos:type_name -> psicologia.OpcionCatalogo
-	16, // 9: psicologia.AtencionVersion.derivaciones:type_name -> psicologia.OpcionCatalogo
-	17, // 10: psicologia.AtencionPsicologica.version:type_name -> psicologia.AtencionVersion
-	16, // 11: psicologia.AtencionResumen.motivos:type_name -> psicologia.OpcionCatalogo
-	18, // 12: psicologia.AtencionResponse.atencion:type_name -> psicologia.AtencionPsicologica
-	15, // 13: psicologia.CreateAtencionDraftRequest.contenido:type_name -> psicologia.AtencionContenido
-	15, // 14: psicologia.UpdateAtencionDraftRequest.contenido:type_name -> psicologia.AtencionContenido
-	19, // 15: psicologia.ListAtencionesResponse.atenciones:type_name -> psicologia.AtencionResumen
-	15, // 16: psicologia.CorrectAtencionRequest.contenido:type_name -> psicologia.AtencionContenido
-	20, // 17: psicologia.ListAtencionVersionsResponse.versiones:type_name -> psicologia.AtencionVersionResumen
-	1,  // 18: psicologia.Psicologia.OpenExpediente:input_type -> psicologia.OpenExpedienteRequest
-	3,  // 19: psicologia.Psicologia.GetExpediente:input_type -> psicologia.GetExpedienteRequest
-	5,  // 20: psicologia.Psicologia.GetExpedienteByEstudiante:input_type -> psicologia.GetExpedienteByEstudianteRequest
-	7,  // 21: psicologia.Psicologia.ListExpedientes:input_type -> psicologia.ListExpedientesRequest
-	9,  // 22: psicologia.Psicologia.UpdateExpediente:input_type -> psicologia.UpdateExpedienteRequest
-	11, // 23: psicologia.Psicologia.CloseExpediente:input_type -> psicologia.CloseExpedienteRequest
-	13, // 24: psicologia.Psicologia.ReopenExpediente:input_type -> psicologia.ReopenExpedienteRequest
-	22, // 25: psicologia.Psicologia.CreateAtencionDraft:input_type -> psicologia.CreateAtencionDraftRequest
-	23, // 26: psicologia.Psicologia.UpdateAtencionDraft:input_type -> psicologia.UpdateAtencionDraftRequest
-	24, // 27: psicologia.Psicologia.RegisterAtencion:input_type -> psicologia.RegisterAtencionRequest
-	25, // 28: psicologia.Psicologia.DiscardAtencionDraft:input_type -> psicologia.DiscardAtencionDraftRequest
-	27, // 29: psicologia.Psicologia.GetAtencion:input_type -> psicologia.GetAtencionRequest
-	28, // 30: psicologia.Psicologia.ListAtenciones:input_type -> psicologia.ListAtencionesRequest
-	30, // 31: psicologia.Psicologia.CorrectAtencion:input_type -> psicologia.CorrectAtencionRequest
-	31, // 32: psicologia.Psicologia.ListAtencionVersions:input_type -> psicologia.ListAtencionVersionsRequest
-	33, // 33: psicologia.Psicologia.GetAtencionVersion:input_type -> psicologia.GetAtencionVersionRequest
-	34, // 34: psicologia.Psicologia.AnnulAtencion:input_type -> psicologia.AnnulAtencionRequest
-	35, // 35: psicologia.Psicologia.ExportAtencionPdf:input_type -> psicologia.ExportAtencionPdfRequest
-	2,  // 36: psicologia.Psicologia.OpenExpediente:output_type -> psicologia.OpenExpedienteResponse
-	4,  // 37: psicologia.Psicologia.GetExpediente:output_type -> psicologia.GetExpedienteResponse
-	6,  // 38: psicologia.Psicologia.GetExpedienteByEstudiante:output_type -> psicologia.GetExpedienteByEstudianteResponse
-	8,  // 39: psicologia.Psicologia.ListExpedientes:output_type -> psicologia.ListExpedientesResponse
-	10, // 40: psicologia.Psicologia.UpdateExpediente:output_type -> psicologia.UpdateExpedienteResponse
-	12, // 41: psicologia.Psicologia.CloseExpediente:output_type -> psicologia.CloseExpedienteResponse
-	14, // 42: psicologia.Psicologia.ReopenExpediente:output_type -> psicologia.ReopenExpedienteResponse
-	21, // 43: psicologia.Psicologia.CreateAtencionDraft:output_type -> psicologia.AtencionResponse
-	21, // 44: psicologia.Psicologia.UpdateAtencionDraft:output_type -> psicologia.AtencionResponse
-	21, // 45: psicologia.Psicologia.RegisterAtencion:output_type -> psicologia.AtencionResponse
-	26, // 46: psicologia.Psicologia.DiscardAtencionDraft:output_type -> psicologia.DiscardAtencionDraftResponse
-	21, // 47: psicologia.Psicologia.GetAtencion:output_type -> psicologia.AtencionResponse
-	29, // 48: psicologia.Psicologia.ListAtenciones:output_type -> psicologia.ListAtencionesResponse
-	21, // 49: psicologia.Psicologia.CorrectAtencion:output_type -> psicologia.AtencionResponse
-	32, // 50: psicologia.Psicologia.ListAtencionVersions:output_type -> psicologia.ListAtencionVersionsResponse
-	21, // 51: psicologia.Psicologia.GetAtencionVersion:output_type -> psicologia.AtencionResponse
-	21, // 52: psicologia.Psicologia.AnnulAtencion:output_type -> psicologia.AtencionResponse
-	36, // 53: psicologia.Psicologia.ExportAtencionPdf:output_type -> psicologia.ExportAtencionPdfResponse
-	36, // [36:54] is the sub-list for method output_type
-	18, // [18:36] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	1,  // 0: psicologia.ExpedientePsicologico.estudiante:type_name -> psicologia.EstudianteResumen
+	0,  // 1: psicologia.OpenExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
+	0,  // 2: psicologia.GetExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
+	0,  // 3: psicologia.GetExpedienteByEstudianteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
+	0,  // 4: psicologia.ListExpedientesResponse.expedientes:type_name -> psicologia.ExpedientePsicologico
+	0,  // 5: psicologia.UpdateExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
+	0,  // 6: psicologia.CloseExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
+	0,  // 7: psicologia.ReopenExpedienteResponse.expediente:type_name -> psicologia.ExpedientePsicologico
+	16, // 8: psicologia.AtencionVersion.contenido:type_name -> psicologia.AtencionContenido
+	17, // 9: psicologia.AtencionVersion.motivos:type_name -> psicologia.OpcionCatalogo
+	17, // 10: psicologia.AtencionVersion.derivaciones:type_name -> psicologia.OpcionCatalogo
+	18, // 11: psicologia.AtencionPsicologica.version:type_name -> psicologia.AtencionVersion
+	17, // 12: psicologia.AtencionResumen.motivos:type_name -> psicologia.OpcionCatalogo
+	19, // 13: psicologia.AtencionResponse.atencion:type_name -> psicologia.AtencionPsicologica
+	16, // 14: psicologia.CreateAtencionDraftRequest.contenido:type_name -> psicologia.AtencionContenido
+	16, // 15: psicologia.UpdateAtencionDraftRequest.contenido:type_name -> psicologia.AtencionContenido
+	20, // 16: psicologia.ListAtencionesResponse.atenciones:type_name -> psicologia.AtencionResumen
+	16, // 17: psicologia.CorrectAtencionRequest.contenido:type_name -> psicologia.AtencionContenido
+	21, // 18: psicologia.ListAtencionVersionsResponse.versiones:type_name -> psicologia.AtencionVersionResumen
+	39, // 19: psicologia.BuscarEstudiantesResponse.estudiantes:type_name -> psicologia.EstudianteBusqueda
+	2,  // 20: psicologia.Psicologia.OpenExpediente:input_type -> psicologia.OpenExpedienteRequest
+	4,  // 21: psicologia.Psicologia.GetExpediente:input_type -> psicologia.GetExpedienteRequest
+	6,  // 22: psicologia.Psicologia.GetExpedienteByEstudiante:input_type -> psicologia.GetExpedienteByEstudianteRequest
+	8,  // 23: psicologia.Psicologia.ListExpedientes:input_type -> psicologia.ListExpedientesRequest
+	10, // 24: psicologia.Psicologia.UpdateExpediente:input_type -> psicologia.UpdateExpedienteRequest
+	12, // 25: psicologia.Psicologia.CloseExpediente:input_type -> psicologia.CloseExpedienteRequest
+	14, // 26: psicologia.Psicologia.ReopenExpediente:input_type -> psicologia.ReopenExpedienteRequest
+	23, // 27: psicologia.Psicologia.CreateAtencionDraft:input_type -> psicologia.CreateAtencionDraftRequest
+	24, // 28: psicologia.Psicologia.UpdateAtencionDraft:input_type -> psicologia.UpdateAtencionDraftRequest
+	25, // 29: psicologia.Psicologia.RegisterAtencion:input_type -> psicologia.RegisterAtencionRequest
+	26, // 30: psicologia.Psicologia.DiscardAtencionDraft:input_type -> psicologia.DiscardAtencionDraftRequest
+	28, // 31: psicologia.Psicologia.GetAtencion:input_type -> psicologia.GetAtencionRequest
+	29, // 32: psicologia.Psicologia.ListAtenciones:input_type -> psicologia.ListAtencionesRequest
+	31, // 33: psicologia.Psicologia.CorrectAtencion:input_type -> psicologia.CorrectAtencionRequest
+	32, // 34: psicologia.Psicologia.ListAtencionVersions:input_type -> psicologia.ListAtencionVersionsRequest
+	34, // 35: psicologia.Psicologia.GetAtencionVersion:input_type -> psicologia.GetAtencionVersionRequest
+	35, // 36: psicologia.Psicologia.AnnulAtencion:input_type -> psicologia.AnnulAtencionRequest
+	36, // 37: psicologia.Psicologia.ExportAtencionPdf:input_type -> psicologia.ExportAtencionPdfRequest
+	38, // 38: psicologia.Psicologia.BuscarEstudiantes:input_type -> psicologia.BuscarEstudiantesRequest
+	3,  // 39: psicologia.Psicologia.OpenExpediente:output_type -> psicologia.OpenExpedienteResponse
+	5,  // 40: psicologia.Psicologia.GetExpediente:output_type -> psicologia.GetExpedienteResponse
+	7,  // 41: psicologia.Psicologia.GetExpedienteByEstudiante:output_type -> psicologia.GetExpedienteByEstudianteResponse
+	9,  // 42: psicologia.Psicologia.ListExpedientes:output_type -> psicologia.ListExpedientesResponse
+	11, // 43: psicologia.Psicologia.UpdateExpediente:output_type -> psicologia.UpdateExpedienteResponse
+	13, // 44: psicologia.Psicologia.CloseExpediente:output_type -> psicologia.CloseExpedienteResponse
+	15, // 45: psicologia.Psicologia.ReopenExpediente:output_type -> psicologia.ReopenExpedienteResponse
+	22, // 46: psicologia.Psicologia.CreateAtencionDraft:output_type -> psicologia.AtencionResponse
+	22, // 47: psicologia.Psicologia.UpdateAtencionDraft:output_type -> psicologia.AtencionResponse
+	22, // 48: psicologia.Psicologia.RegisterAtencion:output_type -> psicologia.AtencionResponse
+	27, // 49: psicologia.Psicologia.DiscardAtencionDraft:output_type -> psicologia.DiscardAtencionDraftResponse
+	22, // 50: psicologia.Psicologia.GetAtencion:output_type -> psicologia.AtencionResponse
+	30, // 51: psicologia.Psicologia.ListAtenciones:output_type -> psicologia.ListAtencionesResponse
+	22, // 52: psicologia.Psicologia.CorrectAtencion:output_type -> psicologia.AtencionResponse
+	33, // 53: psicologia.Psicologia.ListAtencionVersions:output_type -> psicologia.ListAtencionVersionsResponse
+	22, // 54: psicologia.Psicologia.GetAtencionVersion:output_type -> psicologia.AtencionResponse
+	22, // 55: psicologia.Psicologia.AnnulAtencion:output_type -> psicologia.AtencionResponse
+	37, // 56: psicologia.Psicologia.ExportAtencionPdf:output_type -> psicologia.ExportAtencionPdfResponse
+	40, // 57: psicologia.Psicologia.BuscarEstudiantes:output_type -> psicologia.BuscarEstudiantesResponse
+	39, // [39:58] is the sub-list for method output_type
+	20, // [20:39] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_psicologia_service_proto_init() }
@@ -2658,14 +2935,14 @@ func file_psicologia_service_proto_init() {
 	if File_psicologia_service_proto != nil {
 		return
 	}
-	file_psicologia_service_proto_msgTypes[9].OneofWrappers = []any{}
+	file_psicologia_service_proto_msgTypes[10].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_psicologia_service_proto_rawDesc), len(file_psicologia_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   37,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -10,6 +10,7 @@ import (
 	"psicologia/internal/svc"
 	"psicologia/psicologia"
 
+	"auth/auth"
 	"estudiantes/estudiantes"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -36,6 +37,12 @@ func main() {
 	// se conserva la línea de error/duración, sin el contenido (mismo
 	// criterio que gateway/internal/logsafe).
 	zrpc.DontLogClientContentForMethod(estudiantes.Estudiantes_GetEstudiante_FullMethodName)
+	// Client credentials: la solicitud lleva el client_secret y la respuesta,
+	// el token de servicio; GetEstudiantesBasic devuelve nombres de menores.
+	zrpc.DontLogClientContentForMethod(auth.Auth_IssueServiceToken_FullMethodName)
+	zrpc.DontLogClientContentForMethod(estudiantes.Estudiantes_GetEstudiantesBasic_FullMethodName)
+	// La búsqueda puede contener un DNI y devuelve nombres de menores.
+	zrpc.DontLogClientContentForMethod(estudiantes.Estudiantes_BuscarEstudiantesSeleccion_FullMethodName)
 
 	ctx := svc.NewServiceContext(c)
 

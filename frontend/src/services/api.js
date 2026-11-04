@@ -100,9 +100,12 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        // Rutas públicas: un 401 no es una sesión vencida (no se renueva).
         const isAuthEndpoint =
             originalRequest?.url?.includes("/api/auth/login") ||
-            originalRequest?.url?.includes("/api/auth/refresh");
+            originalRequest?.url?.includes("/api/auth/refresh") ||
+            originalRequest?.url?.includes("/api/auth/google/canjear") ||
+            originalRequest?.url?.includes("/api/auth/google/registro");
         const isPermissionsEndpoint = originalRequest?.url?.includes(PERMISSIONS_ENDPOINT);
 
         if (error.response?.status === 403 && !isPermissionsEndpoint) {

@@ -195,7 +195,8 @@ func TestPsicologiaService(t *testing.T) {
 	// códigos gRPC incluidos.
 	t.Run("Open_EstudianteVerifier_Real_CasosYReenvioDeJWT", func(t *testing.T) {
 		fake := &scriptedEstudiantesClient{exist: map[string]bool{est(231): true}}
-		h.svcCtx.Estudiantes = svc.NewEstudianteVerifier(fake)
+		// Modo usuario (sin credencial de servicio): reenvío del JWT del usuario.
+		h.svcCtx.Estudiantes = svc.NewEstudianteVerifier(fake, nil)
 		defer func() { h.svcCtx.Estudiantes = nil }()
 
 		var antes, despues int

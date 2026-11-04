@@ -468,6 +468,359 @@ func (x *ListDerivacionesResponse) GetTotal() int32 {
 	return 0
 }
 
+// ReporteDerivaciones (Reportes, Fase 2): conteos AGREGADOS de derivaciones,
+// sin registros individuales ni textos libres. Exige "reportes.view". Solo
+// considera derivaciones de expedientes ACTIVOS y visibles para el usuario
+// (alcance que entrega Expedientes.ReporteAlcanceExpedientes). Fecha usada:
+// fecha de la derivación (hora de Lima). Origen/destino se normalizan a
+// códigos de área; lo irreconocible es SIN_CLASIFICAR (el texto original,
+// que puede contener nombres de usuario, nunca sale del servicio).
+type ReporteDerivacionesRequest struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Desde        string                 `protobuf:"bytes,1,opt,name=desde,proto3" json:"desde,omitempty"`
+	Hasta        string                 `protobuf:"bytes,2,opt,name=hasta,proto3" json:"hasta,omitempty"`
+	TipoTramite  string                 `protobuf:"bytes,3,opt,name=tipo_tramite,json=tipoTramite,proto3" json:"tipo_tramite,omitempty"`
+	Granularidad string                 `protobuf:"bytes,4,opt,name=granularidad,proto3" json:"granularidad,omitempty"`
+	// Solo para el reporte de actividad del Gateway (agrupa por rol).
+	IncluirRegistros bool `protobuf:"varint,5,opt,name=incluir_registros,json=incluirRegistros,proto3" json:"incluir_registros,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ReporteDerivacionesRequest) Reset() {
+	*x = ReporteDerivacionesRequest{}
+	mi := &file_derivaciones_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDerivacionesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDerivacionesRequest) ProtoMessage() {}
+
+func (x *ReporteDerivacionesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDerivacionesRequest.ProtoReflect.Descriptor instead.
+func (*ReporteDerivacionesRequest) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ReporteDerivacionesRequest) GetDesde() string {
+	if x != nil {
+		return x.Desde
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesRequest) GetHasta() string {
+	if x != nil {
+		return x.Hasta
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesRequest) GetTipoTramite() string {
+	if x != nil {
+		return x.TipoTramite
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesRequest) GetGranularidad() string {
+	if x != nil {
+		return x.Granularidad
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesRequest) GetIncluirRegistros() bool {
+	if x != nil {
+		return x.IncluirRegistros
+	}
+	return false
+}
+
+type ReporteDerivConteo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clave         string                 `protobuf:"bytes,1,opt,name=clave,proto3" json:"clave,omitempty"`
+	Cantidad      int32                  `protobuf:"varint,2,opt,name=cantidad,proto3" json:"cantidad,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteDerivConteo) Reset() {
+	*x = ReporteDerivConteo{}
+	mi := &file_derivaciones_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDerivConteo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDerivConteo) ProtoMessage() {}
+
+func (x *ReporteDerivConteo) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDerivConteo.ProtoReflect.Descriptor instead.
+func (*ReporteDerivConteo) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ReporteDerivConteo) GetClave() string {
+	if x != nil {
+		return x.Clave
+	}
+	return ""
+}
+
+func (x *ReporteDerivConteo) GetCantidad() int32 {
+	if x != nil {
+		return x.Cantidad
+	}
+	return 0
+}
+
+type ReporteDerivFlujo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Origen        string                 `protobuf:"bytes,1,opt,name=origen,proto3" json:"origen,omitempty"`
+	Destino       string                 `protobuf:"bytes,2,opt,name=destino,proto3" json:"destino,omitempty"`
+	Cantidad      int32                  `protobuf:"varint,3,opt,name=cantidad,proto3" json:"cantidad,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteDerivFlujo) Reset() {
+	*x = ReporteDerivFlujo{}
+	mi := &file_derivaciones_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDerivFlujo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDerivFlujo) ProtoMessage() {}
+
+func (x *ReporteDerivFlujo) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDerivFlujo.ProtoReflect.Descriptor instead.
+func (*ReporteDerivFlujo) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ReporteDerivFlujo) GetOrigen() string {
+	if x != nil {
+		return x.Origen
+	}
+	return ""
+}
+
+func (x *ReporteDerivFlujo) GetDestino() string {
+	if x != nil {
+		return x.Destino
+	}
+	return ""
+}
+
+func (x *ReporteDerivFlujo) GetCantidad() int32 {
+	if x != nil {
+		return x.Cantidad
+	}
+	return 0
+}
+
+type ReporteDerivacionesResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Derivaciones entre áreas (tipo DERIVACION; incluye devoluciones a
+	// Secretaría, que hoy no se distinguen como rechazo).
+	Total          int32                 `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	PorDestino     []*ReporteDerivConteo `protobuf:"bytes,2,rep,name=por_destino,json=porDestino,proto3" json:"por_destino,omitempty"`
+	PorOrigen      []*ReporteDerivConteo `protobuf:"bytes,3,rep,name=por_origen,json=porOrigen,proto3" json:"por_origen,omitempty"`
+	Flujo          []*ReporteDerivFlujo  `protobuf:"bytes,4,rep,name=flujo,proto3" json:"flujo,omitempty"`
+	PorTipoTramite []*ReporteDerivConteo `protobuf:"bytes,5,rep,name=por_tipo_tramite,json=porTipoTramite,proto3" json:"por_tipo_tramite,omitempty"`
+	Serie          []*ReporteDerivConteo `protobuf:"bytes,6,rep,name=serie,proto3" json:"serie,omitempty"`
+	Granularidad   string                `protobuf:"bytes,7,opt,name=granularidad,proto3" json:"granularidad,omitempty"`
+	// Otros movimientos (NOTIFICACION, ASIGNACION, RECEPCION, APROBACION):
+	// solo cantidad por tipo.
+	OtrosMovimientos []*ReporteDerivConteo `protobuf:"bytes,8,rep,name=otros_movimientos,json=otrosMovimientos,proto3" json:"otros_movimientos,omitempty"`
+	// Derivaciones con origen o destino SIN_CLASIFICAR.
+	SinClasificar int32 `protobuf:"varint,9,opt,name=sin_clasificar,json=sinClasificar,proto3" json:"sin_clasificar,omitempty"`
+	// Solo con incluir_registros: clave = ID del usuario que registró.
+	RegistrosPorUsuario []*ReporteDerivConteo `protobuf:"bytes,10,rep,name=registros_por_usuario,json=registrosPorUsuario,proto3" json:"registros_por_usuario,omitempty"`
+	Generado            string                `protobuf:"bytes,11,opt,name=generado,proto3" json:"generado,omitempty"`
+	// Alcance aplicado (lo informa Expedientes): INSTITUCION o AREA.
+	Alcance     string `protobuf:"bytes,12,opt,name=alcance,proto3" json:"alcance,omitempty"`
+	AreaAlcance string `protobuf:"bytes,13,opt,name=area_alcance,json=areaAlcance,proto3" json:"area_alcance,omitempty"`
+	// Solo con incluir_registros: como registros_por_usuario pero SOLO del
+	// tipo DERIVACION (registros_por_usuario cuenta todos los movimientos).
+	DerivacionesPorUsuario []*ReporteDerivConteo `protobuf:"bytes,14,rep,name=derivaciones_por_usuario,json=derivacionesPorUsuario,proto3" json:"derivaciones_por_usuario,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ReporteDerivacionesResponse) Reset() {
+	*x = ReporteDerivacionesResponse{}
+	mi := &file_derivaciones_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDerivacionesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDerivacionesResponse) ProtoMessage() {}
+
+func (x *ReporteDerivacionesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDerivacionesResponse.ProtoReflect.Descriptor instead.
+func (*ReporteDerivacionesResponse) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ReporteDerivacionesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ReporteDerivacionesResponse) GetPorDestino() []*ReporteDerivConteo {
+	if x != nil {
+		return x.PorDestino
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetPorOrigen() []*ReporteDerivConteo {
+	if x != nil {
+		return x.PorOrigen
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetFlujo() []*ReporteDerivFlujo {
+	if x != nil {
+		return x.Flujo
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetPorTipoTramite() []*ReporteDerivConteo {
+	if x != nil {
+		return x.PorTipoTramite
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetSerie() []*ReporteDerivConteo {
+	if x != nil {
+		return x.Serie
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetGranularidad() string {
+	if x != nil {
+		return x.Granularidad
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesResponse) GetOtrosMovimientos() []*ReporteDerivConteo {
+	if x != nil {
+		return x.OtrosMovimientos
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetSinClasificar() int32 {
+	if x != nil {
+		return x.SinClasificar
+	}
+	return 0
+}
+
+func (x *ReporteDerivacionesResponse) GetRegistrosPorUsuario() []*ReporteDerivConteo {
+	if x != nil {
+		return x.RegistrosPorUsuario
+	}
+	return nil
+}
+
+func (x *ReporteDerivacionesResponse) GetGenerado() string {
+	if x != nil {
+		return x.Generado
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesResponse) GetAlcance() string {
+	if x != nil {
+		return x.Alcance
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesResponse) GetAreaAlcance() string {
+	if x != nil {
+		return x.AreaAlcance
+	}
+	return ""
+}
+
+func (x *ReporteDerivacionesResponse) GetDerivacionesPorUsuario() []*ReporteDerivConteo {
+	if x != nil {
+		return x.DerivacionesPorUsuario
+	}
+	return nil
+}
+
 var File_derivaciones_service_proto protoreflect.FileDescriptor
 
 const file_derivaciones_service_proto_rawDesc = "" +
@@ -508,11 +861,43 @@ const file_derivaciones_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"n\n" +
 	"\x18ListDerivacionesResponse\x12<\n" +
 	"\fderivaciones\x18\x01 \x03(\v2\x18.derivaciones.DerivacionR\fderivaciones\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total2\xab\x02\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\xbc\x01\n" +
+	"\x1aReporteDerivacionesRequest\x12\x14\n" +
+	"\x05desde\x18\x01 \x01(\tR\x05desde\x12\x14\n" +
+	"\x05hasta\x18\x02 \x01(\tR\x05hasta\x12!\n" +
+	"\ftipo_tramite\x18\x03 \x01(\tR\vtipoTramite\x12\"\n" +
+	"\fgranularidad\x18\x04 \x01(\tR\fgranularidad\x12+\n" +
+	"\x11incluir_registros\x18\x05 \x01(\bR\x10incluirRegistros\"F\n" +
+	"\x12ReporteDerivConteo\x12\x14\n" +
+	"\x05clave\x18\x01 \x01(\tR\x05clave\x12\x1a\n" +
+	"\bcantidad\x18\x02 \x01(\x05R\bcantidad\"a\n" +
+	"\x11ReporteDerivFlujo\x12\x16\n" +
+	"\x06origen\x18\x01 \x01(\tR\x06origen\x12\x18\n" +
+	"\adestino\x18\x02 \x01(\tR\adestino\x12\x1a\n" +
+	"\bcantidad\x18\x03 \x01(\x05R\bcantidad\"\x97\x06\n" +
+	"\x1bReporteDerivacionesResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12A\n" +
+	"\vpor_destino\x18\x02 \x03(\v2 .derivaciones.ReporteDerivConteoR\n" +
+	"porDestino\x12?\n" +
+	"\n" +
+	"por_origen\x18\x03 \x03(\v2 .derivaciones.ReporteDerivConteoR\tporOrigen\x125\n" +
+	"\x05flujo\x18\x04 \x03(\v2\x1f.derivaciones.ReporteDerivFlujoR\x05flujo\x12J\n" +
+	"\x10por_tipo_tramite\x18\x05 \x03(\v2 .derivaciones.ReporteDerivConteoR\x0eporTipoTramite\x126\n" +
+	"\x05serie\x18\x06 \x03(\v2 .derivaciones.ReporteDerivConteoR\x05serie\x12\"\n" +
+	"\fgranularidad\x18\a \x01(\tR\fgranularidad\x12M\n" +
+	"\x11otros_movimientos\x18\b \x03(\v2 .derivaciones.ReporteDerivConteoR\x10otrosMovimientos\x12%\n" +
+	"\x0esin_clasificar\x18\t \x01(\x05R\rsinClasificar\x12T\n" +
+	"\x15registros_por_usuario\x18\n" +
+	" \x03(\v2 .derivaciones.ReporteDerivConteoR\x13registrosPorUsuario\x12\x1a\n" +
+	"\bgenerado\x18\v \x01(\tR\bgenerado\x12\x18\n" +
+	"\aalcance\x18\f \x01(\tR\aalcance\x12!\n" +
+	"\farea_alcance\x18\r \x01(\tR\vareaAlcance\x12Z\n" +
+	"\x18derivaciones_por_usuario\x18\x0e \x03(\v2 .derivaciones.ReporteDerivConteoR\x16derivacionesPorUsuario2\x97\x03\n" +
 	"\fDerivaciones\x12^\n" +
 	"\x0fCrearDerivacion\x12$.derivaciones.CrearDerivacionRequest\x1a%.derivaciones.CrearDerivacionResponse\x12X\n" +
 	"\rGetDerivacion\x12\".derivaciones.GetDerivacionRequest\x1a#.derivaciones.GetDerivacionResponse\x12a\n" +
-	"\x10ListDerivaciones\x12%.derivaciones.ListDerivacionesRequest\x1a&.derivaciones.ListDerivacionesResponseB\x10Z\x0e./derivacionesb\x06proto3"
+	"\x10ListDerivaciones\x12%.derivaciones.ListDerivacionesRequest\x1a&.derivaciones.ListDerivacionesResponse\x12j\n" +
+	"\x13ReporteDerivaciones\x12(.derivaciones.ReporteDerivacionesRequest\x1a).derivaciones.ReporteDerivacionesResponseB\x10Z\x0e./derivacionesb\x06proto3"
 
 var (
 	file_derivaciones_service_proto_rawDescOnce sync.Once
@@ -526,31 +911,45 @@ func file_derivaciones_service_proto_rawDescGZIP() []byte {
 	return file_derivaciones_service_proto_rawDescData
 }
 
-var file_derivaciones_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_derivaciones_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_derivaciones_service_proto_goTypes = []any{
-	(*Derivacion)(nil),               // 0: derivaciones.Derivacion
-	(*CrearDerivacionRequest)(nil),   // 1: derivaciones.CrearDerivacionRequest
-	(*CrearDerivacionResponse)(nil),  // 2: derivaciones.CrearDerivacionResponse
-	(*GetDerivacionRequest)(nil),     // 3: derivaciones.GetDerivacionRequest
-	(*GetDerivacionResponse)(nil),    // 4: derivaciones.GetDerivacionResponse
-	(*ListDerivacionesRequest)(nil),  // 5: derivaciones.ListDerivacionesRequest
-	(*ListDerivacionesResponse)(nil), // 6: derivaciones.ListDerivacionesResponse
+	(*Derivacion)(nil),                  // 0: derivaciones.Derivacion
+	(*CrearDerivacionRequest)(nil),      // 1: derivaciones.CrearDerivacionRequest
+	(*CrearDerivacionResponse)(nil),     // 2: derivaciones.CrearDerivacionResponse
+	(*GetDerivacionRequest)(nil),        // 3: derivaciones.GetDerivacionRequest
+	(*GetDerivacionResponse)(nil),       // 4: derivaciones.GetDerivacionResponse
+	(*ListDerivacionesRequest)(nil),     // 5: derivaciones.ListDerivacionesRequest
+	(*ListDerivacionesResponse)(nil),    // 6: derivaciones.ListDerivacionesResponse
+	(*ReporteDerivacionesRequest)(nil),  // 7: derivaciones.ReporteDerivacionesRequest
+	(*ReporteDerivConteo)(nil),          // 8: derivaciones.ReporteDerivConteo
+	(*ReporteDerivFlujo)(nil),           // 9: derivaciones.ReporteDerivFlujo
+	(*ReporteDerivacionesResponse)(nil), // 10: derivaciones.ReporteDerivacionesResponse
 }
 var file_derivaciones_service_proto_depIdxs = []int32{
-	0, // 0: derivaciones.CrearDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
-	0, // 1: derivaciones.GetDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
-	0, // 2: derivaciones.ListDerivacionesResponse.derivaciones:type_name -> derivaciones.Derivacion
-	1, // 3: derivaciones.Derivaciones.CrearDerivacion:input_type -> derivaciones.CrearDerivacionRequest
-	3, // 4: derivaciones.Derivaciones.GetDerivacion:input_type -> derivaciones.GetDerivacionRequest
-	5, // 5: derivaciones.Derivaciones.ListDerivaciones:input_type -> derivaciones.ListDerivacionesRequest
-	2, // 6: derivaciones.Derivaciones.CrearDerivacion:output_type -> derivaciones.CrearDerivacionResponse
-	4, // 7: derivaciones.Derivaciones.GetDerivacion:output_type -> derivaciones.GetDerivacionResponse
-	6, // 8: derivaciones.Derivaciones.ListDerivaciones:output_type -> derivaciones.ListDerivacionesResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0,  // 0: derivaciones.CrearDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
+	0,  // 1: derivaciones.GetDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
+	0,  // 2: derivaciones.ListDerivacionesResponse.derivaciones:type_name -> derivaciones.Derivacion
+	8,  // 3: derivaciones.ReporteDerivacionesResponse.por_destino:type_name -> derivaciones.ReporteDerivConteo
+	8,  // 4: derivaciones.ReporteDerivacionesResponse.por_origen:type_name -> derivaciones.ReporteDerivConteo
+	9,  // 5: derivaciones.ReporteDerivacionesResponse.flujo:type_name -> derivaciones.ReporteDerivFlujo
+	8,  // 6: derivaciones.ReporteDerivacionesResponse.por_tipo_tramite:type_name -> derivaciones.ReporteDerivConteo
+	8,  // 7: derivaciones.ReporteDerivacionesResponse.serie:type_name -> derivaciones.ReporteDerivConteo
+	8,  // 8: derivaciones.ReporteDerivacionesResponse.otros_movimientos:type_name -> derivaciones.ReporteDerivConteo
+	8,  // 9: derivaciones.ReporteDerivacionesResponse.registros_por_usuario:type_name -> derivaciones.ReporteDerivConteo
+	8,  // 10: derivaciones.ReporteDerivacionesResponse.derivaciones_por_usuario:type_name -> derivaciones.ReporteDerivConteo
+	1,  // 11: derivaciones.Derivaciones.CrearDerivacion:input_type -> derivaciones.CrearDerivacionRequest
+	3,  // 12: derivaciones.Derivaciones.GetDerivacion:input_type -> derivaciones.GetDerivacionRequest
+	5,  // 13: derivaciones.Derivaciones.ListDerivaciones:input_type -> derivaciones.ListDerivacionesRequest
+	7,  // 14: derivaciones.Derivaciones.ReporteDerivaciones:input_type -> derivaciones.ReporteDerivacionesRequest
+	2,  // 15: derivaciones.Derivaciones.CrearDerivacion:output_type -> derivaciones.CrearDerivacionResponse
+	4,  // 16: derivaciones.Derivaciones.GetDerivacion:output_type -> derivaciones.GetDerivacionResponse
+	6,  // 17: derivaciones.Derivaciones.ListDerivaciones:output_type -> derivaciones.ListDerivacionesResponse
+	10, // 18: derivaciones.Derivaciones.ReporteDerivaciones:output_type -> derivaciones.ReporteDerivacionesResponse
+	15, // [15:19] is the sub-list for method output_type
+	11, // [11:15] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_derivaciones_service_proto_init() }
@@ -564,7 +963,7 @@ func file_derivaciones_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_derivaciones_service_proto_rawDesc), len(file_derivaciones_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

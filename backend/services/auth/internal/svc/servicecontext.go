@@ -8,6 +8,7 @@ import (
 
 	"auth/internal/authorization"
 	"auth/internal/config"
+	"auth/internal/correo"
 	"auth/internal/repository"
 	"auth/internal/security"
 
@@ -29,6 +30,17 @@ type ServiceContext struct {
 	// Unavailable y nada más cambia.
 	ServiceClientRepository *repository.ServiceClientRepository
 	ServiceTokenIssuer      *security.ServiceTokenIssuer
+	// Acceso con Google (solo SOLICITANTES).
+	GoogleRepository *repository.GoogleRepository
+	Google           security.GoogleProvider
+	// Registro manual con verificación del correo (solo SOLICITANTES). Correo
+	// no configurado = el registro manual responde "no disponible".
+	RegistroCorreoRepository *repository.RegistroCorreoRepository
+	Correo                   correo.Enviador
+	CodigosVerificacion      *security.CodigosVerificacion
+	// Identidad declarada de los solicitantes públicos (verificación por
+	// Secretaría, permiso solicitantes.identidad.verify).
+	IdentidadRepository *repository.IdentidadRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -108,6 +120,32 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		log.Println("Tokens de servicio habilitados (client credentials)")
 	}
 
+	google := security.NewGoogleOIDC(security.GoogleConfig{
+		ClientID: c.Google.ClientID, ClientSecret: c.Google.ClientSecret,
+		RedirectURL: c.Google.RedirectURL, Issuer: c.Google.Issuer,
+	})
+	if google.Configurado() {
+		log.Println("Acceso con Google habilitado (solo SOLICITANTES)")
+	} else {
+		log.Println("Acceso con Google deshabilitado: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o GOOGLE_REDIRECT_URL no configurados")
+	}
+
+	enviador, err := correo.NewSMTP(c.RegistroCorreo.SMTP)
+	if err != nil {
+		db.Close()
+		log.Fatalf("Configuración de correo (SMTP_*) inválida: %v", err)
+	}
+	if enviador.Configurado() {
+		log.Println("Registro manual con verificación de correo habilitado (solo SOLICITANTES)")
+	} else {
+		log.Println("Registro manual deshabilitado: SMTP_SERVIDOR o SMTP_REMITENTE no configurados")
+	}
+	codigos, err := security.NewCodigosVerificacion(c.JWTSecret)
+	if err != nil {
+		db.Close()
+		log.Fatalf("Códigos de verificación: %v", err)
+	}
+
 	return &ServiceContext{
 		Config:                   c,
 		DB:                       db,
@@ -120,6 +158,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		JWTManager:               security.NewJWTManager(c.JWTSecret, c.AccessTokenDuration),
 		ServiceClientRepository:  repository.NewServiceClientRepository(db),
 		ServiceTokenIssuer:       serviceIssuer,
+		GoogleRepository:         repository.NewGoogleRepository(db),
+		Google:                   google,
+		RegistroCorreoRepository: repository.NewRegistroCorreoRepository(db),
+		Correo:                   enviador,
+		CodigosVerificacion:      codigos,
+		IdentidadRepository:      repository.NewIdentidadRepository(db),
 	}
 }
 

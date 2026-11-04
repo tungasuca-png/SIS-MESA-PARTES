@@ -152,3 +152,13 @@ export const exportAtencionPdf = async (id, version) => {
     });
     return response.data;
 };
+
+// Búsqueda de estudiantes para seleccionarlos (nuevo expediente, buscar
+// alumno). La resuelve Psicología con su credencial de servicio: el frontend
+// nunca consulta /api/estudiantes. POST: la consulta (puede ser un DNI) no
+// viaja en la URL. Respuesta: { estudiantes: [{ id, nombre_completo, grado,
+// seccion }], total }.
+export const buscarEstudiantesPsicologia = async ({ q, page, pageSize } = {}) => {
+    const response = await api.post("/api/psicologia/estudiantes/buscar", { q, page, page_size: pageSize });
+    return response.data;
+};

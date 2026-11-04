@@ -41,10 +41,14 @@ var (
 	errServiceSecretShared  = errors.New("ServiceJWTSecret no puede ser igual a JWTSecret")
 )
 
-// AssignableServicePermissions: únicos permisos que un sistema consumidor
-// puede recibir (mínimo privilegio, nunca permisos administrativos). Son
-// códigos reales del catálogo de Auth; estudiantes.basic.view lo agrega la
-// migración 019.
+// AssignableServicePermissions: únicos permisos que pueden figurar en el scope
+// de un token de servicio (nunca permisos administrativos). Son códigos
+// reales del catálogo de Auth; estudiantes.basic.view lo agrega la migración
+// 019 y estudiantes.search.basic, la 020. Se conserva amplia SOLO como filtro
+// del token, para que un sistema registrado antes no pierda acceso; los
+// sistemas NUEVOS se registran con GrantableServicePermissions y, de todos
+// modos, Estudiantes no admite escrituras ni datos personales de sistemas
+// (interceptor.ServiceMethods).
 var AssignableServicePermissions = map[string]bool{
 	"estudiantes.view":             true,
 	"estudiantes.basic.view":       true,
@@ -52,6 +56,19 @@ var AssignableServicePermissions = map[string]bool{
 	"estudiantes.create":           true,
 	"estudiantes.update":           true,
 	"estudiantes.matricula.update": true,
+	// Búsqueda mínima para seleccionar estudiantes (migración 020).
+	"estudiantes.search.basic": true,
+}
+
+// GrantableServicePermissions: lista EXPLÍCITA de permisos que pueden
+// otorgarse o retirarse a un sistema YA EXISTENTE (GrantServiceClientPermission
+// / WithdrawServiceClientPermission). Solo lecturas mínimas: nunca
+// estudiantes.view, datos personales, escritura ni permisos humanos o
+// administrativos. Debe ser un subconjunto de AssignableServicePermissions
+// (lo verifica una prueba).
+var GrantableServicePermissions = map[string]bool{
+	"estudiantes.basic.view":   true,
+	"estudiantes.search.basic": true,
 }
 
 type ServiceClaims struct {

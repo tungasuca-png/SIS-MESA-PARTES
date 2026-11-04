@@ -44,6 +44,12 @@ func (l *ResolveEstudianteLogic) ResolveEstudiante(in *estudiantes.ResolveEstudi
 	numero := validation.Upper(in.NumeroDocumento)
 	porDocumento := tipo != "" || numero != ""
 
+	// Sistemas consumidores sin estudiantes.view: solo DNI completo (8
+	// dígitos, tipo DNI); nunca código interno ni SIAGIE ni CE/pasaporte.
+	if consumidorMinimo(l.ctx) && (codigo != "" || siagie != "" || tipo != validation.TipoDNI) {
+		return nil, escrituraError(l.Logger, "resolver", validation.Invalid("los sistemas consumidores solo pueden resolver por tipo_documento DNI y numero_documento de 8 dígitos"))
+	}
+
 	criterios := 0
 	for _, usado := range []bool{codigo != "", siagie != "", porDocumento} {
 		if usado {
@@ -82,5 +88,5 @@ func (l *ResolveEstudianteLogic) ResolveEstudiante(in *estudiantes.ResolveEstudi
 	if err != nil {
 		return nil, errorSeguro(l.Logger, "resolver", "no se pudo resolver el estudiante", err)
 	}
-	return &estudiantes.ResolveEstudianteResponse{Estudiante: toProtoBasic(found)}, nil
+	return &estudiantes.ResolveEstudianteResponse{Estudiante: basicoParaLlamador(l.ctx, found)}, nil
 }

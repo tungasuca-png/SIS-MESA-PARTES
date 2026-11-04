@@ -147,8 +147,8 @@ func TestExpedientesIntegration(t *testing.T) {
 		t.Fatalf("expected same expediente by codigo lookup")
 	}
 
-	if _, err := client.GetExpediente(ctxOtroSolicitante, &expedientes.GetExpedienteRequest{Id: createResp.Expediente.Id}); status.Code(err) != codes.PermissionDenied {
-		t.Fatalf("expected PermissionDenied for foreign expediente, got %v", err)
+	if _, err := client.GetExpediente(ctxOtroSolicitante, &expedientes.GetExpedienteRequest{Id: createResp.Expediente.Id}); status.Code(err) != codes.NotFound {
+		t.Fatalf("expected NotFound (same as a missing id) for foreign expediente, got %v", err)
 	}
 	if _, err := client.GetExpediente(ctxAdmin, &expedientes.GetExpedienteRequest{Id: "no-existe-" + time.Now().String()}); status.Code(err) != codes.NotFound {
 		t.Fatalf("expected NotFound for missing expediente, got %v", err)

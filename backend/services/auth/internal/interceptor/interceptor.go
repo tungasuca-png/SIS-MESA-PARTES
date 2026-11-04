@@ -72,10 +72,43 @@ func DefaultMethodPolicies() map[string]MethodPolicy {
 		// client_secret por un token de servicio (público, como Login). La
 		// administración de sistemas exige su propio permiso, que no se
 		// asigna automáticamente a ningún rol (migración 019).
-		"/auth.Auth/IssueServiceToken":   PublicMethod(),
-		"/auth.Auth/CreateServiceClient": ProtectedMethod("integraciones.manage"),
-		"/auth.Auth/RevokeServiceClient": ProtectedMethod("integraciones.manage"),
-		"/auth.Auth/ListServiceClients":  ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/IssueServiceToken": PublicMethod(),
+		// Google (solo SOLICITANTES). Inicio, callback, canje, registro y su
+		// confirmación/compensación son públicos: su autoridad es un código
+		// de un solo uso emitido por Auth (y el ID token validado de Google).
+		// Iniciar la vinculación y consultar su estado exigen sesión.
+		"/auth.Auth/GoogleStart":                PublicMethod(),
+		"/auth.Auth/GoogleCallback":             PublicMethod(),
+		"/auth.Auth/GoogleExchange":             PublicMethod(),
+		"/auth.Auth/GoogleRegister":             PublicMethod(),
+		"/auth.Auth/GoogleCompleteRegistration": PublicMethod(),
+		"/auth.Auth/GoogleCancelRegistration":   PublicMethod(),
+		"/auth.Auth/GoogleStartLink":            AuthenticatedMethod(),
+		"/auth.Auth/GoogleLinkStatus":           AuthenticatedMethod(),
+		"/auth.Auth/CreateServiceClient":        ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/RevokeServiceClient":        ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/ListServiceClients":         ProtectedMethod("integraciones.manage"),
+		// Otorgar / retirar un permiso a un sistema existente (sin recrearlo).
+		"/auth.Auth/GrantServiceClientPermission":    ProtectedMethod("integraciones.manage"),
+		"/auth.Auth/WithdrawServiceClientPermission": ProtectedMethod("integraciones.manage"),
+		// Registro manual con verificación del correo (solo SOLICITANTES): sin
+		// sesión; cada paso exige el id del registro y el código de 6 dígitos
+		// (intentos limitados y contados por Auth).
+		"/auth.Auth/EmailRegister":             PublicMethod(),
+		"/auth.Auth/EmailResendCode":           PublicMethod(),
+		"/auth.Auth/EmailVerify":               PublicMethod(),
+		"/auth.Auth/EmailCompleteRegistration": PublicMethod(),
+		"/auth.Auth/EmailCancelRegistration":   PublicMethod(),
+		// Verificación de identidad de solicitantes (bandeja de Secretaría):
+		// permiso propio, sin asignar a ningún rol por defecto (migración 025).
+		"/auth.Auth/ListSolicitanteIdentities": ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/GetSolicitanteIdentity":    ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/VerifySolicitanteIdentity": ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/RejectSolicitanteIdentity": ProtectedMethod("solicitantes.identidad.verify"),
+		// Sincronización con Usuarios y su compensación (mismo permiso).
+		"/auth.Auth/ConfirmSolicitanteIdentitySync":       ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/RecordSolicitanteIdentitySyncFailure": ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/RevertSolicitanteIdentity":            ProtectedMethod("solicitantes.identidad.verify"),
 	}
 }
 

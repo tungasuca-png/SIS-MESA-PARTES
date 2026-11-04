@@ -643,6 +643,249 @@ func (x *DeleteDocumentoResponse) GetSuccess() bool {
 	return false
 }
 
+// ReporteDocumentos (Reportes, Fase 2): conteos AGREGADOS de documentos
+// ACTIVOS (adjuntos, proveídos, actas...) de expedientes ACTIVOS y visibles
+// para el usuario. Exige "reportes.view". Fecha usada: fecha de registro del
+// documento (hora de Lima). Sin nombres de archivo ni contenido.
+type ReporteDocumentosRequest struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Desde        string                 `protobuf:"bytes,1,opt,name=desde,proto3" json:"desde,omitempty"`
+	Hasta        string                 `protobuf:"bytes,2,opt,name=hasta,proto3" json:"hasta,omitempty"`
+	TipoTramite  string                 `protobuf:"bytes,3,opt,name=tipo_tramite,json=tipoTramite,proto3" json:"tipo_tramite,omitempty"`
+	Granularidad string                 `protobuf:"bytes,4,opt,name=granularidad,proto3" json:"granularidad,omitempty"`
+	// Solo para el reporte de actividad del Gateway (agrupa por rol).
+	IncluirRegistros bool `protobuf:"varint,5,opt,name=incluir_registros,json=incluirRegistros,proto3" json:"incluir_registros,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ReporteDocumentosRequest) Reset() {
+	*x = ReporteDocumentosRequest{}
+	mi := &file_documentos_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDocumentosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDocumentosRequest) ProtoMessage() {}
+
+func (x *ReporteDocumentosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_documentos_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDocumentosRequest.ProtoReflect.Descriptor instead.
+func (*ReporteDocumentosRequest) Descriptor() ([]byte, []int) {
+	return file_documentos_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ReporteDocumentosRequest) GetDesde() string {
+	if x != nil {
+		return x.Desde
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosRequest) GetHasta() string {
+	if x != nil {
+		return x.Hasta
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosRequest) GetTipoTramite() string {
+	if x != nil {
+		return x.TipoTramite
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosRequest) GetGranularidad() string {
+	if x != nil {
+		return x.Granularidad
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosRequest) GetIncluirRegistros() bool {
+	if x != nil {
+		return x.IncluirRegistros
+	}
+	return false
+}
+
+type ReporteDocConteo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clave         string                 `protobuf:"bytes,1,opt,name=clave,proto3" json:"clave,omitempty"`
+	Cantidad      int32                  `protobuf:"varint,2,opt,name=cantidad,proto3" json:"cantidad,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteDocConteo) Reset() {
+	*x = ReporteDocConteo{}
+	mi := &file_documentos_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDocConteo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDocConteo) ProtoMessage() {}
+
+func (x *ReporteDocConteo) ProtoReflect() protoreflect.Message {
+	mi := &file_documentos_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDocConteo.ProtoReflect.Descriptor instead.
+func (*ReporteDocConteo) Descriptor() ([]byte, []int) {
+	return file_documentos_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ReporteDocConteo) GetClave() string {
+	if x != nil {
+		return x.Clave
+	}
+	return ""
+}
+
+func (x *ReporteDocConteo) GetCantidad() int32 {
+	if x != nil {
+		return x.Cantidad
+	}
+	return 0
+}
+
+type ReporteDocumentosResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Total            int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	PorTipoDocumento []*ReporteDocConteo    `protobuf:"bytes,2,rep,name=por_tipo_documento,json=porTipoDocumento,proto3" json:"por_tipo_documento,omitempty"`
+	PorTipoTramite   []*ReporteDocConteo    `protobuf:"bytes,3,rep,name=por_tipo_tramite,json=porTipoTramite,proto3" json:"por_tipo_tramite,omitempty"`
+	Serie            []*ReporteDocConteo    `protobuf:"bytes,4,rep,name=serie,proto3" json:"serie,omitempty"`
+	Granularidad     string                 `protobuf:"bytes,5,opt,name=granularidad,proto3" json:"granularidad,omitempty"`
+	// Solo con incluir_registros: clave = ID del usuario que subió.
+	RegistrosPorUsuario []*ReporteDocConteo `protobuf:"bytes,6,rep,name=registros_por_usuario,json=registrosPorUsuario,proto3" json:"registros_por_usuario,omitempty"`
+	Generado            string              `protobuf:"bytes,7,opt,name=generado,proto3" json:"generado,omitempty"`
+	// Alcance aplicado (lo informa Expedientes): INSTITUCION o AREA.
+	Alcance       string `protobuf:"bytes,8,opt,name=alcance,proto3" json:"alcance,omitempty"`
+	AreaAlcance   string `protobuf:"bytes,9,opt,name=area_alcance,json=areaAlcance,proto3" json:"area_alcance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReporteDocumentosResponse) Reset() {
+	*x = ReporteDocumentosResponse{}
+	mi := &file_documentos_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReporteDocumentosResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReporteDocumentosResponse) ProtoMessage() {}
+
+func (x *ReporteDocumentosResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_documentos_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReporteDocumentosResponse.ProtoReflect.Descriptor instead.
+func (*ReporteDocumentosResponse) Descriptor() ([]byte, []int) {
+	return file_documentos_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ReporteDocumentosResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ReporteDocumentosResponse) GetPorTipoDocumento() []*ReporteDocConteo {
+	if x != nil {
+		return x.PorTipoDocumento
+	}
+	return nil
+}
+
+func (x *ReporteDocumentosResponse) GetPorTipoTramite() []*ReporteDocConteo {
+	if x != nil {
+		return x.PorTipoTramite
+	}
+	return nil
+}
+
+func (x *ReporteDocumentosResponse) GetSerie() []*ReporteDocConteo {
+	if x != nil {
+		return x.Serie
+	}
+	return nil
+}
+
+func (x *ReporteDocumentosResponse) GetGranularidad() string {
+	if x != nil {
+		return x.Granularidad
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosResponse) GetRegistrosPorUsuario() []*ReporteDocConteo {
+	if x != nil {
+		return x.RegistrosPorUsuario
+	}
+	return nil
+}
+
+func (x *ReporteDocumentosResponse) GetGenerado() string {
+	if x != nil {
+		return x.Generado
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosResponse) GetAlcance() string {
+	if x != nil {
+		return x.Alcance
+	}
+	return ""
+}
+
+func (x *ReporteDocumentosResponse) GetAreaAlcance() string {
+	if x != nil {
+		return x.AreaAlcance
+	}
+	return ""
+}
+
 var File_documentos_service_proto protoreflect.FileDescriptor
 
 const file_documentos_service_proto_rawDesc = "" +
@@ -690,14 +933,34 @@ const file_documentos_service_proto_rawDesc = "" +
 	"\x16DeleteDocumentoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"3\n" +
 	"\x17DeleteDocumentoResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xd2\x03\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xba\x01\n" +
+	"\x18ReporteDocumentosRequest\x12\x14\n" +
+	"\x05desde\x18\x01 \x01(\tR\x05desde\x12\x14\n" +
+	"\x05hasta\x18\x02 \x01(\tR\x05hasta\x12!\n" +
+	"\ftipo_tramite\x18\x03 \x01(\tR\vtipoTramite\x12\"\n" +
+	"\fgranularidad\x18\x04 \x01(\tR\fgranularidad\x12+\n" +
+	"\x11incluir_registros\x18\x05 \x01(\bR\x10incluirRegistros\"D\n" +
+	"\x10ReporteDocConteo\x12\x14\n" +
+	"\x05clave\x18\x01 \x01(\tR\x05clave\x12\x1a\n" +
+	"\bcantidad\x18\x02 \x01(\x05R\bcantidad\"\xc8\x03\n" +
+	"\x19ReporteDocumentosResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12J\n" +
+	"\x12por_tipo_documento\x18\x02 \x03(\v2\x1c.documentos.ReporteDocConteoR\x10porTipoDocumento\x12F\n" +
+	"\x10por_tipo_tramite\x18\x03 \x03(\v2\x1c.documentos.ReporteDocConteoR\x0eporTipoTramite\x122\n" +
+	"\x05serie\x18\x04 \x03(\v2\x1c.documentos.ReporteDocConteoR\x05serie\x12\"\n" +
+	"\fgranularidad\x18\x05 \x01(\tR\fgranularidad\x12P\n" +
+	"\x15registros_por_usuario\x18\x06 \x03(\v2\x1c.documentos.ReporteDocConteoR\x13registrosPorUsuario\x12\x1a\n" +
+	"\bgenerado\x18\a \x01(\tR\bgenerado\x12\x18\n" +
+	"\aalcance\x18\b \x01(\tR\aalcance\x12!\n" +
+	"\farea_alcance\x18\t \x01(\tR\vareaAlcance2\xb4\x04\n" +
 	"\n" +
 	"Documentos\x12Z\n" +
 	"\x0fUploadDocumento\x12\".documentos.UploadDocumentoRequest\x1a#.documentos.UploadDocumentoResponse\x12Q\n" +
 	"\fGetDocumento\x12\x1f.documentos.GetDocumentoRequest\x1a .documentos.GetDocumentoResponse\x12`\n" +
 	"\x11DownloadDocumento\x12$.documentos.DownloadDocumentoRequest\x1a%.documentos.DownloadDocumentoResponse\x12W\n" +
 	"\x0eListDocumentos\x12!.documentos.ListDocumentosRequest\x1a\".documentos.ListDocumentosResponse\x12Z\n" +
-	"\x0fDeleteDocumento\x12\".documentos.DeleteDocumentoRequest\x1a#.documentos.DeleteDocumentoResponseB\x0eZ\f./documentosb\x06proto3"
+	"\x0fDeleteDocumento\x12\".documentos.DeleteDocumentoRequest\x1a#.documentos.DeleteDocumentoResponse\x12`\n" +
+	"\x11ReporteDocumentos\x12$.documentos.ReporteDocumentosRequest\x1a%.documentos.ReporteDocumentosResponseB\x0eZ\f./documentosb\x06proto3"
 
 var (
 	file_documentos_service_proto_rawDescOnce sync.Once
@@ -711,7 +974,7 @@ func file_documentos_service_proto_rawDescGZIP() []byte {
 	return file_documentos_service_proto_rawDescData
 }
 
-var file_documentos_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_documentos_service_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_documentos_service_proto_goTypes = []any{
 	(*Documento)(nil),                 // 0: documentos.Documento
 	(*UploadDocumentoRequest)(nil),    // 1: documentos.UploadDocumentoRequest
@@ -724,27 +987,36 @@ var file_documentos_service_proto_goTypes = []any{
 	(*ListDocumentosResponse)(nil),    // 8: documentos.ListDocumentosResponse
 	(*DeleteDocumentoRequest)(nil),    // 9: documentos.DeleteDocumentoRequest
 	(*DeleteDocumentoResponse)(nil),   // 10: documentos.DeleteDocumentoResponse
+	(*ReporteDocumentosRequest)(nil),  // 11: documentos.ReporteDocumentosRequest
+	(*ReporteDocConteo)(nil),          // 12: documentos.ReporteDocConteo
+	(*ReporteDocumentosResponse)(nil), // 13: documentos.ReporteDocumentosResponse
 }
 var file_documentos_service_proto_depIdxs = []int32{
 	0,  // 0: documentos.UploadDocumentoResponse.documento:type_name -> documentos.Documento
 	0,  // 1: documentos.GetDocumentoResponse.documento:type_name -> documentos.Documento
 	0,  // 2: documentos.DownloadDocumentoResponse.documento:type_name -> documentos.Documento
 	0,  // 3: documentos.ListDocumentosResponse.documentos:type_name -> documentos.Documento
-	1,  // 4: documentos.Documentos.UploadDocumento:input_type -> documentos.UploadDocumentoRequest
-	3,  // 5: documentos.Documentos.GetDocumento:input_type -> documentos.GetDocumentoRequest
-	5,  // 6: documentos.Documentos.DownloadDocumento:input_type -> documentos.DownloadDocumentoRequest
-	7,  // 7: documentos.Documentos.ListDocumentos:input_type -> documentos.ListDocumentosRequest
-	9,  // 8: documentos.Documentos.DeleteDocumento:input_type -> documentos.DeleteDocumentoRequest
-	2,  // 9: documentos.Documentos.UploadDocumento:output_type -> documentos.UploadDocumentoResponse
-	4,  // 10: documentos.Documentos.GetDocumento:output_type -> documentos.GetDocumentoResponse
-	6,  // 11: documentos.Documentos.DownloadDocumento:output_type -> documentos.DownloadDocumentoResponse
-	8,  // 12: documentos.Documentos.ListDocumentos:output_type -> documentos.ListDocumentosResponse
-	10, // 13: documentos.Documentos.DeleteDocumento:output_type -> documentos.DeleteDocumentoResponse
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	12, // 4: documentos.ReporteDocumentosResponse.por_tipo_documento:type_name -> documentos.ReporteDocConteo
+	12, // 5: documentos.ReporteDocumentosResponse.por_tipo_tramite:type_name -> documentos.ReporteDocConteo
+	12, // 6: documentos.ReporteDocumentosResponse.serie:type_name -> documentos.ReporteDocConteo
+	12, // 7: documentos.ReporteDocumentosResponse.registros_por_usuario:type_name -> documentos.ReporteDocConteo
+	1,  // 8: documentos.Documentos.UploadDocumento:input_type -> documentos.UploadDocumentoRequest
+	3,  // 9: documentos.Documentos.GetDocumento:input_type -> documentos.GetDocumentoRequest
+	5,  // 10: documentos.Documentos.DownloadDocumento:input_type -> documentos.DownloadDocumentoRequest
+	7,  // 11: documentos.Documentos.ListDocumentos:input_type -> documentos.ListDocumentosRequest
+	9,  // 12: documentos.Documentos.DeleteDocumento:input_type -> documentos.DeleteDocumentoRequest
+	11, // 13: documentos.Documentos.ReporteDocumentos:input_type -> documentos.ReporteDocumentosRequest
+	2,  // 14: documentos.Documentos.UploadDocumento:output_type -> documentos.UploadDocumentoResponse
+	4,  // 15: documentos.Documentos.GetDocumento:output_type -> documentos.GetDocumentoResponse
+	6,  // 16: documentos.Documentos.DownloadDocumento:output_type -> documentos.DownloadDocumentoResponse
+	8,  // 17: documentos.Documentos.ListDocumentos:output_type -> documentos.ListDocumentosResponse
+	10, // 18: documentos.Documentos.DeleteDocumento:output_type -> documentos.DeleteDocumentoResponse
+	13, // 19: documentos.Documentos.ReporteDocumentos:output_type -> documentos.ReporteDocumentosResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_documentos_service_proto_init() }
@@ -758,7 +1030,7 @@ func file_documentos_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_documentos_service_proto_rawDesc), len(file_documentos_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

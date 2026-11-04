@@ -73,7 +73,7 @@ func (l *GetEstudiantesBasicLogic) GetEstudiantesBasic(in *estudiantes.GetEstudi
 
 	items := make([]*estudiantes.EstudianteBasico, 0, len(found))
 	for _, item := range found {
-		items = append(items, toProtoBasic(item))
+		items = append(items, basicoParaLlamador(l.ctx, item))
 	}
 	return &estudiantes.GetEstudiantesBasicResponse{Estudiantes: items}, nil
 }

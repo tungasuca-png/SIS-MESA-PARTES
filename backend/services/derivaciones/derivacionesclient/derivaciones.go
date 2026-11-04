@@ -14,18 +14,23 @@ import (
 )
 
 type (
-	CrearDerivacionRequest   = derivaciones.CrearDerivacionRequest
-	CrearDerivacionResponse  = derivaciones.CrearDerivacionResponse
-	Derivacion               = derivaciones.Derivacion
-	GetDerivacionRequest     = derivaciones.GetDerivacionRequest
-	GetDerivacionResponse    = derivaciones.GetDerivacionResponse
-	ListDerivacionesRequest  = derivaciones.ListDerivacionesRequest
-	ListDerivacionesResponse = derivaciones.ListDerivacionesResponse
+	CrearDerivacionRequest      = derivaciones.CrearDerivacionRequest
+	CrearDerivacionResponse     = derivaciones.CrearDerivacionResponse
+	Derivacion                  = derivaciones.Derivacion
+	GetDerivacionRequest        = derivaciones.GetDerivacionRequest
+	GetDerivacionResponse       = derivaciones.GetDerivacionResponse
+	ListDerivacionesRequest     = derivaciones.ListDerivacionesRequest
+	ListDerivacionesResponse    = derivaciones.ListDerivacionesResponse
+	ReporteDerivConteo          = derivaciones.ReporteDerivConteo
+	ReporteDerivFlujo           = derivaciones.ReporteDerivFlujo
+	ReporteDerivacionesRequest  = derivaciones.ReporteDerivacionesRequest
+	ReporteDerivacionesResponse = derivaciones.ReporteDerivacionesResponse
 
 	Derivaciones interface {
 		CrearDerivacion(ctx context.Context, in *CrearDerivacionRequest, opts ...grpc.CallOption) (*CrearDerivacionResponse, error)
 		GetDerivacion(ctx context.Context, in *GetDerivacionRequest, opts ...grpc.CallOption) (*GetDerivacionResponse, error)
 		ListDerivaciones(ctx context.Context, in *ListDerivacionesRequest, opts ...grpc.CallOption) (*ListDerivacionesResponse, error)
+		ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error)
 	}
 
 	defaultDerivaciones struct {
@@ -52,4 +57,9 @@ func (m *defaultDerivaciones) GetDerivacion(ctx context.Context, in *GetDerivaci
 func (m *defaultDerivaciones) ListDerivaciones(ctx context.Context, in *ListDerivacionesRequest, opts ...grpc.CallOption) (*ListDerivacionesResponse, error) {
 	client := derivaciones.NewDerivacionesClient(m.cli.Conn())
 	return client.ListDerivaciones(ctx, in, opts...)
+}
+
+func (m *defaultDerivaciones) ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error) {
+	client := derivaciones.NewDerivacionesClient(m.cli.Conn())
+	return client.ReporteDerivaciones(ctx, in, opts...)
 }

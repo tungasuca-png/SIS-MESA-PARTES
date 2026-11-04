@@ -22,8 +22,9 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const login = useCallback(async (dni, password) => {
-        const data = await loginRequest(dni, password);
+    // Guarda una sesión emitida por Auth (login con DNI o acceso con Google:
+    // misma forma de respuesta) y carga los permisos reales.
+    const iniciarSesion = useCallback(async (data) => {
         const userData = {
             id: data.user_id,
             username: data.username,
@@ -41,6 +42,8 @@ export function AuthProvider({ children }) {
 
         return userData;
     }, []);
+
+    const login = useCallback(async (dni, password) => iniciarSesion(await loginRequest(dni, password)), [iniciarSesion]);
 
     const logout = useCallback(async () => {
         const session = getSession();
@@ -122,6 +125,7 @@ export function AuthProvider({ children }) {
                 isAuthenticated,
                 loading,
                 login,
+                iniciarSesion,
                 logout,
             }}
         >

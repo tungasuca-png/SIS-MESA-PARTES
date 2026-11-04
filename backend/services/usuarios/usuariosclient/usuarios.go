@@ -14,24 +14,30 @@ import (
 )
 
 type (
-	GetUsuarioBasicRequest    = usuarios.GetUsuarioBasicRequest
-	GetUsuarioBasicResponse   = usuarios.GetUsuarioBasicResponse
-	GetUsuarioRequest         = usuarios.GetUsuarioRequest
-	GetUsuarioResponse        = usuarios.GetUsuarioResponse
-	GetUsuariosBasicRequest   = usuarios.GetUsuariosBasicRequest
-	GetUsuariosBasicResponse  = usuarios.GetUsuariosBasicResponse
-	ListUsuariosRequest       = usuarios.ListUsuariosRequest
-	ListUsuariosResponse      = usuarios.ListUsuariosResponse
-	SearchUsuariosRequest     = usuarios.SearchUsuariosRequest
-	SearchUsuariosResponse    = usuarios.SearchUsuariosResponse
-	UpsertUsuarioRequest      = usuarios.UpsertUsuarioRequest
-	UpsertUsuarioResponse     = usuarios.UpsertUsuarioResponse
-	UpdateMyProfileRequest    = usuarios.UpdateMyProfileRequest
-	UpdateMyProfileResponse   = usuarios.UpdateMyProfileResponse
-	UpdateUsuarioRoleRequest  = usuarios.UpdateUsuarioRoleRequest
-	UpdateUsuarioRoleResponse = usuarios.UpdateUsuarioRoleResponse
-	Usuario                   = usuarios.Usuario
-	UsuarioBasic              = usuarios.UsuarioBasic
+	CreateMyProfileRequest          = usuarios.CreateMyProfileRequest
+	CreateMyProfileResponse         = usuarios.CreateMyProfileResponse
+	GetUsuarioBasicRequest          = usuarios.GetUsuarioBasicRequest
+	GetUsuarioBasicResponse         = usuarios.GetUsuarioBasicResponse
+	GetUsuarioRequest               = usuarios.GetUsuarioRequest
+	GetUsuarioResponse              = usuarios.GetUsuarioResponse
+	GetUsuariosBasicRequest         = usuarios.GetUsuariosBasicRequest
+	GetUsuariosBasicResponse        = usuarios.GetUsuariosBasicResponse
+	ListUsuariosRequest             = usuarios.ListUsuariosRequest
+	ListUsuariosResponse            = usuarios.ListUsuariosResponse
+	SearchUsuariosRequest           = usuarios.SearchUsuariosRequest
+	SearchUsuariosResponse          = usuarios.SearchUsuariosResponse
+	UpdateMyProfileRequest          = usuarios.UpdateMyProfileRequest
+	UpdateMyProfileResponse         = usuarios.UpdateMyProfileResponse
+	UpdateUsuarioRoleRequest        = usuarios.UpdateUsuarioRoleRequest
+	UpdateUsuarioRoleResponse       = usuarios.UpdateUsuarioRoleResponse
+	VerifiedDniRequest              = usuarios.VerifiedDniRequest
+	VerifiedDniResponse             = usuarios.VerifiedDniResponse
+	PublicRegistrationReadyRequest  = usuarios.PublicRegistrationReadyRequest
+	PublicRegistrationReadyResponse = usuarios.PublicRegistrationReadyResponse
+	UpsertUsuarioRequest            = usuarios.UpsertUsuarioRequest
+	UpsertUsuarioResponse           = usuarios.UpsertUsuarioResponse
+	Usuario                         = usuarios.Usuario
+	UsuarioBasic                    = usuarios.UsuarioBasic
 
 	Usuarios interface {
 		GetUsuario(ctx context.Context, in *GetUsuarioRequest, opts ...grpc.CallOption) (*GetUsuarioResponse, error)
@@ -41,7 +47,11 @@ type (
 		SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 		UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
 		UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
+		CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error)
 		UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error)
+		AssignVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error)
+		PublicRegistrationReady(ctx context.Context, in *PublicRegistrationReadyRequest, opts ...grpc.CallOption) (*PublicRegistrationReadyResponse, error)
+		RevertVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error)
 	}
 
 	defaultUsuarios struct {
@@ -90,7 +100,27 @@ func (m *defaultUsuarios) UpdateMyProfile(ctx context.Context, in *UpdateMyProfi
 	return client.UpdateMyProfile(ctx, in, opts...)
 }
 
+func (m *defaultUsuarios) CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.CreateMyProfile(ctx, in, opts...)
+}
+
 func (m *defaultUsuarios) UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error) {
 	client := usuarios.NewUsuariosClient(m.cli.Conn())
 	return client.UpdateUsuarioRole(ctx, in, opts...)
+}
+
+func (m *defaultUsuarios) AssignVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.AssignVerifiedDni(ctx, in, opts...)
+}
+
+func (m *defaultUsuarios) RevertVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.RevertVerifiedDni(ctx, in, opts...)
+}
+
+func (m *defaultUsuarios) PublicRegistrationReady(ctx context.Context, in *PublicRegistrationReadyRequest, opts ...grpc.CallOption) (*PublicRegistrationReadyResponse, error) {
+	client := usuarios.NewUsuariosClient(m.cli.Conn())
+	return client.PublicRegistrationReady(ctx, in, opts...)
 }

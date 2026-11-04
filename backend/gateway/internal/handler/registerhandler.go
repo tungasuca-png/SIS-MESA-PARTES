@@ -6,26 +6,21 @@ package handler
 import (
 	"net/http"
 
-	"gateway/internal/logic"
 	"gateway/internal/svc"
-	"gateway/internal/types"
+
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.RegisterRequest
-		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-			return
-		}
+// MensajeRegistroDeshabilitado: este contrato antiguo (usuario, clave y rol)
+// se retiró; los solicitantes se registran con Google o con su correo
+// verificado (POST /api/auth/registro), o reciben sus credenciales de la
+// institución.
+const MensajeRegistroDeshabilitado = "Este método de registro fue deshabilitado. Usa «Continuar con Google» o «Crear cuenta con correo» en la pantalla de inicio de sesión."
 
-		l := logic.NewRegisterLogic(r.Context(), svcCtx)
-		resp, err := l.Register(&req)
-		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
-		}
+// RegisterHandler: POST /api/auth/register responde 410 Gone sin llamar a
+// ningún servicio. No elimina usuarios ni datos existentes.
+func RegisterHandler(_ *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		httpx.WriteJsonCtx(r.Context(), w, http.StatusGone, map[string]string{"message": MensajeRegistroDeshabilitado})
 	}
 }

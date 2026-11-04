@@ -16,7 +16,16 @@ function SolicitanteNombre({ id, usuarios, unavailable }) {
 
     const resuelto = usuarios?.get(id);
     if (resuelto) {
-        return <span title={id}>{resuelto.nombre_completo}</span>;
+        return (
+            <span title={id}>
+                {resuelto.nombre_completo}
+                {resuelto.identidad_pendiente && (
+                    <span className="dp-identidad-pendiente" title="El DNI declarado todavía no fue verificado por la institución">
+                        Identidad no verificada
+                    </span>
+                )}
+            </span>
+        );
     }
 
     if (usuarios?.has(id)) {

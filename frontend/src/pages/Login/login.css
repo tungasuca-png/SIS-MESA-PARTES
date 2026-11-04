@@ -376,3 +376,235 @@
         font-size: 16px;
     }
 }
+
+/* ============================================
+   ACCESO CON GOOGLE (solo solicitantes)
+   ============================================ */
+
+.login-separador {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 12px;
+    font-size: 12px;
+    color: var(--login-muted);
+}
+
+.login-separador::before,
+.login-separador::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--login-border);
+}
+
+.login-google {
+    width: 100%;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--login-border);
+    border-radius: 8px;
+    background: var(--login-surface);
+    color: var(--login-text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-google:hover {
+    background: #f8fafc;
+    border-color: #cbd2dc;
+}
+
+.login-google:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--login-accent-soft), 0 0 0 1px var(--login-accent);
+}
+
+.login-google.is-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.login-google-nota {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--login-muted);
+}
+
+/* Enlace con apariencia de botón principal (pantallas de Google). */
+.login-button--enlace {
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.login-estado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 8px 0 4px;
+    font-size: 14px;
+    color: var(--login-muted);
+}
+
+.login-spinner--oscuro {
+    border-color: rgba(11, 61, 145, 0.2);
+    border-top-color: var(--login-accent);
+}
+
+/* Formulario obligatorio del registro con Google. */
+.login-card--registro {
+    max-width: 560px;
+}
+
+.registro-correo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--login-border);
+    border-radius: 8px;
+    background: #f8fafc;
+    font-size: 12.5px;
+    color: var(--login-muted);
+    overflow-wrap: anywhere;
+}
+
+.registro-correo strong {
+    font-size: 14px;
+    color: var(--login-text);
+}
+
+.registro-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 14px;
+}
+
+.registro-grid .input-box input {
+    padding-left: 12px;
+}
+
+.registro-obligatorio {
+    color: var(--login-danger);
+}
+
+.registro-error-campo {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--login-danger);
+}
+
+@media (max-width: 560px) {
+    .registro-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ---- Registro manual con verificación del correo ---- */
+.registro-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 4px 0 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--login-text);
+    cursor: pointer;
+}
+
+.registro-check input {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    flex: none;
+    accent-color: var(--login-accent);
+}
+
+.registro-check a {
+    color: var(--login-accent);
+    font-weight: 600;
+}
+
+.registro-check--suave {
+    margin-top: -4px;
+    color: var(--login-muted);
+}
+
+.registro-aviso {
+    padding: 9px 11px;
+    margin: 2px 0 14px;
+    background: #ecfdf3;
+    border: 1px solid #abefc6;
+    border-radius: 8px;
+    color: #067647;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.registro-aviso p {
+    margin: 0;
+}
+
+.input-box input.codigo-verificacion {
+    padding-left: 12px;
+    text-align: center;
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.45em;
+}
+
+.registro-temporizador {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--login-muted);
+}
+
+.login-enlace-boton {
+    display: block;
+    width: 100%;
+    margin: 10px 0 0;
+    padding: 8px;
+    background: none;
+    border: 0;
+    color: var(--login-accent);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-enlace-boton:disabled {
+    color: var(--login-muted);
+    font-weight: 500;
+    cursor: default;
+}
+
+.login-enlace-boton:not(:disabled):hover,
+.login-help a:hover {
+    text-decoration: underline;
+}
+
+.login-help a {
+    color: var(--login-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.registro-nota {
+    margin: 0 0 12px;
+    padding: 8px 11px;
+    background: var(--login-accent-soft);
+    border-radius: 8px;
+    color: var(--login-text);
+    font-size: 12.5px;
+    line-height: 1.45;
+}

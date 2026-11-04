@@ -19,14 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Usuarios_GetUsuario_FullMethodName        = "/usuarios.Usuarios/GetUsuario"
-	Usuarios_GetUsuarioBasic_FullMethodName   = "/usuarios.Usuarios/GetUsuarioBasic"
-	Usuarios_GetUsuariosBasic_FullMethodName  = "/usuarios.Usuarios/GetUsuariosBasic"
-	Usuarios_ListUsuarios_FullMethodName      = "/usuarios.Usuarios/ListUsuarios"
-	Usuarios_SearchUsuarios_FullMethodName    = "/usuarios.Usuarios/SearchUsuarios"
-	Usuarios_UpsertUsuario_FullMethodName     = "/usuarios.Usuarios/UpsertUsuario"
-	Usuarios_UpdateMyProfile_FullMethodName   = "/usuarios.Usuarios/UpdateMyProfile"
-	Usuarios_UpdateUsuarioRole_FullMethodName = "/usuarios.Usuarios/UpdateUsuarioRole"
+	Usuarios_GetUsuario_FullMethodName              = "/usuarios.Usuarios/GetUsuario"
+	Usuarios_GetUsuarioBasic_FullMethodName         = "/usuarios.Usuarios/GetUsuarioBasic"
+	Usuarios_GetUsuariosBasic_FullMethodName        = "/usuarios.Usuarios/GetUsuariosBasic"
+	Usuarios_ListUsuarios_FullMethodName            = "/usuarios.Usuarios/ListUsuarios"
+	Usuarios_SearchUsuarios_FullMethodName          = "/usuarios.Usuarios/SearchUsuarios"
+	Usuarios_UpsertUsuario_FullMethodName           = "/usuarios.Usuarios/UpsertUsuario"
+	Usuarios_UpdateMyProfile_FullMethodName         = "/usuarios.Usuarios/UpdateMyProfile"
+	Usuarios_CreateMyProfile_FullMethodName         = "/usuarios.Usuarios/CreateMyProfile"
+	Usuarios_UpdateUsuarioRole_FullMethodName       = "/usuarios.Usuarios/UpdateUsuarioRole"
+	Usuarios_AssignVerifiedDni_FullMethodName       = "/usuarios.Usuarios/AssignVerifiedDni"
+	Usuarios_PublicRegistrationReady_FullMethodName = "/usuarios.Usuarios/PublicRegistrationReady"
+	Usuarios_RevertVerifiedDni_FullMethodName       = "/usuarios.Usuarios/RevertVerifiedDni"
 )
 
 // UsuariosClient is the client API for Usuarios service.
@@ -40,7 +44,11 @@ type UsuariosClient interface {
 	SearchUsuarios(ctx context.Context, in *SearchUsuariosRequest, opts ...grpc.CallOption) (*SearchUsuariosResponse, error)
 	UpsertUsuario(ctx context.Context, in *UpsertUsuarioRequest, opts ...grpc.CallOption) (*UpsertUsuarioResponse, error)
 	UpdateMyProfile(ctx context.Context, in *UpdateMyProfileRequest, opts ...grpc.CallOption) (*UpdateMyProfileResponse, error)
+	CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error)
 	UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error)
+	AssignVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error)
+	PublicRegistrationReady(ctx context.Context, in *PublicRegistrationReadyRequest, opts ...grpc.CallOption) (*PublicRegistrationReadyResponse, error)
+	RevertVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error)
 }
 
 type usuariosClient struct {
@@ -121,10 +129,50 @@ func (c *usuariosClient) UpdateMyProfile(ctx context.Context, in *UpdateMyProfil
 	return out, nil
 }
 
+func (c *usuariosClient) CreateMyProfile(ctx context.Context, in *CreateMyProfileRequest, opts ...grpc.CallOption) (*CreateMyProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateMyProfileResponse)
+	err := c.cc.Invoke(ctx, Usuarios_CreateMyProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *usuariosClient) UpdateUsuarioRole(ctx context.Context, in *UpdateUsuarioRoleRequest, opts ...grpc.CallOption) (*UpdateUsuarioRoleResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateUsuarioRoleResponse)
 	err := c.cc.Invoke(ctx, Usuarios_UpdateUsuarioRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usuariosClient) AssignVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifiedDniResponse)
+	err := c.cc.Invoke(ctx, Usuarios_AssignVerifiedDni_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usuariosClient) PublicRegistrationReady(ctx context.Context, in *PublicRegistrationReadyRequest, opts ...grpc.CallOption) (*PublicRegistrationReadyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublicRegistrationReadyResponse)
+	err := c.cc.Invoke(ctx, Usuarios_PublicRegistrationReady_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usuariosClient) RevertVerifiedDni(ctx context.Context, in *VerifiedDniRequest, opts ...grpc.CallOption) (*VerifiedDniResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifiedDniResponse)
+	err := c.cc.Invoke(ctx, Usuarios_RevertVerifiedDni_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +190,11 @@ type UsuariosServer interface {
 	SearchUsuarios(context.Context, *SearchUsuariosRequest) (*SearchUsuariosResponse, error)
 	UpsertUsuario(context.Context, *UpsertUsuarioRequest) (*UpsertUsuarioResponse, error)
 	UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error)
+	CreateMyProfile(context.Context, *CreateMyProfileRequest) (*CreateMyProfileResponse, error)
 	UpdateUsuarioRole(context.Context, *UpdateUsuarioRoleRequest) (*UpdateUsuarioRoleResponse, error)
+	AssignVerifiedDni(context.Context, *VerifiedDniRequest) (*VerifiedDniResponse, error)
+	PublicRegistrationReady(context.Context, *PublicRegistrationReadyRequest) (*PublicRegistrationReadyResponse, error)
+	RevertVerifiedDni(context.Context, *VerifiedDniRequest) (*VerifiedDniResponse, error)
 	mustEmbedUnimplementedUsuariosServer()
 }
 
@@ -174,8 +226,20 @@ func (UnimplementedUsuariosServer) UpsertUsuario(context.Context, *UpsertUsuario
 func (UnimplementedUsuariosServer) UpdateMyProfile(context.Context, *UpdateMyProfileRequest) (*UpdateMyProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMyProfile not implemented")
 }
+func (UnimplementedUsuariosServer) CreateMyProfile(context.Context, *CreateMyProfileRequest) (*CreateMyProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateMyProfile not implemented")
+}
 func (UnimplementedUsuariosServer) UpdateUsuarioRole(context.Context, *UpdateUsuarioRoleRequest) (*UpdateUsuarioRoleResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUsuarioRole not implemented")
+}
+func (UnimplementedUsuariosServer) AssignVerifiedDni(context.Context, *VerifiedDniRequest) (*VerifiedDniResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AssignVerifiedDni not implemented")
+}
+func (UnimplementedUsuariosServer) PublicRegistrationReady(context.Context, *PublicRegistrationReadyRequest) (*PublicRegistrationReadyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PublicRegistrationReady not implemented")
+}
+func (UnimplementedUsuariosServer) RevertVerifiedDni(context.Context, *VerifiedDniRequest) (*VerifiedDniResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevertVerifiedDni not implemented")
 }
 func (UnimplementedUsuariosServer) mustEmbedUnimplementedUsuariosServer() {}
 func (UnimplementedUsuariosServer) testEmbeddedByValue()                  {}
@@ -324,6 +388,24 @@ func _Usuarios_UpdateMyProfile_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Usuarios_CreateMyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMyProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).CreateMyProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_CreateMyProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).CreateMyProfile(ctx, req.(*CreateMyProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Usuarios_UpdateUsuarioRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateUsuarioRoleRequest)
 	if err := dec(in); err != nil {
@@ -338,6 +420,60 @@ func _Usuarios_UpdateUsuarioRole_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsuariosServer).UpdateUsuarioRole(ctx, req.(*UpdateUsuarioRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Usuarios_AssignVerifiedDni_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifiedDniRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).AssignVerifiedDni(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_AssignVerifiedDni_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).AssignVerifiedDni(ctx, req.(*VerifiedDniRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Usuarios_PublicRegistrationReady_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublicRegistrationReadyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).PublicRegistrationReady(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_PublicRegistrationReady_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).PublicRegistrationReady(ctx, req.(*PublicRegistrationReadyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Usuarios_RevertVerifiedDni_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifiedDniRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsuariosServer).RevertVerifiedDni(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Usuarios_RevertVerifiedDni_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsuariosServer).RevertVerifiedDni(ctx, req.(*VerifiedDniRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -378,8 +514,24 @@ var Usuarios_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Usuarios_UpdateMyProfile_Handler,
 		},
 		{
+			MethodName: "CreateMyProfile",
+			Handler:    _Usuarios_CreateMyProfile_Handler,
+		},
+		{
 			MethodName: "UpdateUsuarioRole",
 			Handler:    _Usuarios_UpdateUsuarioRole_Handler,
+		},
+		{
+			MethodName: "AssignVerifiedDni",
+			Handler:    _Usuarios_AssignVerifiedDni_Handler,
+		},
+		{
+			MethodName: "PublicRegistrationReady",
+			Handler:    _Usuarios_PublicRegistrationReady_Handler,
+		},
+		{
+			MethodName: "RevertVerifiedDni",
+			Handler:    _Usuarios_RevertVerifiedDni_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

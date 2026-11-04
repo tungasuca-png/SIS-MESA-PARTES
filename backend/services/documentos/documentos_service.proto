@@ -66,10 +66,43 @@ message DeleteDocumentoResponse {
   bool success = 1;
 }
 
+// ReporteDocumentos (Reportes, Fase 2): conteos AGREGADOS de documentos
+// ACTIVOS (adjuntos, proveídos, actas...) de expedientes ACTIVOS y visibles
+// para el usuario. Exige "reportes.view". Fecha usada: fecha de registro del
+// documento (hora de Lima). Sin nombres de archivo ni contenido.
+message ReporteDocumentosRequest {
+  string desde = 1;
+  string hasta = 2;
+  string tipo_tramite = 3;
+  string granularidad = 4;
+  // Solo para el reporte de actividad del Gateway (agrupa por rol).
+  bool incluir_registros = 5;
+}
+
+message ReporteDocConteo {
+  string clave = 1;
+  int32 cantidad = 2;
+}
+
+message ReporteDocumentosResponse {
+  int32 total = 1;
+  repeated ReporteDocConteo por_tipo_documento = 2;
+  repeated ReporteDocConteo por_tipo_tramite = 3;
+  repeated ReporteDocConteo serie = 4;
+  string granularidad = 5;
+  // Solo con incluir_registros: clave = ID del usuario que subió.
+  repeated ReporteDocConteo registros_por_usuario = 6;
+  string generado = 7;
+  // Alcance aplicado (lo informa Expedientes): INSTITUCION o AREA.
+  string alcance = 8;
+  string area_alcance = 9;
+}
+
 service Documentos {
   rpc UploadDocumento(UploadDocumentoRequest) returns (UploadDocumentoResponse);
   rpc GetDocumento(GetDocumentoRequest) returns (GetDocumentoResponse);
   rpc DownloadDocumento(DownloadDocumentoRequest) returns (DownloadDocumentoResponse);
   rpc ListDocumentos(ListDocumentosRequest) returns (ListDocumentosResponse);
   rpc DeleteDocumento(DeleteDocumentoRequest) returns (DeleteDocumentoResponse);
+  rpc ReporteDocumentos(ReporteDocumentosRequest) returns (ReporteDocumentosResponse);
 }

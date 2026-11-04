@@ -17,6 +17,11 @@ message Usuario {
   bool activo = 9;
   string created_at = 10;
   string updated_at = 11;
+  // DNI declarado en el registro público (sin verificar). Vacío para las
+  // cuentas institucionales y los solicitantes ya verificados.
+  string dni_declarado = 12;
+  // El solicitante declaró un DNI que Secretaría todavía no verificó.
+  bool identidad_pendiente = 13;
 }
 
 // Proyección mínima pensada para resolver identificadores en otros módulos
@@ -31,6 +36,8 @@ message UsuarioBasic {
   string nombre_completo = 4;
   string tipo_usuario = 5;
   string dni = 6;
+  // Marca "Identidad no verificada" (no expone el DNI declarado).
+  bool identidad_pendiente = 7;
 }
 
 message GetUsuarioRequest {
@@ -107,6 +114,34 @@ message UpsertUsuarioResponse {
 // el propio usuario puede tocar sobre sí mismo (ver Paso 22D/22B):
 // nombres, apellidos, DNI, tipo_usuario y activo permanecen fuera de este
 // RPC (edición administrativa, no implementada todavía).
+// Autoperfil del SOLICITANTE que se registró con Google. El id sale del JWT
+// (nunca de la solicitud) y el tipo es siempre SOLICITANTE (rol firmado en el
+// token). Solo crea el perfil si no existe: un reintento devuelve el existente
+// (created = false) y nunca sobrescribe datos. DNI duplicado -> AlreadyExists.
+message CreateMyProfileRequest {
+  string nombres = 1;
+  string apellidos = 2;
+  string dni = 3;
+  string telefono = 4;
+  string correo = 5;
+  string direccion = 6;
+  // Registro público: DNI DECLARADO (no reserva el DNI; dni debe ir vacío).
+  string dni_declarado = 7;
+}
+
+message CreateMyProfileResponse {
+  Usuario usuario = 1;
+  bool created = 2;
+}
+// Preparación para el registro público: el Gateway la consulta ANTES de que
+// Auth cree una cuenta (registro manual y Google). ready = la base responde y
+// el esquema admite perfiles con DNI declarado (migración 003). Sin sesión
+// (el registro es anónimo) y sin ningún dato: solo un booleano.
+message PublicRegistrationReadyRequest {}
+message PublicRegistrationReadyResponse {
+  bool ready = 1;
+}
+
 message UpdateMyProfileRequest {
   string telefono = 1;
   string correo = 2;
@@ -130,6 +165,16 @@ message UpdateUsuarioRoleRequest {
 message UpdateUsuarioRoleResponse {
   Usuario usuario = 1;
 }
+// Verificación de identidad por Secretaría (permiso
+// solicitantes.identidad.verify): pasa el DNI declarado al DNI definitivo del
+// perfil, o lo revierte si Auth no pudo completar la verificación.
+message VerifiedDniRequest {
+  string id = 1;
+  string dni = 2;
+}
+message VerifiedDniResponse {
+  Usuario usuario = 1;
+}
 
 service Usuarios {
   rpc GetUsuario(GetUsuarioRequest) returns (GetUsuarioResponse);
@@ -139,5 +184,9 @@ service Usuarios {
   rpc SearchUsuarios(SearchUsuariosRequest) returns (SearchUsuariosResponse);
   rpc UpsertUsuario(UpsertUsuarioRequest) returns (UpsertUsuarioResponse);
   rpc UpdateMyProfile(UpdateMyProfileRequest) returns (UpdateMyProfileResponse);
+  rpc CreateMyProfile(CreateMyProfileRequest) returns (CreateMyProfileResponse);
   rpc UpdateUsuarioRole(UpdateUsuarioRoleRequest) returns (UpdateUsuarioRoleResponse);
+  rpc AssignVerifiedDni(VerifiedDniRequest) returns (VerifiedDniResponse);
+  rpc PublicRegistrationReady(PublicRegistrationReadyRequest) returns (PublicRegistrationReadyResponse);
+  rpc RevertVerifiedDni(VerifiedDniRequest) returns (VerifiedDniResponse);
 }

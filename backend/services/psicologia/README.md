@@ -103,7 +103,29 @@ Usuarios se sustituyen por dobles que conceden permisos por `userID`. Los datos
 de prueba se eliminan al terminar (la limpieza de la bitácora la hace un
 superusuario, porque la aplicación no puede borrarla).
 
-## Dependencias pendientes
+Sin `INTEGRATION_TEST`, `go test ./...` ejecuta solo las pruebas sin base de
+datos (credencial de servicio, verificador, política de arranque, permisos). La
+prueba real de solo lectura contra Auth y Estudiantes en ejecución se activa con
+`PSICOLOGIA_E2E_REAL=true` y las credenciales de `backend/.env` en el entorno
+(opcional `E2E_ESTUDIANTE_ID`):
 
-- **Estudiantes Service** (no existe): `svc.EstudianteVerifier` es el punto de
-  extensión; mientras sea `nil` solo se valida el formato del `estudiante_id`.
+```bash
+PSICOLOGIA_E2E_REAL=true go test -run TestE2E_ -v ./internal/svc/
+```
+
+## Integración con Estudiantes (client credentials)
+
+Psicología consulta Estudiantes como **sistema consumidor** ("Servicio
+Psicologia", permiso único `estudiantes.basic.view`), con su propio token de
+servicio emitido por Auth y la operación gRPC `GetEstudiantesBasic`
+(`svc.EstudianteVerifier`: existencia del estudiante al abrir un expediente y
+nombre para la Hoja de Atención). Nunca reenvía el JWT del usuario; los permisos
+`psicologia.*` del usuario se comprueban antes.
+
+- `PSICOLOGIA_CLIENT_ID` y `PSICOLOGIA_CLIENT_SECRET` (en `backend/.env`) son
+  **obligatorias**: sin ellas Psicología no inicia.
+- Solo en desarrollo (`Mode: dev` o `test`) y con
+  `PSICOLOGIA_ALLOW_LEGACY_AUTH=true` puede arrancar sin ellas, reenviando el JWT
+  del usuario (modo anterior; el usuario necesita `estudiantes.view`).
+
+Detalle: [docs/integraciones/psicologia-estudiantes-client-credentials.md](../../../docs/integraciones/psicologia-estudiantes-client-credentials.md).

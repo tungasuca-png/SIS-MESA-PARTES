@@ -21,9 +21,16 @@ import { lazy, Suspense } from "react";
 const EstudiantesList = lazy(() => import("./pages/Estudiantes/EstudiantesList"));
 const EstudianteDetail = lazy(() => import("./pages/Estudiantes/EstudianteDetail"));
 const PeriodosSecciones = lazy(() => import("./pages/Estudiantes/PeriodosSecciones"));
+// Reportes en un chunk propio (carga al entrar a /reportes).
+const Reportes = lazy(() => import("./pages/Reportes/Reportes"));
 const cargando = <p className="dp-table-empty">Cargando...</p>;
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
+import GoogleCallback from "./pages/Login/GoogleCallback";
+import RegistroGoogle from "./pages/Login/RegistroGoogle";
+import RegistroCorreo from "./pages/Login/RegistroCorreo";
+import VerificarCorreo from "./pages/Login/VerificarCorreo";
+import IdentidadSolicitantes from "./pages/Solicitantes/IdentidadSolicitantes";
 
 function App() {
     return (
@@ -34,6 +41,17 @@ function App() {
                 path="/login"
                 element={<Login />}
             />
+
+            {/* Acceso con Google (solo solicitantes): regreso desde Google y
+                formulario obligatorio del primer registro. Públicas: la
+                sesión se crea recién al completar el registro. */}
+            <Route path="/login/google" element={<GoogleCallback />} />
+            <Route path="/registro/google" element={<RegistroGoogle />} />
+
+            {/* Registro manual con verificación del correo (solo
+                solicitantes). Públicas: la cuenta se activa al verificar. */}
+            <Route path="/registro" element={<RegistroCorreo />} />
+            <Route path="/registro/verificar" element={<VerificarCorreo />} />
 
             {/* Dashboard protegido */}
             <Route
@@ -242,6 +260,22 @@ function App() {
                 }
             />
 
+            {/* Reportes (Fase 1): "reportes.view". El backend (Expedientes
+                Service) vuelve a exigir el permiso y aplica el alcance por rol;
+                este guard solo evita montar la página sin permiso. */}
+            <Route
+                path="/reportes"
+                element={
+                    <ProtectedRoute>
+                        <PermissionRoute permission="reportes.view">
+                            <Suspense fallback={cargando}>
+                                <Reportes />
+                            </Suspense>
+                        </PermissionRoute>
+                    </ProtectedRoute>
+                }
+            />
+
             {/* Configuración → Roles y permisos (Paso 21E). El backend
                 (Auth Service, vía Gateway) sigue siendo la única autoridad
                 real sobre "roles.view" — PermissionRoute (Paso 6) es solo
@@ -271,6 +305,19 @@ function App() {
                     <ProtectedRoute>
                         <PermissionRoute permission="usuarios.view">
                             <Usuarios />
+                        </PermissionRoute>
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Verificación de identidad de solicitantes (Secretaría): el
+                permiso también lo exigen Auth y Usuarios en el backend. */}
+            <Route
+                path="/solicitantes/identidades"
+                element={
+                    <ProtectedRoute>
+                        <PermissionRoute permission="solicitantes.identidad.verify">
+                            <IdentidadSolicitantes />
                         </PermissionRoute>
                     </ProtectedRoute>
                 }

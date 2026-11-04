@@ -27,6 +27,31 @@ ServiceTokenIssuer: tungasuca-auth
 ServiceTokenAudience: estudiantes
 ServiceTokenDuration: 5m
 
+# Acceso con Google (solo SOLICITANTES). Valores en backend/.env; sin ellos el
+# acceso con Google responde "no configurado" y el login por DNI no cambia.
+Google:
+  ClientID: "${GOOGLE_CLIENT_ID}"
+  ClientSecret: "${GOOGLE_CLIENT_SECRET}"
+  RedirectURL: "${GOOGLE_REDIRECT_URL}"
+  Issuer: "${GOOGLE_OIDC_ISSUER}"
+
+# Registro manual de SOLICITANTES con verificación del correo. Sin
+# SMTP_SERVIDOR y SMTP_REMITENTE el registro manual responde "no disponible";
+# el login y Google no cambian. Credenciales solo en backend/.env.
+RegistroCorreo:
+  DuracionCodigo: 10m
+  MaxIntentos: 5
+  EsperaReenvio: 60s
+  MaxEnvios: 5
+  MaxRegistrosPorHora: 5
+  SMTP:
+    Servidor: "${SMTP_SERVIDOR}"
+    Usuario: "${SMTP_USUARIO}"
+    Clave: "${SMTP_CLAVE}"
+    Remitente: "${SMTP_REMITENTE}"
+    NombreRemitente: "${SMTP_NOMBRE_REMITENTE}"
+    Seguridad: "${SMTP_SEGURIDAD}"
+
 Middlewares:
   StatConf:
     IgnoreContentMethods:
@@ -41,3 +66,28 @@ Middlewares:
       - /auth.Auth/CreateServiceClient
       - /auth.Auth/RevokeServiceClient
       - /auth.Auth/ListServiceClients
+      # Google: códigos de autorización, verificadores PKCE, códigos de un
+      # solo uso y tokens en la solicitud o en la respuesta.
+      - /auth.Auth/GoogleStart
+      - /auth.Auth/GoogleCallback
+      - /auth.Auth/GoogleExchange
+      - /auth.Auth/GoogleRegister
+      - /auth.Auth/GoogleCompleteRegistration
+      - /auth.Auth/GoogleCancelRegistration
+      - /auth.Auth/GoogleStartLink
+      - /auth.Auth/GoogleLinkStatus
+      # Registro manual: clave, DNI, datos personales, códigos de
+      # verificación y tokens en la solicitud o en la respuesta.
+      - /auth.Auth/EmailRegister
+      - /auth.Auth/EmailResendCode
+      - /auth.Auth/EmailVerify
+      - /auth.Auth/EmailCompleteRegistration
+      - /auth.Auth/EmailCancelRegistration
+      # Identidad de solicitantes: DNI declarado en la respuesta.
+      - /auth.Auth/ListSolicitanteIdentities
+      - /auth.Auth/GetSolicitanteIdentity
+      - /auth.Auth/VerifySolicitanteIdentity
+      - /auth.Auth/RejectSolicitanteIdentity
+      - /auth.Auth/ConfirmSolicitanteIdentitySync
+      - /auth.Auth/RecordSolicitanteIdentitySyncFailure
+      - /auth.Auth/RevertSolicitanteIdentity

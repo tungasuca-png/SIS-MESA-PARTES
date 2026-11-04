@@ -37,6 +37,7 @@ const (
 	Psicologia_GetAtencionVersion_FullMethodName        = "/psicologia.Psicologia/GetAtencionVersion"
 	Psicologia_AnnulAtencion_FullMethodName             = "/psicologia.Psicologia/AnnulAtencion"
 	Psicologia_ExportAtencionPdf_FullMethodName         = "/psicologia.Psicologia/ExportAtencionPdf"
+	Psicologia_BuscarEstudiantes_FullMethodName         = "/psicologia.Psicologia/BuscarEstudiantes"
 )
 
 // PsicologiaClient is the client API for Psicologia service.
@@ -61,6 +62,7 @@ type PsicologiaClient interface {
 	GetAtencionVersion(ctx context.Context, in *GetAtencionVersionRequest, opts ...grpc.CallOption) (*AtencionResponse, error)
 	AnnulAtencion(ctx context.Context, in *AnnulAtencionRequest, opts ...grpc.CallOption) (*AtencionResponse, error)
 	ExportAtencionPdf(ctx context.Context, in *ExportAtencionPdfRequest, opts ...grpc.CallOption) (*ExportAtencionPdfResponse, error)
+	BuscarEstudiantes(ctx context.Context, in *BuscarEstudiantesRequest, opts ...grpc.CallOption) (*BuscarEstudiantesResponse, error)
 }
 
 type psicologiaClient struct {
@@ -251,6 +253,16 @@ func (c *psicologiaClient) ExportAtencionPdf(ctx context.Context, in *ExportAten
 	return out, nil
 }
 
+func (c *psicologiaClient) BuscarEstudiantes(ctx context.Context, in *BuscarEstudiantesRequest, opts ...grpc.CallOption) (*BuscarEstudiantesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BuscarEstudiantesResponse)
+	err := c.cc.Invoke(ctx, Psicologia_BuscarEstudiantes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PsicologiaServer is the server API for Psicologia service.
 // All implementations must embed UnimplementedPsicologiaServer
 // for forward compatibility.
@@ -273,6 +285,7 @@ type PsicologiaServer interface {
 	GetAtencionVersion(context.Context, *GetAtencionVersionRequest) (*AtencionResponse, error)
 	AnnulAtencion(context.Context, *AnnulAtencionRequest) (*AtencionResponse, error)
 	ExportAtencionPdf(context.Context, *ExportAtencionPdfRequest) (*ExportAtencionPdfResponse, error)
+	BuscarEstudiantes(context.Context, *BuscarEstudiantesRequest) (*BuscarEstudiantesResponse, error)
 	mustEmbedUnimplementedPsicologiaServer()
 }
 
@@ -336,6 +349,9 @@ func (UnimplementedPsicologiaServer) AnnulAtencion(context.Context, *AnnulAtenci
 }
 func (UnimplementedPsicologiaServer) ExportAtencionPdf(context.Context, *ExportAtencionPdfRequest) (*ExportAtencionPdfResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExportAtencionPdf not implemented")
+}
+func (UnimplementedPsicologiaServer) BuscarEstudiantes(context.Context, *BuscarEstudiantesRequest) (*BuscarEstudiantesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BuscarEstudiantes not implemented")
 }
 func (UnimplementedPsicologiaServer) mustEmbedUnimplementedPsicologiaServer() {}
 func (UnimplementedPsicologiaServer) testEmbeddedByValue()                    {}
@@ -682,6 +698,24 @@ func _Psicologia_ExportAtencionPdf_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Psicologia_BuscarEstudiantes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BuscarEstudiantesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PsicologiaServer).BuscarEstudiantes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Psicologia_BuscarEstudiantes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PsicologiaServer).BuscarEstudiantes(ctx, req.(*BuscarEstudiantesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Psicologia_ServiceDesc is the grpc.ServiceDesc for Psicologia service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -760,6 +794,10 @@ var Psicologia_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExportAtencionPdf",
 			Handler:    _Psicologia_ExportAtencionPdf_Handler,
+		},
+		{
+			MethodName: "BuscarEstudiantes",
+			Handler:    _Psicologia_BuscarEstudiantes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

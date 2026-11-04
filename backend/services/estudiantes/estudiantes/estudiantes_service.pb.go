@@ -7152,6 +7152,191 @@ func (x *EliminarPlantillaDatosResponse) GetEliminada() bool {
 	return false
 }
 
+// Búsqueda MÍNIMA para seleccionar un estudiante, exclusiva de sistemas
+// consumidores con "estudiantes.search.basic" (p. ej. Psicología). q admite
+// nombres, apellidos y DNI completo (8 dígitos, coincidencia exacta); nunca
+// código interno ni SIAGIE. Solo registros ACTIVO. La respuesta NO incluye
+// documento, códigos ni estados. page_size máximo 20.
+type BuscarEstudiantesSeleccionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Q             string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BuscarEstudiantesSeleccionRequest) Reset() {
+	*x = BuscarEstudiantesSeleccionRequest{}
+	mi := &file_estudiantes_service_proto_msgTypes[98]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BuscarEstudiantesSeleccionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BuscarEstudiantesSeleccionRequest) ProtoMessage() {}
+
+func (x *BuscarEstudiantesSeleccionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[98]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BuscarEstudiantesSeleccionRequest.ProtoReflect.Descriptor instead.
+func (*BuscarEstudiantesSeleccionRequest) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{98}
+}
+
+func (x *BuscarEstudiantesSeleccionRequest) GetQ() string {
+	if x != nil {
+		return x.Q
+	}
+	return ""
+}
+
+func (x *BuscarEstudiantesSeleccionRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *BuscarEstudiantesSeleccionRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type EstudianteSeleccion struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	NombreCompleto string                 `protobuf:"bytes,2,opt,name=nombre_completo,json=nombreCompleto,proto3" json:"nombre_completo,omitempty"`
+	Grado          string                 `protobuf:"bytes,3,opt,name=grado,proto3" json:"grado,omitempty"`
+	Seccion        string                 `protobuf:"bytes,4,opt,name=seccion,proto3" json:"seccion,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EstudianteSeleccion) Reset() {
+	*x = EstudianteSeleccion{}
+	mi := &file_estudiantes_service_proto_msgTypes[99]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EstudianteSeleccion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EstudianteSeleccion) ProtoMessage() {}
+
+func (x *EstudianteSeleccion) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[99]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EstudianteSeleccion.ProtoReflect.Descriptor instead.
+func (*EstudianteSeleccion) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{99}
+}
+
+func (x *EstudianteSeleccion) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *EstudianteSeleccion) GetNombreCompleto() string {
+	if x != nil {
+		return x.NombreCompleto
+	}
+	return ""
+}
+
+func (x *EstudianteSeleccion) GetGrado() string {
+	if x != nil {
+		return x.Grado
+	}
+	return ""
+}
+
+func (x *EstudianteSeleccion) GetSeccion() string {
+	if x != nil {
+		return x.Seccion
+	}
+	return ""
+}
+
+type BuscarEstudiantesSeleccionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Estudiantes   []*EstudianteSeleccion `protobuf:"bytes,1,rep,name=estudiantes,proto3" json:"estudiantes,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BuscarEstudiantesSeleccionResponse) Reset() {
+	*x = BuscarEstudiantesSeleccionResponse{}
+	mi := &file_estudiantes_service_proto_msgTypes[100]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BuscarEstudiantesSeleccionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BuscarEstudiantesSeleccionResponse) ProtoMessage() {}
+
+func (x *BuscarEstudiantesSeleccionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_estudiantes_service_proto_msgTypes[100]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BuscarEstudiantesSeleccionResponse.ProtoReflect.Descriptor instead.
+func (*BuscarEstudiantesSeleccionResponse) Descriptor() ([]byte, []int) {
+	return file_estudiantes_service_proto_rawDescGZIP(), []int{100}
+}
+
+func (x *BuscarEstudiantesSeleccionResponse) GetEstudiantes() []*EstudianteSeleccion {
+	if x != nil {
+		return x.Estudiantes
+	}
+	return nil
+}
+
+func (x *BuscarEstudiantesSeleccionResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_estudiantes_service_proto protoreflect.FileDescriptor
 
 const file_estudiantes_service_proto_rawDesc = "" +
@@ -7832,7 +8017,19 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04tipo\x18\x02 \x01(\tR\x04tipo\">\n" +
 	"\x1eEliminarPlantillaDatosResponse\x12\x1c\n" +
-	"\teliminada\x18\x01 \x01(\bR\teliminada2\x98\"\n" +
+	"\teliminada\x18\x01 \x01(\bR\teliminada\"b\n" +
+	"!BuscarEstudiantesSeleccionRequest\x12\f\n" +
+	"\x01q\x18\x01 \x01(\tR\x01q\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"~\n" +
+	"\x13EstudianteSeleccion\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0fnombre_completo\x18\x02 \x01(\tR\x0enombreCompleto\x12\x14\n" +
+	"\x05grado\x18\x03 \x01(\tR\x05grado\x12\x18\n" +
+	"\aseccion\x18\x04 \x01(\tR\aseccion\"~\n" +
+	"\"BuscarEstudiantesSeleccionResponse\x12B\n" +
+	"\vestudiantes\x18\x01 \x03(\v2 .estudiantes.EstudianteSeleccionR\vestudiantes\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total2\x97#\n" +
 	"\vEstudiantes\x12V\n" +
 	"\rGetEstudiante\x12!.estudiantes.GetEstudianteRequest\x1a\".estudiantes.GetEstudianteResponse\x12b\n" +
 	"\x11SearchEstudiantes\x12%.estudiantes.SearchEstudiantesRequest\x1a&.estudiantes.SearchEstudiantesResponse\x12h\n" +
@@ -7842,7 +8039,8 @@ const file_estudiantes_service_proto_rawDesc = "" +
 	"\x16ChangeEstadoEstudiante\x12*.estudiantes.ChangeEstadoEstudianteRequest\x1a+.estudiantes.ChangeEstadoEstudianteResponse\x12n\n" +
 	"\x15GetEstudiantePersonal\x12).estudiantes.GetEstudiantePersonalRequest\x1a*.estudiantes.GetEstudiantePersonalResponse\x12w\n" +
 	"\x18UpdateEstudiantePersonal\x12,.estudiantes.UpdateEstudiantePersonalRequest\x1a-.estudiantes.UpdateEstudiantePersonalResponse\x12b\n" +
-	"\x11ResolveEstudiante\x12%.estudiantes.ResolveEstudianteRequest\x1a&.estudiantes.ResolveEstudianteResponse\x12q\n" +
+	"\x11ResolveEstudiante\x12%.estudiantes.ResolveEstudianteRequest\x1a&.estudiantes.ResolveEstudianteResponse\x12}\n" +
+	"\x1aBuscarEstudiantesSeleccion\x12..estudiantes.BuscarEstudiantesSeleccionRequest\x1a/.estudiantes.BuscarEstudiantesSeleccionResponse\x12q\n" +
 	"\x16ListPosiblesDuplicados\x12*.estudiantes.ListPosiblesDuplicadosRequest\x1a+.estudiantes.ListPosiblesDuplicadosResponse\x12w\n" +
 	"\x18ListMatriculasEstudiante\x12,.estudiantes.ListMatriculasEstudianteRequest\x1a-.estudiantes.ListMatriculasEstudianteResponse\x12w\n" +
 	"\x18ListFamiliaresEstudiante\x12,.estudiantes.ListFamiliaresEstudianteRequest\x1a-.estudiantes.ListFamiliaresEstudianteResponse\x12_\n" +
@@ -7891,249 +8089,255 @@ func file_estudiantes_service_proto_rawDescGZIP() []byte {
 	return file_estudiantes_service_proto_rawDescData
 }
 
-var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 98)
+var file_estudiantes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 101)
 var file_estudiantes_service_proto_goTypes = []any{
-	(*Estudiante)(nil),                        // 0: estudiantes.Estudiante
-	(*EstudianteBasico)(nil),                  // 1: estudiantes.EstudianteBasico
-	(*GetEstudianteRequest)(nil),              // 2: estudiantes.GetEstudianteRequest
-	(*GetEstudianteResponse)(nil),             // 3: estudiantes.GetEstudianteResponse
-	(*SearchEstudiantesRequest)(nil),          // 4: estudiantes.SearchEstudiantesRequest
-	(*SearchEstudiantesResponse)(nil),         // 5: estudiantes.SearchEstudiantesResponse
-	(*GetEstudiantesBasicRequest)(nil),        // 6: estudiantes.GetEstudiantesBasicRequest
-	(*GetEstudiantesBasicResponse)(nil),       // 7: estudiantes.GetEstudiantesBasicResponse
-	(*CreateEstudianteRequest)(nil),           // 8: estudiantes.CreateEstudianteRequest
-	(*CreateEstudianteResponse)(nil),          // 9: estudiantes.CreateEstudianteResponse
-	(*UpdateEstudianteRequest)(nil),           // 10: estudiantes.UpdateEstudianteRequest
-	(*UpdateEstudianteResponse)(nil),          // 11: estudiantes.UpdateEstudianteResponse
-	(*ChangeEstadoEstudianteRequest)(nil),     // 12: estudiantes.ChangeEstadoEstudianteRequest
-	(*ChangeEstadoEstudianteResponse)(nil),    // 13: estudiantes.ChangeEstadoEstudianteResponse
-	(*EstudiantePersonal)(nil),                // 14: estudiantes.EstudiantePersonal
-	(*GetEstudiantePersonalRequest)(nil),      // 15: estudiantes.GetEstudiantePersonalRequest
-	(*GetEstudiantePersonalResponse)(nil),     // 16: estudiantes.GetEstudiantePersonalResponse
-	(*UpdateEstudiantePersonalRequest)(nil),   // 17: estudiantes.UpdateEstudiantePersonalRequest
-	(*UpdateEstudiantePersonalResponse)(nil),  // 18: estudiantes.UpdateEstudiantePersonalResponse
-	(*ResolveEstudianteRequest)(nil),          // 19: estudiantes.ResolveEstudianteRequest
-	(*ResolveEstudianteResponse)(nil),         // 20: estudiantes.ResolveEstudianteResponse
-	(*GrupoPosibleDuplicado)(nil),             // 21: estudiantes.GrupoPosibleDuplicado
-	(*ListPosiblesDuplicadosRequest)(nil),     // 22: estudiantes.ListPosiblesDuplicadosRequest
-	(*ListPosiblesDuplicadosResponse)(nil),    // 23: estudiantes.ListPosiblesDuplicadosResponse
-	(*PeriodoAcademico)(nil),                  // 24: estudiantes.PeriodoAcademico
-	(*SeccionAcademica)(nil),                  // 25: estudiantes.SeccionAcademica
-	(*MovimientoMatricula)(nil),               // 26: estudiantes.MovimientoMatricula
-	(*Matricula)(nil),                         // 27: estudiantes.Matricula
-	(*ListMatriculasEstudianteRequest)(nil),   // 28: estudiantes.ListMatriculasEstudianteRequest
-	(*ListMatriculasEstudianteResponse)(nil),  // 29: estudiantes.ListMatriculasEstudianteResponse
-	(*Persona)(nil),                           // 30: estudiantes.Persona
-	(*Familiar)(nil),                          // 31: estudiantes.Familiar
-	(*ListFamiliaresEstudianteRequest)(nil),   // 32: estudiantes.ListFamiliaresEstudianteRequest
-	(*ListFamiliaresEstudianteResponse)(nil),  // 33: estudiantes.ListFamiliaresEstudianteResponse
-	(*VincularFamiliarRequest)(nil),           // 34: estudiantes.VincularFamiliarRequest
-	(*VincularFamiliarResponse)(nil),          // 35: estudiantes.VincularFamiliarResponse
-	(*DesvincularFamiliarRequest)(nil),        // 36: estudiantes.DesvincularFamiliarRequest
-	(*DesvincularFamiliarResponse)(nil),       // 37: estudiantes.DesvincularFamiliarResponse
-	(*ActualizarFamiliarRequest)(nil),         // 38: estudiantes.ActualizarFamiliarRequest
-	(*ActualizarFamiliarResponse)(nil),        // 39: estudiantes.ActualizarFamiliarResponse
-	(*CambiarParentescoFamiliarRequest)(nil),  // 40: estudiantes.CambiarParentescoFamiliarRequest
-	(*CambiarParentescoFamiliarResponse)(nil), // 41: estudiantes.CambiarParentescoFamiliarResponse
-	(*EventoHistorial)(nil),                   // 42: estudiantes.EventoHistorial
-	(*ListHistorialEstudianteRequest)(nil),    // 43: estudiantes.ListHistorialEstudianteRequest
-	(*ListHistorialEstudianteResponse)(nil),   // 44: estudiantes.ListHistorialEstudianteResponse
-	(*VinculoPersona)(nil),                    // 45: estudiantes.VinculoPersona
-	(*CreatePersonaRequest)(nil),              // 46: estudiantes.CreatePersonaRequest
-	(*PersonaResponse)(nil),                   // 47: estudiantes.PersonaResponse
-	(*GetPersonaRequest)(nil),                 // 48: estudiantes.GetPersonaRequest
-	(*GetPersonaResponse)(nil),                // 49: estudiantes.GetPersonaResponse
-	(*SearchPersonasRequest)(nil),             // 50: estudiantes.SearchPersonasRequest
-	(*SearchPersonasResponse)(nil),            // 51: estudiantes.SearchPersonasResponse
-	(*UpdatePersonaRequest)(nil),              // 52: estudiantes.UpdatePersonaRequest
-	(*CreatePeriodoRequest)(nil),              // 53: estudiantes.CreatePeriodoRequest
-	(*PeriodoResponse)(nil),                   // 54: estudiantes.PeriodoResponse
-	(*ListPeriodosRequest)(nil),               // 55: estudiantes.ListPeriodosRequest
-	(*ListPeriodosResponse)(nil),              // 56: estudiantes.ListPeriodosResponse
-	(*ChangeEstadoPeriodoRequest)(nil),        // 57: estudiantes.ChangeEstadoPeriodoRequest
-	(*CreateSeccionRequest)(nil),              // 58: estudiantes.CreateSeccionRequest
-	(*SeccionResponse)(nil),                   // 59: estudiantes.SeccionResponse
-	(*ListSeccionesRequest)(nil),              // 60: estudiantes.ListSeccionesRequest
-	(*ListSeccionesResponse)(nil),             // 61: estudiantes.ListSeccionesResponse
-	(*MatriculaResponse)(nil),                 // 62: estudiantes.MatriculaResponse
-	(*MatricularEstudianteRequest)(nil),       // 63: estudiantes.MatricularEstudianteRequest
-	(*CambiarSeccionMatriculaRequest)(nil),    // 64: estudiantes.CambiarSeccionMatriculaRequest
-	(*RetirarMatriculaRequest)(nil),           // 65: estudiantes.RetirarMatriculaRequest
-	(*ReingresarMatriculaRequest)(nil),        // 66: estudiantes.ReingresarMatriculaRequest
-	(*ConcluirMatriculaRequest)(nil),          // 67: estudiantes.ConcluirMatriculaRequest
-	(*MatriculaNomina)(nil),                   // 68: estudiantes.MatriculaNomina
-	(*ListMatriculasPeriodoRequest)(nil),      // 69: estudiantes.ListMatriculasPeriodoRequest
-	(*ListMatriculasPeriodoResponse)(nil),     // 70: estudiantes.ListMatriculasPeriodoResponse
-	(*PlantillaEstudiantesRequest)(nil),       // 71: estudiantes.PlantillaEstudiantesRequest
-	(*ArchivoExcelResponse)(nil),              // 72: estudiantes.ArchivoExcelResponse
-	(*ImportarEstudiantesRequest)(nil),        // 73: estudiantes.ImportarEstudiantesRequest
-	(*FilaImportacion)(nil),                   // 74: estudiantes.FilaImportacion
-	(*ResumenImportacion)(nil),                // 75: estudiantes.ResumenImportacion
-	(*ImportarEstudiantesResponse)(nil),       // 76: estudiantes.ImportarEstudiantesResponse
-	(*ExportarEstudiantesRequest)(nil),        // 77: estudiantes.ExportarEstudiantesRequest
-	(*OpcionesLectura)(nil),                   // 78: estudiantes.OpcionesLectura
-	(*AsignacionColumna)(nil),                 // 79: estudiantes.AsignacionColumna
-	(*DatosImportacionRequest)(nil),           // 80: estudiantes.DatosImportacionRequest
-	(*ColumnaAnalizada)(nil),                  // 81: estudiantes.ColumnaAnalizada
-	(*RegistroAnalizado)(nil),                 // 82: estudiantes.RegistroAnalizado
-	(*ResumenDatos)(nil),                      // 83: estudiantes.ResumenDatos
-	(*DatosImportacionResponse)(nil),          // 84: estudiantes.DatosImportacionResponse
-	(*CampoDatos)(nil),                        // 85: estudiantes.CampoDatos
-	(*ColumnaExportDatos)(nil),                // 86: estudiantes.ColumnaExportDatos
-	(*CamposDatosRequest)(nil),                // 87: estudiantes.CamposDatosRequest
-	(*CamposDatosResponse)(nil),               // 88: estudiantes.CamposDatosResponse
-	(*DatosExportacionRequest)(nil),           // 89: estudiantes.DatosExportacionRequest
-	(*ArchivoDatosResponse)(nil),              // 90: estudiantes.ArchivoDatosResponse
-	(*PlantillaDatos)(nil),                    // 91: estudiantes.PlantillaDatos
-	(*ListPlantillasDatosRequest)(nil),        // 92: estudiantes.ListPlantillasDatosRequest
-	(*ListPlantillasDatosResponse)(nil),       // 93: estudiantes.ListPlantillasDatosResponse
-	(*GuardarPlantillaDatosRequest)(nil),      // 94: estudiantes.GuardarPlantillaDatosRequest
-	(*PlantillaDatosResponse)(nil),            // 95: estudiantes.PlantillaDatosResponse
-	(*EliminarPlantillaDatosRequest)(nil),     // 96: estudiantes.EliminarPlantillaDatosRequest
-	(*EliminarPlantillaDatosResponse)(nil),    // 97: estudiantes.EliminarPlantillaDatosResponse
+	(*Estudiante)(nil),                         // 0: estudiantes.Estudiante
+	(*EstudianteBasico)(nil),                   // 1: estudiantes.EstudianteBasico
+	(*GetEstudianteRequest)(nil),               // 2: estudiantes.GetEstudianteRequest
+	(*GetEstudianteResponse)(nil),              // 3: estudiantes.GetEstudianteResponse
+	(*SearchEstudiantesRequest)(nil),           // 4: estudiantes.SearchEstudiantesRequest
+	(*SearchEstudiantesResponse)(nil),          // 5: estudiantes.SearchEstudiantesResponse
+	(*GetEstudiantesBasicRequest)(nil),         // 6: estudiantes.GetEstudiantesBasicRequest
+	(*GetEstudiantesBasicResponse)(nil),        // 7: estudiantes.GetEstudiantesBasicResponse
+	(*CreateEstudianteRequest)(nil),            // 8: estudiantes.CreateEstudianteRequest
+	(*CreateEstudianteResponse)(nil),           // 9: estudiantes.CreateEstudianteResponse
+	(*UpdateEstudianteRequest)(nil),            // 10: estudiantes.UpdateEstudianteRequest
+	(*UpdateEstudianteResponse)(nil),           // 11: estudiantes.UpdateEstudianteResponse
+	(*ChangeEstadoEstudianteRequest)(nil),      // 12: estudiantes.ChangeEstadoEstudianteRequest
+	(*ChangeEstadoEstudianteResponse)(nil),     // 13: estudiantes.ChangeEstadoEstudianteResponse
+	(*EstudiantePersonal)(nil),                 // 14: estudiantes.EstudiantePersonal
+	(*GetEstudiantePersonalRequest)(nil),       // 15: estudiantes.GetEstudiantePersonalRequest
+	(*GetEstudiantePersonalResponse)(nil),      // 16: estudiantes.GetEstudiantePersonalResponse
+	(*UpdateEstudiantePersonalRequest)(nil),    // 17: estudiantes.UpdateEstudiantePersonalRequest
+	(*UpdateEstudiantePersonalResponse)(nil),   // 18: estudiantes.UpdateEstudiantePersonalResponse
+	(*ResolveEstudianteRequest)(nil),           // 19: estudiantes.ResolveEstudianteRequest
+	(*ResolveEstudianteResponse)(nil),          // 20: estudiantes.ResolveEstudianteResponse
+	(*GrupoPosibleDuplicado)(nil),              // 21: estudiantes.GrupoPosibleDuplicado
+	(*ListPosiblesDuplicadosRequest)(nil),      // 22: estudiantes.ListPosiblesDuplicadosRequest
+	(*ListPosiblesDuplicadosResponse)(nil),     // 23: estudiantes.ListPosiblesDuplicadosResponse
+	(*PeriodoAcademico)(nil),                   // 24: estudiantes.PeriodoAcademico
+	(*SeccionAcademica)(nil),                   // 25: estudiantes.SeccionAcademica
+	(*MovimientoMatricula)(nil),                // 26: estudiantes.MovimientoMatricula
+	(*Matricula)(nil),                          // 27: estudiantes.Matricula
+	(*ListMatriculasEstudianteRequest)(nil),    // 28: estudiantes.ListMatriculasEstudianteRequest
+	(*ListMatriculasEstudianteResponse)(nil),   // 29: estudiantes.ListMatriculasEstudianteResponse
+	(*Persona)(nil),                            // 30: estudiantes.Persona
+	(*Familiar)(nil),                           // 31: estudiantes.Familiar
+	(*ListFamiliaresEstudianteRequest)(nil),    // 32: estudiantes.ListFamiliaresEstudianteRequest
+	(*ListFamiliaresEstudianteResponse)(nil),   // 33: estudiantes.ListFamiliaresEstudianteResponse
+	(*VincularFamiliarRequest)(nil),            // 34: estudiantes.VincularFamiliarRequest
+	(*VincularFamiliarResponse)(nil),           // 35: estudiantes.VincularFamiliarResponse
+	(*DesvincularFamiliarRequest)(nil),         // 36: estudiantes.DesvincularFamiliarRequest
+	(*DesvincularFamiliarResponse)(nil),        // 37: estudiantes.DesvincularFamiliarResponse
+	(*ActualizarFamiliarRequest)(nil),          // 38: estudiantes.ActualizarFamiliarRequest
+	(*ActualizarFamiliarResponse)(nil),         // 39: estudiantes.ActualizarFamiliarResponse
+	(*CambiarParentescoFamiliarRequest)(nil),   // 40: estudiantes.CambiarParentescoFamiliarRequest
+	(*CambiarParentescoFamiliarResponse)(nil),  // 41: estudiantes.CambiarParentescoFamiliarResponse
+	(*EventoHistorial)(nil),                    // 42: estudiantes.EventoHistorial
+	(*ListHistorialEstudianteRequest)(nil),     // 43: estudiantes.ListHistorialEstudianteRequest
+	(*ListHistorialEstudianteResponse)(nil),    // 44: estudiantes.ListHistorialEstudianteResponse
+	(*VinculoPersona)(nil),                     // 45: estudiantes.VinculoPersona
+	(*CreatePersonaRequest)(nil),               // 46: estudiantes.CreatePersonaRequest
+	(*PersonaResponse)(nil),                    // 47: estudiantes.PersonaResponse
+	(*GetPersonaRequest)(nil),                  // 48: estudiantes.GetPersonaRequest
+	(*GetPersonaResponse)(nil),                 // 49: estudiantes.GetPersonaResponse
+	(*SearchPersonasRequest)(nil),              // 50: estudiantes.SearchPersonasRequest
+	(*SearchPersonasResponse)(nil),             // 51: estudiantes.SearchPersonasResponse
+	(*UpdatePersonaRequest)(nil),               // 52: estudiantes.UpdatePersonaRequest
+	(*CreatePeriodoRequest)(nil),               // 53: estudiantes.CreatePeriodoRequest
+	(*PeriodoResponse)(nil),                    // 54: estudiantes.PeriodoResponse
+	(*ListPeriodosRequest)(nil),                // 55: estudiantes.ListPeriodosRequest
+	(*ListPeriodosResponse)(nil),               // 56: estudiantes.ListPeriodosResponse
+	(*ChangeEstadoPeriodoRequest)(nil),         // 57: estudiantes.ChangeEstadoPeriodoRequest
+	(*CreateSeccionRequest)(nil),               // 58: estudiantes.CreateSeccionRequest
+	(*SeccionResponse)(nil),                    // 59: estudiantes.SeccionResponse
+	(*ListSeccionesRequest)(nil),               // 60: estudiantes.ListSeccionesRequest
+	(*ListSeccionesResponse)(nil),              // 61: estudiantes.ListSeccionesResponse
+	(*MatriculaResponse)(nil),                  // 62: estudiantes.MatriculaResponse
+	(*MatricularEstudianteRequest)(nil),        // 63: estudiantes.MatricularEstudianteRequest
+	(*CambiarSeccionMatriculaRequest)(nil),     // 64: estudiantes.CambiarSeccionMatriculaRequest
+	(*RetirarMatriculaRequest)(nil),            // 65: estudiantes.RetirarMatriculaRequest
+	(*ReingresarMatriculaRequest)(nil),         // 66: estudiantes.ReingresarMatriculaRequest
+	(*ConcluirMatriculaRequest)(nil),           // 67: estudiantes.ConcluirMatriculaRequest
+	(*MatriculaNomina)(nil),                    // 68: estudiantes.MatriculaNomina
+	(*ListMatriculasPeriodoRequest)(nil),       // 69: estudiantes.ListMatriculasPeriodoRequest
+	(*ListMatriculasPeriodoResponse)(nil),      // 70: estudiantes.ListMatriculasPeriodoResponse
+	(*PlantillaEstudiantesRequest)(nil),        // 71: estudiantes.PlantillaEstudiantesRequest
+	(*ArchivoExcelResponse)(nil),               // 72: estudiantes.ArchivoExcelResponse
+	(*ImportarEstudiantesRequest)(nil),         // 73: estudiantes.ImportarEstudiantesRequest
+	(*FilaImportacion)(nil),                    // 74: estudiantes.FilaImportacion
+	(*ResumenImportacion)(nil),                 // 75: estudiantes.ResumenImportacion
+	(*ImportarEstudiantesResponse)(nil),        // 76: estudiantes.ImportarEstudiantesResponse
+	(*ExportarEstudiantesRequest)(nil),         // 77: estudiantes.ExportarEstudiantesRequest
+	(*OpcionesLectura)(nil),                    // 78: estudiantes.OpcionesLectura
+	(*AsignacionColumna)(nil),                  // 79: estudiantes.AsignacionColumna
+	(*DatosImportacionRequest)(nil),            // 80: estudiantes.DatosImportacionRequest
+	(*ColumnaAnalizada)(nil),                   // 81: estudiantes.ColumnaAnalizada
+	(*RegistroAnalizado)(nil),                  // 82: estudiantes.RegistroAnalizado
+	(*ResumenDatos)(nil),                       // 83: estudiantes.ResumenDatos
+	(*DatosImportacionResponse)(nil),           // 84: estudiantes.DatosImportacionResponse
+	(*CampoDatos)(nil),                         // 85: estudiantes.CampoDatos
+	(*ColumnaExportDatos)(nil),                 // 86: estudiantes.ColumnaExportDatos
+	(*CamposDatosRequest)(nil),                 // 87: estudiantes.CamposDatosRequest
+	(*CamposDatosResponse)(nil),                // 88: estudiantes.CamposDatosResponse
+	(*DatosExportacionRequest)(nil),            // 89: estudiantes.DatosExportacionRequest
+	(*ArchivoDatosResponse)(nil),               // 90: estudiantes.ArchivoDatosResponse
+	(*PlantillaDatos)(nil),                     // 91: estudiantes.PlantillaDatos
+	(*ListPlantillasDatosRequest)(nil),         // 92: estudiantes.ListPlantillasDatosRequest
+	(*ListPlantillasDatosResponse)(nil),        // 93: estudiantes.ListPlantillasDatosResponse
+	(*GuardarPlantillaDatosRequest)(nil),       // 94: estudiantes.GuardarPlantillaDatosRequest
+	(*PlantillaDatosResponse)(nil),             // 95: estudiantes.PlantillaDatosResponse
+	(*EliminarPlantillaDatosRequest)(nil),      // 96: estudiantes.EliminarPlantillaDatosRequest
+	(*EliminarPlantillaDatosResponse)(nil),     // 97: estudiantes.EliminarPlantillaDatosResponse
+	(*BuscarEstudiantesSeleccionRequest)(nil),  // 98: estudiantes.BuscarEstudiantesSeleccionRequest
+	(*EstudianteSeleccion)(nil),                // 99: estudiantes.EstudianteSeleccion
+	(*BuscarEstudiantesSeleccionResponse)(nil), // 100: estudiantes.BuscarEstudiantesSeleccionResponse
 }
 var file_estudiantes_service_proto_depIdxs = []int32{
-	0,  // 0: estudiantes.GetEstudianteResponse.estudiante:type_name -> estudiantes.Estudiante
-	1,  // 1: estudiantes.SearchEstudiantesResponse.estudiantes:type_name -> estudiantes.EstudianteBasico
-	1,  // 2: estudiantes.GetEstudiantesBasicResponse.estudiantes:type_name -> estudiantes.EstudianteBasico
-	1,  // 3: estudiantes.CreateEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
-	1,  // 4: estudiantes.UpdateEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
-	1,  // 5: estudiantes.ChangeEstadoEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
-	14, // 6: estudiantes.GetEstudiantePersonalResponse.personal:type_name -> estudiantes.EstudiantePersonal
-	1,  // 7: estudiantes.UpdateEstudiantePersonalResponse.estudiante:type_name -> estudiantes.EstudianteBasico
-	1,  // 8: estudiantes.ResolveEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
-	1,  // 9: estudiantes.GrupoPosibleDuplicado.estudiantes:type_name -> estudiantes.EstudianteBasico
-	21, // 10: estudiantes.ListPosiblesDuplicadosResponse.grupos:type_name -> estudiantes.GrupoPosibleDuplicado
-	24, // 11: estudiantes.Matricula.periodo:type_name -> estudiantes.PeriodoAcademico
-	25, // 12: estudiantes.Matricula.seccion:type_name -> estudiantes.SeccionAcademica
-	26, // 13: estudiantes.Matricula.movimientos:type_name -> estudiantes.MovimientoMatricula
-	27, // 14: estudiantes.ListMatriculasEstudianteResponse.matriculas:type_name -> estudiantes.Matricula
-	30, // 15: estudiantes.Familiar.persona:type_name -> estudiantes.Persona
-	31, // 16: estudiantes.ListFamiliaresEstudianteResponse.familiares:type_name -> estudiantes.Familiar
-	30, // 17: estudiantes.VincularFamiliarRequest.persona:type_name -> estudiantes.Persona
-	31, // 18: estudiantes.VincularFamiliarResponse.familiar:type_name -> estudiantes.Familiar
-	31, // 19: estudiantes.DesvincularFamiliarResponse.familiar:type_name -> estudiantes.Familiar
-	31, // 20: estudiantes.ActualizarFamiliarResponse.familiar:type_name -> estudiantes.Familiar
-	31, // 21: estudiantes.CambiarParentescoFamiliarResponse.anterior:type_name -> estudiantes.Familiar
-	31, // 22: estudiantes.CambiarParentescoFamiliarResponse.familiar:type_name -> estudiantes.Familiar
-	42, // 23: estudiantes.ListHistorialEstudianteResponse.eventos:type_name -> estudiantes.EventoHistorial
-	1,  // 24: estudiantes.VinculoPersona.estudiante:type_name -> estudiantes.EstudianteBasico
-	30, // 25: estudiantes.CreatePersonaRequest.persona:type_name -> estudiantes.Persona
-	30, // 26: estudiantes.PersonaResponse.persona:type_name -> estudiantes.Persona
-	30, // 27: estudiantes.GetPersonaResponse.persona:type_name -> estudiantes.Persona
-	45, // 28: estudiantes.GetPersonaResponse.vinculos:type_name -> estudiantes.VinculoPersona
-	30, // 29: estudiantes.SearchPersonasResponse.personas:type_name -> estudiantes.Persona
-	24, // 30: estudiantes.PeriodoResponse.periodo:type_name -> estudiantes.PeriodoAcademico
-	24, // 31: estudiantes.ListPeriodosResponse.periodos:type_name -> estudiantes.PeriodoAcademico
-	25, // 32: estudiantes.SeccionResponse.seccion:type_name -> estudiantes.SeccionAcademica
-	25, // 33: estudiantes.ListSeccionesResponse.secciones:type_name -> estudiantes.SeccionAcademica
-	27, // 34: estudiantes.MatriculaResponse.matricula:type_name -> estudiantes.Matricula
-	27, // 35: estudiantes.MatriculaNomina.matricula:type_name -> estudiantes.Matricula
-	1,  // 36: estudiantes.MatriculaNomina.estudiante:type_name -> estudiantes.EstudianteBasico
-	68, // 37: estudiantes.ListMatriculasPeriodoResponse.matriculas:type_name -> estudiantes.MatriculaNomina
-	75, // 38: estudiantes.ImportarEstudiantesResponse.resumen:type_name -> estudiantes.ResumenImportacion
-	74, // 39: estudiantes.ImportarEstudiantesResponse.filas:type_name -> estudiantes.FilaImportacion
-	78, // 40: estudiantes.DatosImportacionRequest.opciones:type_name -> estudiantes.OpcionesLectura
-	79, // 41: estudiantes.DatosImportacionRequest.mapeo:type_name -> estudiantes.AsignacionColumna
-	81, // 42: estudiantes.DatosImportacionResponse.columnas:type_name -> estudiantes.ColumnaAnalizada
-	83, // 43: estudiantes.DatosImportacionResponse.resumen:type_name -> estudiantes.ResumenDatos
-	82, // 44: estudiantes.DatosImportacionResponse.registros:type_name -> estudiantes.RegistroAnalizado
-	85, // 45: estudiantes.CamposDatosResponse.campos:type_name -> estudiantes.CampoDatos
-	86, // 46: estudiantes.CamposDatosResponse.columnas_tabla:type_name -> estudiantes.ColumnaExportDatos
-	86, // 47: estudiantes.DatosExportacionRequest.columnas:type_name -> estudiantes.ColumnaExportDatos
-	91, // 48: estudiantes.ListPlantillasDatosResponse.plantillas:type_name -> estudiantes.PlantillaDatos
-	91, // 49: estudiantes.PlantillaDatosResponse.plantilla:type_name -> estudiantes.PlantillaDatos
-	2,  // 50: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
-	4,  // 51: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
-	6,  // 52: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
-	8,  // 53: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
-	10, // 54: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
-	12, // 55: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
-	15, // 56: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
-	17, // 57: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
-	19, // 58: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
-	22, // 59: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
-	28, // 60: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
-	32, // 61: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
-	34, // 62: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
-	36, // 63: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
-	38, // 64: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
-	46, // 65: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
-	48, // 66: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
-	50, // 67: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
-	52, // 68: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
-	53, // 69: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
-	55, // 70: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
-	57, // 71: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
-	58, // 72: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
-	60, // 73: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
-	63, // 74: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
-	64, // 75: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
-	65, // 76: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
-	66, // 77: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
-	67, // 78: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
-	69, // 79: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
-	40, // 80: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
-	43, // 81: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
-	71, // 82: estudiantes.Estudiantes.PlantillaEstudiantes:input_type -> estudiantes.PlantillaEstudiantesRequest
-	73, // 83: estudiantes.Estudiantes.PreviewImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
-	73, // 84: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
-	77, // 85: estudiantes.Estudiantes.ExportarEstudiantes:input_type -> estudiantes.ExportarEstudiantesRequest
-	87, // 86: estudiantes.Estudiantes.CamposDatosEstudiantes:input_type -> estudiantes.CamposDatosRequest
-	80, // 87: estudiantes.Estudiantes.AnalizarDatosEstudiantes:input_type -> estudiantes.DatosImportacionRequest
-	80, // 88: estudiantes.Estudiantes.ConfirmarDatosEstudiantes:input_type -> estudiantes.DatosImportacionRequest
-	89, // 89: estudiantes.Estudiantes.ExportarDatosEstudiantes:input_type -> estudiantes.DatosExportacionRequest
-	92, // 90: estudiantes.Estudiantes.ListPlantillasDatos:input_type -> estudiantes.ListPlantillasDatosRequest
-	94, // 91: estudiantes.Estudiantes.GuardarPlantillaDatos:input_type -> estudiantes.GuardarPlantillaDatosRequest
-	96, // 92: estudiantes.Estudiantes.EliminarPlantillaDatos:input_type -> estudiantes.EliminarPlantillaDatosRequest
-	3,  // 93: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
-	5,  // 94: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
-	7,  // 95: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
-	9,  // 96: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
-	11, // 97: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
-	13, // 98: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
-	16, // 99: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
-	18, // 100: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
-	20, // 101: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
-	23, // 102: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
-	29, // 103: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
-	33, // 104: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
-	35, // 105: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
-	37, // 106: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
-	39, // 107: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
-	47, // 108: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
-	49, // 109: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
-	51, // 110: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
-	47, // 111: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
-	54, // 112: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
-	56, // 113: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
-	54, // 114: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
-	59, // 115: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
-	61, // 116: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
-	62, // 117: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
-	62, // 118: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 119: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 120: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
-	62, // 121: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
-	70, // 122: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
-	41, // 123: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
-	44, // 124: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
-	72, // 125: estudiantes.Estudiantes.PlantillaEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
-	76, // 126: estudiantes.Estudiantes.PreviewImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
-	76, // 127: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
-	72, // 128: estudiantes.Estudiantes.ExportarEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
-	88, // 129: estudiantes.Estudiantes.CamposDatosEstudiantes:output_type -> estudiantes.CamposDatosResponse
-	84, // 130: estudiantes.Estudiantes.AnalizarDatosEstudiantes:output_type -> estudiantes.DatosImportacionResponse
-	84, // 131: estudiantes.Estudiantes.ConfirmarDatosEstudiantes:output_type -> estudiantes.DatosImportacionResponse
-	90, // 132: estudiantes.Estudiantes.ExportarDatosEstudiantes:output_type -> estudiantes.ArchivoDatosResponse
-	93, // 133: estudiantes.Estudiantes.ListPlantillasDatos:output_type -> estudiantes.ListPlantillasDatosResponse
-	95, // 134: estudiantes.Estudiantes.GuardarPlantillaDatos:output_type -> estudiantes.PlantillaDatosResponse
-	97, // 135: estudiantes.Estudiantes.EliminarPlantillaDatos:output_type -> estudiantes.EliminarPlantillaDatosResponse
-	93, // [93:136] is the sub-list for method output_type
-	50, // [50:93] is the sub-list for method input_type
-	50, // [50:50] is the sub-list for extension type_name
-	50, // [50:50] is the sub-list for extension extendee
-	0,  // [0:50] is the sub-list for field type_name
+	0,   // 0: estudiantes.GetEstudianteResponse.estudiante:type_name -> estudiantes.Estudiante
+	1,   // 1: estudiantes.SearchEstudiantesResponse.estudiantes:type_name -> estudiantes.EstudianteBasico
+	1,   // 2: estudiantes.GetEstudiantesBasicResponse.estudiantes:type_name -> estudiantes.EstudianteBasico
+	1,   // 3: estudiantes.CreateEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
+	1,   // 4: estudiantes.UpdateEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
+	1,   // 5: estudiantes.ChangeEstadoEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
+	14,  // 6: estudiantes.GetEstudiantePersonalResponse.personal:type_name -> estudiantes.EstudiantePersonal
+	1,   // 7: estudiantes.UpdateEstudiantePersonalResponse.estudiante:type_name -> estudiantes.EstudianteBasico
+	1,   // 8: estudiantes.ResolveEstudianteResponse.estudiante:type_name -> estudiantes.EstudianteBasico
+	1,   // 9: estudiantes.GrupoPosibleDuplicado.estudiantes:type_name -> estudiantes.EstudianteBasico
+	21,  // 10: estudiantes.ListPosiblesDuplicadosResponse.grupos:type_name -> estudiantes.GrupoPosibleDuplicado
+	24,  // 11: estudiantes.Matricula.periodo:type_name -> estudiantes.PeriodoAcademico
+	25,  // 12: estudiantes.Matricula.seccion:type_name -> estudiantes.SeccionAcademica
+	26,  // 13: estudiantes.Matricula.movimientos:type_name -> estudiantes.MovimientoMatricula
+	27,  // 14: estudiantes.ListMatriculasEstudianteResponse.matriculas:type_name -> estudiantes.Matricula
+	30,  // 15: estudiantes.Familiar.persona:type_name -> estudiantes.Persona
+	31,  // 16: estudiantes.ListFamiliaresEstudianteResponse.familiares:type_name -> estudiantes.Familiar
+	30,  // 17: estudiantes.VincularFamiliarRequest.persona:type_name -> estudiantes.Persona
+	31,  // 18: estudiantes.VincularFamiliarResponse.familiar:type_name -> estudiantes.Familiar
+	31,  // 19: estudiantes.DesvincularFamiliarResponse.familiar:type_name -> estudiantes.Familiar
+	31,  // 20: estudiantes.ActualizarFamiliarResponse.familiar:type_name -> estudiantes.Familiar
+	31,  // 21: estudiantes.CambiarParentescoFamiliarResponse.anterior:type_name -> estudiantes.Familiar
+	31,  // 22: estudiantes.CambiarParentescoFamiliarResponse.familiar:type_name -> estudiantes.Familiar
+	42,  // 23: estudiantes.ListHistorialEstudianteResponse.eventos:type_name -> estudiantes.EventoHistorial
+	1,   // 24: estudiantes.VinculoPersona.estudiante:type_name -> estudiantes.EstudianteBasico
+	30,  // 25: estudiantes.CreatePersonaRequest.persona:type_name -> estudiantes.Persona
+	30,  // 26: estudiantes.PersonaResponse.persona:type_name -> estudiantes.Persona
+	30,  // 27: estudiantes.GetPersonaResponse.persona:type_name -> estudiantes.Persona
+	45,  // 28: estudiantes.GetPersonaResponse.vinculos:type_name -> estudiantes.VinculoPersona
+	30,  // 29: estudiantes.SearchPersonasResponse.personas:type_name -> estudiantes.Persona
+	24,  // 30: estudiantes.PeriodoResponse.periodo:type_name -> estudiantes.PeriodoAcademico
+	24,  // 31: estudiantes.ListPeriodosResponse.periodos:type_name -> estudiantes.PeriodoAcademico
+	25,  // 32: estudiantes.SeccionResponse.seccion:type_name -> estudiantes.SeccionAcademica
+	25,  // 33: estudiantes.ListSeccionesResponse.secciones:type_name -> estudiantes.SeccionAcademica
+	27,  // 34: estudiantes.MatriculaResponse.matricula:type_name -> estudiantes.Matricula
+	27,  // 35: estudiantes.MatriculaNomina.matricula:type_name -> estudiantes.Matricula
+	1,   // 36: estudiantes.MatriculaNomina.estudiante:type_name -> estudiantes.EstudianteBasico
+	68,  // 37: estudiantes.ListMatriculasPeriodoResponse.matriculas:type_name -> estudiantes.MatriculaNomina
+	75,  // 38: estudiantes.ImportarEstudiantesResponse.resumen:type_name -> estudiantes.ResumenImportacion
+	74,  // 39: estudiantes.ImportarEstudiantesResponse.filas:type_name -> estudiantes.FilaImportacion
+	78,  // 40: estudiantes.DatosImportacionRequest.opciones:type_name -> estudiantes.OpcionesLectura
+	79,  // 41: estudiantes.DatosImportacionRequest.mapeo:type_name -> estudiantes.AsignacionColumna
+	81,  // 42: estudiantes.DatosImportacionResponse.columnas:type_name -> estudiantes.ColumnaAnalizada
+	83,  // 43: estudiantes.DatosImportacionResponse.resumen:type_name -> estudiantes.ResumenDatos
+	82,  // 44: estudiantes.DatosImportacionResponse.registros:type_name -> estudiantes.RegistroAnalizado
+	85,  // 45: estudiantes.CamposDatosResponse.campos:type_name -> estudiantes.CampoDatos
+	86,  // 46: estudiantes.CamposDatosResponse.columnas_tabla:type_name -> estudiantes.ColumnaExportDatos
+	86,  // 47: estudiantes.DatosExportacionRequest.columnas:type_name -> estudiantes.ColumnaExportDatos
+	91,  // 48: estudiantes.ListPlantillasDatosResponse.plantillas:type_name -> estudiantes.PlantillaDatos
+	91,  // 49: estudiantes.PlantillaDatosResponse.plantilla:type_name -> estudiantes.PlantillaDatos
+	99,  // 50: estudiantes.BuscarEstudiantesSeleccionResponse.estudiantes:type_name -> estudiantes.EstudianteSeleccion
+	2,   // 51: estudiantes.Estudiantes.GetEstudiante:input_type -> estudiantes.GetEstudianteRequest
+	4,   // 52: estudiantes.Estudiantes.SearchEstudiantes:input_type -> estudiantes.SearchEstudiantesRequest
+	6,   // 53: estudiantes.Estudiantes.GetEstudiantesBasic:input_type -> estudiantes.GetEstudiantesBasicRequest
+	8,   // 54: estudiantes.Estudiantes.CreateEstudiante:input_type -> estudiantes.CreateEstudianteRequest
+	10,  // 55: estudiantes.Estudiantes.UpdateEstudiante:input_type -> estudiantes.UpdateEstudianteRequest
+	12,  // 56: estudiantes.Estudiantes.ChangeEstadoEstudiante:input_type -> estudiantes.ChangeEstadoEstudianteRequest
+	15,  // 57: estudiantes.Estudiantes.GetEstudiantePersonal:input_type -> estudiantes.GetEstudiantePersonalRequest
+	17,  // 58: estudiantes.Estudiantes.UpdateEstudiantePersonal:input_type -> estudiantes.UpdateEstudiantePersonalRequest
+	19,  // 59: estudiantes.Estudiantes.ResolveEstudiante:input_type -> estudiantes.ResolveEstudianteRequest
+	98,  // 60: estudiantes.Estudiantes.BuscarEstudiantesSeleccion:input_type -> estudiantes.BuscarEstudiantesSeleccionRequest
+	22,  // 61: estudiantes.Estudiantes.ListPosiblesDuplicados:input_type -> estudiantes.ListPosiblesDuplicadosRequest
+	28,  // 62: estudiantes.Estudiantes.ListMatriculasEstudiante:input_type -> estudiantes.ListMatriculasEstudianteRequest
+	32,  // 63: estudiantes.Estudiantes.ListFamiliaresEstudiante:input_type -> estudiantes.ListFamiliaresEstudianteRequest
+	34,  // 64: estudiantes.Estudiantes.VincularFamiliar:input_type -> estudiantes.VincularFamiliarRequest
+	36,  // 65: estudiantes.Estudiantes.DesvincularFamiliar:input_type -> estudiantes.DesvincularFamiliarRequest
+	38,  // 66: estudiantes.Estudiantes.ActualizarFamiliar:input_type -> estudiantes.ActualizarFamiliarRequest
+	46,  // 67: estudiantes.Estudiantes.CreatePersona:input_type -> estudiantes.CreatePersonaRequest
+	48,  // 68: estudiantes.Estudiantes.GetPersona:input_type -> estudiantes.GetPersonaRequest
+	50,  // 69: estudiantes.Estudiantes.SearchPersonas:input_type -> estudiantes.SearchPersonasRequest
+	52,  // 70: estudiantes.Estudiantes.UpdatePersona:input_type -> estudiantes.UpdatePersonaRequest
+	53,  // 71: estudiantes.Estudiantes.CreatePeriodo:input_type -> estudiantes.CreatePeriodoRequest
+	55,  // 72: estudiantes.Estudiantes.ListPeriodos:input_type -> estudiantes.ListPeriodosRequest
+	57,  // 73: estudiantes.Estudiantes.ChangeEstadoPeriodo:input_type -> estudiantes.ChangeEstadoPeriodoRequest
+	58,  // 74: estudiantes.Estudiantes.CreateSeccion:input_type -> estudiantes.CreateSeccionRequest
+	60,  // 75: estudiantes.Estudiantes.ListSecciones:input_type -> estudiantes.ListSeccionesRequest
+	63,  // 76: estudiantes.Estudiantes.MatricularEstudiante:input_type -> estudiantes.MatricularEstudianteRequest
+	64,  // 77: estudiantes.Estudiantes.CambiarSeccionMatricula:input_type -> estudiantes.CambiarSeccionMatriculaRequest
+	65,  // 78: estudiantes.Estudiantes.RetirarMatricula:input_type -> estudiantes.RetirarMatriculaRequest
+	66,  // 79: estudiantes.Estudiantes.ReingresarMatricula:input_type -> estudiantes.ReingresarMatriculaRequest
+	67,  // 80: estudiantes.Estudiantes.ConcluirMatricula:input_type -> estudiantes.ConcluirMatriculaRequest
+	69,  // 81: estudiantes.Estudiantes.ListMatriculasPeriodo:input_type -> estudiantes.ListMatriculasPeriodoRequest
+	40,  // 82: estudiantes.Estudiantes.CambiarParentescoFamiliar:input_type -> estudiantes.CambiarParentescoFamiliarRequest
+	43,  // 83: estudiantes.Estudiantes.ListHistorialEstudiante:input_type -> estudiantes.ListHistorialEstudianteRequest
+	71,  // 84: estudiantes.Estudiantes.PlantillaEstudiantes:input_type -> estudiantes.PlantillaEstudiantesRequest
+	73,  // 85: estudiantes.Estudiantes.PreviewImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
+	73,  // 86: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:input_type -> estudiantes.ImportarEstudiantesRequest
+	77,  // 87: estudiantes.Estudiantes.ExportarEstudiantes:input_type -> estudiantes.ExportarEstudiantesRequest
+	87,  // 88: estudiantes.Estudiantes.CamposDatosEstudiantes:input_type -> estudiantes.CamposDatosRequest
+	80,  // 89: estudiantes.Estudiantes.AnalizarDatosEstudiantes:input_type -> estudiantes.DatosImportacionRequest
+	80,  // 90: estudiantes.Estudiantes.ConfirmarDatosEstudiantes:input_type -> estudiantes.DatosImportacionRequest
+	89,  // 91: estudiantes.Estudiantes.ExportarDatosEstudiantes:input_type -> estudiantes.DatosExportacionRequest
+	92,  // 92: estudiantes.Estudiantes.ListPlantillasDatos:input_type -> estudiantes.ListPlantillasDatosRequest
+	94,  // 93: estudiantes.Estudiantes.GuardarPlantillaDatos:input_type -> estudiantes.GuardarPlantillaDatosRequest
+	96,  // 94: estudiantes.Estudiantes.EliminarPlantillaDatos:input_type -> estudiantes.EliminarPlantillaDatosRequest
+	3,   // 95: estudiantes.Estudiantes.GetEstudiante:output_type -> estudiantes.GetEstudianteResponse
+	5,   // 96: estudiantes.Estudiantes.SearchEstudiantes:output_type -> estudiantes.SearchEstudiantesResponse
+	7,   // 97: estudiantes.Estudiantes.GetEstudiantesBasic:output_type -> estudiantes.GetEstudiantesBasicResponse
+	9,   // 98: estudiantes.Estudiantes.CreateEstudiante:output_type -> estudiantes.CreateEstudianteResponse
+	11,  // 99: estudiantes.Estudiantes.UpdateEstudiante:output_type -> estudiantes.UpdateEstudianteResponse
+	13,  // 100: estudiantes.Estudiantes.ChangeEstadoEstudiante:output_type -> estudiantes.ChangeEstadoEstudianteResponse
+	16,  // 101: estudiantes.Estudiantes.GetEstudiantePersonal:output_type -> estudiantes.GetEstudiantePersonalResponse
+	18,  // 102: estudiantes.Estudiantes.UpdateEstudiantePersonal:output_type -> estudiantes.UpdateEstudiantePersonalResponse
+	20,  // 103: estudiantes.Estudiantes.ResolveEstudiante:output_type -> estudiantes.ResolveEstudianteResponse
+	100, // 104: estudiantes.Estudiantes.BuscarEstudiantesSeleccion:output_type -> estudiantes.BuscarEstudiantesSeleccionResponse
+	23,  // 105: estudiantes.Estudiantes.ListPosiblesDuplicados:output_type -> estudiantes.ListPosiblesDuplicadosResponse
+	29,  // 106: estudiantes.Estudiantes.ListMatriculasEstudiante:output_type -> estudiantes.ListMatriculasEstudianteResponse
+	33,  // 107: estudiantes.Estudiantes.ListFamiliaresEstudiante:output_type -> estudiantes.ListFamiliaresEstudianteResponse
+	35,  // 108: estudiantes.Estudiantes.VincularFamiliar:output_type -> estudiantes.VincularFamiliarResponse
+	37,  // 109: estudiantes.Estudiantes.DesvincularFamiliar:output_type -> estudiantes.DesvincularFamiliarResponse
+	39,  // 110: estudiantes.Estudiantes.ActualizarFamiliar:output_type -> estudiantes.ActualizarFamiliarResponse
+	47,  // 111: estudiantes.Estudiantes.CreatePersona:output_type -> estudiantes.PersonaResponse
+	49,  // 112: estudiantes.Estudiantes.GetPersona:output_type -> estudiantes.GetPersonaResponse
+	51,  // 113: estudiantes.Estudiantes.SearchPersonas:output_type -> estudiantes.SearchPersonasResponse
+	47,  // 114: estudiantes.Estudiantes.UpdatePersona:output_type -> estudiantes.PersonaResponse
+	54,  // 115: estudiantes.Estudiantes.CreatePeriodo:output_type -> estudiantes.PeriodoResponse
+	56,  // 116: estudiantes.Estudiantes.ListPeriodos:output_type -> estudiantes.ListPeriodosResponse
+	54,  // 117: estudiantes.Estudiantes.ChangeEstadoPeriodo:output_type -> estudiantes.PeriodoResponse
+	59,  // 118: estudiantes.Estudiantes.CreateSeccion:output_type -> estudiantes.SeccionResponse
+	61,  // 119: estudiantes.Estudiantes.ListSecciones:output_type -> estudiantes.ListSeccionesResponse
+	62,  // 120: estudiantes.Estudiantes.MatricularEstudiante:output_type -> estudiantes.MatriculaResponse
+	62,  // 121: estudiantes.Estudiantes.CambiarSeccionMatricula:output_type -> estudiantes.MatriculaResponse
+	62,  // 122: estudiantes.Estudiantes.RetirarMatricula:output_type -> estudiantes.MatriculaResponse
+	62,  // 123: estudiantes.Estudiantes.ReingresarMatricula:output_type -> estudiantes.MatriculaResponse
+	62,  // 124: estudiantes.Estudiantes.ConcluirMatricula:output_type -> estudiantes.MatriculaResponse
+	70,  // 125: estudiantes.Estudiantes.ListMatriculasPeriodo:output_type -> estudiantes.ListMatriculasPeriodoResponse
+	41,  // 126: estudiantes.Estudiantes.CambiarParentescoFamiliar:output_type -> estudiantes.CambiarParentescoFamiliarResponse
+	44,  // 127: estudiantes.Estudiantes.ListHistorialEstudiante:output_type -> estudiantes.ListHistorialEstudianteResponse
+	72,  // 128: estudiantes.Estudiantes.PlantillaEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
+	76,  // 129: estudiantes.Estudiantes.PreviewImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
+	76,  // 130: estudiantes.Estudiantes.ConfirmarImportacionEstudiantes:output_type -> estudiantes.ImportarEstudiantesResponse
+	72,  // 131: estudiantes.Estudiantes.ExportarEstudiantes:output_type -> estudiantes.ArchivoExcelResponse
+	88,  // 132: estudiantes.Estudiantes.CamposDatosEstudiantes:output_type -> estudiantes.CamposDatosResponse
+	84,  // 133: estudiantes.Estudiantes.AnalizarDatosEstudiantes:output_type -> estudiantes.DatosImportacionResponse
+	84,  // 134: estudiantes.Estudiantes.ConfirmarDatosEstudiantes:output_type -> estudiantes.DatosImportacionResponse
+	90,  // 135: estudiantes.Estudiantes.ExportarDatosEstudiantes:output_type -> estudiantes.ArchivoDatosResponse
+	93,  // 136: estudiantes.Estudiantes.ListPlantillasDatos:output_type -> estudiantes.ListPlantillasDatosResponse
+	95,  // 137: estudiantes.Estudiantes.GuardarPlantillaDatos:output_type -> estudiantes.PlantillaDatosResponse
+	97,  // 138: estudiantes.Estudiantes.EliminarPlantillaDatos:output_type -> estudiantes.EliminarPlantillaDatosResponse
+	95,  // [95:139] is the sub-list for method output_type
+	51,  // [51:95] is the sub-list for method input_type
+	51,  // [51:51] is the sub-list for extension type_name
+	51,  // [51:51] is the sub-list for extension extendee
+	0,   // [0:51] is the sub-list for field type_name
 }
 
 func init() { file_estudiantes_service_proto_init() }
@@ -8153,7 +8357,7 @@ func file_estudiantes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_estudiantes_service_proto_rawDesc), len(file_estudiantes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   98,
+			NumMessages:   101,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

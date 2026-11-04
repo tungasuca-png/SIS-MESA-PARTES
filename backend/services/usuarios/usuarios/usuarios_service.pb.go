@@ -24,20 +24,25 @@ const (
 // Perfil completo. Contiene datos personales: solo debe entregarse a quien
 // esté autorizado (ver internal/authorization).
 type Usuario struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Nombres       string                 `protobuf:"bytes,2,opt,name=nombres,proto3" json:"nombres,omitempty"`
-	Apellidos     string                 `protobuf:"bytes,3,opt,name=apellidos,proto3" json:"apellidos,omitempty"`
-	Dni           string                 `protobuf:"bytes,4,opt,name=dni,proto3" json:"dni,omitempty"`
-	Telefono      string                 `protobuf:"bytes,5,opt,name=telefono,proto3" json:"telefono,omitempty"`
-	Correo        string                 `protobuf:"bytes,6,opt,name=correo,proto3" json:"correo,omitempty"`
-	Direccion     string                 `protobuf:"bytes,7,opt,name=direccion,proto3" json:"direccion,omitempty"`
-	TipoUsuario   string                 `protobuf:"bytes,8,opt,name=tipo_usuario,json=tipoUsuario,proto3" json:"tipo_usuario,omitempty"`
-	Activo        bool                   `protobuf:"varint,9,opt,name=activo,proto3" json:"activo,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Id          string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Nombres     string                 `protobuf:"bytes,2,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	Apellidos   string                 `protobuf:"bytes,3,opt,name=apellidos,proto3" json:"apellidos,omitempty"`
+	Dni         string                 `protobuf:"bytes,4,opt,name=dni,proto3" json:"dni,omitempty"`
+	Telefono    string                 `protobuf:"bytes,5,opt,name=telefono,proto3" json:"telefono,omitempty"`
+	Correo      string                 `protobuf:"bytes,6,opt,name=correo,proto3" json:"correo,omitempty"`
+	Direccion   string                 `protobuf:"bytes,7,opt,name=direccion,proto3" json:"direccion,omitempty"`
+	TipoUsuario string                 `protobuf:"bytes,8,opt,name=tipo_usuario,json=tipoUsuario,proto3" json:"tipo_usuario,omitempty"`
+	Activo      bool                   `protobuf:"varint,9,opt,name=activo,proto3" json:"activo,omitempty"`
+	CreatedAt   string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// DNI declarado en el registro público (sin verificar). Vacío para las
+	// cuentas institucionales y los solicitantes ya verificados.
+	DniDeclarado string `protobuf:"bytes,12,opt,name=dni_declarado,json=dniDeclarado,proto3" json:"dni_declarado,omitempty"`
+	// El solicitante declaró un DNI que Secretaría todavía no verificó.
+	IdentidadPendiente bool `protobuf:"varint,13,opt,name=identidad_pendiente,json=identidadPendiente,proto3" json:"identidad_pendiente,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Usuario) Reset() {
@@ -147,6 +152,20 @@ func (x *Usuario) GetUpdatedAt() string {
 	return ""
 }
 
+func (x *Usuario) GetDniDeclarado() string {
+	if x != nil {
+		return x.DniDeclarado
+	}
+	return ""
+}
+
+func (x *Usuario) GetIdentidadPendiente() bool {
+	if x != nil {
+		return x.IdentidadPendiente
+	}
+	return false
+}
+
 // Proyección mínima pensada para resolver identificadores en otros módulos
 // (Expedientes, Derivaciones, Seguimiento). No incluye teléfono, correo
 // ni dirección. El dni solo se completa cuando quien consulta está
@@ -160,8 +179,10 @@ type UsuarioBasic struct {
 	NombreCompleto string                 `protobuf:"bytes,4,opt,name=nombre_completo,json=nombreCompleto,proto3" json:"nombre_completo,omitempty"`
 	TipoUsuario    string                 `protobuf:"bytes,5,opt,name=tipo_usuario,json=tipoUsuario,proto3" json:"tipo_usuario,omitempty"`
 	Dni            string                 `protobuf:"bytes,6,opt,name=dni,proto3" json:"dni,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Marca "Identidad no verificada" (no expone el DNI declarado).
+	IdentidadPendiente bool `protobuf:"varint,7,opt,name=identidad_pendiente,json=identidadPendiente,proto3" json:"identidad_pendiente,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *UsuarioBasic) Reset() {
@@ -234,6 +255,13 @@ func (x *UsuarioBasic) GetDni() string {
 		return x.Dni
 	}
 	return ""
+}
+
+func (x *UsuarioBasic) GetIdentidadPendiente() bool {
+	if x != nil {
+		return x.IdentidadPendiente
+	}
+	return false
 }
 
 type GetUsuarioRequest struct {
@@ -888,6 +916,239 @@ func (x *UpsertUsuarioResponse) GetUsuario() *Usuario {
 // el propio usuario puede tocar sobre sí mismo (ver Paso 22D/22B):
 // nombres, apellidos, DNI, tipo_usuario y activo permanecen fuera de este
 // RPC (edición administrativa, no implementada todavía).
+// Autoperfil del SOLICITANTE que se registró con Google. El id sale del JWT
+// (nunca de la solicitud) y el tipo es siempre SOLICITANTE (rol firmado en el
+// token). Solo crea el perfil si no existe: un reintento devuelve el existente
+// (created = false) y nunca sobrescribe datos. DNI duplicado -> AlreadyExists.
+type CreateMyProfileRequest struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Nombres   string                 `protobuf:"bytes,1,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	Apellidos string                 `protobuf:"bytes,2,opt,name=apellidos,proto3" json:"apellidos,omitempty"`
+	Dni       string                 `protobuf:"bytes,3,opt,name=dni,proto3" json:"dni,omitempty"`
+	Telefono  string                 `protobuf:"bytes,4,opt,name=telefono,proto3" json:"telefono,omitempty"`
+	Correo    string                 `protobuf:"bytes,5,opt,name=correo,proto3" json:"correo,omitempty"`
+	Direccion string                 `protobuf:"bytes,6,opt,name=direccion,proto3" json:"direccion,omitempty"`
+	// Registro público: DNI DECLARADO (no reserva el DNI; dni debe ir vacío).
+	DniDeclarado  string `protobuf:"bytes,7,opt,name=dni_declarado,json=dniDeclarado,proto3" json:"dni_declarado,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMyProfileRequest) Reset() {
+	*x = CreateMyProfileRequest{}
+	mi := &file_usuarios_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMyProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMyProfileRequest) ProtoMessage() {}
+
+func (x *CreateMyProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMyProfileRequest.ProtoReflect.Descriptor instead.
+func (*CreateMyProfileRequest) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CreateMyProfileRequest) GetNombres() string {
+	if x != nil {
+		return x.Nombres
+	}
+	return ""
+}
+
+func (x *CreateMyProfileRequest) GetApellidos() string {
+	if x != nil {
+		return x.Apellidos
+	}
+	return ""
+}
+
+func (x *CreateMyProfileRequest) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+func (x *CreateMyProfileRequest) GetTelefono() string {
+	if x != nil {
+		return x.Telefono
+	}
+	return ""
+}
+
+func (x *CreateMyProfileRequest) GetCorreo() string {
+	if x != nil {
+		return x.Correo
+	}
+	return ""
+}
+
+func (x *CreateMyProfileRequest) GetDireccion() string {
+	if x != nil {
+		return x.Direccion
+	}
+	return ""
+}
+
+func (x *CreateMyProfileRequest) GetDniDeclarado() string {
+	if x != nil {
+		return x.DniDeclarado
+	}
+	return ""
+}
+
+type CreateMyProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Usuario       *Usuario               `protobuf:"bytes,1,opt,name=usuario,proto3" json:"usuario,omitempty"`
+	Created       bool                   `protobuf:"varint,2,opt,name=created,proto3" json:"created,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMyProfileResponse) Reset() {
+	*x = CreateMyProfileResponse{}
+	mi := &file_usuarios_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMyProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMyProfileResponse) ProtoMessage() {}
+
+func (x *CreateMyProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMyProfileResponse.ProtoReflect.Descriptor instead.
+func (*CreateMyProfileResponse) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CreateMyProfileResponse) GetUsuario() *Usuario {
+	if x != nil {
+		return x.Usuario
+	}
+	return nil
+}
+
+func (x *CreateMyProfileResponse) GetCreated() bool {
+	if x != nil {
+		return x.Created
+	}
+	return false
+}
+
+// Preparación para el registro público: el Gateway la consulta ANTES de que
+// Auth cree una cuenta (registro manual y Google). ready = la base responde y
+// el esquema admite perfiles con DNI declarado (migración 003). Sin sesión
+// (el registro es anónimo) y sin ningún dato: solo un booleano.
+type PublicRegistrationReadyRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublicRegistrationReadyRequest) Reset() {
+	*x = PublicRegistrationReadyRequest{}
+	mi := &file_usuarios_service_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublicRegistrationReadyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublicRegistrationReadyRequest) ProtoMessage() {}
+
+func (x *PublicRegistrationReadyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublicRegistrationReadyRequest.ProtoReflect.Descriptor instead.
+func (*PublicRegistrationReadyRequest) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{16}
+}
+
+type PublicRegistrationReadyResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ready         bool                   `protobuf:"varint,1,opt,name=ready,proto3" json:"ready,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublicRegistrationReadyResponse) Reset() {
+	*x = PublicRegistrationReadyResponse{}
+	mi := &file_usuarios_service_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublicRegistrationReadyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublicRegistrationReadyResponse) ProtoMessage() {}
+
+func (x *PublicRegistrationReadyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublicRegistrationReadyResponse.ProtoReflect.Descriptor instead.
+func (*PublicRegistrationReadyResponse) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *PublicRegistrationReadyResponse) GetReady() bool {
+	if x != nil {
+		return x.Ready
+	}
+	return false
+}
+
 type UpdateMyProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Telefono      string                 `protobuf:"bytes,1,opt,name=telefono,proto3" json:"telefono,omitempty"`
@@ -899,7 +1160,7 @@ type UpdateMyProfileRequest struct {
 
 func (x *UpdateMyProfileRequest) Reset() {
 	*x = UpdateMyProfileRequest{}
-	mi := &file_usuarios_service_proto_msgTypes[14]
+	mi := &file_usuarios_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -911,7 +1172,7 @@ func (x *UpdateMyProfileRequest) String() string {
 func (*UpdateMyProfileRequest) ProtoMessage() {}
 
 func (x *UpdateMyProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_usuarios_service_proto_msgTypes[14]
+	mi := &file_usuarios_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -924,7 +1185,7 @@ func (x *UpdateMyProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMyProfileRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMyProfileRequest) Descriptor() ([]byte, []int) {
-	return file_usuarios_service_proto_rawDescGZIP(), []int{14}
+	return file_usuarios_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *UpdateMyProfileRequest) GetTelefono() string {
@@ -957,7 +1218,7 @@ type UpdateMyProfileResponse struct {
 
 func (x *UpdateMyProfileResponse) Reset() {
 	*x = UpdateMyProfileResponse{}
-	mi := &file_usuarios_service_proto_msgTypes[15]
+	mi := &file_usuarios_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -969,7 +1230,7 @@ func (x *UpdateMyProfileResponse) String() string {
 func (*UpdateMyProfileResponse) ProtoMessage() {}
 
 func (x *UpdateMyProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_usuarios_service_proto_msgTypes[15]
+	mi := &file_usuarios_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -982,7 +1243,7 @@ func (x *UpdateMyProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMyProfileResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMyProfileResponse) Descriptor() ([]byte, []int) {
-	return file_usuarios_service_proto_rawDescGZIP(), []int{15}
+	return file_usuarios_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UpdateMyProfileResponse) GetUsuario() *Usuario {
@@ -1007,7 +1268,7 @@ type UpdateUsuarioRoleRequest struct {
 
 func (x *UpdateUsuarioRoleRequest) Reset() {
 	*x = UpdateUsuarioRoleRequest{}
-	mi := &file_usuarios_service_proto_msgTypes[16]
+	mi := &file_usuarios_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1019,7 +1280,7 @@ func (x *UpdateUsuarioRoleRequest) String() string {
 func (*UpdateUsuarioRoleRequest) ProtoMessage() {}
 
 func (x *UpdateUsuarioRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_usuarios_service_proto_msgTypes[16]
+	mi := &file_usuarios_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1032,7 +1293,7 @@ func (x *UpdateUsuarioRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUsuarioRoleRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUsuarioRoleRequest) Descriptor() ([]byte, []int) {
-	return file_usuarios_service_proto_rawDescGZIP(), []int{16}
+	return file_usuarios_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *UpdateUsuarioRoleRequest) GetId() string {
@@ -1058,7 +1319,7 @@ type UpdateUsuarioRoleResponse struct {
 
 func (x *UpdateUsuarioRoleResponse) Reset() {
 	*x = UpdateUsuarioRoleResponse{}
-	mi := &file_usuarios_service_proto_msgTypes[17]
+	mi := &file_usuarios_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1070,7 +1331,7 @@ func (x *UpdateUsuarioRoleResponse) String() string {
 func (*UpdateUsuarioRoleResponse) ProtoMessage() {}
 
 func (x *UpdateUsuarioRoleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_usuarios_service_proto_msgTypes[17]
+	mi := &file_usuarios_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1083,10 +1344,109 @@ func (x *UpdateUsuarioRoleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUsuarioRoleResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUsuarioRoleResponse) Descriptor() ([]byte, []int) {
-	return file_usuarios_service_proto_rawDescGZIP(), []int{17}
+	return file_usuarios_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *UpdateUsuarioRoleResponse) GetUsuario() *Usuario {
+	if x != nil {
+		return x.Usuario
+	}
+	return nil
+}
+
+// Verificación de identidad por Secretaría (permiso
+// solicitantes.identidad.verify): pasa el DNI declarado al DNI definitivo del
+// perfil, o lo revierte si Auth no pudo completar la verificación.
+type VerifiedDniRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Dni           string                 `protobuf:"bytes,2,opt,name=dni,proto3" json:"dni,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifiedDniRequest) Reset() {
+	*x = VerifiedDniRequest{}
+	mi := &file_usuarios_service_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifiedDniRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifiedDniRequest) ProtoMessage() {}
+
+func (x *VerifiedDniRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifiedDniRequest.ProtoReflect.Descriptor instead.
+func (*VerifiedDniRequest) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *VerifiedDniRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *VerifiedDniRequest) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+type VerifiedDniResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Usuario       *Usuario               `protobuf:"bytes,1,opt,name=usuario,proto3" json:"usuario,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifiedDniResponse) Reset() {
+	*x = VerifiedDniResponse{}
+	mi := &file_usuarios_service_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifiedDniResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifiedDniResponse) ProtoMessage() {}
+
+func (x *VerifiedDniResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usuarios_service_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifiedDniResponse.ProtoReflect.Descriptor instead.
+func (*VerifiedDniResponse) Descriptor() ([]byte, []int) {
+	return file_usuarios_service_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *VerifiedDniResponse) GetUsuario() *Usuario {
 	if x != nil {
 		return x.Usuario
 	}
@@ -1097,7 +1457,7 @@ var File_usuarios_service_proto protoreflect.FileDescriptor
 
 const file_usuarios_service_proto_rawDesc = "" +
 	"\n" +
-	"\x16usuarios_service.proto\x12\busuarios\"\xae\x02\n" +
+	"\x16usuarios_service.proto\x12\busuarios\"\x84\x03\n" +
 	"\aUsuario\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\anombres\x18\x02 \x01(\tR\anombres\x12\x1c\n" +
@@ -1112,14 +1472,17 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\xb4\x01\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\x12#\n" +
+	"\rdni_declarado\x18\f \x01(\tR\fdniDeclarado\x12/\n" +
+	"\x13identidad_pendiente\x18\r \x01(\bR\x12identidadPendiente\"\xe5\x01\n" +
 	"\fUsuarioBasic\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\anombres\x18\x02 \x01(\tR\anombres\x12\x1c\n" +
 	"\tapellidos\x18\x03 \x01(\tR\tapellidos\x12'\n" +
 	"\x0fnombre_completo\x18\x04 \x01(\tR\x0enombreCompleto\x12!\n" +
 	"\ftipo_usuario\x18\x05 \x01(\tR\vtipoUsuario\x12\x10\n" +
-	"\x03dni\x18\x06 \x01(\tR\x03dni\"#\n" +
+	"\x03dni\x18\x06 \x01(\tR\x03dni\x12/\n" +
+	"\x13identidad_pendiente\x18\a \x01(\bR\x12identidadPendiente\"#\n" +
 	"\x11GetUsuarioRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x12GetUsuarioResponse\x12+\n" +
@@ -1157,7 +1520,21 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\tdireccion\x18\a \x01(\tR\tdireccion\x12!\n" +
 	"\ftipo_usuario\x18\b \x01(\tR\vtipoUsuario\"D\n" +
 	"\x15UpsertUsuarioResponse\x12+\n" +
-	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario\"j\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario\"\xd9\x01\n" +
+	"\x16CreateMyProfileRequest\x12\x18\n" +
+	"\anombres\x18\x01 \x01(\tR\anombres\x12\x1c\n" +
+	"\tapellidos\x18\x02 \x01(\tR\tapellidos\x12\x10\n" +
+	"\x03dni\x18\x03 \x01(\tR\x03dni\x12\x1a\n" +
+	"\btelefono\x18\x04 \x01(\tR\btelefono\x12\x16\n" +
+	"\x06correo\x18\x05 \x01(\tR\x06correo\x12\x1c\n" +
+	"\tdireccion\x18\x06 \x01(\tR\tdireccion\x12#\n" +
+	"\rdni_declarado\x18\a \x01(\tR\fdniDeclarado\"`\n" +
+	"\x17CreateMyProfileResponse\x12+\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario\x12\x18\n" +
+	"\acreated\x18\x02 \x01(\bR\acreated\" \n" +
+	"\x1ePublicRegistrationReadyRequest\"7\n" +
+	"\x1fPublicRegistrationReadyResponse\x12\x14\n" +
+	"\x05ready\x18\x01 \x01(\bR\x05ready\"j\n" +
 	"\x16UpdateMyProfileRequest\x12\x1a\n" +
 	"\btelefono\x18\x01 \x01(\tR\btelefono\x12\x16\n" +
 	"\x06correo\x18\x02 \x01(\tR\x06correo\x12\x1c\n" +
@@ -1168,7 +1545,12 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
 	"\ftipo_usuario\x18\x02 \x01(\tR\vtipoUsuario\"H\n" +
 	"\x19UpdateUsuarioRoleResponse\x12+\n" +
-	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario2\xb2\x05\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario\"6\n" +
+	"\x12VerifiedDniRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
+	"\x03dni\x18\x02 \x01(\tR\x03dni\"B\n" +
+	"\x13VerifiedDniResponse\x12+\n" +
+	"\ausuario\x18\x01 \x01(\v2\x11.usuarios.UsuarioR\ausuario2\x9e\b\n" +
 	"\bUsuarios\x12G\n" +
 	"\n" +
 	"GetUsuario\x12\x1b.usuarios.GetUsuarioRequest\x1a\x1c.usuarios.GetUsuarioResponse\x12V\n" +
@@ -1177,8 +1559,12 @@ const file_usuarios_service_proto_rawDesc = "" +
 	"\fListUsuarios\x12\x1d.usuarios.ListUsuariosRequest\x1a\x1e.usuarios.ListUsuariosResponse\x12S\n" +
 	"\x0eSearchUsuarios\x12\x1f.usuarios.SearchUsuariosRequest\x1a .usuarios.SearchUsuariosResponse\x12P\n" +
 	"\rUpsertUsuario\x12\x1e.usuarios.UpsertUsuarioRequest\x1a\x1f.usuarios.UpsertUsuarioResponse\x12V\n" +
-	"\x0fUpdateMyProfile\x12 .usuarios.UpdateMyProfileRequest\x1a!.usuarios.UpdateMyProfileResponse\x12\\\n" +
-	"\x11UpdateUsuarioRole\x12\".usuarios.UpdateUsuarioRoleRequest\x1a#.usuarios.UpdateUsuarioRoleResponseB\fZ\n" +
+	"\x0fUpdateMyProfile\x12 .usuarios.UpdateMyProfileRequest\x1a!.usuarios.UpdateMyProfileResponse\x12V\n" +
+	"\x0fCreateMyProfile\x12 .usuarios.CreateMyProfileRequest\x1a!.usuarios.CreateMyProfileResponse\x12\\\n" +
+	"\x11UpdateUsuarioRole\x12\".usuarios.UpdateUsuarioRoleRequest\x1a#.usuarios.UpdateUsuarioRoleResponse\x12P\n" +
+	"\x11AssignVerifiedDni\x12\x1c.usuarios.VerifiedDniRequest\x1a\x1d.usuarios.VerifiedDniResponse\x12n\n" +
+	"\x17PublicRegistrationReady\x12(.usuarios.PublicRegistrationReadyRequest\x1a).usuarios.PublicRegistrationReadyResponse\x12P\n" +
+	"\x11RevertVerifiedDni\x12\x1c.usuarios.VerifiedDniRequest\x1a\x1d.usuarios.VerifiedDniResponseB\fZ\n" +
 	"./usuariosb\x06proto3"
 
 var (
@@ -1193,26 +1579,32 @@ func file_usuarios_service_proto_rawDescGZIP() []byte {
 	return file_usuarios_service_proto_rawDescData
 }
 
-var file_usuarios_service_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_usuarios_service_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_usuarios_service_proto_goTypes = []any{
-	(*Usuario)(nil),                   // 0: usuarios.Usuario
-	(*UsuarioBasic)(nil),              // 1: usuarios.UsuarioBasic
-	(*GetUsuarioRequest)(nil),         // 2: usuarios.GetUsuarioRequest
-	(*GetUsuarioResponse)(nil),        // 3: usuarios.GetUsuarioResponse
-	(*GetUsuarioBasicRequest)(nil),    // 4: usuarios.GetUsuarioBasicRequest
-	(*GetUsuarioBasicResponse)(nil),   // 5: usuarios.GetUsuarioBasicResponse
-	(*GetUsuariosBasicRequest)(nil),   // 6: usuarios.GetUsuariosBasicRequest
-	(*GetUsuariosBasicResponse)(nil),  // 7: usuarios.GetUsuariosBasicResponse
-	(*ListUsuariosRequest)(nil),       // 8: usuarios.ListUsuariosRequest
-	(*ListUsuariosResponse)(nil),      // 9: usuarios.ListUsuariosResponse
-	(*SearchUsuariosRequest)(nil),     // 10: usuarios.SearchUsuariosRequest
-	(*SearchUsuariosResponse)(nil),    // 11: usuarios.SearchUsuariosResponse
-	(*UpsertUsuarioRequest)(nil),      // 12: usuarios.UpsertUsuarioRequest
-	(*UpsertUsuarioResponse)(nil),     // 13: usuarios.UpsertUsuarioResponse
-	(*UpdateMyProfileRequest)(nil),    // 14: usuarios.UpdateMyProfileRequest
-	(*UpdateMyProfileResponse)(nil),   // 15: usuarios.UpdateMyProfileResponse
-	(*UpdateUsuarioRoleRequest)(nil),  // 16: usuarios.UpdateUsuarioRoleRequest
-	(*UpdateUsuarioRoleResponse)(nil), // 17: usuarios.UpdateUsuarioRoleResponse
+	(*Usuario)(nil),                         // 0: usuarios.Usuario
+	(*UsuarioBasic)(nil),                    // 1: usuarios.UsuarioBasic
+	(*GetUsuarioRequest)(nil),               // 2: usuarios.GetUsuarioRequest
+	(*GetUsuarioResponse)(nil),              // 3: usuarios.GetUsuarioResponse
+	(*GetUsuarioBasicRequest)(nil),          // 4: usuarios.GetUsuarioBasicRequest
+	(*GetUsuarioBasicResponse)(nil),         // 5: usuarios.GetUsuarioBasicResponse
+	(*GetUsuariosBasicRequest)(nil),         // 6: usuarios.GetUsuariosBasicRequest
+	(*GetUsuariosBasicResponse)(nil),        // 7: usuarios.GetUsuariosBasicResponse
+	(*ListUsuariosRequest)(nil),             // 8: usuarios.ListUsuariosRequest
+	(*ListUsuariosResponse)(nil),            // 9: usuarios.ListUsuariosResponse
+	(*SearchUsuariosRequest)(nil),           // 10: usuarios.SearchUsuariosRequest
+	(*SearchUsuariosResponse)(nil),          // 11: usuarios.SearchUsuariosResponse
+	(*UpsertUsuarioRequest)(nil),            // 12: usuarios.UpsertUsuarioRequest
+	(*UpsertUsuarioResponse)(nil),           // 13: usuarios.UpsertUsuarioResponse
+	(*CreateMyProfileRequest)(nil),          // 14: usuarios.CreateMyProfileRequest
+	(*CreateMyProfileResponse)(nil),         // 15: usuarios.CreateMyProfileResponse
+	(*PublicRegistrationReadyRequest)(nil),  // 16: usuarios.PublicRegistrationReadyRequest
+	(*PublicRegistrationReadyResponse)(nil), // 17: usuarios.PublicRegistrationReadyResponse
+	(*UpdateMyProfileRequest)(nil),          // 18: usuarios.UpdateMyProfileRequest
+	(*UpdateMyProfileResponse)(nil),         // 19: usuarios.UpdateMyProfileResponse
+	(*UpdateUsuarioRoleRequest)(nil),        // 20: usuarios.UpdateUsuarioRoleRequest
+	(*UpdateUsuarioRoleResponse)(nil),       // 21: usuarios.UpdateUsuarioRoleResponse
+	(*VerifiedDniRequest)(nil),              // 22: usuarios.VerifiedDniRequest
+	(*VerifiedDniResponse)(nil),             // 23: usuarios.VerifiedDniResponse
 }
 var file_usuarios_service_proto_depIdxs = []int32{
 	0,  // 0: usuarios.GetUsuarioResponse.usuario:type_name -> usuarios.Usuario
@@ -1221,29 +1613,39 @@ var file_usuarios_service_proto_depIdxs = []int32{
 	0,  // 3: usuarios.ListUsuariosResponse.usuarios:type_name -> usuarios.Usuario
 	0,  // 4: usuarios.SearchUsuariosResponse.usuarios:type_name -> usuarios.Usuario
 	0,  // 5: usuarios.UpsertUsuarioResponse.usuario:type_name -> usuarios.Usuario
-	0,  // 6: usuarios.UpdateMyProfileResponse.usuario:type_name -> usuarios.Usuario
-	0,  // 7: usuarios.UpdateUsuarioRoleResponse.usuario:type_name -> usuarios.Usuario
-	2,  // 8: usuarios.Usuarios.GetUsuario:input_type -> usuarios.GetUsuarioRequest
-	4,  // 9: usuarios.Usuarios.GetUsuarioBasic:input_type -> usuarios.GetUsuarioBasicRequest
-	6,  // 10: usuarios.Usuarios.GetUsuariosBasic:input_type -> usuarios.GetUsuariosBasicRequest
-	8,  // 11: usuarios.Usuarios.ListUsuarios:input_type -> usuarios.ListUsuariosRequest
-	10, // 12: usuarios.Usuarios.SearchUsuarios:input_type -> usuarios.SearchUsuariosRequest
-	12, // 13: usuarios.Usuarios.UpsertUsuario:input_type -> usuarios.UpsertUsuarioRequest
-	14, // 14: usuarios.Usuarios.UpdateMyProfile:input_type -> usuarios.UpdateMyProfileRequest
-	16, // 15: usuarios.Usuarios.UpdateUsuarioRole:input_type -> usuarios.UpdateUsuarioRoleRequest
-	3,  // 16: usuarios.Usuarios.GetUsuario:output_type -> usuarios.GetUsuarioResponse
-	5,  // 17: usuarios.Usuarios.GetUsuarioBasic:output_type -> usuarios.GetUsuarioBasicResponse
-	7,  // 18: usuarios.Usuarios.GetUsuariosBasic:output_type -> usuarios.GetUsuariosBasicResponse
-	9,  // 19: usuarios.Usuarios.ListUsuarios:output_type -> usuarios.ListUsuariosResponse
-	11, // 20: usuarios.Usuarios.SearchUsuarios:output_type -> usuarios.SearchUsuariosResponse
-	13, // 21: usuarios.Usuarios.UpsertUsuario:output_type -> usuarios.UpsertUsuarioResponse
-	15, // 22: usuarios.Usuarios.UpdateMyProfile:output_type -> usuarios.UpdateMyProfileResponse
-	17, // 23: usuarios.Usuarios.UpdateUsuarioRole:output_type -> usuarios.UpdateUsuarioRoleResponse
-	16, // [16:24] is the sub-list for method output_type
-	8,  // [8:16] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	0,  // 6: usuarios.CreateMyProfileResponse.usuario:type_name -> usuarios.Usuario
+	0,  // 7: usuarios.UpdateMyProfileResponse.usuario:type_name -> usuarios.Usuario
+	0,  // 8: usuarios.UpdateUsuarioRoleResponse.usuario:type_name -> usuarios.Usuario
+	0,  // 9: usuarios.VerifiedDniResponse.usuario:type_name -> usuarios.Usuario
+	2,  // 10: usuarios.Usuarios.GetUsuario:input_type -> usuarios.GetUsuarioRequest
+	4,  // 11: usuarios.Usuarios.GetUsuarioBasic:input_type -> usuarios.GetUsuarioBasicRequest
+	6,  // 12: usuarios.Usuarios.GetUsuariosBasic:input_type -> usuarios.GetUsuariosBasicRequest
+	8,  // 13: usuarios.Usuarios.ListUsuarios:input_type -> usuarios.ListUsuariosRequest
+	10, // 14: usuarios.Usuarios.SearchUsuarios:input_type -> usuarios.SearchUsuariosRequest
+	12, // 15: usuarios.Usuarios.UpsertUsuario:input_type -> usuarios.UpsertUsuarioRequest
+	18, // 16: usuarios.Usuarios.UpdateMyProfile:input_type -> usuarios.UpdateMyProfileRequest
+	14, // 17: usuarios.Usuarios.CreateMyProfile:input_type -> usuarios.CreateMyProfileRequest
+	20, // 18: usuarios.Usuarios.UpdateUsuarioRole:input_type -> usuarios.UpdateUsuarioRoleRequest
+	22, // 19: usuarios.Usuarios.AssignVerifiedDni:input_type -> usuarios.VerifiedDniRequest
+	16, // 20: usuarios.Usuarios.PublicRegistrationReady:input_type -> usuarios.PublicRegistrationReadyRequest
+	22, // 21: usuarios.Usuarios.RevertVerifiedDni:input_type -> usuarios.VerifiedDniRequest
+	3,  // 22: usuarios.Usuarios.GetUsuario:output_type -> usuarios.GetUsuarioResponse
+	5,  // 23: usuarios.Usuarios.GetUsuarioBasic:output_type -> usuarios.GetUsuarioBasicResponse
+	7,  // 24: usuarios.Usuarios.GetUsuariosBasic:output_type -> usuarios.GetUsuariosBasicResponse
+	9,  // 25: usuarios.Usuarios.ListUsuarios:output_type -> usuarios.ListUsuariosResponse
+	11, // 26: usuarios.Usuarios.SearchUsuarios:output_type -> usuarios.SearchUsuariosResponse
+	13, // 27: usuarios.Usuarios.UpsertUsuario:output_type -> usuarios.UpsertUsuarioResponse
+	19, // 28: usuarios.Usuarios.UpdateMyProfile:output_type -> usuarios.UpdateMyProfileResponse
+	15, // 29: usuarios.Usuarios.CreateMyProfile:output_type -> usuarios.CreateMyProfileResponse
+	21, // 30: usuarios.Usuarios.UpdateUsuarioRole:output_type -> usuarios.UpdateUsuarioRoleResponse
+	23, // 31: usuarios.Usuarios.AssignVerifiedDni:output_type -> usuarios.VerifiedDniResponse
+	17, // 32: usuarios.Usuarios.PublicRegistrationReady:output_type -> usuarios.PublicRegistrationReadyResponse
+	23, // 33: usuarios.Usuarios.RevertVerifiedDni:output_type -> usuarios.VerifiedDniResponse
+	22, // [22:34] is the sub-list for method output_type
+	10, // [10:22] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_usuarios_service_proto_init() }
@@ -1257,7 +1659,7 @@ func file_usuarios_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_usuarios_service_proto_rawDesc), len(file_usuarios_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -3,6 +3,15 @@
 
 package types
 
+type ActividadRolDTO struct {
+	Rol                     string `json:"rol"`
+	ExpedientesRegistrados  int32  `json:"expedientes_registrados"`
+	MovimientosRegistrados  int32  `json:"movimientos_registrados"`
+	DerivacionesRegistradas int32  `json:"derivaciones_registradas"`
+	DocumentosSubidos       int32  `json:"documentos_subidos"`
+	Total                   int32  `json:"total"`
+}
+
 type ActualizarFamiliarRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
@@ -28,6 +37,12 @@ type ArchivoExcelResponse struct {
 	Nombre          string `json:"nombre"`
 	ContenidoBase64 string `json:"contenido_base64"`
 	Filas           int32  `json:"filas"`
+}
+
+type ArchivoReporteResponse struct {
+	Nombre          string `json:"nombre"`
+	Mime            string `json:"mime"`
+	ContenidoBase64 string `json:"contenido_base64"`
 }
 
 type AtencionContenidoDTO struct {
@@ -94,6 +109,30 @@ type AtencionVersionResumenDTO struct {
 	MotivoCorreccion string `json:"motivo_correccion"`
 	CreadaPor        string `json:"creada_por"`
 	CreadaEn         string `json:"creada_en"`
+}
+
+type BuscarEstudiantesSeleccionRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `json:"q"`
+	Page          int32  `json:"page,optional"`
+	PageSize      int32  `json:"page_size,optional"`
+}
+
+type BuscarEstudiantesSeleccionResponse struct {
+	Estudiantes []EstudianteBusquedaDTO `json:"estudiantes"`
+	Total       int32                   `json:"total"`
+}
+
+type BuscarPsicologiaEstudiantesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Q             string `json:"q"`
+	Page          int32  `json:"page,optional"`
+	PageSize      int32  `json:"page_size,optional"`
+}
+
+type BuscarPsicologiaEstudiantesResponse struct {
+	Estudiantes []EstudianteBusquedaDTO `json:"estudiantes"`
+	Total       int32                   `json:"total"`
 }
 
 type CambiarParentescoFamiliarRequest struct {
@@ -170,6 +209,15 @@ type ColumnaAnalizadaDTO struct {
 type ColumnaExportDatosDTO struct {
 	Clave      string `json:"clave"`
 	Encabezado string `json:"encabezado,optional"`
+}
+
+type ComparacionFilaDTO struct {
+	Grupo          string  `json:"grupo"`
+	Clave          string  `json:"clave"`
+	Actual         int32   `json:"actual"`
+	Anterior       int32   `json:"anterior"`
+	TieneVariacion bool    `json:"tiene_variacion"`
+	Variacion      float64 `json:"variacion"`
 }
 
 type ConcluirMatriculaRequest struct {
@@ -455,6 +503,13 @@ type EstudianteBasicoDTO struct {
 	Version         int32  `json:"version"` // FASE E-05
 }
 
+type EstudianteBusquedaDTO struct {
+	Id             string `json:"id"`
+	NombreCompleto string `json:"nombre_completo"`
+	Grado          string `json:"grado"`
+	Seccion        string `json:"seccion"`
+}
+
 type EstudianteDTO struct {
 	Id              string `json:"id"`
 	Codigo          string `json:"codigo"`
@@ -485,6 +540,11 @@ type EstudiantePersonalDTO struct {
 	Correo                string `json:"correo"`
 	Telefono              string `json:"telefono"`
 	Edad                  *int32 `json:"edad"`
+}
+
+type EstudianteResumenDTO struct {
+	NombreCompleto string `json:"nombre_completo"`
+	Resolucion     string `json:"resolucion"`
 }
 
 type EstudianteWriteResponse struct {
@@ -522,18 +582,19 @@ type ExpedienteDTO struct {
 }
 
 type ExpedientePsicologicoDTO struct {
-	Id            string `json:"id"`
-	EstudianteId  string `json:"estudiante_id"`
-	Codigo        string `json:"codigo"`
-	Estado        string `json:"estado"`
-	ResponsableId string `json:"responsable_id"`
-	AbiertoPor    string `json:"abierto_por"`
-	FechaApertura string `json:"fecha_apertura"`
-	FechaCierre   string `json:"fecha_cierre"`
-	MotivoCierre  string `json:"motivo_cierre"`
-	ResumenCaso   string `json:"resumen_caso"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
+	Id            string                `json:"id"`
+	EstudianteId  string                `json:"estudiante_id"`
+	Codigo        string                `json:"codigo"`
+	Estado        string                `json:"estado"`
+	ResponsableId string                `json:"responsable_id"`
+	AbiertoPor    string                `json:"abierto_por"`
+	FechaApertura string                `json:"fecha_apertura"`
+	FechaCierre   string                `json:"fecha_cierre"`
+	MotivoCierre  string                `json:"motivo_cierre"`
+	ResumenCaso   string                `json:"resumen_caso"`
+	CreatedAt     string                `json:"created_at"`
+	UpdatedAt     string                `json:"updated_at"`
+	Estudiante    *EstudianteResumenDTO `json:"estudiante,omitempty"`
 }
 
 type ExportFutPdfRequest struct {
@@ -561,6 +622,42 @@ type ExportarEstudiantesExcelRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Estado        string `form:"estado,optional"`
 	Nivel         string `form:"nivel,optional"`
+}
+
+type ExportarReporteComparacionRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Formato       string `form:"formato"`
+	Desde         string `form:"desde"`
+	Hasta         string `form:"hasta"`
+	Modo          string `form:"modo,optional"`
+	DesdeB        string `form:"desde_b,optional"`
+	HastaB        string `form:"hasta_b,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+}
+
+type ExportarReporteExpedientesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Formato       string `form:"formato"`
+	Vista         string `form:"vista,optional"`
+	Granularidad  string `form:"granularidad,optional"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+}
+
+type ExportarReportePeriodoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Formato       string `form:"formato"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Granularidad  string `form:"granularidad,optional"`
 }
 
 type FamiliarDTO struct {
@@ -720,6 +817,103 @@ type GetUsuariosBasicRequest struct {
 
 type GetUsuariosBasicResponse struct {
 	Usuarios []UsuarioBasicDTO `json:"usuarios"`
+}
+
+type GoogleCallbackRequest struct {
+	Code  string `form:"code,optional"`
+	State string `form:"state,optional"`
+	Error string `form:"error,optional"`
+}
+
+type GoogleCanjearRequest struct {
+	Codigo string `json:"codigo"`
+}
+
+type GoogleCanjearResponse struct {
+	Resultado string         `json:"resultado"`
+	Sesion    *LoginResponse `json:"sesion,omitempty"`
+	Correo    string         `json:"correo,omitempty"`
+	Nombres   string         `json:"nombres,omitempty"`
+	Apellidos string         `json:"apellidos,omitempty"`
+}
+
+type GoogleEstadoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type GoogleEstadoResponse struct {
+	Vinculado  bool   `json:"vinculado"`
+	Correo     string `json:"correo"`
+	Disponible bool   `json:"disponible"`
+}
+
+type GoogleIniciarRequest struct {
+	Modo string `form:"modo,optional"`
+}
+
+type GoogleRedireccionResponse struct {
+}
+
+type GoogleRegistroRequest struct {
+	Codigo          string `json:"codigo"`
+	Dni             string `json:"dni"`
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno,optional"`
+	Telefono        string `json:"telefono,optional"`
+	Direccion       string `json:"direccion,optional"`
+}
+
+// ---- Registro manual con verificación del correo (solo SOLICITANTES) ----
+// El rol NO se recibe: siempre SOLICITANTE. La cuenta se crea al verificar.
+type RegistroCorreoRequest struct {
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno,optional"`
+	Dni             string `json:"dni"`
+	Correo          string `json:"correo"`
+	Clave           string `json:"clave"`
+	AceptaTerminos  bool   `json:"acepta_terminos,optional"`
+	VersionTerminos string `json:"version_terminos,optional"`
+}
+
+// Misma respuesta exista o no el correo.
+type RegistroCorreoResponse struct {
+	RegistroId string `json:"registro_id"`
+	ExpiraEn   int64  `json:"expira_en"`
+	ReenviarEn int64  `json:"reenviar_en"`
+	Mensaje    string `json:"mensaje"`
+}
+
+type RegistroVerificarRequest struct {
+	RegistroId string `json:"registro_id"`
+	Codigo     string `json:"codigo"`
+}
+
+// Sin DNI: el DNI declarado no se devuelve; se inicia sesión con el correo.
+type RegistroVerificarResponse struct {
+	Mensaje string `json:"mensaje"`
+	Correo  string `json:"correo"`
+}
+
+type RegistroReenviarRequest struct {
+	RegistroId string `json:"registro_id"`
+}
+
+type RegistroReenviarResponse struct {
+	ExpiraEn   int64  `json:"expira_en"`
+	ReenviarEn int64  `json:"reenviar_en"`
+	Mensaje    string `json:"mensaje"`
+}
+
+type GoogleVincularRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Clave         string `json:"clave"`
+}
+
+type GoogleVincularResponse struct {
+	Url      string `json:"url"`
+	ExpiraEn int64  `json:"expira_en"`
 }
 
 type GrupoPosibleDuplicadoDTO struct {
@@ -939,8 +1133,10 @@ type ListUsuariosResponse struct {
 }
 
 type LoginRequest struct {
-	Dni      string `json:"dni"`
+	Dni      string `json:"dni,optional"`
 	Password string `json:"password"`
+	// Solo solicitantes del registro público cuyo DNI aún no fue verificado.
+	Correo string `json:"correo,optional"`
 }
 
 type LoginResponse struct {
@@ -1149,6 +1345,123 @@ type ReopenPsicologiaExpedienteRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Id            string `path:"id"`
 	Estado        string `json:"estado,optional"`
+}
+
+type ReporteActividadResponse struct {
+	Roles       []ActividadRolDTO `json:"roles"`
+	Alcance     string            `json:"alcance"`
+	AreaAlcance string            `json:"area_alcance"`
+	Generado    string            `json:"generado"`
+}
+
+type ReporteComparacionRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Desde         string `form:"desde"`
+	Hasta         string `form:"hasta"`
+	Modo          string `form:"modo,optional"`
+	DesdeB        string `form:"desde_b,optional"`
+	HastaB        string `form:"hasta_b,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+}
+
+type ReporteComparacionResponse struct {
+	DesdeA      string               `json:"desde_a"`
+	HastaA      string               `json:"hasta_a"`
+	DesdeB      string               `json:"desde_b"`
+	HastaB      string               `json:"hasta_b"`
+	TotalA      int32                `json:"total_a"`
+	TotalB      int32                `json:"total_b"`
+	Comparable  bool                 `json:"comparable"`
+	Minimo      int32                `json:"minimo"`
+	Mensaje     string               `json:"mensaje"`
+	Filas       []ComparacionFilaDTO `json:"filas"`
+	Alcance     string               `json:"alcance"`
+	AreaAlcance string               `json:"area_alcance"`
+	Generado    string               `json:"generado"`
+}
+
+type ReporteConteoDTO struct {
+	Clave    string `json:"clave"`
+	Cantidad int32  `json:"cantidad"`
+}
+
+type ReporteCruceDTO struct {
+	Fila     string `json:"fila"`
+	Columna  string `json:"columna"`
+	Cantidad int32  `json:"cantidad"`
+}
+
+type ReporteDerivacionesResponse struct {
+	Total            int32              `json:"total"`
+	PorDestino       []ReporteConteoDTO `json:"por_destino"`
+	PorOrigen        []ReporteConteoDTO `json:"por_origen"`
+	Flujo            []ReporteFlujoDTO  `json:"flujo"`
+	PorTipoTramite   []ReporteConteoDTO `json:"por_tipo_tramite"`
+	Serie            []ReporteConteoDTO `json:"serie"`
+	Granularidad     string             `json:"granularidad"`
+	OtrosMovimientos []ReporteConteoDTO `json:"otros_movimientos"`
+	SinClasificar    int32              `json:"sin_clasificar"`
+	Alcance          string             `json:"alcance"`
+	AreaAlcance      string             `json:"area_alcance"`
+	Generado         string             `json:"generado"`
+}
+
+type ReporteDocumentosResponse struct {
+	Total            int32              `json:"total"`
+	PorTipoDocumento []ReporteConteoDTO `json:"por_tipo_documento"`
+	PorTipoTramite   []ReporteConteoDTO `json:"por_tipo_tramite"`
+	Serie            []ReporteConteoDTO `json:"serie"`
+	Granularidad     string             `json:"granularidad"`
+	Alcance          string             `json:"alcance"`
+	AreaAlcance      string             `json:"area_alcance"`
+	Generado         string             `json:"generado"`
+}
+
+type ReporteExpedientesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Estado        string `form:"estado,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Prioridad     string `form:"prioridad,optional"`
+	Area          string `form:"area,optional"`
+	Granularidad  string `form:"granularidad,optional"`
+}
+
+type ReporteExpedientesResponse struct {
+	Total                   int32              `json:"total"`
+	PorEstado               []ReporteConteoDTO `json:"por_estado"`
+	PorTipo                 []ReporteConteoDTO `json:"por_tipo"`
+	PorPrioridad            []ReporteConteoDTO `json:"por_prioridad"`
+	PorArea                 []ReporteConteoDTO `json:"por_area"`
+	PorMes                  []ReporteConteoDTO `json:"por_mes"`
+	Pendientes              int32              `json:"pendientes"`
+	PendientesPorAntiguedad []ReporteConteoDTO `json:"pendientes_por_antiguedad"`
+	Alcance                 string             `json:"alcance"`
+	AreaAlcance             string             `json:"area_alcance"`
+	Generado                string             `json:"generado"`
+	Serie                   []ReporteConteoDTO `json:"serie"`
+	Granularidad            string             `json:"granularidad"`
+	AreaEstado              []ReporteCruceDTO  `json:"area_estado"`
+	TipoEstado              []ReporteCruceDTO  `json:"tipo_estado"`
+	SerieEstado             []ReporteCruceDTO  `json:"serie_estado"`
+}
+
+type ReporteFlujoDTO struct {
+	Origen   string `json:"origen"`
+	Destino  string `json:"destino"`
+	Cantidad int32  `json:"cantidad"`
+}
+
+type ReportePeriodoRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Desde         string `form:"desde,optional"`
+	Hasta         string `form:"hasta,optional"`
+	Tipo          string `form:"tipo,optional"`
+	Granularidad  string `form:"granularidad,optional"`
 }
 
 type ResolveEstudianteRequest struct {
@@ -1420,6 +1733,72 @@ type UsuarioBasicDTO struct {
 	NombreCompleto string `json:"nombre_completo"`
 	TipoUsuario    string `json:"tipo_usuario"`
 	Dni            string `json:"dni"`
+	// Marca "Identidad no verificada" (sin el DNI declarado).
+	IdentidadPendiente bool `json:"identidad_pendiente"`
+}
+
+// ---- Verificación de identidad de solicitantes (Secretaría) ----
+// Permiso solicitantes.identidad.verify (lo comprueban Auth y Usuarios).
+type IdentidadSolicitanteDTO struct {
+	UsuarioId      string `json:"usuario_id"`
+	NombreCompleto string `json:"nombre_completo"`
+	DniDeclarado   string `json:"dni_declarado"`
+	Origen         string `json:"origen"`
+	Estado         string `json:"estado"`
+	Metodo         string `json:"metodo"`
+	VerificadoAt   string `json:"verificado_at"`
+	MotivoRechazo  string `json:"motivo_rechazo"`
+	CreatedAt      string `json:"created_at"`
+	Conflicto      bool   `json:"conflicto"`
+	// Sincronización del DNI verificado con el perfil (Usuarios): "",
+	// PERFIL_PENDIENTE o COMPLETA, y la traza del último intento.
+	Sincronizacion         string `json:"sincronizacion"`
+	SincronizacionIntentos int32  `json:"sincronizacion_intentos"`
+	SincronizacionError    string `json:"sincronizacion_error"`
+}
+
+type ListIdentidadesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Limit         int32  `form:"limit,optional"`
+	Offset        int32  `form:"offset,optional"`
+	// Solo verificadas con el perfil pendiente de sincronizar.
+	SincronizacionPendiente bool `form:"sincronizacion_pendiente,optional"`
+}
+
+type ListIdentidadesResponse struct {
+	Items []IdentidadSolicitanteDTO `json:"items"`
+	Total int32                     `json:"total"`
+}
+
+type VerificarIdentidadRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Metodo        string `json:"metodo"`
+}
+
+type RechazarIdentidadRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type IdentidadEstadoResponse struct {
+	Estado string `json:"estado"`
+	// PERFIL_PENDIENTE: Auth verificó y el perfil se actualizará en la
+	// reconciliación (el DNI ya no puede usarlo otra cuenta).
+	Sincronizacion string `json:"sincronizacion"`
+}
+
+// Reconciliación: reintenta las verificaciones con el perfil pendiente.
+type ReconciliarIdentidadesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ReconciliarIdentidadesResponse struct {
+	Completadas int `json:"completadas"`
+	Revertidas  int `json:"revertidas"`
+	Pendientes  int `json:"pendientes"`
 }
 
 type UsuarioDTO struct {
@@ -1434,6 +1813,9 @@ type UsuarioDTO struct {
 	Activo      bool   `json:"activo"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
+	// DNI declarado en el registro público (sin verificar).
+	DniDeclarado       string `json:"dni_declarado"`
+	IdentidadPendiente bool   `json:"identidad_pendiente"`
 }
 
 type ValidateTokenRequest struct {

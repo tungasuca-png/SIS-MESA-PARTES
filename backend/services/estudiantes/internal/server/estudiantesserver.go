@@ -68,6 +68,11 @@ func (s *EstudiantesServer) ResolveEstudiante(ctx context.Context, in *estudiant
 	return l.ResolveEstudiante(in)
 }
 
+func (s *EstudiantesServer) BuscarEstudiantesSeleccion(ctx context.Context, in *estudiantes.BuscarEstudiantesSeleccionRequest) (*estudiantes.BuscarEstudiantesSeleccionResponse, error) {
+	l := logic.NewBuscarEstudiantesSeleccionLogic(ctx, s.svcCtx)
+	return l.BuscarEstudiantesSeleccion(in)
+}
+
 func (s *EstudiantesServer) ListPosiblesDuplicados(ctx context.Context, in *estudiantes.ListPosiblesDuplicadosRequest) (*estudiantes.ListPosiblesDuplicadosResponse, error) {
 	l := logic.NewListPosiblesDuplicadosLogic(ctx, s.svcCtx)
 	return l.ListPosiblesDuplicados(in)

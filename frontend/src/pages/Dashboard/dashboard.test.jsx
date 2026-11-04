@@ -5,10 +5,12 @@ import { AuthContext } from "../../context/auth-context";
 import Dashboard from "./dashboard";
 import { agruparPorDia, cargarSerieDiaria } from "./dashboardData";
 import * as expedientes from "../../services/expedientesService";
+import * as reportes from "../../services/reportesService";
 
 // Dashboard: cifras calculadas solo con el listado real de expedientes,
 // visibles solo con expedientes.view. Datos ficticios; HTTP simulado.
 vi.mock("../../services/expedientesService", () => ({ getExpedientes: vi.fn() }));
+vi.mock("../../services/reportesService", () => ({ getReporteExpedientes: vi.fn() }));
 vi.mock("../../services/usuariosService", () => ({ getUsuariosBasic: vi.fn().mockResolvedValue({ usuarios: [] }) }));
 vi.mock("../../components/dashboard/DashboardLayout", () => ({ default: ({ children }) => <div>{children}</div> }));
 
@@ -139,5 +141,49 @@ describe("Dashboard", () => {
         renderDashboard(["dashboard.view", "expedientes.view_own"], "SOLICITANTE");
         expect(expedientes.getExpedientes).not.toHaveBeenCalled();
         expect(screen.queryByText("Resumen de Mesa de Partes")).toBeNull();
+    });
+});
+
+// Con reportes.view, los indicadores y "por tipo" salen del endpoint agregado
+// (menos consultas); misma presentación. Si falla, se usa el listado.
+function reporteDe(datos) {
+    return async ({ prioridad } = {}) => {
+        const f = datos.filter((e) => !prioridad || e.prioridad === prioridad);
+        const contar = (campo, valor) => f.filter((e) => e[campo] === valor).length;
+        return {
+            total: f.length,
+            por_estado: ["PENDIENTE", "EN_PROCESO", "OBSERVADO", "ATENDIDO"].map((v) => ({ clave: v, cantidad: contar("estado", v) })),
+            por_tipo: ["CERTIFICADO", "CONSTANCIA", "PERMISO"].map((v) => ({ clave: v, cantidad: contar("tipo", v) })),
+        };
+    };
+}
+
+describe("Dashboard con reportes.view", () => {
+    it("usa el endpoint agregado: mismas cifras con menos consultas al listado", async () => {
+        expedientes.getExpedientes.mockImplementation(backendCon(DATOS));
+        reportes.getReporteExpedientes.mockImplementation(reporteDe(DATOS));
+        renderDashboard(["dashboard.view", "expedientes.view", "reportes.view"]);
+
+        const total = (await screen.findByText("Total de expedientes")).closest("a");
+        expect(within(total).getByText("4")).toBeTruthy();
+        expect(within(total).getByText("1 urgente sin atender")).toBeTruthy();
+        expect(within(screen.getByText("Por revisar").closest("a")).getByText("25% del total")).toBeTruthy();
+        const tipos = await screen.findByLabelText("Expedientes por tipo de trámite");
+        expect(within(tipos).getAllByText(/Estudios|Permiso/).map((n) => n.textContent)).toEqual(["Constancia de Estudios", "Certificado de Estudios", "Permiso"]);
+        await screen.findByText("4 en los últimos 30 días");
+
+        expect(reportes.getReporteExpedientes).toHaveBeenCalledWith({ prioridad: "URGENTE" });
+        // Ningún conteo con page_size=1 (por estado / tipo): solo recientes y la serie diaria.
+        const conteos = expedientes.getExpedientes.mock.calls.filter(([f]) => f?.pageSize === 1);
+        expect(conteos).toHaveLength(0);
+    });
+
+    it("si el endpoint agregado falla, calcula con el listado sin perder cifras", async () => {
+        expedientes.getExpedientes.mockImplementation(backendCon(DATOS));
+        reportes.getReporteExpedientes.mockRejectedValue(new Error("no desplegado"));
+        renderDashboard(["dashboard.view", "expedientes.view", "reportes.view"]);
+        const total = (await screen.findByText("Total de expedientes")).closest("a");
+        expect(within(total).getByText("4")).toBeTruthy();
+        expect(screen.queryByText(/No se pudieron cargar los indicadores/)).toBeNull();
     });
 });

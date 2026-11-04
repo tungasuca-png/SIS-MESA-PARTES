@@ -7,6 +7,8 @@
 //	go run ./cmd/clientes-servicio crear -nombre "Sistema de Biblioteca" -permisos estudiantes.basic.view
 //	go run ./cmd/clientes-servicio listar
 //	go run ./cmd/clientes-servicio revocar -id cli_0123...
+//	go run ./cmd/clientes-servicio otorgar -cliente cli_0123... -permiso estudiantes.search.basic
+//	go run ./cmd/clientes-servicio retirar -cliente cli_0123... -permiso estudiantes.search.basic
 package main
 
 import (
@@ -33,6 +35,8 @@ func main() {
 	nombre := fs.String("nombre", "", "nombre del sistema (crear)")
 	permisos := fs.String("permisos", "", "permisos separados por comas (crear)")
 	id := fs.String("id", "", "id o client_id del sistema (revocar)")
+	cliente := fs.String("cliente", "", "client_id del sistema (otorgar/retirar)")
+	permiso := fs.String("permiso", "", "código del permiso (otorgar/retirar)")
 	_ = fs.Parse(os.Args[2:])
 
 	token := strings.TrimSpace(os.Getenv("AUTH_ADMIN_TOKEN"))
@@ -63,6 +67,26 @@ func main() {
 		resp, err := client.RevokeServiceClient(ctx, &authclient.RevokeServiceClientRequest{Id: *id})
 		comprobar(err)
 		imprimir(resp.Client)
+	case "otorgar", "retirar":
+		req := &authclient.ServiceClientPermissionRequest{ClientId: *cliente, PermissionCode: *permiso}
+		var resp *authclient.ServiceClientPermissionResponse
+		var err error
+		if os.Args[1] == "otorgar" {
+			resp, err = client.GrantServiceClientPermission(ctx, req)
+		} else {
+			resp, err = client.WithdrawServiceClientPermission(ctx, req)
+		}
+		comprobar(err)
+		if resp.Changed {
+			accion := "se retiró"
+			if os.Args[1] == "otorgar" {
+				accion = "se otorgó"
+			}
+			fmt.Printf("Listo: %s el permiso %q.\n", accion, *permiso)
+		} else {
+			fmt.Println("Sin cambios: el sistema ya estaba en ese estado (operación idempotente).")
+		}
+		imprimir(resp.Client)
 	default:
 		uso()
 	}
@@ -85,5 +109,6 @@ func fallar(msg string) {
 }
 
 func uso() {
-	fallar("uso: clientes-servicio crear -nombre NOMBRE -permisos p1,p2 | listar | revocar -id ID")
+	fallar("uso: clientes-servicio crear -nombre NOMBRE -permisos p1,p2 | listar | revocar -id ID | " +
+		"otorgar -cliente CLIENT_ID -permiso PERMISO | retirar -cliente CLIENT_ID -permiso PERMISO")
 }

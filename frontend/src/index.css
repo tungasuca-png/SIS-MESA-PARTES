@@ -35,3 +35,20 @@ input {
 button {
     cursor: pointer;
 }
+
+/* Marca "Identidad no verificada": solicitante del registro público cuyo DNI
+   declarado todavía no verificó la institución (SolicitanteNombre). */
+.dp-identidad-pendiente {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #fff4e5;
+    border: 1px solid #f5c98a;
+    color: #8a4b00;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.6;
+    white-space: nowrap;
+    vertical-align: middle;
+}

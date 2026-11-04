@@ -6,11 +6,12 @@ package logic
 import (
 	"context"
 
-	"auth/authclient"
 	"gateway/internal/svc"
 	"gateway/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type RegisterLogic struct {
@@ -27,23 +28,9 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 	}
 }
 
-func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
-	authResp, err := l.svcCtx.AuthClient.Register(l.ctx, &authclient.RegisterRequest{
-		Username: req.Username,
-		Dni:      req.Dni,
-		Email:    req.Email,
-		Password: req.Password,
-		Role:     req.Role,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.RegisterResponse{
-		Id:       authResp.Id,
-		Username: authResp.Username,
-		Email:    authResp.Email,
-		Role:     authResp.Role,
-		Message:  authResp.Message,
-	}, nil
+// Register: el autorregistro público quedó deshabilitado (el handler responde
+// 410 Gone sin llegar aquí). Se conserva la firma generada por goctl, pero
+// ya no llama a Auth.Register.
+func (l *RegisterLogic) Register(_ *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
+	return nil, status.Error(codes.Unimplemented, "el registro público fue deshabilitado")
 }

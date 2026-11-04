@@ -37,3 +37,8 @@ func (s *DerivacionesServer) ListDerivaciones(ctx context.Context, in *derivacio
 	l := logic.NewListDerivacionesLogic(ctx, s.svcCtx)
 	return l.ListDerivaciones(in)
 }
+
+func (s *DerivacionesServer) ReporteDerivaciones(ctx context.Context, in *derivaciones.ReporteDerivacionesRequest) (*derivaciones.ReporteDerivacionesResponse, error) {
+	l := logic.NewReporteDerivacionesLogic(ctx, s.svcCtx)
+	return l.ReporteDerivaciones(in)
+}

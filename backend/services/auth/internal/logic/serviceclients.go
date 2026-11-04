@@ -94,7 +94,10 @@ func emitirTokenServicio(ctx context.Context, store serviceClientStore, issuer *
 }
 
 // validarPermisosSistema normaliza y valida los permisos pedidos al registrar
-// un sistema: al menos uno, todos asignables a sistemas, sin repetir.
+// un sistema: al menos uno, sin repetir y SOLO de lectura mínima
+// (GrantableServicePermissions: estudiantes.basic.view y
+// estudiantes.search.basic). Un sistema nuevo nunca recibe estudiantes.view,
+// datos personales ni permisos de escritura.
 func validarPermisosSistema(permisos []string) ([]string, error) {
 	scope := security.NormalizeScope(permisos)
 	if scope == "" {
@@ -102,7 +105,7 @@ func validarPermisosSistema(permisos []string) ([]string, error) {
 	}
 	lista := strings.Fields(scope)
 	for _, p := range lista {
-		if !security.AssignableServicePermissions[p] {
+		if !security.GrantableServicePermissions[p] {
 			return nil, status.Errorf(codes.InvalidArgument, "el permiso %q no se puede asignar a un sistema", p)
 		}
 	}
@@ -125,4 +128,98 @@ func serviceClientProto(c *repository.ServiceClient) *auth.ServiceClient {
 		out.RevokedAt = c.RevokedAt.UTC().Format(time.RFC3339)
 	}
 	return out
+}
+
+// permisoSistemaStore: lo mínimo del repositorio para otorgar y retirar
+// permisos (se reemplaza por un doble en las pruebas).
+type permisoSistemaStore interface {
+	FindByClientID(ctx context.Context, clientID string) (*repository.ServiceClient, error)
+	AddPermission(ctx context.Context, serviceClientID, codigo string) (bool, error)
+	RemovePermission(ctx context.Context, serviceClientID, codigo string) (bool, error)
+}
+
+// cambiarPermisoSistema otorga (otorgar=true) o retira un permiso de un
+// sistema consumidor existente, sin recrearlo ni tocar sus credenciales.
+// Solo permisos de security.GrantableServicePermissions, también al retirar.
+// Idempotente:
+// changed=false si no había nada que hacer. Cada resultado queda en el log
+// de auditoría (sin secretos: solo administrador, client_id y permiso).
+func cambiarPermisoSistema(ctx context.Context, store permisoSistemaStore, adminID, clientID, codigo string, otorgar bool) (*auth.ServiceClientPermissionResponse, error) {
+	operacion := "retirar"
+	if otorgar {
+		operacion = "otorgar"
+	}
+	clientID, codigo = strings.TrimSpace(clientID), strings.TrimSpace(codigo)
+	auditar := func(resultado string, cambio bool) {
+		idLog := "<formato inválido>"
+		if security.ValidClientIDFormat(clientID) {
+			idLog = clientID
+		}
+		logx.WithContext(ctx).Infow("auditoría: permiso de sistema consumidor",
+			logx.Field("operacion", operacion),
+			logx.Field("resultado", resultado),
+			logx.Field("cambio", cambio),
+			logx.Field("admin_id", adminID),
+			logx.Field("client_id", idLog),
+			logx.Field("permiso", codigoParaLog(codigo)),
+		)
+	}
+
+	if !security.ValidClientIDFormat(clientID) {
+		auditar("rechazado: client_id inválido", false)
+		return nil, status.Error(codes.InvalidArgument, "client_id inválido")
+	}
+	if !security.GrantableServicePermissions[codigo] {
+		auditar("rechazado: permiso no asignable", false)
+		return nil, status.Errorf(codes.InvalidArgument, "el permiso %q no se puede asignar a un sistema", codigoParaLog(codigo))
+	}
+	client, err := store.FindByClientID(ctx, clientID)
+	if errors.Is(err, repository.ErrServiceClientNotFound) {
+		auditar("rechazado: sistema inexistente", false)
+		return nil, status.Error(codes.NotFound, "sistema consumidor no encontrado")
+	}
+	if err != nil {
+		logx.WithContext(ctx).Errorf("%s permiso de sistema: no se pudo consultar el cliente: %v", operacion, err)
+		return nil, status.Error(codes.Internal, "no se pudo consultar el sistema consumidor")
+	}
+	if otorgar && client.Estado != repository.ServiceClientActivo {
+		auditar("rechazado: sistema revocado", false)
+		return nil, status.Error(codes.FailedPrecondition, "el sistema consumidor está revocado: no se le otorgan permisos")
+	}
+
+	var cambio bool
+	if otorgar {
+		cambio, err = store.AddPermission(ctx, client.ID, codigo)
+	} else {
+		cambio, err = store.RemovePermission(ctx, client.ID, codigo)
+	}
+	if errors.Is(err, repository.ErrPermisoNoCatalogado) {
+		auditar("rechazado: permiso fuera del catálogo", false)
+		return nil, status.Error(codes.FailedPrecondition, "el permiso no está registrado o está inactivo en el catálogo")
+	}
+	if err != nil {
+		logx.WithContext(ctx).Errorf("%s permiso de sistema: %v", operacion, err)
+		return nil, status.Error(codes.Internal, "no se pudo actualizar los permisos del sistema consumidor")
+	}
+
+	actualizado, err := store.FindByClientID(ctx, clientID)
+	if err != nil {
+		logx.WithContext(ctx).Errorf("%s permiso de sistema: no se pudo releer el cliente: %v", operacion, err)
+		return nil, status.Error(codes.Internal, "no se pudo consultar el sistema consumidor")
+	}
+	if cambio {
+		auditar("aplicado", true)
+	} else {
+		auditar("sin cambios (idempotente)", false)
+	}
+	return &auth.ServiceClientPermissionResponse{Client: serviceClientProto(actualizado), Changed: cambio}, nil
+}
+
+// codigoParaLog: los códigos de permiso son identificadores cortos; un valor
+// con otra forma (posible dato pegado por error) no se registra.
+func codigoParaLog(codigo string) string {
+	if len(codigo) > 0 && len(codigo) <= 100 && strings.Trim(codigo, "abcdefghijklmnopqrstuvwxyz._") == "" {
+		return codigo
+	}
+	return "<formato inválido>"
 }

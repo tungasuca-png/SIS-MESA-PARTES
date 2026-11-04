@@ -7,9 +7,9 @@ import EstudianteSelector from "./EstudianteSelector";
 import Icon from "./Icon";
 import "./forms.css";
 
-// FASE 5D: el estudiante se busca y selecciona por DNI/nombre/apellido
-// (EstudianteSelector, real contra Estudiantes Service) — ya no se pide su
-// UUID a mano. El backend (Psicología Service, vía EstudianteVerifier)
+// El estudiante se busca y selecciona por nombres, apellidos o DNI completo
+// (EstudianteSelector, vía la búsqueda de Psicología con su credencial de
+// servicio) — ya no se pide su UUID a mano. El backend (Psicología Service, vía EstudianteVerifier)
 // sigue siendo quien valida que el estudiante exista de verdad; el frontend
 // no confía únicamente en que el usuario eligió un resultado.
 // initialEstudiante (opcional): estudiante ya elegido en "Buscar alumno".
