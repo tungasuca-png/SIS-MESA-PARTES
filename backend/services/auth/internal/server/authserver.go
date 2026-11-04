@@ -162,3 +162,63 @@ func (s *AuthServer) GoogleLinkStatus(ctx context.Context, in *auth.GoogleLinkSt
 	l := logic.NewGoogleLinkStatusLogic(ctx, s.svcCtx)
 	return l.GoogleLinkStatus(in)
 }
+
+func (s *AuthServer) EmailRegister(ctx context.Context, in *auth.EmailRegisterRequest) (*auth.EmailRegisterResponse, error) {
+	l := logic.NewEmailRegisterLogic(ctx, s.svcCtx)
+	return l.EmailRegister(in)
+}
+
+func (s *AuthServer) EmailResendCode(ctx context.Context, in *auth.EmailResendCodeRequest) (*auth.EmailResendCodeResponse, error) {
+	l := logic.NewEmailResendCodeLogic(ctx, s.svcCtx)
+	return l.EmailResendCode(in)
+}
+
+func (s *AuthServer) EmailVerify(ctx context.Context, in *auth.EmailVerifyRequest) (*auth.EmailVerifyResponse, error) {
+	l := logic.NewEmailVerifyLogic(ctx, s.svcCtx)
+	return l.EmailVerify(in)
+}
+
+func (s *AuthServer) EmailCompleteRegistration(ctx context.Context, in *auth.EmailRegistrationRequest) (*auth.EmailCompleteResponse, error) {
+	l := logic.NewEmailCompleteRegistrationLogic(ctx, s.svcCtx)
+	return l.EmailCompleteRegistration(in)
+}
+
+func (s *AuthServer) EmailCancelRegistration(ctx context.Context, in *auth.EmailRegistrationRequest) (*auth.EmailCancelResponse, error) {
+	l := logic.NewEmailCancelRegistrationLogic(ctx, s.svcCtx)
+	return l.EmailCancelRegistration(in)
+}
+
+func (s *AuthServer) ListSolicitanteIdentities(ctx context.Context, in *auth.ListSolicitanteIdentitiesRequest) (*auth.ListSolicitanteIdentitiesResponse, error) {
+	l := logic.NewListSolicitanteIdentitiesLogic(ctx, s.svcCtx)
+	return l.ListSolicitanteIdentities(in)
+}
+
+func (s *AuthServer) GetSolicitanteIdentity(ctx context.Context, in *auth.GetSolicitanteIdentityRequest) (*auth.GetSolicitanteIdentityResponse, error) {
+	l := logic.NewGetSolicitanteIdentityLogic(ctx, s.svcCtx)
+	return l.GetSolicitanteIdentity(in)
+}
+
+func (s *AuthServer) VerifySolicitanteIdentity(ctx context.Context, in *auth.VerifySolicitanteIdentityRequest) (*auth.VerifySolicitanteIdentityResponse, error) {
+	l := logic.NewVerifySolicitanteIdentityLogic(ctx, s.svcCtx)
+	return l.VerifySolicitanteIdentity(in)
+}
+
+func (s *AuthServer) RejectSolicitanteIdentity(ctx context.Context, in *auth.RejectSolicitanteIdentityRequest) (*auth.RejectSolicitanteIdentityResponse, error) {
+	l := logic.NewRejectSolicitanteIdentityLogic(ctx, s.svcCtx)
+	return l.RejectSolicitanteIdentity(in)
+}
+
+func (s *AuthServer) ConfirmSolicitanteIdentitySync(ctx context.Context, in *auth.IdentitySyncRequest) (*auth.IdentitySyncResponse, error) {
+	l := logic.NewConfirmSolicitanteIdentitySyncLogic(ctx, s.svcCtx)
+	return l.ConfirmSolicitanteIdentitySync(in)
+}
+
+func (s *AuthServer) RecordSolicitanteIdentitySyncFailure(ctx context.Context, in *auth.IdentitySyncFailureRequest) (*auth.IdentitySyncResponse, error) {
+	l := logic.NewRecordSolicitanteIdentitySyncFailureLogic(ctx, s.svcCtx)
+	return l.RecordSolicitanteIdentitySyncFailure(in)
+}
+
+func (s *AuthServer) RevertSolicitanteIdentity(ctx context.Context, in *auth.IdentitySyncRequest) (*auth.IdentitySyncResponse, error) {
+	l := logic.NewRevertSolicitanteIdentityLogic(ctx, s.svcCtx)
+	return l.RevertSolicitanteIdentity(in)
+}

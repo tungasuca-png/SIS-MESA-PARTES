@@ -55,8 +55,15 @@ func (l *CreateMyProfileLogic) CreateMyProfile(in *usuarios.CreateMyProfileReque
 	if utf8.RuneCountInString(nombres) > 100 || utf8.RuneCountInString(apellidos) > 100 {
 		return nil, status.Error(codes.InvalidArgument, "nombres y apellidos no pueden superar los 100 caracteres")
 	}
+	// Registro público: el DNI solo se DECLARA (no se reserva el DNI
+	// definitivo; lo asigna Secretaría al verificar la identidad).
 	dni := strings.TrimSpace(in.Dni)
-	if !dniPerfilPattern.MatchString(dni) {
+	dniDeclarado := strings.TrimSpace(in.DniDeclarado)
+	if dniDeclarado != "" {
+		if dni != "" || !dniPerfilPattern.MatchString(dniDeclarado) {
+			return nil, status.Error(codes.InvalidArgument, "el DNI debe tener 8 dígitos numéricos")
+		}
+	} else if !dniPerfilPattern.MatchString(dni) {
 		return nil, status.Error(codes.InvalidArgument, "el DNI debe tener 8 dígitos numéricos")
 	}
 	telefono := strings.TrimSpace(in.Telefono)
@@ -74,9 +81,12 @@ func (l *CreateMyProfileLogic) CreateMyProfile(in *usuarios.CreateMyProfileReque
 
 	perfil, creado, err := l.svcCtx.UsuarioRepository.CreateIfNotExists(l.ctx, &repository.Usuario{
 		ID: userID, Nombres: nombres, Apellidos: apellidos, DNI: dni, Telefono: telefono,
-		Correo: correo, Direccion: direccion, TipoUsuario: tipoSolicitante,
+		Correo: correo, Direccion: direccion, TipoUsuario: tipoSolicitante, DNIDeclarado: dniDeclarado,
 	})
 	if err != nil {
+		if errors.Is(err, repository.ErrEsquemaPendiente) {
+			return nil, status.Error(codes.Unavailable, "el registro público no está disponible temporalmente")
+		}
 		if errors.Is(err, repository.ErrDniExists) {
 			return nil, status.Error(codes.AlreadyExists, "el DNI ya está registrado para otro usuario")
 		}

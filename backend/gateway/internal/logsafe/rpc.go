@@ -37,8 +37,25 @@ var sensitiveRPCMethods = []string{
 	auth.Auth_GoogleCompleteRegistration_FullMethodName,
 	auth.Auth_GoogleCancelRegistration_FullMethodName,
 	auth.Auth_GoogleStartLink_FullMethodName,
+	// Registro manual: clave, DNI, datos personales, códigos de verificación
+	// y el token para crear el perfil.
+	auth.Auth_EmailRegister_FullMethodName,
+	auth.Auth_EmailResendCode_FullMethodName,
+	auth.Auth_EmailVerify_FullMethodName,
+	auth.Auth_EmailCompleteRegistration_FullMethodName,
+	auth.Auth_EmailCancelRegistration_FullMethodName,
+	// Verificación de identidad: DNI declarado en las respuestas.
+	auth.Auth_ListSolicitanteIdentities_FullMethodName,
+	auth.Auth_GetSolicitanteIdentity_FullMethodName,
+	auth.Auth_VerifySolicitanteIdentity_FullMethodName,
+	auth.Auth_RejectSolicitanteIdentity_FullMethodName,
+	auth.Auth_ConfirmSolicitanteIdentitySync_FullMethodName,
+	auth.Auth_RecordSolicitanteIdentitySyncFailure_FullMethodName,
+	auth.Auth_RevertSolicitanteIdentity_FullMethodName,
 	// Usuarios: perfil propio con DNI y datos personales.
 	usuarios.Usuarios_CreateMyProfile_FullMethodName,
+	usuarios.Usuarios_AssignVerifiedDni_FullMethodName,
+	usuarios.Usuarios_RevertVerifiedDni_FullMethodName,
 
 	// Psicología: identificadores de estudiantes y texto clínico (resumen_caso,
 	// motivo de cierre) en solicitudes y respuestas.

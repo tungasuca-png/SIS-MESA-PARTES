@@ -122,6 +122,7 @@ export const NAV_GROUPS = [
         items: [
             { key: "usuarios", label: "Usuarios", description: "Usuarios del sistema y sus roles.", path: "/configuracion/usuarios", icon: "users", permission: "usuarios.view" },
             { key: "roles", label: "Roles y Permisos", description: "Permisos asignados a cada rol.", path: "/configuracion/roles-permisos", icon: "settings", permission: "roles.view" },
+            { key: "identidades", label: "Identidad de solicitantes", description: "Verificación del DNI declarado por los solicitantes.", path: "/solicitantes/identidades", icon: "check", permission: "solicitantes.identidad.verify" },
             { key: "configuracion", label: "Configuración", description: "Configuración general del sistema.", path: null, icon: "settings", permission: "configuracion.view" },
         ],
     },

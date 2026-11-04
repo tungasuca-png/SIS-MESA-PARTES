@@ -391,8 +391,8 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		solicitanteB := createRealUser(t, "solicitanted", "SOLICITANTE")
 		_, err = client.GetDocumento(authCtx(solicitanteB, "SOLICITANTE"), &documentos.GetDocumentoRequest{Id: uploaded.Documento.Id})
-		if status.Code(err) != codes.PermissionDenied {
-			t.Fatalf("se esperaba PermissionDenied: el expediente es de otro solicitante, got %v", err)
+		if status.Code(err) != codes.NotFound {
+			t.Fatalf("se esperaba NotFound (igual que un recurso inexistente): el expediente es de otro solicitante, got %v", err)
 		}
 	})
 
@@ -464,8 +464,8 @@ func TestHasPermissionIntegration(t *testing.T) {
 		_, err := client.UploadDocumento(authCtx(solicitanteB, "SOLICITANTE"), &documentos.UploadDocumentoRequest{
 			ExpedienteId: expA, Nombre: "intruso.pdf", TipoDocumento: "ADJUNTO", Extension: "pdf", Contenido: []byte("x"),
 		})
-		if status.Code(err) != codes.PermissionDenied {
-			t.Fatalf("se esperaba PermissionDenied: el expediente es de otro solicitante, got %v", err)
+		if status.Code(err) != codes.NotFound {
+			t.Fatalf("se esperaba NotFound (igual que un recurso inexistente): el expediente es de otro solicitante, got %v", err)
 		}
 		if despues := countDocumentosPorExpediente(t, expA); despues != antes {
 			t.Fatalf("no debía crearse ningún documento: antes=%d despues=%d", antes, despues)
@@ -604,8 +604,8 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		solicitanteB := createRealUser(t, "solicitanteo", "SOLICITANTE")
 		_, err = client.DownloadDocumento(authCtx(solicitanteB, "SOLICITANTE"), &documentos.DownloadDocumentoRequest{Id: uploadedA.Documento.Id})
-		if status.Code(err) != codes.PermissionDenied {
-			t.Fatalf("se esperaba PermissionDenied: el expediente es de otro solicitante (llamada directa al RPC, sin Gateway), got %v", err)
+		if status.Code(err) != codes.NotFound {
+			t.Fatalf("se esperaba NotFound (igual que un recurso inexistente): el expediente es de otro solicitante (llamada directa al RPC, sin Gateway), got %v", err)
 		}
 	})
 
@@ -743,8 +743,8 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		solicitanteB := createRealUser(t, "solicitanteb", "SOLICITANTE")
 		_, err = client.ListDocumentos(authCtx(solicitanteB, "SOLICITANTE"), &documentos.ListDocumentosRequest{ExpedienteId: expA})
-		if status.Code(err) != codes.PermissionDenied {
-			t.Fatalf("se esperaba PermissionDenied: el expediente es de otro solicitante, got %v", err)
+		if status.Code(err) != codes.NotFound {
+			t.Fatalf("se esperaba NotFound (igual que un recurso inexistente): el expediente es de otro solicitante, got %v", err)
 		}
 	})
 

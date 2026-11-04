@@ -138,9 +138,12 @@ func TestSensitiveRPCMethods_NombresVerificadosContraElCodigoGenerado(t *testing
 	// + 2 de datos personales, FASE E-08, + 6 del modelo maestro).
 	esperados := map[string]int{
 		// Auth: 7 previos + 7 del acceso con Google (inicio, callback, canje,
-		// registro, confirmación, compensación e inicio de vinculación).
-		"/auth.Auth/":               14,
-		"/usuarios.Usuarios/":       1, // CreateMyProfile (DNI y datos personales)
+		// registro, confirmación, compensación e inicio de vinculación) + 5
+		// del registro manual con correo (registro, reenvío, verificación,
+		// confirmación y compensación) + 7 de la verificación de identidad
+		// (bandeja, verificación, rechazo y sincronización con Usuarios).
+		"/auth.Auth/":               26,
+		"/usuarios.Usuarios/":       3, // CreateMyProfile y asignar/revertir DNI verificado
 		"/psicologia.Psicologia/":   19,
 		"/estudiantes.Estudiantes/": 44, // etapas 5 y 6 + Excel + motor de datos + selección: todos los RPC de Estudiantes
 	}
@@ -162,7 +165,7 @@ func TestSensitiveRPCMethods_NombresVerificadosContraElCodigoGenerado(t *testing
 			t.Fatalf("se esperaban %d métodos con prefijo %s, hay %d", n, p, encontrados[p])
 		}
 	}
-	if len(sensitiveRPCMethods) != 78 {
-		t.Fatalf("se esperaban 14 métodos de Auth + 1 de Usuarios + 19 de Psicología + 44 de Estudiantes, hay %d", len(sensitiveRPCMethods))
+	if len(sensitiveRPCMethods) != 92 {
+		t.Fatalf("se esperaban 26 métodos de Auth + 3 de Usuarios + 19 de Psicología + 44 de Estudiantes, hay %d", len(sensitiveRPCMethods))
 	}
 }

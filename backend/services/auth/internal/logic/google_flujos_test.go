@@ -97,6 +97,7 @@ func nuevoEntorno(t *testing.T) *entorno {
 		UserRepository:         repository.NewUserRepository(pool),
 		RefreshTokenRepository: repository.NewRefreshTokenRepository(pool),
 		GoogleRepository:       repository.NewGoogleRepository(pool),
+		IdentidadRepository:    repository.NewIdentidadRepository(pool),
 		JWTManager:             security.NewJWTManager("secreto-de-prueba-para-jwt-0123456789abcdef", 15*time.Minute),
 		Google:                 g,
 	}
@@ -187,8 +188,12 @@ func TestGoogle_RegistroNuevoYLuegoLogin(t *testing.T) {
 		t.Fatalf("token de perfil: %+v %v", claims, err)
 	}
 	// Cuenta creada con rol fijo SOLICITANTE, correo verificado y pendiente.
+	// El DNI solo queda DECLARADO (usuarios.dni NULL hasta que Secretaría
+	// verifique la identidad).
 	if e.contar(`SELECT count(*) FROM usuarios u JOIN usuario_roles ur ON ur.usuario_id=u.id JOIN roles r ON r.id=ur.rol_id
-		WHERE u.id=$1 AND r.nombre='SOLICITANTE' AND u.email_verified AND u.dni=$2`, reg.UserId, dni) != 1 ||
+		JOIN identidad_solicitantes i ON i.usuario_id=u.id
+		WHERE u.id=$1 AND r.nombre='SOLICITANTE' AND u.email_verified AND u.dni IS NULL
+		  AND i.dni_declarado=$2 AND i.estado='PENDIENTE' AND i.origen='google'`, reg.UserId, dni) != 1 ||
 		e.contar(`SELECT count(*) FROM user_auth_providers WHERE usuario_id=$1 AND NOT registro_completo`, reg.UserId) != 1 {
 		t.Fatal("estado de la cuenta pendiente")
 	}
@@ -234,7 +239,11 @@ func TestGoogle_RegistroNuevoYLuegoLogin(t *testing.T) {
 	}
 }
 
-func TestGoogle_DNIExistenteNoCreaNada(t *testing.T) {
+// El DNI escrito en el registro con Google solo se DECLARA: usar el DNI de
+// una cuenta existente no se rechaza (eso permitiría enumerar DNI), pero
+// tampoco toma ni modifica nada. La cuenta existente queda intacta y el
+// conflicto solo lo ve el personal al verificar.
+func TestGoogle_DNIExistenteNoSeReservaNiSeToma(t *testing.T) {
 	e := nuevoEntorno(t)
 	dni, correoInst := e.dniNuevo(), e.unico("inst")+"@colegio.example"
 	inst := e.crearUsuario(dni, correoInst, "ClaveInstitucional1", "SOLICITANTE", true)
@@ -246,12 +255,17 @@ func TestGoogle_DNIExistenteNoCreaNada(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = NewGoogleRegisterLogic(e.ctx, e.sc).GoogleRegister(&auth.GoogleRegisterRequest{LoginCode: cb.LoginCode, Dni: dni})
-	if status.Code(err) != codes.AlreadyExists || clave(err) != "dni_registrado" || !strings.Contains(err.Error(), MensajeDNIRegistrado) {
-		t.Fatalf("DNI existente: %v", err)
+	reg, err := NewGoogleRegisterLogic(e.ctx, e.sc).GoogleRegister(&auth.GoogleRegisterRequest{LoginCode: cb.LoginCode, Dni: dni})
+	if err != nil {
+		t.Fatalf("el registro no revela que el DNI existe: %v", err)
 	}
-	if e.contar(`SELECT count(*) FROM usuarios WHERE email=$1`, email) != 0 || e.contar(`SELECT count(*) FROM user_auth_providers WHERE provider_email=$1`, email) != 0 {
-		t.Fatal("no debe crearse ninguna cuenta ni identidad")
+	if e.contar(`SELECT count(*) FROM usuarios WHERE id=$1 AND dni IS NULL`, reg.UserId) != 1 ||
+		e.contar(`SELECT count(*) FROM usuarios WHERE dni=$1`, dni) != 1 ||
+		e.contar(`SELECT count(*) FROM identidad_solicitantes WHERE usuario_id=$1 AND dni_declarado=$2 AND estado='PENDIENTE'`, reg.UserId, dni) != 1 {
+		t.Fatal("el DNI solo queda declarado: la cuenta nueva no lo obtiene")
+	}
+	if i, err := e.sc.IdentidadRepository.Obtener(e.ctx, reg.UserId); err != nil || !i.Conflicto {
+		t.Fatalf("el personal debe ver el conflicto: %+v %v", i, err)
 	}
 	var hashDespues, correo string
 	var activo bool
@@ -259,13 +273,20 @@ func TestGoogle_DNIExistenteNoCreaNada(t *testing.T) {
 	if hashDespues != hashAntes || correo != correoInst || !activo || e.contar(`SELECT count(*) FROM user_auth_providers WHERE usuario_id=$1`, inst) != 0 {
 		t.Fatal("la cuenta institucional no debe cambiar ni vincularse")
 	}
-	// El mismo mensaje para un DNI de una cuenta administrativa inactiva.
+	// Con el DNI de una cuenta ADMIN: misma respuesta y el ADMIN no cambia.
 	dniAdmin := e.dniNuevo()
-	e.crearUsuario(dniAdmin, e.unico("adm")+"@colegio.example", "ClaveAdmin123", "ADMIN", false)
+	admin := e.crearUsuario(dniAdmin, e.unico("adm")+"@colegio.example", "ClaveAdmin123", "ADMIN", true)
 	cb2, _ := e.callback(e.unico("sub-"), e.unico("g")+"@gmail.example", true, "")
-	_, err2 := NewGoogleRegisterLogic(e.ctx, e.sc).GoogleRegister(&auth.GoogleRegisterRequest{LoginCode: cb2.LoginCode, Dni: dniAdmin})
-	if status.Convert(err2).Message() != status.Convert(err).Message() {
-		t.Fatal("el mensaje no debe revelar rol ni estado de la cuenta encontrada")
+	reg2, err2 := NewGoogleRegisterLogic(e.ctx, e.sc).GoogleRegister(&auth.GoogleRegisterRequest{LoginCode: cb2.LoginCode, Dni: dniAdmin})
+	if err2 != nil || e.contar(`SELECT count(*) FROM usuarios WHERE id=$1 AND dni IS NULL`, reg2.UserId) != 1 {
+		t.Fatalf("DNI de un ADMIN: %v", err2)
+	}
+	if e.contar(`SELECT count(*) FROM usuarios WHERE id=$1 AND dni=$2`, admin, dniAdmin) != 1 ||
+		e.contar(`SELECT count(*) FROM user_auth_providers WHERE usuario_id=$1`, admin) != 0 {
+		t.Fatal("la cuenta ADMIN no debe cambiar")
+	}
+	if ses, err := NewLoginLogic(e.ctx, e.sc).Login(&auth.LoginRequest{Dni: dniAdmin, Password: "ClaveAdmin123"}); err != nil || ses.UserId != admin || ses.Role != "ADMIN" {
+		t.Fatalf("login del ADMIN: %v", err)
 	}
 }
 
@@ -320,7 +341,7 @@ func TestGoogle_ConcurrenciaSinDuplicados(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	if e.contar(`SELECT count(*) FROM usuarios WHERE dni=$1`, dni) != 1 {
+	if e.contar(`SELECT count(*) FROM identidad_solicitantes WHERE dni_declarado=$1`, dni) != 1 {
 		t.Fatal("doble envío creó más de una cuenta")
 	}
 	for _, id := range ids {
@@ -328,7 +349,9 @@ func TestGoogle_ConcurrenciaSinDuplicados(t *testing.T) {
 			t.Fatalf("reintentos con distinto usuario: %v", ids)
 		}
 	}
-	// Dos personas (dos identidades Google) con el mismo DNI a la vez: una sola gana.
+	// Varias personas (identidades Google distintas) declaran el mismo DNI a la
+	// vez: todas se registran, ninguna lo reserva (la unicidad se aplica al
+	// verificar la identidad; ver TestIdentidad_VerificacionesConcurrentes).
 	dni2 := e.dniNuevo()
 	codigos := make([]string, 4)
 	for i := range codigos {
@@ -352,8 +375,9 @@ func TestGoogle_ConcurrenciaSinDuplicados(t *testing.T) {
 		}(c)
 	}
 	wg.Wait()
-	if ok != 1 || rechazados != 3 || e.contar(`SELECT count(*) FROM usuarios WHERE dni=$1`, dni2) != 1 {
-		t.Fatalf("carrera por el mismo DNI: ok=%d rechazados=%d", ok, rechazados)
+	if ok != 4 || rechazados != 0 || e.contar(`SELECT count(*) FROM usuarios WHERE dni=$1`, dni2) != 0 ||
+		e.contar(`SELECT count(*) FROM identidad_solicitantes WHERE dni_declarado=$1 AND estado='PENDIENTE'`, dni2) != 4 {
+		t.Fatalf("declaraciones simultáneas del mismo DNI: ok=%d rechazados=%d", ok, rechazados)
 	}
 }
 

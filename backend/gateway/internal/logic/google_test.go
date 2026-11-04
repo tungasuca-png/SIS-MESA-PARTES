@@ -29,6 +29,7 @@ type authGoogleFalso struct {
 	cancelados  int
 	completados int
 	vinculoAuth string
+	registros   int // llamadas a GoogleRegister (crean la cuenta)
 }
 
 func (a *authGoogleFalso) GoogleStart(context.Context, *authclient.GoogleStartRequest, ...grpc.CallOption) (*authclient.GoogleStartResponse, error) {
@@ -44,6 +45,7 @@ func (a *authGoogleFalso) GoogleCallback(_ context.Context, in *authclient.Googl
 }
 
 func (a *authGoogleFalso) GoogleRegister(_ context.Context, in *authclient.GoogleRegisterRequest, _ ...grpc.CallOption) (*authclient.GoogleRegisterResponse, error) {
+	a.registros++
 	if a.registroErr != nil {
 		return nil, a.registroErr
 	}
@@ -76,6 +78,11 @@ type usuariosPerfilFalso struct {
 	err      error
 	pedido   *usuariosclient.CreateMyProfileRequest
 	tokenUso string
+	noListo  bool // Usuarios sin la migración 003 (o sin base)
+}
+
+func (u *usuariosPerfilFalso) PublicRegistrationReady(context.Context, *usuariosclient.PublicRegistrationReadyRequest, ...grpc.CallOption) (*usuariosclient.PublicRegistrationReadyResponse, error) {
+	return &usuariosclient.PublicRegistrationReadyResponse{Ready: !u.noListo}, nil
 }
 
 func (u *usuariosPerfilFalso) CreateMyProfile(ctx context.Context, in *usuariosclient.CreateMyProfileRequest, _ ...grpc.CallOption) (*usuariosclient.CreateMyProfileResponse, error) {
@@ -156,7 +163,8 @@ func TestGoogleRegistro_Orquestacion(t *testing.T) {
 	if err != nil || r.AccessToken != "at" || r.Role != "SOLICITANTE" || a.completados != 1 {
 		t.Fatalf("registro: %+v %v", r, err)
 	}
-	if u.pedido.Nombres != "Ana María" || u.pedido.Apellidos != "Quispe Ñahui" || u.pedido.Dni != "12345678" ||
+	// El DNI del formulario va como DECLARADO (lo verifica Secretaría).
+	if u.pedido.Nombres != "Ana María" || u.pedido.Apellidos != "Quispe Ñahui" || u.pedido.DniDeclarado != "12345678" || u.pedido.Dni != "" ||
 		u.pedido.Correo != "verificado@gmail.example" || u.tokenUso != "Bearer token-de-perfil" {
 		t.Fatalf("perfil: %+v %s", u.pedido, u.tokenUso)
 	}

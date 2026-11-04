@@ -88,6 +88,15 @@ function MiPerfil() {
                                     <dd>{perfil.dni}</dd>
                                 </div>
                             )}
+                            {!perfil.dni && perfil.identidad_pendiente && (
+                                <div>
+                                    <dt>DNI declarado</dt>
+                                    <dd>
+                                        {perfil.dni_declarado}{" "}
+                                        <span className="mp-identidad-pendiente">Identidad pendiente de verificación</span>
+                                    </dd>
+                                </div>
+                            )}
                             {perfil.telefono && (
                                 <div>
                                     <dt>Teléfono</dt>

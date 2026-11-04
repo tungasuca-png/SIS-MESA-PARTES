@@ -23,8 +23,10 @@ type RegisterResponse {
 }
 
 type LoginRequest {
-	Dni      string `json:"dni"`
+	Dni      string `json:"dni,optional"`
 	Password string `json:"password"`
+	// Solo solicitantes del registro público cuyo DNI aún no fue verificado.
+	Correo string `json:"correo,optional"`
 }
 
 type LoginResponse {
@@ -78,6 +80,48 @@ type GoogleRegistroRequest {
 	ApellidoMaterno string `json:"apellido_materno,optional"`
 	Telefono        string `json:"telefono,optional"`
 	Direccion       string `json:"direccion,optional"`
+}
+
+// ---- Registro manual con verificación del correo (solo SOLICITANTES) ----
+// El rol NO se recibe: siempre SOLICITANTE. La cuenta se crea al verificar.
+type RegistroCorreoRequest {
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno,optional"`
+	Dni             string `json:"dni"`
+	Correo          string `json:"correo"`
+	Clave           string `json:"clave"`
+	AceptaTerminos  bool   `json:"acepta_terminos,optional"`
+	VersionTerminos string `json:"version_terminos,optional"`
+}
+
+// Misma respuesta exista o no el correo.
+type RegistroCorreoResponse {
+	RegistroId string `json:"registro_id"`
+	ExpiraEn   int64  `json:"expira_en"`
+	ReenviarEn int64  `json:"reenviar_en"`
+	Mensaje    string `json:"mensaje"`
+}
+
+type RegistroVerificarRequest {
+	RegistroId string `json:"registro_id"`
+	Codigo     string `json:"codigo"`
+}
+
+// Sin DNI: el DNI declarado no se devuelve; se inicia sesión con el correo.
+type RegistroVerificarResponse {
+	Mensaje string `json:"mensaje"`
+	Correo  string `json:"correo"`
+}
+
+type RegistroReenviarRequest {
+	RegistroId string `json:"registro_id"`
+}
+
+type RegistroReenviarResponse {
+	ExpiraEn   int64  `json:"expira_en"`
+	ReenviarEn int64  `json:"reenviar_en"`
+	Mensaje    string `json:"mensaje"`
 }
 
 type GoogleVincularRequest {
@@ -327,7 +371,8 @@ type ExportFutPdfResponse {
 }
 
 service gateway-api {
-	// Deshabilitado: responde 410 Gone (el autorregistro es solo con Google).
+	// Deshabilitado: responde 410 Gone (contrato antiguo con username y rol).
+	// El autorregistro es con Google o con /api/auth/registro (correo verificado).
 	@handler Register
 	post /api/auth/register (RegisterRequest) returns (RegisterResponse)
 
@@ -348,6 +393,16 @@ service gateway-api {
 
 	@handler GoogleEstado
 	get /api/auth/google/estado (GoogleEstadoRequest) returns (GoogleEstadoResponse)
+
+	// Registro manual con verificación del correo (solo SOLICITANTES).
+	@handler RegistroCorreo
+	post /api/auth/registro (RegistroCorreoRequest) returns (RegistroCorreoResponse)
+
+	@handler RegistroVerificar
+	post /api/auth/registro/verificar (RegistroVerificarRequest) returns (RegistroVerificarResponse)
+
+	@handler RegistroReenviar
+	post /api/auth/registro/reenviar (RegistroReenviarRequest) returns (RegistroReenviarResponse)
 
 	@handler Login
 	post /api/auth/login (LoginRequest) returns (LoginResponse)
@@ -380,6 +435,9 @@ type UsuarioDTO {
 	Activo      bool   `json:"activo"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
+	// DNI declarado en el registro público (sin verificar).
+	DniDeclarado       string `json:"dni_declarado"`
+	IdentidadPendiente bool   `json:"identidad_pendiente"`
 }
 
 type UsuarioBasicDTO {
@@ -389,6 +447,72 @@ type UsuarioBasicDTO {
 	NombreCompleto string `json:"nombre_completo"`
 	TipoUsuario    string `json:"tipo_usuario"`
 	Dni            string `json:"dni"`
+	// Marca "Identidad no verificada" (sin el DNI declarado).
+	IdentidadPendiente bool `json:"identidad_pendiente"`
+}
+
+// ---- Verificación de identidad de solicitantes (Secretaría) ----
+// Permiso solicitantes.identidad.verify (lo comprueban Auth y Usuarios).
+type IdentidadSolicitanteDTO {
+	UsuarioId      string `json:"usuario_id"`
+	NombreCompleto string `json:"nombre_completo"`
+	DniDeclarado   string `json:"dni_declarado"`
+	Origen         string `json:"origen"`
+	Estado         string `json:"estado"`
+	Metodo         string `json:"metodo"`
+	VerificadoAt   string `json:"verificado_at"`
+	MotivoRechazo  string `json:"motivo_rechazo"`
+	CreatedAt      string `json:"created_at"`
+	Conflicto      bool   `json:"conflicto"`
+	// Sincronización del DNI verificado con el perfil (Usuarios): "",
+	// PERFIL_PENDIENTE o COMPLETA, y la traza del último intento.
+	Sincronizacion         string `json:"sincronizacion"`
+	SincronizacionIntentos int32  `json:"sincronizacion_intentos"`
+	SincronizacionError    string `json:"sincronizacion_error"`
+}
+
+type ListIdentidadesRequest {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Limit         int32  `form:"limit,optional"`
+	Offset        int32  `form:"offset,optional"`
+	// Solo verificadas con el perfil pendiente de sincronizar.
+	SincronizacionPendiente bool `form:"sincronizacion_pendiente,optional"`
+}
+
+type ListIdentidadesResponse {
+	Items []IdentidadSolicitanteDTO `json:"items"`
+	Total int32                     `json:"total"`
+}
+
+type VerificarIdentidadRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Metodo        string `json:"metodo"`
+}
+
+type RechazarIdentidadRequest {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type IdentidadEstadoResponse {
+	Estado string `json:"estado"`
+	// PERFIL_PENDIENTE: Auth verificó y el perfil se actualizará en la
+	// reconciliación (el DNI ya no puede usarlo otra cuenta).
+	Sincronizacion string `json:"sincronizacion"`
+}
+
+// Reconciliación: reintenta las verificaciones con el perfil pendiente.
+type ReconciliarIdentidadesRequest {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ReconciliarIdentidadesResponse {
+	Completadas int `json:"completadas"`
+	Revertidas  int `json:"revertidas"`
+	Pendientes  int `json:"pendientes"`
 }
 
 type GetUsuarioRequest {
@@ -510,6 +634,19 @@ service gateway-api {
 
 	@handler GetUsuariosBasic
 	post /api/usuarios/basic-batch (GetUsuariosBasicRequest) returns (GetUsuariosBasicResponse)
+
+	// Verificación de identidad de solicitantes (Secretaría).
+	@handler ListIdentidades
+	get /api/solicitantes/identidades (ListIdentidadesRequest) returns (ListIdentidadesResponse)
+
+	@handler VerificarIdentidad
+	post /api/solicitantes/identidades/:id/verificar (VerificarIdentidadRequest) returns (IdentidadEstadoResponse)
+
+	@handler RechazarIdentidad
+	post /api/solicitantes/identidades/:id/rechazar (RechazarIdentidadRequest) returns (IdentidadEstadoResponse)
+
+	@handler ReconciliarIdentidades
+	post /api/solicitantes/identidades/reconciliar (ReconciliarIdentidadesRequest) returns (ReconciliarIdentidadesResponse)
 
 	@handler GetUsuario
 	get /api/usuarios/:id (GetUsuarioRequest) returns (GetUsuarioResponse)

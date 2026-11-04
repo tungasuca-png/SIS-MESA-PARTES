@@ -90,3 +90,26 @@ func TestAuthenticationInterceptor_EsquemaIncorrecto(t *testing.T) {
 		t.Fatalf("expected Unauthenticated, got %v", err)
 	}
 }
+
+// Solo la consulta de preparación del registro público pasa sin sesión (y
+// sin identidad en el contexto); cualquier otro método sigue exigiendo token.
+func TestAuthenticationInterceptor_SoloPreparacionEsPublica(t *testing.T) {
+	llamado := false
+	h := func(ctx context.Context, _ any) (any, error) {
+		llamado = true
+		if id, _, ok := UserFromContext(ctx); ok || id != "" {
+			t.Fatal("la consulta pública no debe llevar identidad")
+		}
+		return "ok", nil
+	}
+	info := &grpc.UnaryServerInfo{FullMethod: "/usuarios.Usuarios/PublicRegistrationReady"}
+	if _, err := AuthenticationInterceptor(testValidator())(context.Background(), nil, info, h); err != nil || !llamado {
+		t.Fatalf("preparación sin sesión: %v", err)
+	}
+	for _, m := range []string{"/usuarios.Usuarios/GetUsuario", "/usuarios.Usuarios/CreateMyProfile", "/usuarios.Usuarios/AssignVerifiedDni", "/usuarios.Usuarios/PublicRegistrationReadyX"} {
+		_, err := AuthenticationInterceptor(testValidator())(context.Background(), nil, &grpc.UnaryServerInfo{FullMethod: m}, testHandler)
+		if status.Code(err) != codes.Unauthenticated {
+			t.Fatalf("%s sin sesión: %v", m, err)
+		}
+	}
+}

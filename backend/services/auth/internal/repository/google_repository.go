@@ -170,9 +170,11 @@ func rolDe(ctx context.Context, tx pgx.Tx, usuarioID string) (string, error) {
 
 // RegisterGoogleUser: paso 1 del autorregistro. Con un código REGISTRO
 // vigente crea, en una transacción, el usuario (rol SOLICITANTE fijo, correo
-// verificado por Google, DNI) y su identidad Google con registro_completo =
-// FALSE. Si el código ya tiene usuario (reintento), retoma ese registro sin
-// crear nada. Los UNIQUE de usuarios (dni, email, username) y de
+// verificado por Google), su identidad Google con registro_completo = FALSE
+// y su DNI DECLARADO (identidad_solicitantes, migración 025). usuarios.dni
+// queda en NULL: el DNI no se reserva hasta que Secretaría verifica la
+// identidad. Si el código ya tiene usuario (reintento), retoma ese registro
+// sin crear nada. Los UNIQUE de usuarios (email, username) y de
 // user_auth_providers son la verificación definitiva frente a carreras.
 func (r *GoogleRepository) RegisterGoogleUser(ctx context.Context, hash []byte, dni, username, passwordHash string) (*RegistroGoogle, error) {
 	tx, err := r.db.Begin(ctx)
@@ -189,8 +191,9 @@ func (r *GoogleRepository) RegisterGoogleUser(ctx context.Context, hash []byte, 
 		// Reintento de un registro cuya cuenta ya existe y espera su perfil.
 		var completo bool
 		err := tx.QueryRow(ctx, `
-			SELECT u.id, u.username, COALESCE(u.dni, ''), u.email::text, p.registro_completo
+			SELECT u.id, u.username, COALESCE(i.dni_declarado, u.dni, ''), u.email::text, p.registro_completo
 			FROM usuarios u JOIN user_auth_providers p ON p.usuario_id = u.id AND p.provider = $2
+			LEFT JOIN identidad_solicitantes i ON i.usuario_id = u.id
 			WHERE u.id = $1
 		`, codigo.UsuarioID, ProveedorGoogle).Scan(&reg.UsuarioID, &reg.Username, &reg.DNI, &reg.Email, &completo)
 		if err != nil {
@@ -205,13 +208,17 @@ func (r *GoogleRepository) RegisterGoogleUser(ctx context.Context, hash []byte, 
 		return reg, tx.Commit(ctx)
 	}
 	err = tx.QueryRow(ctx, `
-		INSERT INTO usuarios (username, email, password_hash, dni, email_verified, email_verified_at)
-		VALUES ($1, $2, $3, $4, TRUE, CURRENT_TIMESTAMP)
-		RETURNING id, username, dni, email::text
-	`, username, codigo.Email, passwordHash, dni).Scan(&reg.UsuarioID, &reg.Username, &reg.DNI, &reg.Email)
+		INSERT INTO usuarios (username, email, password_hash, email_verified, email_verified_at)
+		VALUES ($1, $2, $3, TRUE, CURRENT_TIMESTAMP)
+		RETURNING id, username, email::text
+	`, username, codigo.Email, passwordHash).Scan(&reg.UsuarioID, &reg.Username, &reg.Email)
 	if err != nil {
 		return nil, classifyUniqueViolation(err)
 	}
+	if err := declararIdentidad(ctx, tx, reg.UsuarioID, dni, OrigenIdentidadGoogle); err != nil {
+		return nil, err
+	}
+	reg.DNI = dni
 	rol, err := findRoleByName(ctx, tx, RolSolicitante)
 	if err != nil {
 		return nil, err

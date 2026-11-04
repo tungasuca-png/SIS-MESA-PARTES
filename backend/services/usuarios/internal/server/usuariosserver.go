@@ -67,3 +67,18 @@ func (s *UsuariosServer) UpdateUsuarioRole(ctx context.Context, in *usuarios.Upd
 	l := logic.NewUpdateUsuarioRoleLogic(ctx, s.svcCtx)
 	return l.UpdateUsuarioRole(in)
 }
+
+func (s *UsuariosServer) AssignVerifiedDni(ctx context.Context, in *usuarios.VerifiedDniRequest) (*usuarios.VerifiedDniResponse, error) {
+	l := logic.NewAssignVerifiedDniLogic(ctx, s.svcCtx)
+	return l.AssignVerifiedDni(in)
+}
+
+func (s *UsuariosServer) RevertVerifiedDni(ctx context.Context, in *usuarios.VerifiedDniRequest) (*usuarios.VerifiedDniResponse, error) {
+	l := logic.NewRevertVerifiedDniLogic(ctx, s.svcCtx)
+	return l.RevertVerifiedDni(in)
+}
+
+func (s *UsuariosServer) PublicRegistrationReady(ctx context.Context, in *usuarios.PublicRegistrationReadyRequest) (*usuarios.PublicRegistrationReadyResponse, error) {
+	l := logic.NewPublicRegistrationReadyLogic(ctx, s.svcCtx)
+	return l.PublicRegistrationReady(in)
+}

@@ -166,6 +166,54 @@ func (c *scriptedAuthClient) GoogleLinkStatus(context.Context, *authclient.Googl
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) EmailRegister(context.Context, *authclient.EmailRegisterRequest, ...grpc.CallOption) (*authclient.EmailRegisterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) EmailResendCode(context.Context, *authclient.EmailResendCodeRequest, ...grpc.CallOption) (*authclient.EmailResendCodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) EmailVerify(context.Context, *authclient.EmailVerifyRequest, ...grpc.CallOption) (*authclient.EmailVerifyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) EmailCompleteRegistration(context.Context, *authclient.EmailRegistrationRequest, ...grpc.CallOption) (*authclient.EmailCompleteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) EmailCancelRegistration(context.Context, *authclient.EmailRegistrationRequest, ...grpc.CallOption) (*authclient.EmailCancelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) ListSolicitanteIdentities(context.Context, *authclient.ListSolicitanteIdentitiesRequest, ...grpc.CallOption) (*authclient.ListSolicitanteIdentitiesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) GetSolicitanteIdentity(context.Context, *authclient.GetSolicitanteIdentityRequest, ...grpc.CallOption) (*authclient.GetSolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) VerifySolicitanteIdentity(context.Context, *authclient.VerifySolicitanteIdentityRequest, ...grpc.CallOption) (*authclient.VerifySolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) RejectSolicitanteIdentity(context.Context, *authclient.RejectSolicitanteIdentityRequest, ...grpc.CallOption) (*authclient.RejectSolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) ConfirmSolicitanteIdentitySync(context.Context, *authclient.IdentitySyncRequest, ...grpc.CallOption) (*authclient.IdentitySyncResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) RecordSolicitanteIdentitySyncFailure(context.Context, *authclient.IdentitySyncFailureRequest, ...grpc.CallOption) (*authclient.IdentitySyncResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
+func (c *scriptedAuthClient) RevertSolicitanteIdentity(context.Context, *authclient.IdentitySyncRequest, ...grpc.CallOption) (*authclient.IdentitySyncResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 func TestUsuariosIntegration(t *testing.T) {
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")

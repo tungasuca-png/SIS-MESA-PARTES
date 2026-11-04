@@ -89,6 +89,12 @@ func (l *DownloadDocumentoLogic) DownloadDocumento(in *documentos.DownloadDocume
 		if _, err := l.svcCtx.ExpedientesClient.GetExpediente(outCtx, &expedientesclient.GetExpedienteRequest{
 			Id: meta.ExpedienteID,
 		}); err != nil {
+			// Expediente ajeno o inexistente (Expedientes ya no distingue
+			// ambos para un solicitante): misma respuesta que un documento
+			// inexistente, para no revelar que el documento existe.
+			if status.Code(err) == codes.NotFound {
+				return nil, status.Error(codes.NotFound, "documento no encontrado")
+			}
 			return nil, err
 		}
 	}

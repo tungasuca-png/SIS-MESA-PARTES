@@ -58,6 +58,11 @@ func (l *GoogleRegisterLogic) GoogleRegister(in *auth.GoogleRegisterRequest) (*a
 			e = errGoogle(codes.InvalidArgument, "dni_distinto", "Tu registro pendiente se inició con otro DNI. Escribe el mismo DNI para continuar.")
 		case errors.Is(err, repository.ErrUsernameExists):
 			e = status.Error(codes.Aborted, "no se pudo crear la cuenta; inténtalo nuevamente")
+		case repository.EsquemaPendiente(err):
+			// Migración 025 pendiente: el DNI no puede guardarse solo como
+			// declarado y NUNCA se reserva en su lugar; no se crea nada.
+			l.Errorf("registro con Google: migración de identidad pendiente (025)")
+			e = errGoogle(codes.Unavailable, "registro_no_disponible", "El registro con Google no está disponible en este momento. Inténtalo más tarde.")
 		default:
 			l.Errorf("registro con Google: no se pudo crear la cuenta: %v", err)
 			e = status.Error(codes.Internal, "no se pudo crear la cuenta")

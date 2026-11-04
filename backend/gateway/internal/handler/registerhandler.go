@@ -11,10 +11,11 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// MensajeRegistroDeshabilitado: el autorregistro público con usuario y clave
-// se retiró; los solicitantes se registran con Google (y completan su DNI) o
-// reciben sus credenciales de la institución.
-const MensajeRegistroDeshabilitado = "El registro público fue deshabilitado. Usa «Continuar con Google» o solicita tus credenciales a la institución educativa."
+// MensajeRegistroDeshabilitado: este contrato antiguo (usuario, clave y rol)
+// se retiró; los solicitantes se registran con Google o con su correo
+// verificado (POST /api/auth/registro), o reciben sus credenciales de la
+// institución.
+const MensajeRegistroDeshabilitado = "Este método de registro fue deshabilitado. Usa «Continuar con Google» o «Crear cuenta con correo» en la pantalla de inicio de sesión."
 
 // RegisterHandler: POST /api/auth/register responde 410 Gone sin llamar a
 // ningún servicio. No elimina usuarios ni datos existentes.

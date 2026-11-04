@@ -55,6 +55,15 @@ func (l *GetDerivacionLogic) GetDerivacion(in *derivaciones.GetDerivacionRequest
 	// Acceso al expediente REAL de esta derivación (found.ExpedienteID, nunca
 	// un dato del cliente); con solo view_own, además debe ser propio.
 	if err := vis.verificarExpediente(l.ctx, l.svcCtx, userID, found.ExpedienteID); err != nil {
+		// Con solo view_own, una derivación de un expediente ajeno responde
+		// EXACTAMENTE igual que una inexistente (no se revela que existe ni
+		// nada de su expediente). El personal (view general) conserva sus
+		// respuestas.
+		if !vis.general {
+			if c := status.Code(err); c == codes.NotFound || c == codes.PermissionDenied {
+				return nil, status.Error(codes.NotFound, "derivación no encontrada")
+			}
+		}
 		return nil, err
 	}
 

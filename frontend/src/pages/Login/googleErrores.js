@@ -20,6 +20,7 @@ export const MENSAJES_GOOGLE = {
     ya_vinculado: "Esta cuenta de Google ya está vinculada a otra cuenta del sistema.",
     cuenta_ya_vinculada: "Tu cuenta ya tiene una cuenta de Google vinculada.",
     clave_incorrecta: "La clave no es correcta.",
+    servicio_no_disponible: "El registro no está disponible en este momento. Inténtalo nuevamente en unos minutos.",
     error: "No se pudo completar el acceso con Google. Inténtalo nuevamente.",
 };
 
@@ -34,6 +35,11 @@ export function errorGoogle(err) {
         const desc = extractBackendMessage(err.response.data) ?? "";
         if (desc.startsWith("account_locked")) return { clave: "cuenta_bloqueada", mensaje: MENSAJES_GOOGLE.cuenta_bloqueada };
         return { clave: "limite", mensaje: "Demasiados intentos seguidos. Espera un momento e inténtalo nuevamente." };
+    }
+    // 5xx: el Gateway no envía detalles (p. ej. Usuarios aún no preparado).
+    // No se creó nada y el registro pendiente se conserva para reintentar.
+    if (err.response.status >= 500) {
+        return { clave: "servicio_no_disponible", mensaje: MENSAJES_GOOGLE.servicio_no_disponible };
     }
     const desc = extractBackendMessage(err.response.data) ?? "";
     const m = desc.match(/^google_([a-z_]+):\s*(.*)$/s);

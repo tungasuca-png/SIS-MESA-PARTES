@@ -44,10 +44,12 @@ privilegios que necesite: el rol de aplicación ya no es dueño de nada.
 **Y además debe añadirlos a `02_propiedad_y_permisos.sql`** (bloque condicional
 con `to_regclass`): ese script hace `REVOKE ALL ON ALL TABLES ... FROM auth_app`
 y, si una tabla no figura en él, reejecutarlo le quita a `auth_app` lo que la
-migración le concedió. Hoy cubre las migraciones de Auth hasta la 023
+migración le concedió. Hoy cubre las migraciones de Auth hasta la 025
 (019/020 `service_clients*`, 022 `user_auth_providers`, 023
 `oauth_login_codes`, `auth_eventos` y la función
-`cancelar_registro_google_pendiente(uuid)`).
+`cancelar_registro_google_pendiente(uuid)`, 024 `registros_correo` y la
+función `cancelar_registro_correo_pendiente(uuid)`, 025
+`identidad_solicitantes`).
 
 ## Orden de aplicación
 
@@ -78,7 +80,8 @@ Privilegios esperados de `auth_app` en `auth_db` (cualquier otro es un error):
 | `service_client_permissions` | SELECT, INSERT, DELETE |
 | `user_auth_providers`, `oauth_login_codes` | SELECT, INSERT, UPDATE |
 | `auth_eventos` | INSERT (sin lectura) |
-| función `cancelar_registro_google_pendiente(uuid)` | EXECUTE (SECURITY DEFINER, dueño `auth_owner`; nadie más) |
+| `registros_correo`, `identidad_solicitantes` | SELECT, INSERT, UPDATE |
+| funciones `cancelar_registro_google_pendiente(uuid)` y `cancelar_registro_correo_pendiente(uuid)` | EXECUTE (SECURITY DEFINER, dueño `auth_owner`; nadie más) |
 En las bases de Mesa de Partes y para los roles `<s>_tester`, los privilegios por
 defecto (`ALTER DEFAULT PRIVILEGES`) ya cubren las tablas nuevas creadas por
 `<s>_owner`.

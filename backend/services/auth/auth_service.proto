@@ -32,6 +32,10 @@ message LoginRequest {
   // DNI (8 dígitos): identifica al usuario; reemplaza al username como credencial.
   string dni = 1;
   string password = 2;
+  // Alternativa SOLO para cuentas SOLICITANTE (registro público con DNI
+  // todavía no verificado). Si viene, se usa en lugar del DNI. Las cuentas
+  // institucionales siguen entrando únicamente por DNI.
+  string email = 3;
 }
 
 message LoginResponse {
@@ -361,6 +365,149 @@ message GoogleLinkStatusResponse {
   bool available = 3;
 }
 
+// ---- Registro manual con verificación del correo (solo SOLICITANTES) ----
+// El rol no se elige: Auth registra siempre SOLICITANTE. La cuenta se crea
+// recién al verificar el código enviado al correo.
+message EmailRegisterRequest {
+  string email = 1;
+  string password = 2;
+  string dni = 3;
+  string nombres = 4;
+  string apellido_paterno = 5;
+  string apellido_materno = 6;
+  bool accept_terms = 7;
+  string terms_version = 8;
+}
+
+// Misma respuesta exista o no el correo (no revela cuentas).
+message EmailRegisterResponse {
+  string registration_id = 1;
+  int64 expires_in = 2;
+  int64 resend_in = 3;
+}
+
+message EmailResendCodeRequest {
+  string registration_id = 1;
+}
+
+message EmailResendCodeResponse {
+  int64 expires_in = 1;
+  int64 resend_in = 2;
+}
+
+// Paso 1 de la activación: código correcto -> crea (o retoma) la cuenta.
+// profile_token es un access token del nuevo usuario SOLO para que el Gateway
+// cree su perfil en Usuarios Service; nunca llega al navegador.
+message EmailVerifyRequest {
+  string registration_id = 1;
+  string code = 2;
+}
+
+message EmailVerifyResponse {
+  string user_id = 1;
+  string dni = 2;
+  string email = 3;
+  string nombres = 4;
+  string apellidos = 5;
+  string profile_token = 6;
+}
+
+// Paso 2 (perfil creado) o compensación (perfil rechazado).
+message EmailRegistrationRequest {
+  string registration_id = 1;
+  string code = 2;
+}
+
+message EmailCompleteResponse {
+  string dni = 1;
+}
+
+message EmailCancelResponse {
+  bool cancelled = 1;
+}
+
+// ---- Verificación de identidad de solicitantes (Secretaría) ----
+// Protegido por el permiso solicitantes.identidad.verify. El registro
+// público solo DECLARA el DNI; aquí el personal lo coteja.
+message SolicitanteIdentity {
+  string user_id = 1;
+  string dni_declarado = 2;
+  string origen = 3;
+  string estado = 4;
+  string metodo = 5;
+  string verificado_at = 6;
+  string motivo_rechazo = 7;
+  string created_at = 8;
+  // El DNI declarado ya pertenece a OTRA cuenta.
+  bool conflicto = 9;
+  // Sincronización con Usuarios: "", PERFIL_PENDIENTE o COMPLETA, y la traza
+  // del último intento (código de error, nunca el DNI).
+  string sincronizacion = 10;
+  int32 sincronizacion_intentos = 11;
+  string sincronizacion_error = 12;
+}
+
+message ListSolicitanteIdentitiesRequest {
+  string estado = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  // Solo verificadas con el perfil pendiente de sincronizar (reconciliación).
+  bool sincronizacion_pendiente = 4;
+}
+
+message ListSolicitanteIdentitiesResponse {
+  repeated SolicitanteIdentity items = 1;
+  int32 total = 2;
+}
+
+message GetSolicitanteIdentityRequest {
+  string user_id = 1;
+}
+
+message GetSolicitanteIdentityResponse {
+  SolicitanteIdentity identity = 1;
+}
+
+// dni_esperado: el DNI que el personal cotejó (si la declaración cambió, no
+// se verifica). metodo: PRESENCIAL o DOCUMENTO.
+message VerifySolicitanteIdentityRequest {
+  string user_id = 1;
+  string dni_esperado = 2;
+  string metodo = 3;
+}
+
+message VerifySolicitanteIdentityResponse {
+  string estado = 1;
+  string sincronizacion = 2;
+}
+
+// Sincronización del DNI verificado con Usuarios Service (el Gateway
+// orquesta; Auth guarda el estado). dni: el DNI definitivo esperado.
+message IdentitySyncRequest {
+  string user_id = 1;
+  string dni = 2;
+}
+
+message IdentitySyncFailureRequest {
+  string user_id = 1;
+  // Código estable del error (p. ej. usuarios_no_disponible); nunca datos.
+  string codigo = 2;
+}
+
+message IdentitySyncResponse {
+  string estado = 1;
+  string sincronizacion = 2;
+}
+
+message RejectSolicitanteIdentityRequest {
+  string user_id = 1;
+  string motivo = 2;
+}
+
+message RejectSolicitanteIdentityResponse {
+  string estado = 1;
+}
+
 service Auth {
   rpc Ping(Request) returns(Response);
   rpc Register(RegisterRequest) returns(RegisterResponse);
@@ -390,4 +537,16 @@ service Auth {
   rpc GoogleCancelRegistration(GoogleRegistrationRequest) returns(GoogleCancelResponse);
   rpc GoogleStartLink(GoogleStartLinkRequest) returns(GoogleStartLinkResponse);
   rpc GoogleLinkStatus(GoogleLinkStatusRequest) returns(GoogleLinkStatusResponse);
+  rpc EmailRegister(EmailRegisterRequest) returns(EmailRegisterResponse);
+  rpc EmailResendCode(EmailResendCodeRequest) returns(EmailResendCodeResponse);
+  rpc EmailVerify(EmailVerifyRequest) returns(EmailVerifyResponse);
+  rpc EmailCompleteRegistration(EmailRegistrationRequest) returns(EmailCompleteResponse);
+  rpc EmailCancelRegistration(EmailRegistrationRequest) returns(EmailCancelResponse);
+  rpc ListSolicitanteIdentities(ListSolicitanteIdentitiesRequest) returns(ListSolicitanteIdentitiesResponse);
+  rpc GetSolicitanteIdentity(GetSolicitanteIdentityRequest) returns(GetSolicitanteIdentityResponse);
+  rpc VerifySolicitanteIdentity(VerifySolicitanteIdentityRequest) returns(VerifySolicitanteIdentityResponse);
+  rpc RejectSolicitanteIdentity(RejectSolicitanteIdentityRequest) returns(RejectSolicitanteIdentityResponse);
+  rpc ConfirmSolicitanteIdentitySync(IdentitySyncRequest) returns(IdentitySyncResponse);
+  rpc RecordSolicitanteIdentitySyncFailure(IdentitySyncFailureRequest) returns(IdentitySyncResponse);
+  rpc RevertSolicitanteIdentity(IdentitySyncRequest) returns(IdentitySyncResponse);
 }

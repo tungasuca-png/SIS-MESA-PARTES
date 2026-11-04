@@ -31,6 +31,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		&authclient.LoginRequest{
 			Dni:      req.Dni,
 			Password: req.Password,
+			Email:    req.Correo,
 		},
 	)
 

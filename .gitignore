@@ -36,3 +36,14 @@ Thumbs.db
 # contraseñas. Se guardan fuera del repositorio (~/.tungasuca-backups).
 backups/
 *.dump
+
+# Prevención: claves, certificados, respaldos y datos tabulares (pueden
+# contener credenciales o datos personales). Las migraciones .sql, la
+# documentación y los .env.example NO se ven afectados.
+*.pem
+*.key
+*.backup
+*.xlsx
+*.csv
+# Configuración local de servicios (backend/services/*/etc/*.local.yaml)
+**/etc/*.local.yaml

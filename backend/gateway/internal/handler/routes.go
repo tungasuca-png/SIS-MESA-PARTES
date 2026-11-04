@@ -42,6 +42,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/api/auth/registro",
+				Handler: RegistroCorreoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/registro/verificar",
+				Handler: RegistroVerificarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/auth/registro/reenviar",
+				Handler: RegistroReenviarHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/api/auth/google/vincular",
 				Handler: GoogleVincularHandler(serverCtx),
 			},
@@ -114,6 +129,26 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/usuarios/basic-batch",
 				Handler: GetUsuariosBasicHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/solicitantes/identidades",
+				Handler: ListIdentidadesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/solicitantes/identidades/:id/verificar",
+				Handler: VerificarIdentidadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/solicitantes/identidades/:id/rechazar",
+				Handler: RechazarIdentidadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/solicitantes/identidades/reconciliar",
+				Handler: ReconciliarIdentidadesHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPut,

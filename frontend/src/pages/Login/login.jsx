@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { extractBackendMessage } from "../../utils/apiErrors";
 import { GOOGLE_INICIAR_URL } from "../../services/authService";
@@ -8,9 +8,14 @@ import "./login.css";
 
 function Login() {
     const navigate = useNavigate();
+    const { state } = useLocation();
     const { login: loginUser } = useAuth();
 
-    const [dni, setDni] = useState("");
+    // Tras activar una cuenta con correo, el correo llega precargado: hasta
+    // que la institución verifique su identidad, el solicitante ingresa con él.
+    const [modo, setModo] = useState(() => (state?.correo ? "correo" : "dni"));
+    const [correo, setCorreo] = useState(() => state?.correo ?? "");
+    const [dni, setDni] = useState(() => (/^[0-9]{8}$/.test(state?.dni ?? "") ? state.dni : ""));
     const [password, setPassword] = useState("");
     const [mostrarClave, setMostrarClave] = useState(false);
     const [error, setError] = useState("");
@@ -20,20 +25,33 @@ function Login() {
         e.preventDefault();
         setError("");
 
+        const porCorreo = modo === "correo";
         const dniLimpio = dni.trim();
-        if (!dniLimpio || !password) {
-            setError("Ingresa tu DNI y tu clave");
-            return;
-        }
-        if (!/^[0-9]{8}$/.test(dniLimpio)) {
-            setError("El DNI debe tener 8 dígitos numéricos");
-            return;
+        const correoLimpio = correo.trim().toLowerCase();
+        if (porCorreo) {
+            if (!correoLimpio || !password) {
+                setError("Ingresa tu correo y tu clave");
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoLimpio)) {
+                setError("Ingresa un correo electrónico válido");
+                return;
+            }
+        } else {
+            if (!dniLimpio || !password) {
+                setError("Ingresa tu DNI y tu clave");
+                return;
+            }
+            if (!/^[0-9]{8}$/.test(dniLimpio)) {
+                setError("El DNI debe tener 8 dígitos numéricos");
+                return;
+            }
         }
 
         setLoading(true);
 
         try {
-            const loggedInUser = await loginUser(dniLimpio, password);
+            const loggedInUser = await loginUser(porCorreo ? correoLimpio : dniLimpio, password);
             // El SOLICITANTE entra a su propio portal (Mesa de Partes
             // Virtual, sin sidebar administrativo); el resto de roles sigue
             // entrando al Dashboard de siempre.
@@ -43,7 +61,7 @@ function Login() {
             if (!err?.response) {
                 setError("No se pudo conectar con el servidor. Inténtalo nuevamente.");
             } else if (err.response.status === 400) {
-                setError("El DNI debe tener 8 dígitos numéricos");
+                setError(porCorreo ? "Ingresa un correo electrónico válido" : "El DNI debe tener 8 dígitos numéricos");
             } else if (err.response.status === 429) {
                 // Auth bloquea la cuenta 15 minutos tras 5 intentos fallidos
                 // ("account_locked: ... en N minutos").
@@ -53,10 +71,16 @@ function Login() {
                         minutos ? `Intenta de nuevo en ${minutos} ${minutos === "1" ? "minuto" : "minutos"}.` : "Intenta de nuevo más tarde."
                     }`
                 );
+            } else if (err.response.status === 403) {
+                // Registro con correo sin terminar (solo se informa si la clave
+                // es correcta): "correo_no_verificado: ..." o "registro_incompleto: ...".
+                const desc = extractBackendMessage(err.response.data) ?? "";
+                const m = desc.match(/^(?:correo_no_verificado|registro_incompleto):\s*(.+)$/s);
+                setError(m ? m[1] : "DNI o clave incorrectos");
             } else if (err.response.status >= 500) {
                 setError("El servicio no está disponible en este momento. Inténtalo nuevamente.");
             } else {
-                setError("DNI o clave incorrectos");
+                setError(porCorreo ? "Correo o clave incorrectos" : "DNI o clave incorrectos");
             }
         } finally {
             setLoading(false);
@@ -88,7 +112,30 @@ function Login() {
 
                 <form onSubmit={handleSubmit} noValidate>
 
+                    {/* CORREO: solicitantes con identidad pendiente de verificación */}
+                    {modo === "correo" && (
+                        <div className="form-group">
+                            <label htmlFor="correo">Correo electrónico</label>
+                            <div className="input-box">
+                                <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                    <path d="M3 7l9 6 9-6" />
+                                </svg>
+                                <input
+                                    id="correo"
+                                    type="email"
+                                    value={correo}
+                                    onChange={(e) => setCorreo(e.target.value)}
+                                    placeholder="tu@correo.com"
+                                    autoComplete="username"
+                                    disabled={loading}
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {/* DNI */}
+                    {modo === "dni" && (
                     <div className="form-group">
                         <label htmlFor="dni">DNI</label>
                         <div className="input-box">
@@ -111,6 +158,7 @@ function Login() {
                             />
                         </div>
                     </div>
+                    )}
 
                     {/* CONTRASEÑA */}
                     <div className="form-group">
@@ -175,6 +223,18 @@ function Login() {
 
                 </form>
 
+                <button
+                    type="button"
+                    className="login-enlace-boton"
+                    onClick={() => {
+                        setModo((m) => (m === "dni" ? "correo" : "dni"));
+                        setError("");
+                    }}
+                    disabled={loading}
+                >
+                    {modo === "dni" ? "¿Te registraste con correo? Usa tu correo" : "Usar mi DNI"}
+                </button>
+
                 {/* GOOGLE (solo solicitantes): navegación completa al backend,
                     que redirige a Google; el personal sigue con DNI y clave. */}
                 <div className="login-separador" role="separator" aria-label="o">
@@ -197,7 +257,7 @@ function Login() {
                 <p className="login-google-nota">Para solicitantes. El personal de la institución ingresa con su DNI y su clave.</p>
 
                 <p className="login-help">
-                    ¿No tienes una cuenta? Solicita tus credenciales a la institución educativa.
+                    ¿Eres solicitante y no tienes cuenta? <Link to="/registro">Crear cuenta con correo</Link>
                 </p>
 
             </section>

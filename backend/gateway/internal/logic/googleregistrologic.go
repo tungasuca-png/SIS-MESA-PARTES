@@ -57,15 +57,20 @@ func (l *GoogleRegistroLogic) GoogleRegistro(req *types.GoogleRegistroRequest) (
 		return nil, status.Error(codes.InvalidArgument, "google_datos_invalidos: El teléfono no puede superar los 20 caracteres.")
 	}
 
+	// Antes de que Auth cree la cuenta: Usuarios debe poder crear el perfil.
+	if err := usuariosListoParaRegistro(l.ctx, l.svcCtx, l.Logger, "google_registro_no_disponible"); err != nil {
+		return nil, err
+	}
 	reg, err := l.svcCtx.AuthClient.GoogleRegister(l.ctx, &authclient.GoogleRegisterRequest{LoginCode: req.Codigo, Dni: dni})
 	if err != nil {
 		return nil, err
 	}
-	// Perfil con el DNI y el correo que Auth confirmó (no los del navegador),
-	// usando un token del nuevo usuario que nunca llega al navegador.
+	// Perfil con el DNI DECLARADO y el correo que Auth confirmó (no los del
+	// navegador), usando un token del nuevo usuario que nunca llega al
+	// navegador. El DNI no se reserva: Secretaría lo verifica después.
 	ctxPerfil := withAuthorization(l.ctx, "Bearer "+reg.ProfileToken)
 	_, err = l.svcCtx.UsuariosClient.CreateMyProfile(ctxPerfil, &usuariosclient.CreateMyProfileRequest{
-		Nombres: nombres, Apellidos: apellidos, Dni: reg.Dni, Telefono: strings.TrimSpace(req.Telefono),
+		Nombres: nombres, Apellidos: apellidos, DniDeclarado: reg.Dni, Telefono: strings.TrimSpace(req.Telefono),
 		Correo: reg.Email, Direccion: strings.TrimSpace(req.Direccion),
 	})
 	switch status.Code(err) {

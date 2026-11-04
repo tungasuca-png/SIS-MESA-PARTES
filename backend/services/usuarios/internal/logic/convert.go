@@ -24,6 +24,10 @@ func toProto(u *repository.Usuario) *usuarios.Usuario {
 		Activo:      u.Activo,
 		CreatedAt:   u.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   u.UpdatedAt.Format(time.RFC3339),
+		// DNI declarado sin verificar (solo para quien ya puede ver el perfil
+		// completo: el propio solicitante o el personal autorizado).
+		DniDeclarado:       u.DNIDeclarado,
+		IdentidadPendiente: u.IdentidadPendiente(),
 	}
 }
 
@@ -41,6 +45,8 @@ func toProtoBasic(u *repository.Usuario, includeDNI bool) *usuarios.UsuarioBasic
 		Apellidos:      u.Apellidos,
 		NombreCompleto: u.NombreCompleto(),
 		TipoUsuario:    u.TipoUsuario,
+		// Solo la marca; el DNI declarado nunca va en la vista básica.
+		IdentidadPendiente: u.IdentidadPendiente(),
 	}
 	if includeDNI {
 		basic.Dni = u.DNI

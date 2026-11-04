@@ -125,6 +125,9 @@ function RegistroGoogle() {
                     <span>Correo verificado por Google</span>
                     <strong>{pendiente.correo}</strong>
                 </div>
+                <p className="registro-nota">
+                    La institución verificará tu DNI. Hasta entonces podrás ingresar con Google y presentar tus trámites con normalidad.
+                </p>
                 <div className="registro-grid">
                     <Campo id="reg-nombres" label="Nombres" obligatorio error={errores.nombres}>
                         <input id="reg-nombres" value={form.nombres} onChange={cambiar("nombres")} autoComplete="given-name" maxLength={100}

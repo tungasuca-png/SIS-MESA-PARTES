@@ -28,6 +28,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
 import GoogleCallback from "./pages/Login/GoogleCallback";
 import RegistroGoogle from "./pages/Login/RegistroGoogle";
+import RegistroCorreo from "./pages/Login/RegistroCorreo";
+import VerificarCorreo from "./pages/Login/VerificarCorreo";
+import IdentidadSolicitantes from "./pages/Solicitantes/IdentidadSolicitantes";
 
 function App() {
     return (
@@ -44,6 +47,11 @@ function App() {
                 sesión se crea recién al completar el registro. */}
             <Route path="/login/google" element={<GoogleCallback />} />
             <Route path="/registro/google" element={<RegistroGoogle />} />
+
+            {/* Registro manual con verificación del correo (solo
+                solicitantes). Públicas: la cuenta se activa al verificar. */}
+            <Route path="/registro" element={<RegistroCorreo />} />
+            <Route path="/registro/verificar" element={<VerificarCorreo />} />
 
             {/* Dashboard protegido */}
             <Route
@@ -297,6 +305,19 @@ function App() {
                     <ProtectedRoute>
                         <PermissionRoute permission="usuarios.view">
                             <Usuarios />
+                        </PermissionRoute>
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Verificación de identidad de solicitantes (Secretaría): el
+                permiso también lo exigen Auth y Usuarios en el backend. */}
+            <Route
+                path="/solicitantes/identidades"
+                element={
+                    <ProtectedRoute>
+                        <PermissionRoute permission="solicitantes.identidad.verify">
+                            <IdentidadSolicitantes />
                         </PermissionRoute>
                     </ProtectedRoute>
                 }

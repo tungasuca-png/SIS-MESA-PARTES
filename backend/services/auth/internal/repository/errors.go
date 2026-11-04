@@ -43,3 +43,12 @@ func classifyNotFound(err error, notFound error) error {
 	}
 	return err
 }
+
+// EsquemaPendiente: la consulta usa una tabla de una migración que todavía no
+// se aplicó (PostgreSQL 42P01, undefined_table). Las funciones nuevas del
+// registro público (024, 025) se desactivan con un error controlado y el
+// login sigue funcionando: nunca un 500 por una migración pendiente.
+func EsquemaPendiente(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "42P01"
+}

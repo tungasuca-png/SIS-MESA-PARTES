@@ -78,6 +78,21 @@ DO $$ BEGIN
         REVOKE ALL ON FUNCTION public.cancelar_registro_google_pendiente(uuid) FROM auth_tester;
         GRANT EXECUTE ON FUNCTION public.cancelar_registro_google_pendiente(uuid) TO auth_app;
     END IF;
+    -- 024: registro manual con verificación del correo (nunca DELETE) y su
+    -- compensación, con el mismo criterio que la de Google.
+    IF to_regclass('public.registros_correo') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.registros_correo TO auth_app;
+    END IF;
+    -- 025: identidad declarada de los solicitantes públicos (nunca DELETE).
+    IF to_regclass('public.identidad_solicitantes') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.identidad_solicitantes TO auth_app;
+    END IF;
+    IF to_regprocedure('public.cancelar_registro_correo_pendiente(uuid)') IS NOT NULL THEN
+        ALTER FUNCTION public.cancelar_registro_correo_pendiente(uuid) OWNER TO auth_owner;
+        REVOKE ALL ON FUNCTION public.cancelar_registro_correo_pendiente(uuid) FROM PUBLIC;
+        REVOKE ALL ON FUNCTION public.cancelar_registro_correo_pendiente(uuid) FROM auth_tester;
+        GRANT EXECUTE ON FUNCTION public.cancelar_registro_correo_pendiente(uuid) TO auth_app;
+    END IF;
 END $$;
 -- user_profiles: sin privilegios (Auth no la usa en ejecución).
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO auth_tester;

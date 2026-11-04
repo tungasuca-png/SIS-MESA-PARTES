@@ -159,6 +159,18 @@ describe("Formulario obligatorio", () => {
         // Puede corregir un DNI mal escrito y reintentar.
         expect(screen.getByRole("button", { name: "Completar registro" }).disabled).toBe(false);
     });
+
+    it("servicio no preparado (503): mensaje claro, conserva el registro y permite reintentar", async () => {
+        pendiente();
+        authService.googleRegistro.mockRejectedValue(httpError(503, "servicio no disponible temporalmente"));
+        montar("/registro/google", <RegistroGoogle />, "/registro/google");
+        completar();
+        fireEvent.click(screen.getByRole("button", { name: "Completar registro" }));
+        expect((await screen.findByRole("alert")).textContent).toMatch(/El registro no está disponible en este momento/);
+        expect(iniciarSesion).not.toHaveBeenCalled();
+        expect(sessionStorage.getItem("mesa_partes_registro_google")).not.toBeNull();
+        expect(screen.getByRole("button", { name: "Completar registro" }).disabled).toBe(false);
+    });
 });
 
 describe("Mi perfil: vincular Google", () => {

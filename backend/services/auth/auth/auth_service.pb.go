@@ -265,8 +265,12 @@ func (x *RegisterResponse) GetMessage() string {
 type LoginRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// DNI (8 dígitos): identifica al usuario; reemplaza al username como credencial.
-	Dni           string `protobuf:"bytes,1,opt,name=dni,proto3" json:"dni,omitempty"`
-	Password      string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Dni      string `protobuf:"bytes,1,opt,name=dni,proto3" json:"dni,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	// Alternativa SOLO para cuentas SOLICITANTE (registro público con DNI
+	// todavía no verificado). Si viene, se usa en lugar del DNI. Las cuentas
+	// institucionales siguen entrando únicamente por DNI.
+	Email         string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -311,6 +315,13 @@ func (x *LoginRequest) GetDni() string {
 func (x *LoginRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
+	}
+	return ""
+}
+
+func (x *LoginRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
 	}
 	return ""
 }
@@ -3093,6 +3104,1262 @@ func (x *GoogleLinkStatusResponse) GetAvailable() bool {
 	return false
 }
 
+// ---- Registro manual con verificación del correo (solo SOLICITANTES) ----
+// El rol no se elige: Auth registra siempre SOLICITANTE. La cuenta se crea
+// recién al verificar el código enviado al correo.
+type EmailRegisterRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Email           string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Password        string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Dni             string                 `protobuf:"bytes,3,opt,name=dni,proto3" json:"dni,omitempty"`
+	Nombres         string                 `protobuf:"bytes,4,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	ApellidoPaterno string                 `protobuf:"bytes,5,opt,name=apellido_paterno,json=apellidoPaterno,proto3" json:"apellido_paterno,omitempty"`
+	ApellidoMaterno string                 `protobuf:"bytes,6,opt,name=apellido_materno,json=apellidoMaterno,proto3" json:"apellido_materno,omitempty"`
+	AcceptTerms     bool                   `protobuf:"varint,7,opt,name=accept_terms,json=acceptTerms,proto3" json:"accept_terms,omitempty"`
+	TermsVersion    string                 `protobuf:"bytes,8,opt,name=terms_version,json=termsVersion,proto3" json:"terms_version,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *EmailRegisterRequest) Reset() {
+	*x = EmailRegisterRequest{}
+	mi := &file_auth_service_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailRegisterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailRegisterRequest) ProtoMessage() {}
+
+func (x *EmailRegisterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailRegisterRequest.ProtoReflect.Descriptor instead.
+func (*EmailRegisterRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *EmailRegisterRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *EmailRegisterRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *EmailRegisterRequest) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+func (x *EmailRegisterRequest) GetNombres() string {
+	if x != nil {
+		return x.Nombres
+	}
+	return ""
+}
+
+func (x *EmailRegisterRequest) GetApellidoPaterno() string {
+	if x != nil {
+		return x.ApellidoPaterno
+	}
+	return ""
+}
+
+func (x *EmailRegisterRequest) GetApellidoMaterno() string {
+	if x != nil {
+		return x.ApellidoMaterno
+	}
+	return ""
+}
+
+func (x *EmailRegisterRequest) GetAcceptTerms() bool {
+	if x != nil {
+		return x.AcceptTerms
+	}
+	return false
+}
+
+func (x *EmailRegisterRequest) GetTermsVersion() string {
+	if x != nil {
+		return x.TermsVersion
+	}
+	return ""
+}
+
+// Misma respuesta exista o no el correo (no revela cuentas).
+type EmailRegisterResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RegistrationId string                 `protobuf:"bytes,1,opt,name=registration_id,json=registrationId,proto3" json:"registration_id,omitempty"`
+	ExpiresIn      int64                  `protobuf:"varint,2,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	ResendIn       int64                  `protobuf:"varint,3,opt,name=resend_in,json=resendIn,proto3" json:"resend_in,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EmailRegisterResponse) Reset() {
+	*x = EmailRegisterResponse{}
+	mi := &file_auth_service_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailRegisterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailRegisterResponse) ProtoMessage() {}
+
+func (x *EmailRegisterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailRegisterResponse.ProtoReflect.Descriptor instead.
+func (*EmailRegisterResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *EmailRegisterResponse) GetRegistrationId() string {
+	if x != nil {
+		return x.RegistrationId
+	}
+	return ""
+}
+
+func (x *EmailRegisterResponse) GetExpiresIn() int64 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
+func (x *EmailRegisterResponse) GetResendIn() int64 {
+	if x != nil {
+		return x.ResendIn
+	}
+	return 0
+}
+
+type EmailResendCodeRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RegistrationId string                 `protobuf:"bytes,1,opt,name=registration_id,json=registrationId,proto3" json:"registration_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EmailResendCodeRequest) Reset() {
+	*x = EmailResendCodeRequest{}
+	mi := &file_auth_service_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailResendCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailResendCodeRequest) ProtoMessage() {}
+
+func (x *EmailResendCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailResendCodeRequest.ProtoReflect.Descriptor instead.
+func (*EmailResendCodeRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{58}
+}
+
+func (x *EmailResendCodeRequest) GetRegistrationId() string {
+	if x != nil {
+		return x.RegistrationId
+	}
+	return ""
+}
+
+type EmailResendCodeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExpiresIn     int64                  `protobuf:"varint,1,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	ResendIn      int64                  `protobuf:"varint,2,opt,name=resend_in,json=resendIn,proto3" json:"resend_in,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmailResendCodeResponse) Reset() {
+	*x = EmailResendCodeResponse{}
+	mi := &file_auth_service_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailResendCodeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailResendCodeResponse) ProtoMessage() {}
+
+func (x *EmailResendCodeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailResendCodeResponse.ProtoReflect.Descriptor instead.
+func (*EmailResendCodeResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *EmailResendCodeResponse) GetExpiresIn() int64 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
+func (x *EmailResendCodeResponse) GetResendIn() int64 {
+	if x != nil {
+		return x.ResendIn
+	}
+	return 0
+}
+
+// Paso 1 de la activación: código correcto -> crea (o retoma) la cuenta.
+// profile_token es un access token del nuevo usuario SOLO para que el Gateway
+// cree su perfil en Usuarios Service; nunca llega al navegador.
+type EmailVerifyRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RegistrationId string                 `protobuf:"bytes,1,opt,name=registration_id,json=registrationId,proto3" json:"registration_id,omitempty"`
+	Code           string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EmailVerifyRequest) Reset() {
+	*x = EmailVerifyRequest{}
+	mi := &file_auth_service_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailVerifyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailVerifyRequest) ProtoMessage() {}
+
+func (x *EmailVerifyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailVerifyRequest.ProtoReflect.Descriptor instead.
+func (*EmailVerifyRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *EmailVerifyRequest) GetRegistrationId() string {
+	if x != nil {
+		return x.RegistrationId
+	}
+	return ""
+}
+
+func (x *EmailVerifyRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type EmailVerifyResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Dni           string                 `protobuf:"bytes,2,opt,name=dni,proto3" json:"dni,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Nombres       string                 `protobuf:"bytes,4,opt,name=nombres,proto3" json:"nombres,omitempty"`
+	Apellidos     string                 `protobuf:"bytes,5,opt,name=apellidos,proto3" json:"apellidos,omitempty"`
+	ProfileToken  string                 `protobuf:"bytes,6,opt,name=profile_token,json=profileToken,proto3" json:"profile_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmailVerifyResponse) Reset() {
+	*x = EmailVerifyResponse{}
+	mi := &file_auth_service_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailVerifyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailVerifyResponse) ProtoMessage() {}
+
+func (x *EmailVerifyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailVerifyResponse.ProtoReflect.Descriptor instead.
+func (*EmailVerifyResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *EmailVerifyResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *EmailVerifyResponse) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+func (x *EmailVerifyResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *EmailVerifyResponse) GetNombres() string {
+	if x != nil {
+		return x.Nombres
+	}
+	return ""
+}
+
+func (x *EmailVerifyResponse) GetApellidos() string {
+	if x != nil {
+		return x.Apellidos
+	}
+	return ""
+}
+
+func (x *EmailVerifyResponse) GetProfileToken() string {
+	if x != nil {
+		return x.ProfileToken
+	}
+	return ""
+}
+
+// Paso 2 (perfil creado) o compensación (perfil rechazado).
+type EmailRegistrationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RegistrationId string                 `protobuf:"bytes,1,opt,name=registration_id,json=registrationId,proto3" json:"registration_id,omitempty"`
+	Code           string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EmailRegistrationRequest) Reset() {
+	*x = EmailRegistrationRequest{}
+	mi := &file_auth_service_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailRegistrationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailRegistrationRequest) ProtoMessage() {}
+
+func (x *EmailRegistrationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailRegistrationRequest.ProtoReflect.Descriptor instead.
+func (*EmailRegistrationRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *EmailRegistrationRequest) GetRegistrationId() string {
+	if x != nil {
+		return x.RegistrationId
+	}
+	return ""
+}
+
+func (x *EmailRegistrationRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type EmailCompleteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Dni           string                 `protobuf:"bytes,1,opt,name=dni,proto3" json:"dni,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmailCompleteResponse) Reset() {
+	*x = EmailCompleteResponse{}
+	mi := &file_auth_service_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailCompleteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailCompleteResponse) ProtoMessage() {}
+
+func (x *EmailCompleteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailCompleteResponse.ProtoReflect.Descriptor instead.
+func (*EmailCompleteResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *EmailCompleteResponse) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+type EmailCancelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cancelled     bool                   `protobuf:"varint,1,opt,name=cancelled,proto3" json:"cancelled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmailCancelResponse) Reset() {
+	*x = EmailCancelResponse{}
+	mi := &file_auth_service_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailCancelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailCancelResponse) ProtoMessage() {}
+
+func (x *EmailCancelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailCancelResponse.ProtoReflect.Descriptor instead.
+func (*EmailCancelResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *EmailCancelResponse) GetCancelled() bool {
+	if x != nil {
+		return x.Cancelled
+	}
+	return false
+}
+
+// ---- Verificación de identidad de solicitantes (Secretaría) ----
+// Protegido por el permiso solicitantes.identidad.verify. El registro
+// público solo DECLARA el DNI; aquí el personal lo coteja.
+type SolicitanteIdentity struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DniDeclarado  string                 `protobuf:"bytes,2,opt,name=dni_declarado,json=dniDeclarado,proto3" json:"dni_declarado,omitempty"`
+	Origen        string                 `protobuf:"bytes,3,opt,name=origen,proto3" json:"origen,omitempty"`
+	Estado        string                 `protobuf:"bytes,4,opt,name=estado,proto3" json:"estado,omitempty"`
+	Metodo        string                 `protobuf:"bytes,5,opt,name=metodo,proto3" json:"metodo,omitempty"`
+	VerificadoAt  string                 `protobuf:"bytes,6,opt,name=verificado_at,json=verificadoAt,proto3" json:"verificado_at,omitempty"`
+	MotivoRechazo string                 `protobuf:"bytes,7,opt,name=motivo_rechazo,json=motivoRechazo,proto3" json:"motivo_rechazo,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// El DNI declarado ya pertenece a OTRA cuenta.
+	Conflicto bool `protobuf:"varint,9,opt,name=conflicto,proto3" json:"conflicto,omitempty"`
+	// Sincronización con Usuarios: "", PERFIL_PENDIENTE o COMPLETA, y la traza
+	// del último intento (código de error, nunca el DNI).
+	Sincronizacion         string `protobuf:"bytes,10,opt,name=sincronizacion,proto3" json:"sincronizacion,omitempty"`
+	SincronizacionIntentos int32  `protobuf:"varint,11,opt,name=sincronizacion_intentos,json=sincronizacionIntentos,proto3" json:"sincronizacion_intentos,omitempty"`
+	SincronizacionError    string `protobuf:"bytes,12,opt,name=sincronizacion_error,json=sincronizacionError,proto3" json:"sincronizacion_error,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SolicitanteIdentity) Reset() {
+	*x = SolicitanteIdentity{}
+	mi := &file_auth_service_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SolicitanteIdentity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SolicitanteIdentity) ProtoMessage() {}
+
+func (x *SolicitanteIdentity) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SolicitanteIdentity.ProtoReflect.Descriptor instead.
+func (*SolicitanteIdentity) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *SolicitanteIdentity) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetDniDeclarado() string {
+	if x != nil {
+		return x.DniDeclarado
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetOrigen() string {
+	if x != nil {
+		return x.Origen
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetMetodo() string {
+	if x != nil {
+		return x.Metodo
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetVerificadoAt() string {
+	if x != nil {
+		return x.VerificadoAt
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetMotivoRechazo() string {
+	if x != nil {
+		return x.MotivoRechazo
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetConflicto() bool {
+	if x != nil {
+		return x.Conflicto
+	}
+	return false
+}
+
+func (x *SolicitanteIdentity) GetSincronizacion() string {
+	if x != nil {
+		return x.Sincronizacion
+	}
+	return ""
+}
+
+func (x *SolicitanteIdentity) GetSincronizacionIntentos() int32 {
+	if x != nil {
+		return x.SincronizacionIntentos
+	}
+	return 0
+}
+
+func (x *SolicitanteIdentity) GetSincronizacionError() string {
+	if x != nil {
+		return x.SincronizacionError
+	}
+	return ""
+}
+
+type ListSolicitanteIdentitiesRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Estado string                 `protobuf:"bytes,1,opt,name=estado,proto3" json:"estado,omitempty"`
+	Limit  int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	// Solo verificadas con el perfil pendiente de sincronizar (reconciliación).
+	SincronizacionPendiente bool `protobuf:"varint,4,opt,name=sincronizacion_pendiente,json=sincronizacionPendiente,proto3" json:"sincronizacion_pendiente,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *ListSolicitanteIdentitiesRequest) Reset() {
+	*x = ListSolicitanteIdentitiesRequest{}
+	mi := &file_auth_service_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSolicitanteIdentitiesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSolicitanteIdentitiesRequest) ProtoMessage() {}
+
+func (x *ListSolicitanteIdentitiesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSolicitanteIdentitiesRequest.ProtoReflect.Descriptor instead.
+func (*ListSolicitanteIdentitiesRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *ListSolicitanteIdentitiesRequest) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *ListSolicitanteIdentitiesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListSolicitanteIdentitiesRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *ListSolicitanteIdentitiesRequest) GetSincronizacionPendiente() bool {
+	if x != nil {
+		return x.SincronizacionPendiente
+	}
+	return false
+}
+
+type ListSolicitanteIdentitiesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*SolicitanteIdentity `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSolicitanteIdentitiesResponse) Reset() {
+	*x = ListSolicitanteIdentitiesResponse{}
+	mi := &file_auth_service_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSolicitanteIdentitiesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSolicitanteIdentitiesResponse) ProtoMessage() {}
+
+func (x *ListSolicitanteIdentitiesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSolicitanteIdentitiesResponse.ProtoReflect.Descriptor instead.
+func (*ListSolicitanteIdentitiesResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *ListSolicitanteIdentitiesResponse) GetItems() []*SolicitanteIdentity {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListSolicitanteIdentitiesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type GetSolicitanteIdentityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSolicitanteIdentityRequest) Reset() {
+	*x = GetSolicitanteIdentityRequest{}
+	mi := &file_auth_service_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSolicitanteIdentityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSolicitanteIdentityRequest) ProtoMessage() {}
+
+func (x *GetSolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSolicitanteIdentityRequest.ProtoReflect.Descriptor instead.
+func (*GetSolicitanteIdentityRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{68}
+}
+
+func (x *GetSolicitanteIdentityRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type GetSolicitanteIdentityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Identity      *SolicitanteIdentity   `protobuf:"bytes,1,opt,name=identity,proto3" json:"identity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSolicitanteIdentityResponse) Reset() {
+	*x = GetSolicitanteIdentityResponse{}
+	mi := &file_auth_service_proto_msgTypes[69]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSolicitanteIdentityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSolicitanteIdentityResponse) ProtoMessage() {}
+
+func (x *GetSolicitanteIdentityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[69]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSolicitanteIdentityResponse.ProtoReflect.Descriptor instead.
+func (*GetSolicitanteIdentityResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{69}
+}
+
+func (x *GetSolicitanteIdentityResponse) GetIdentity() *SolicitanteIdentity {
+	if x != nil {
+		return x.Identity
+	}
+	return nil
+}
+
+// dni_esperado: el DNI que el personal cotejó (si la declaración cambió, no
+// se verifica). metodo: PRESENCIAL o DOCUMENTO.
+type VerifySolicitanteIdentityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DniEsperado   string                 `protobuf:"bytes,2,opt,name=dni_esperado,json=dniEsperado,proto3" json:"dni_esperado,omitempty"`
+	Metodo        string                 `protobuf:"bytes,3,opt,name=metodo,proto3" json:"metodo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifySolicitanteIdentityRequest) Reset() {
+	*x = VerifySolicitanteIdentityRequest{}
+	mi := &file_auth_service_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifySolicitanteIdentityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifySolicitanteIdentityRequest) ProtoMessage() {}
+
+func (x *VerifySolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifySolicitanteIdentityRequest.ProtoReflect.Descriptor instead.
+func (*VerifySolicitanteIdentityRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *VerifySolicitanteIdentityRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *VerifySolicitanteIdentityRequest) GetDniEsperado() string {
+	if x != nil {
+		return x.DniEsperado
+	}
+	return ""
+}
+
+func (x *VerifySolicitanteIdentityRequest) GetMetodo() string {
+	if x != nil {
+		return x.Metodo
+	}
+	return ""
+}
+
+type VerifySolicitanteIdentityResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Estado         string                 `protobuf:"bytes,1,opt,name=estado,proto3" json:"estado,omitempty"`
+	Sincronizacion string                 `protobuf:"bytes,2,opt,name=sincronizacion,proto3" json:"sincronizacion,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *VerifySolicitanteIdentityResponse) Reset() {
+	*x = VerifySolicitanteIdentityResponse{}
+	mi := &file_auth_service_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifySolicitanteIdentityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifySolicitanteIdentityResponse) ProtoMessage() {}
+
+func (x *VerifySolicitanteIdentityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifySolicitanteIdentityResponse.ProtoReflect.Descriptor instead.
+func (*VerifySolicitanteIdentityResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *VerifySolicitanteIdentityResponse) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *VerifySolicitanteIdentityResponse) GetSincronizacion() string {
+	if x != nil {
+		return x.Sincronizacion
+	}
+	return ""
+}
+
+// Sincronización del DNI verificado con Usuarios Service (el Gateway
+// orquesta; Auth guarda el estado). dni: el DNI definitivo esperado.
+type IdentitySyncRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Dni           string                 `protobuf:"bytes,2,opt,name=dni,proto3" json:"dni,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IdentitySyncRequest) Reset() {
+	*x = IdentitySyncRequest{}
+	mi := &file_auth_service_proto_msgTypes[72]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdentitySyncRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdentitySyncRequest) ProtoMessage() {}
+
+func (x *IdentitySyncRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[72]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdentitySyncRequest.ProtoReflect.Descriptor instead.
+func (*IdentitySyncRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{72}
+}
+
+func (x *IdentitySyncRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *IdentitySyncRequest) GetDni() string {
+	if x != nil {
+		return x.Dni
+	}
+	return ""
+}
+
+type IdentitySyncFailureRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// Código estable del error (p. ej. usuarios_no_disponible); nunca datos.
+	Codigo        string `protobuf:"bytes,2,opt,name=codigo,proto3" json:"codigo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IdentitySyncFailureRequest) Reset() {
+	*x = IdentitySyncFailureRequest{}
+	mi := &file_auth_service_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdentitySyncFailureRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdentitySyncFailureRequest) ProtoMessage() {}
+
+func (x *IdentitySyncFailureRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdentitySyncFailureRequest.ProtoReflect.Descriptor instead.
+func (*IdentitySyncFailureRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{73}
+}
+
+func (x *IdentitySyncFailureRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *IdentitySyncFailureRequest) GetCodigo() string {
+	if x != nil {
+		return x.Codigo
+	}
+	return ""
+}
+
+type IdentitySyncResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Estado         string                 `protobuf:"bytes,1,opt,name=estado,proto3" json:"estado,omitempty"`
+	Sincronizacion string                 `protobuf:"bytes,2,opt,name=sincronizacion,proto3" json:"sincronizacion,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *IdentitySyncResponse) Reset() {
+	*x = IdentitySyncResponse{}
+	mi := &file_auth_service_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdentitySyncResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdentitySyncResponse) ProtoMessage() {}
+
+func (x *IdentitySyncResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdentitySyncResponse.ProtoReflect.Descriptor instead.
+func (*IdentitySyncResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *IdentitySyncResponse) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *IdentitySyncResponse) GetSincronizacion() string {
+	if x != nil {
+		return x.Sincronizacion
+	}
+	return ""
+}
+
+type RejectSolicitanteIdentityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Motivo        string                 `protobuf:"bytes,2,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RejectSolicitanteIdentityRequest) Reset() {
+	*x = RejectSolicitanteIdentityRequest{}
+	mi := &file_auth_service_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RejectSolicitanteIdentityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RejectSolicitanteIdentityRequest) ProtoMessage() {}
+
+func (x *RejectSolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RejectSolicitanteIdentityRequest.ProtoReflect.Descriptor instead.
+func (*RejectSolicitanteIdentityRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{75}
+}
+
+func (x *RejectSolicitanteIdentityRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RejectSolicitanteIdentityRequest) GetMotivo() string {
+	if x != nil {
+		return x.Motivo
+	}
+	return ""
+}
+
+type RejectSolicitanteIdentityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Estado        string                 `protobuf:"bytes,1,opt,name=estado,proto3" json:"estado,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RejectSolicitanteIdentityResponse) Reset() {
+	*x = RejectSolicitanteIdentityResponse{}
+	mi := &file_auth_service_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RejectSolicitanteIdentityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RejectSolicitanteIdentityResponse) ProtoMessage() {}
+
+func (x *RejectSolicitanteIdentityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RejectSolicitanteIdentityResponse.ProtoReflect.Descriptor instead.
+func (*RejectSolicitanteIdentityResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *RejectSolicitanteIdentityResponse) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
 var File_auth_service_proto protoreflect.FileDescriptor
 
 const file_auth_service_proto_rawDesc = "" +
@@ -3113,10 +4380,11 @@ const file_auth_service_proto_rawDesc = "" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x12\n" +
 	"\x04role\x18\x04 \x01(\tR\x04role\x12\x18\n" +
-	"\amessage\x18\x05 \x01(\tR\amessage\"<\n" +
+	"\amessage\x18\x05 \x01(\tR\amessage\"R\n" +
 	"\fLoginRequest\x12\x10\n" +
 	"\x03dni\x18\x01 \x01(\tR\x03dni\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xd5\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\"\xd5\x01\n" +
 	"\rLoginResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1d\n" +
@@ -3295,7 +4563,92 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x18GoogleLinkStatusResponse\x12\x16\n" +
 	"\x06linked\x18\x01 \x01(\bR\x06linked\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1c\n" +
-	"\tavailable\x18\x03 \x01(\bR\tavailable2\x9c\x11\n" +
+	"\tavailable\x18\x03 \x01(\bR\tavailable\"\x92\x02\n" +
+	"\x14EmailRegisterRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x10\n" +
+	"\x03dni\x18\x03 \x01(\tR\x03dni\x12\x18\n" +
+	"\anombres\x18\x04 \x01(\tR\anombres\x12)\n" +
+	"\x10apellido_paterno\x18\x05 \x01(\tR\x0fapellidoPaterno\x12)\n" +
+	"\x10apellido_materno\x18\x06 \x01(\tR\x0fapellidoMaterno\x12!\n" +
+	"\faccept_terms\x18\a \x01(\bR\vacceptTerms\x12#\n" +
+	"\rterms_version\x18\b \x01(\tR\ftermsVersion\"|\n" +
+	"\x15EmailRegisterResponse\x12'\n" +
+	"\x0fregistration_id\x18\x01 \x01(\tR\x0eregistrationId\x12\x1d\n" +
+	"\n" +
+	"expires_in\x18\x02 \x01(\x03R\texpiresIn\x12\x1b\n" +
+	"\tresend_in\x18\x03 \x01(\x03R\bresendIn\"A\n" +
+	"\x16EmailResendCodeRequest\x12'\n" +
+	"\x0fregistration_id\x18\x01 \x01(\tR\x0eregistrationId\"U\n" +
+	"\x17EmailResendCodeResponse\x12\x1d\n" +
+	"\n" +
+	"expires_in\x18\x01 \x01(\x03R\texpiresIn\x12\x1b\n" +
+	"\tresend_in\x18\x02 \x01(\x03R\bresendIn\"Q\n" +
+	"\x12EmailVerifyRequest\x12'\n" +
+	"\x0fregistration_id\x18\x01 \x01(\tR\x0eregistrationId\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\"\xb3\x01\n" +
+	"\x13EmailVerifyResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x10\n" +
+	"\x03dni\x18\x02 \x01(\tR\x03dni\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x18\n" +
+	"\anombres\x18\x04 \x01(\tR\anombres\x12\x1c\n" +
+	"\tapellidos\x18\x05 \x01(\tR\tapellidos\x12#\n" +
+	"\rprofile_token\x18\x06 \x01(\tR\fprofileToken\"W\n" +
+	"\x18EmailRegistrationRequest\x12'\n" +
+	"\x0fregistration_id\x18\x01 \x01(\tR\x0eregistrationId\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\")\n" +
+	"\x15EmailCompleteResponse\x12\x10\n" +
+	"\x03dni\x18\x01 \x01(\tR\x03dni\"3\n" +
+	"\x13EmailCancelResponse\x12\x1c\n" +
+	"\tcancelled\x18\x01 \x01(\bR\tcancelled\"\xb8\x03\n" +
+	"\x13SolicitanteIdentity\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
+	"\rdni_declarado\x18\x02 \x01(\tR\fdniDeclarado\x12\x16\n" +
+	"\x06origen\x18\x03 \x01(\tR\x06origen\x12\x16\n" +
+	"\x06estado\x18\x04 \x01(\tR\x06estado\x12\x16\n" +
+	"\x06metodo\x18\x05 \x01(\tR\x06metodo\x12#\n" +
+	"\rverificado_at\x18\x06 \x01(\tR\fverificadoAt\x12%\n" +
+	"\x0emotivo_rechazo\x18\a \x01(\tR\rmotivoRechazo\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1c\n" +
+	"\tconflicto\x18\t \x01(\bR\tconflicto\x12&\n" +
+	"\x0esincronizacion\x18\n" +
+	" \x01(\tR\x0esincronizacion\x127\n" +
+	"\x17sincronizacion_intentos\x18\v \x01(\x05R\x16sincronizacionIntentos\x121\n" +
+	"\x14sincronizacion_error\x18\f \x01(\tR\x13sincronizacionError\"\xa3\x01\n" +
+	" ListSolicitanteIdentitiesRequest\x12\x16\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\x129\n" +
+	"\x18sincronizacion_pendiente\x18\x04 \x01(\bR\x17sincronizacionPendiente\"j\n" +
+	"!ListSolicitanteIdentitiesResponse\x12/\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.auth.SolicitanteIdentityR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"8\n" +
+	"\x1dGetSolicitanteIdentityRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"W\n" +
+	"\x1eGetSolicitanteIdentityResponse\x125\n" +
+	"\bidentity\x18\x01 \x01(\v2\x19.auth.SolicitanteIdentityR\bidentity\"v\n" +
+	" VerifySolicitanteIdentityRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
+	"\fdni_esperado\x18\x02 \x01(\tR\vdniEsperado\x12\x16\n" +
+	"\x06metodo\x18\x03 \x01(\tR\x06metodo\"c\n" +
+	"!VerifySolicitanteIdentityResponse\x12\x16\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado\x12&\n" +
+	"\x0esincronizacion\x18\x02 \x01(\tR\x0esincronizacion\"@\n" +
+	"\x13IdentitySyncRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x10\n" +
+	"\x03dni\x18\x02 \x01(\tR\x03dni\"M\n" +
+	"\x1aIdentitySyncFailureRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06codigo\x18\x02 \x01(\tR\x06codigo\"V\n" +
+	"\x14IdentitySyncResponse\x12\x16\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado\x12&\n" +
+	"\x0esincronizacion\x18\x02 \x01(\tR\x0esincronizacion\"S\n" +
+	" RejectSolicitanteIdentityRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06motivo\x18\x02 \x01(\tR\x06motivo\";\n" +
+	"!RejectSolicitanteIdentityResponse\x12\x16\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado2\xec\x19\n" +
 	"\x04Auth\x12%\n" +
 	"\x04Ping\x12\r.auth.Request\x1a\x0e.auth.Response\x129\n" +
 	"\bRegister\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x120\n" +
@@ -3325,7 +4678,19 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x1aGoogleCompleteRegistration\x12\x1f.auth.GoogleRegistrationRequest\x1a\x1c.auth.GoogleCompleteResponse\x12W\n" +
 	"\x18GoogleCancelRegistration\x12\x1f.auth.GoogleRegistrationRequest\x1a\x1a.auth.GoogleCancelResponse\x12N\n" +
 	"\x0fGoogleStartLink\x12\x1c.auth.GoogleStartLinkRequest\x1a\x1d.auth.GoogleStartLinkResponse\x12Q\n" +
-	"\x10GoogleLinkStatus\x12\x1d.auth.GoogleLinkStatusRequest\x1a\x1e.auth.GoogleLinkStatusResponseB\bZ\x06./authb\x06proto3"
+	"\x10GoogleLinkStatus\x12\x1d.auth.GoogleLinkStatusRequest\x1a\x1e.auth.GoogleLinkStatusResponse\x12H\n" +
+	"\rEmailRegister\x12\x1a.auth.EmailRegisterRequest\x1a\x1b.auth.EmailRegisterResponse\x12N\n" +
+	"\x0fEmailResendCode\x12\x1c.auth.EmailResendCodeRequest\x1a\x1d.auth.EmailResendCodeResponse\x12B\n" +
+	"\vEmailVerify\x12\x18.auth.EmailVerifyRequest\x1a\x19.auth.EmailVerifyResponse\x12X\n" +
+	"\x19EmailCompleteRegistration\x12\x1e.auth.EmailRegistrationRequest\x1a\x1b.auth.EmailCompleteResponse\x12T\n" +
+	"\x17EmailCancelRegistration\x12\x1e.auth.EmailRegistrationRequest\x1a\x19.auth.EmailCancelResponse\x12l\n" +
+	"\x19ListSolicitanteIdentities\x12&.auth.ListSolicitanteIdentitiesRequest\x1a'.auth.ListSolicitanteIdentitiesResponse\x12c\n" +
+	"\x16GetSolicitanteIdentity\x12#.auth.GetSolicitanteIdentityRequest\x1a$.auth.GetSolicitanteIdentityResponse\x12l\n" +
+	"\x19VerifySolicitanteIdentity\x12&.auth.VerifySolicitanteIdentityRequest\x1a'.auth.VerifySolicitanteIdentityResponse\x12l\n" +
+	"\x19RejectSolicitanteIdentity\x12&.auth.RejectSolicitanteIdentityRequest\x1a'.auth.RejectSolicitanteIdentityResponse\x12W\n" +
+	"\x1eConfirmSolicitanteIdentitySync\x12\x19.auth.IdentitySyncRequest\x1a\x1a.auth.IdentitySyncResponse\x12d\n" +
+	"$RecordSolicitanteIdentitySyncFailure\x12 .auth.IdentitySyncFailureRequest\x1a\x1a.auth.IdentitySyncResponse\x12R\n" +
+	"\x19RevertSolicitanteIdentity\x12\x19.auth.IdentitySyncRequest\x1a\x1a.auth.IdentitySyncResponseB\bZ\x06./authb\x06proto3"
 
 var (
 	file_auth_service_proto_rawDescOnce sync.Once
@@ -3339,64 +4704,85 @@ func file_auth_service_proto_rawDescGZIP() []byte {
 	return file_auth_service_proto_rawDescData
 }
 
-var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
+var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 77)
 var file_auth_service_proto_goTypes = []any{
-	(*Request)(nil),                         // 0: auth.Request
-	(*Response)(nil),                        // 1: auth.Response
-	(*RegisterRequest)(nil),                 // 2: auth.RegisterRequest
-	(*RegisterResponse)(nil),                // 3: auth.RegisterResponse
-	(*LoginRequest)(nil),                    // 4: auth.LoginRequest
-	(*LoginResponse)(nil),                   // 5: auth.LoginResponse
-	(*RefreshTokenRequest)(nil),             // 6: auth.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),            // 7: auth.RefreshTokenResponse
-	(*LogoutRequest)(nil),                   // 8: auth.LogoutRequest
-	(*LogoutResponse)(nil),                  // 9: auth.LogoutResponse
-	(*ValidateTokenRequest)(nil),            // 10: auth.ValidateTokenRequest
-	(*ValidateTokenResponse)(nil),           // 11: auth.ValidateTokenResponse
-	(*HasPermissionRequest)(nil),            // 12: auth.HasPermissionRequest
-	(*HasPermissionResponse)(nil),           // 13: auth.HasPermissionResponse
-	(*GetMyPermissionsRequest)(nil),         // 14: auth.GetMyPermissionsRequest
-	(*GetMyPermissionsResponse)(nil),        // 15: auth.GetMyPermissionsResponse
-	(*Role)(nil),                            // 16: auth.Role
-	(*ListRolesRequest)(nil),                // 17: auth.ListRolesRequest
-	(*ListRolesResponse)(nil),               // 18: auth.ListRolesResponse
-	(*Permission)(nil),                      // 19: auth.Permission
-	(*ListPermissionsRequest)(nil),          // 20: auth.ListPermissionsRequest
-	(*ListPermissionsResponse)(nil),         // 21: auth.ListPermissionsResponse
-	(*GetRolePermissionsRequest)(nil),       // 22: auth.GetRolePermissionsRequest
-	(*GetRolePermissionsResponse)(nil),      // 23: auth.GetRolePermissionsResponse
-	(*UpdateRolePermissionsRequest)(nil),    // 24: auth.UpdateRolePermissionsRequest
-	(*UpdateRolePermissionsResponse)(nil),   // 25: auth.UpdateRolePermissionsResponse
-	(*UpdateUserRoleRequest)(nil),           // 26: auth.UpdateUserRoleRequest
-	(*UpdateUserRoleResponse)(nil),          // 27: auth.UpdateUserRoleResponse
-	(*CreateUserRequest)(nil),               // 28: auth.CreateUserRequest
-	(*CreateUserResponse)(nil),              // 29: auth.CreateUserResponse
-	(*IssueServiceTokenRequest)(nil),        // 30: auth.IssueServiceTokenRequest
-	(*IssueServiceTokenResponse)(nil),       // 31: auth.IssueServiceTokenResponse
-	(*ServiceClient)(nil),                   // 32: auth.ServiceClient
-	(*CreateServiceClientRequest)(nil),      // 33: auth.CreateServiceClientRequest
-	(*CreateServiceClientResponse)(nil),     // 34: auth.CreateServiceClientResponse
-	(*RevokeServiceClientRequest)(nil),      // 35: auth.RevokeServiceClientRequest
-	(*RevokeServiceClientResponse)(nil),     // 36: auth.RevokeServiceClientResponse
-	(*ServiceClientPermissionRequest)(nil),  // 37: auth.ServiceClientPermissionRequest
-	(*ServiceClientPermissionResponse)(nil), // 38: auth.ServiceClientPermissionResponse
-	(*ListServiceClientsRequest)(nil),       // 39: auth.ListServiceClientsRequest
-	(*ListServiceClientsResponse)(nil),      // 40: auth.ListServiceClientsResponse
-	(*GoogleStartRequest)(nil),              // 41: auth.GoogleStartRequest
-	(*GoogleStartResponse)(nil),             // 42: auth.GoogleStartResponse
-	(*GoogleCallbackRequest)(nil),           // 43: auth.GoogleCallbackRequest
-	(*GoogleCallbackResponse)(nil),          // 44: auth.GoogleCallbackResponse
-	(*GoogleExchangeRequest)(nil),           // 45: auth.GoogleExchangeRequest
-	(*GoogleExchangeResponse)(nil),          // 46: auth.GoogleExchangeResponse
-	(*GoogleRegisterRequest)(nil),           // 47: auth.GoogleRegisterRequest
-	(*GoogleRegisterResponse)(nil),          // 48: auth.GoogleRegisterResponse
-	(*GoogleRegistrationRequest)(nil),       // 49: auth.GoogleRegistrationRequest
-	(*GoogleCompleteResponse)(nil),          // 50: auth.GoogleCompleteResponse
-	(*GoogleCancelResponse)(nil),            // 51: auth.GoogleCancelResponse
-	(*GoogleStartLinkRequest)(nil),          // 52: auth.GoogleStartLinkRequest
-	(*GoogleStartLinkResponse)(nil),         // 53: auth.GoogleStartLinkResponse
-	(*GoogleLinkStatusRequest)(nil),         // 54: auth.GoogleLinkStatusRequest
-	(*GoogleLinkStatusResponse)(nil),        // 55: auth.GoogleLinkStatusResponse
+	(*Request)(nil),                           // 0: auth.Request
+	(*Response)(nil),                          // 1: auth.Response
+	(*RegisterRequest)(nil),                   // 2: auth.RegisterRequest
+	(*RegisterResponse)(nil),                  // 3: auth.RegisterResponse
+	(*LoginRequest)(nil),                      // 4: auth.LoginRequest
+	(*LoginResponse)(nil),                     // 5: auth.LoginResponse
+	(*RefreshTokenRequest)(nil),               // 6: auth.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),              // 7: auth.RefreshTokenResponse
+	(*LogoutRequest)(nil),                     // 8: auth.LogoutRequest
+	(*LogoutResponse)(nil),                    // 9: auth.LogoutResponse
+	(*ValidateTokenRequest)(nil),              // 10: auth.ValidateTokenRequest
+	(*ValidateTokenResponse)(nil),             // 11: auth.ValidateTokenResponse
+	(*HasPermissionRequest)(nil),              // 12: auth.HasPermissionRequest
+	(*HasPermissionResponse)(nil),             // 13: auth.HasPermissionResponse
+	(*GetMyPermissionsRequest)(nil),           // 14: auth.GetMyPermissionsRequest
+	(*GetMyPermissionsResponse)(nil),          // 15: auth.GetMyPermissionsResponse
+	(*Role)(nil),                              // 16: auth.Role
+	(*ListRolesRequest)(nil),                  // 17: auth.ListRolesRequest
+	(*ListRolesResponse)(nil),                 // 18: auth.ListRolesResponse
+	(*Permission)(nil),                        // 19: auth.Permission
+	(*ListPermissionsRequest)(nil),            // 20: auth.ListPermissionsRequest
+	(*ListPermissionsResponse)(nil),           // 21: auth.ListPermissionsResponse
+	(*GetRolePermissionsRequest)(nil),         // 22: auth.GetRolePermissionsRequest
+	(*GetRolePermissionsResponse)(nil),        // 23: auth.GetRolePermissionsResponse
+	(*UpdateRolePermissionsRequest)(nil),      // 24: auth.UpdateRolePermissionsRequest
+	(*UpdateRolePermissionsResponse)(nil),     // 25: auth.UpdateRolePermissionsResponse
+	(*UpdateUserRoleRequest)(nil),             // 26: auth.UpdateUserRoleRequest
+	(*UpdateUserRoleResponse)(nil),            // 27: auth.UpdateUserRoleResponse
+	(*CreateUserRequest)(nil),                 // 28: auth.CreateUserRequest
+	(*CreateUserResponse)(nil),                // 29: auth.CreateUserResponse
+	(*IssueServiceTokenRequest)(nil),          // 30: auth.IssueServiceTokenRequest
+	(*IssueServiceTokenResponse)(nil),         // 31: auth.IssueServiceTokenResponse
+	(*ServiceClient)(nil),                     // 32: auth.ServiceClient
+	(*CreateServiceClientRequest)(nil),        // 33: auth.CreateServiceClientRequest
+	(*CreateServiceClientResponse)(nil),       // 34: auth.CreateServiceClientResponse
+	(*RevokeServiceClientRequest)(nil),        // 35: auth.RevokeServiceClientRequest
+	(*RevokeServiceClientResponse)(nil),       // 36: auth.RevokeServiceClientResponse
+	(*ServiceClientPermissionRequest)(nil),    // 37: auth.ServiceClientPermissionRequest
+	(*ServiceClientPermissionResponse)(nil),   // 38: auth.ServiceClientPermissionResponse
+	(*ListServiceClientsRequest)(nil),         // 39: auth.ListServiceClientsRequest
+	(*ListServiceClientsResponse)(nil),        // 40: auth.ListServiceClientsResponse
+	(*GoogleStartRequest)(nil),                // 41: auth.GoogleStartRequest
+	(*GoogleStartResponse)(nil),               // 42: auth.GoogleStartResponse
+	(*GoogleCallbackRequest)(nil),             // 43: auth.GoogleCallbackRequest
+	(*GoogleCallbackResponse)(nil),            // 44: auth.GoogleCallbackResponse
+	(*GoogleExchangeRequest)(nil),             // 45: auth.GoogleExchangeRequest
+	(*GoogleExchangeResponse)(nil),            // 46: auth.GoogleExchangeResponse
+	(*GoogleRegisterRequest)(nil),             // 47: auth.GoogleRegisterRequest
+	(*GoogleRegisterResponse)(nil),            // 48: auth.GoogleRegisterResponse
+	(*GoogleRegistrationRequest)(nil),         // 49: auth.GoogleRegistrationRequest
+	(*GoogleCompleteResponse)(nil),            // 50: auth.GoogleCompleteResponse
+	(*GoogleCancelResponse)(nil),              // 51: auth.GoogleCancelResponse
+	(*GoogleStartLinkRequest)(nil),            // 52: auth.GoogleStartLinkRequest
+	(*GoogleStartLinkResponse)(nil),           // 53: auth.GoogleStartLinkResponse
+	(*GoogleLinkStatusRequest)(nil),           // 54: auth.GoogleLinkStatusRequest
+	(*GoogleLinkStatusResponse)(nil),          // 55: auth.GoogleLinkStatusResponse
+	(*EmailRegisterRequest)(nil),              // 56: auth.EmailRegisterRequest
+	(*EmailRegisterResponse)(nil),             // 57: auth.EmailRegisterResponse
+	(*EmailResendCodeRequest)(nil),            // 58: auth.EmailResendCodeRequest
+	(*EmailResendCodeResponse)(nil),           // 59: auth.EmailResendCodeResponse
+	(*EmailVerifyRequest)(nil),                // 60: auth.EmailVerifyRequest
+	(*EmailVerifyResponse)(nil),               // 61: auth.EmailVerifyResponse
+	(*EmailRegistrationRequest)(nil),          // 62: auth.EmailRegistrationRequest
+	(*EmailCompleteResponse)(nil),             // 63: auth.EmailCompleteResponse
+	(*EmailCancelResponse)(nil),               // 64: auth.EmailCancelResponse
+	(*SolicitanteIdentity)(nil),               // 65: auth.SolicitanteIdentity
+	(*ListSolicitanteIdentitiesRequest)(nil),  // 66: auth.ListSolicitanteIdentitiesRequest
+	(*ListSolicitanteIdentitiesResponse)(nil), // 67: auth.ListSolicitanteIdentitiesResponse
+	(*GetSolicitanteIdentityRequest)(nil),     // 68: auth.GetSolicitanteIdentityRequest
+	(*GetSolicitanteIdentityResponse)(nil),    // 69: auth.GetSolicitanteIdentityResponse
+	(*VerifySolicitanteIdentityRequest)(nil),  // 70: auth.VerifySolicitanteIdentityRequest
+	(*VerifySolicitanteIdentityResponse)(nil), // 71: auth.VerifySolicitanteIdentityResponse
+	(*IdentitySyncRequest)(nil),               // 72: auth.IdentitySyncRequest
+	(*IdentitySyncFailureRequest)(nil),        // 73: auth.IdentitySyncFailureRequest
+	(*IdentitySyncResponse)(nil),              // 74: auth.IdentitySyncResponse
+	(*RejectSolicitanteIdentityRequest)(nil),  // 75: auth.RejectSolicitanteIdentityRequest
+	(*RejectSolicitanteIdentityResponse)(nil), // 76: auth.RejectSolicitanteIdentityResponse
 }
 var file_auth_service_proto_depIdxs = []int32{
 	16, // 0: auth.ListRolesResponse.roles:type_name -> auth.Role
@@ -3408,67 +4794,93 @@ var file_auth_service_proto_depIdxs = []int32{
 	32, // 6: auth.ListServiceClientsResponse.clients:type_name -> auth.ServiceClient
 	5,  // 7: auth.GoogleExchangeResponse.session:type_name -> auth.LoginResponse
 	5,  // 8: auth.GoogleCompleteResponse.session:type_name -> auth.LoginResponse
-	0,  // 9: auth.Auth.Ping:input_type -> auth.Request
-	2,  // 10: auth.Auth.Register:input_type -> auth.RegisterRequest
-	4,  // 11: auth.Auth.Login:input_type -> auth.LoginRequest
-	6,  // 12: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenRequest
-	8,  // 13: auth.Auth.Logout:input_type -> auth.LogoutRequest
-	10, // 14: auth.Auth.ValidateToken:input_type -> auth.ValidateTokenRequest
-	12, // 15: auth.Auth.HasPermission:input_type -> auth.HasPermissionRequest
-	14, // 16: auth.Auth.GetMyPermissions:input_type -> auth.GetMyPermissionsRequest
-	17, // 17: auth.Auth.ListRoles:input_type -> auth.ListRolesRequest
-	20, // 18: auth.Auth.ListPermissions:input_type -> auth.ListPermissionsRequest
-	22, // 19: auth.Auth.GetRolePermissions:input_type -> auth.GetRolePermissionsRequest
-	24, // 20: auth.Auth.UpdateRolePermissions:input_type -> auth.UpdateRolePermissionsRequest
-	26, // 21: auth.Auth.UpdateUserRole:input_type -> auth.UpdateUserRoleRequest
-	28, // 22: auth.Auth.CreateUser:input_type -> auth.CreateUserRequest
-	30, // 23: auth.Auth.IssueServiceToken:input_type -> auth.IssueServiceTokenRequest
-	33, // 24: auth.Auth.CreateServiceClient:input_type -> auth.CreateServiceClientRequest
-	35, // 25: auth.Auth.RevokeServiceClient:input_type -> auth.RevokeServiceClientRequest
-	39, // 26: auth.Auth.ListServiceClients:input_type -> auth.ListServiceClientsRequest
-	37, // 27: auth.Auth.GrantServiceClientPermission:input_type -> auth.ServiceClientPermissionRequest
-	37, // 28: auth.Auth.WithdrawServiceClientPermission:input_type -> auth.ServiceClientPermissionRequest
-	41, // 29: auth.Auth.GoogleStart:input_type -> auth.GoogleStartRequest
-	43, // 30: auth.Auth.GoogleCallback:input_type -> auth.GoogleCallbackRequest
-	45, // 31: auth.Auth.GoogleExchange:input_type -> auth.GoogleExchangeRequest
-	47, // 32: auth.Auth.GoogleRegister:input_type -> auth.GoogleRegisterRequest
-	49, // 33: auth.Auth.GoogleCompleteRegistration:input_type -> auth.GoogleRegistrationRequest
-	49, // 34: auth.Auth.GoogleCancelRegistration:input_type -> auth.GoogleRegistrationRequest
-	52, // 35: auth.Auth.GoogleStartLink:input_type -> auth.GoogleStartLinkRequest
-	54, // 36: auth.Auth.GoogleLinkStatus:input_type -> auth.GoogleLinkStatusRequest
-	1,  // 37: auth.Auth.Ping:output_type -> auth.Response
-	3,  // 38: auth.Auth.Register:output_type -> auth.RegisterResponse
-	5,  // 39: auth.Auth.Login:output_type -> auth.LoginResponse
-	7,  // 40: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
-	9,  // 41: auth.Auth.Logout:output_type -> auth.LogoutResponse
-	11, // 42: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
-	13, // 43: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
-	15, // 44: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
-	18, // 45: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
-	21, // 46: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
-	23, // 47: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
-	25, // 48: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
-	27, // 49: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
-	29, // 50: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
-	31, // 51: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
-	34, // 52: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
-	36, // 53: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
-	40, // 54: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
-	38, // 55: auth.Auth.GrantServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
-	38, // 56: auth.Auth.WithdrawServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
-	42, // 57: auth.Auth.GoogleStart:output_type -> auth.GoogleStartResponse
-	44, // 58: auth.Auth.GoogleCallback:output_type -> auth.GoogleCallbackResponse
-	46, // 59: auth.Auth.GoogleExchange:output_type -> auth.GoogleExchangeResponse
-	48, // 60: auth.Auth.GoogleRegister:output_type -> auth.GoogleRegisterResponse
-	50, // 61: auth.Auth.GoogleCompleteRegistration:output_type -> auth.GoogleCompleteResponse
-	51, // 62: auth.Auth.GoogleCancelRegistration:output_type -> auth.GoogleCancelResponse
-	53, // 63: auth.Auth.GoogleStartLink:output_type -> auth.GoogleStartLinkResponse
-	55, // 64: auth.Auth.GoogleLinkStatus:output_type -> auth.GoogleLinkStatusResponse
-	37, // [37:65] is the sub-list for method output_type
-	9,  // [9:37] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	65, // 9: auth.ListSolicitanteIdentitiesResponse.items:type_name -> auth.SolicitanteIdentity
+	65, // 10: auth.GetSolicitanteIdentityResponse.identity:type_name -> auth.SolicitanteIdentity
+	0,  // 11: auth.Auth.Ping:input_type -> auth.Request
+	2,  // 12: auth.Auth.Register:input_type -> auth.RegisterRequest
+	4,  // 13: auth.Auth.Login:input_type -> auth.LoginRequest
+	6,  // 14: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenRequest
+	8,  // 15: auth.Auth.Logout:input_type -> auth.LogoutRequest
+	10, // 16: auth.Auth.ValidateToken:input_type -> auth.ValidateTokenRequest
+	12, // 17: auth.Auth.HasPermission:input_type -> auth.HasPermissionRequest
+	14, // 18: auth.Auth.GetMyPermissions:input_type -> auth.GetMyPermissionsRequest
+	17, // 19: auth.Auth.ListRoles:input_type -> auth.ListRolesRequest
+	20, // 20: auth.Auth.ListPermissions:input_type -> auth.ListPermissionsRequest
+	22, // 21: auth.Auth.GetRolePermissions:input_type -> auth.GetRolePermissionsRequest
+	24, // 22: auth.Auth.UpdateRolePermissions:input_type -> auth.UpdateRolePermissionsRequest
+	26, // 23: auth.Auth.UpdateUserRole:input_type -> auth.UpdateUserRoleRequest
+	28, // 24: auth.Auth.CreateUser:input_type -> auth.CreateUserRequest
+	30, // 25: auth.Auth.IssueServiceToken:input_type -> auth.IssueServiceTokenRequest
+	33, // 26: auth.Auth.CreateServiceClient:input_type -> auth.CreateServiceClientRequest
+	35, // 27: auth.Auth.RevokeServiceClient:input_type -> auth.RevokeServiceClientRequest
+	39, // 28: auth.Auth.ListServiceClients:input_type -> auth.ListServiceClientsRequest
+	37, // 29: auth.Auth.GrantServiceClientPermission:input_type -> auth.ServiceClientPermissionRequest
+	37, // 30: auth.Auth.WithdrawServiceClientPermission:input_type -> auth.ServiceClientPermissionRequest
+	41, // 31: auth.Auth.GoogleStart:input_type -> auth.GoogleStartRequest
+	43, // 32: auth.Auth.GoogleCallback:input_type -> auth.GoogleCallbackRequest
+	45, // 33: auth.Auth.GoogleExchange:input_type -> auth.GoogleExchangeRequest
+	47, // 34: auth.Auth.GoogleRegister:input_type -> auth.GoogleRegisterRequest
+	49, // 35: auth.Auth.GoogleCompleteRegistration:input_type -> auth.GoogleRegistrationRequest
+	49, // 36: auth.Auth.GoogleCancelRegistration:input_type -> auth.GoogleRegistrationRequest
+	52, // 37: auth.Auth.GoogleStartLink:input_type -> auth.GoogleStartLinkRequest
+	54, // 38: auth.Auth.GoogleLinkStatus:input_type -> auth.GoogleLinkStatusRequest
+	56, // 39: auth.Auth.EmailRegister:input_type -> auth.EmailRegisterRequest
+	58, // 40: auth.Auth.EmailResendCode:input_type -> auth.EmailResendCodeRequest
+	60, // 41: auth.Auth.EmailVerify:input_type -> auth.EmailVerifyRequest
+	62, // 42: auth.Auth.EmailCompleteRegistration:input_type -> auth.EmailRegistrationRequest
+	62, // 43: auth.Auth.EmailCancelRegistration:input_type -> auth.EmailRegistrationRequest
+	66, // 44: auth.Auth.ListSolicitanteIdentities:input_type -> auth.ListSolicitanteIdentitiesRequest
+	68, // 45: auth.Auth.GetSolicitanteIdentity:input_type -> auth.GetSolicitanteIdentityRequest
+	70, // 46: auth.Auth.VerifySolicitanteIdentity:input_type -> auth.VerifySolicitanteIdentityRequest
+	75, // 47: auth.Auth.RejectSolicitanteIdentity:input_type -> auth.RejectSolicitanteIdentityRequest
+	72, // 48: auth.Auth.ConfirmSolicitanteIdentitySync:input_type -> auth.IdentitySyncRequest
+	73, // 49: auth.Auth.RecordSolicitanteIdentitySyncFailure:input_type -> auth.IdentitySyncFailureRequest
+	72, // 50: auth.Auth.RevertSolicitanteIdentity:input_type -> auth.IdentitySyncRequest
+	1,  // 51: auth.Auth.Ping:output_type -> auth.Response
+	3,  // 52: auth.Auth.Register:output_type -> auth.RegisterResponse
+	5,  // 53: auth.Auth.Login:output_type -> auth.LoginResponse
+	7,  // 54: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
+	9,  // 55: auth.Auth.Logout:output_type -> auth.LogoutResponse
+	11, // 56: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
+	13, // 57: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
+	15, // 58: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
+	18, // 59: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
+	21, // 60: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
+	23, // 61: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
+	25, // 62: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
+	27, // 63: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
+	29, // 64: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
+	31, // 65: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
+	34, // 66: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
+	36, // 67: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
+	40, // 68: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
+	38, // 69: auth.Auth.GrantServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
+	38, // 70: auth.Auth.WithdrawServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
+	42, // 71: auth.Auth.GoogleStart:output_type -> auth.GoogleStartResponse
+	44, // 72: auth.Auth.GoogleCallback:output_type -> auth.GoogleCallbackResponse
+	46, // 73: auth.Auth.GoogleExchange:output_type -> auth.GoogleExchangeResponse
+	48, // 74: auth.Auth.GoogleRegister:output_type -> auth.GoogleRegisterResponse
+	50, // 75: auth.Auth.GoogleCompleteRegistration:output_type -> auth.GoogleCompleteResponse
+	51, // 76: auth.Auth.GoogleCancelRegistration:output_type -> auth.GoogleCancelResponse
+	53, // 77: auth.Auth.GoogleStartLink:output_type -> auth.GoogleStartLinkResponse
+	55, // 78: auth.Auth.GoogleLinkStatus:output_type -> auth.GoogleLinkStatusResponse
+	57, // 79: auth.Auth.EmailRegister:output_type -> auth.EmailRegisterResponse
+	59, // 80: auth.Auth.EmailResendCode:output_type -> auth.EmailResendCodeResponse
+	61, // 81: auth.Auth.EmailVerify:output_type -> auth.EmailVerifyResponse
+	63, // 82: auth.Auth.EmailCompleteRegistration:output_type -> auth.EmailCompleteResponse
+	64, // 83: auth.Auth.EmailCancelRegistration:output_type -> auth.EmailCancelResponse
+	67, // 84: auth.Auth.ListSolicitanteIdentities:output_type -> auth.ListSolicitanteIdentitiesResponse
+	69, // 85: auth.Auth.GetSolicitanteIdentity:output_type -> auth.GetSolicitanteIdentityResponse
+	71, // 86: auth.Auth.VerifySolicitanteIdentity:output_type -> auth.VerifySolicitanteIdentityResponse
+	76, // 87: auth.Auth.RejectSolicitanteIdentity:output_type -> auth.RejectSolicitanteIdentityResponse
+	74, // 88: auth.Auth.ConfirmSolicitanteIdentitySync:output_type -> auth.IdentitySyncResponse
+	74, // 89: auth.Auth.RecordSolicitanteIdentitySyncFailure:output_type -> auth.IdentitySyncResponse
+	74, // 90: auth.Auth.RevertSolicitanteIdentity:output_type -> auth.IdentitySyncResponse
+	51, // [51:91] is the sub-list for method output_type
+	11, // [11:51] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_auth_service_proto_init() }
@@ -3482,7 +4894,7 @@ func file_auth_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_service_proto_rawDesc), len(file_auth_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   56,
+			NumMessages:   77,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -28,9 +28,9 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 )
 
-// catalogoPermisosReales son los 44 códigos del catálogo (migración 005 + los
-// permisos de las migraciones 006, 008, 010, 012, 014, 015, 016, 017, 018, 019
-// y 020) — ListPermissions debe devolver exactamente estos 44, ni uno más ni uno menos. Los permisos ASIGNADOS
+// catalogoPermisosReales son los 45 códigos del catálogo (migración 005 + los
+// permisos de las migraciones 006, 008, 010, 012, 014, 015, 016, 017, 018, 019,
+// 020 y 025) — ListPermissions debe devolver exactamente estos 45, ni uno más ni uno menos. Los permisos ASIGNADOS
 // a cada rol (role_permissions) NO se fijan acá: son datos editables desde la
 // pantalla Roles y permisos, así que los tests los comparan contra la BD viva.
 var catalogoPermisosReales = []string{
@@ -61,6 +61,8 @@ var catalogoPermisosReales = []string{
 	"estudiantes.basic.view", "integraciones.manage",
 	// Búsqueda mínima para sistemas (migración 020): registrado, sin asignar.
 	"estudiantes.search.basic",
+	// Verificación de identidad de solicitantes (migración 025): registrado, sin asignar.
+	"solicitantes.identidad.verify",
 }
 
 // TestRolesPermissionsRPC prueba ListRoles/ListPermissions/GetRolePermissions

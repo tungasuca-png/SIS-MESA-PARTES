@@ -25,11 +25,19 @@ type userContext struct {
 	Token string
 }
 
+// metodoPublicoPreparacion: única operación sin sesión. Solo responde si el
+// servicio puede registrar perfiles públicos (un booleano, sin datos); el
+// Gateway la consulta antes de que Auth cree una cuenta.
+const metodoPublicoPreparacion = "/usuarios.Usuarios/PublicRegistrationReady"
+
 // AuthenticationInterceptor exige un access token válido en la metadata
-// "authorization" para todas las operaciones: Usuarios Service no tiene
-// métodos públicos.
+// "authorization" para todas las operaciones salvo la consulta de
+// preparación del registro público (que no expone ningún dato).
 func AuthenticationInterceptor(validator *security.JWTValidator) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		if info != nil && info.FullMethod == metodoPublicoPreparacion {
+			return handler(ctx, req)
+		}
 		userID, role, token, err := authenticate(ctx, validator)
 		if err != nil {
 			return nil, err

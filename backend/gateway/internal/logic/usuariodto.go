@@ -22,6 +22,9 @@ func toUsuarioDTO(u *usuariosclient.Usuario) types.UsuarioDTO {
 		Activo:      u.Activo,
 		CreatedAt:   u.CreatedAt,
 		UpdatedAt:   u.UpdatedAt,
+
+		DniDeclarado:       u.DniDeclarado,
+		IdentidadPendiente: u.IdentidadPendiente,
 	}
 }
 
@@ -37,5 +40,7 @@ func toUsuarioBasicDTO(u *usuariosclient.UsuarioBasic) types.UsuarioBasicDTO {
 		NombreCompleto: u.NombreCompleto,
 		TipoUsuario:    u.TipoUsuario,
 		Dni:            u.Dni,
+
+		IdentidadPendiente: u.IdentidadPendiente,
 	}
 }

@@ -864,6 +864,48 @@ type GoogleRegistroRequest struct {
 	Direccion       string `json:"direccion,optional"`
 }
 
+// ---- Registro manual con verificación del correo (solo SOLICITANTES) ----
+// El rol NO se recibe: siempre SOLICITANTE. La cuenta se crea al verificar.
+type RegistroCorreoRequest struct {
+	Nombres         string `json:"nombres"`
+	ApellidoPaterno string `json:"apellido_paterno"`
+	ApellidoMaterno string `json:"apellido_materno,optional"`
+	Dni             string `json:"dni"`
+	Correo          string `json:"correo"`
+	Clave           string `json:"clave"`
+	AceptaTerminos  bool   `json:"acepta_terminos,optional"`
+	VersionTerminos string `json:"version_terminos,optional"`
+}
+
+// Misma respuesta exista o no el correo.
+type RegistroCorreoResponse struct {
+	RegistroId string `json:"registro_id"`
+	ExpiraEn   int64  `json:"expira_en"`
+	ReenviarEn int64  `json:"reenviar_en"`
+	Mensaje    string `json:"mensaje"`
+}
+
+type RegistroVerificarRequest struct {
+	RegistroId string `json:"registro_id"`
+	Codigo     string `json:"codigo"`
+}
+
+// Sin DNI: el DNI declarado no se devuelve; se inicia sesión con el correo.
+type RegistroVerificarResponse struct {
+	Mensaje string `json:"mensaje"`
+	Correo  string `json:"correo"`
+}
+
+type RegistroReenviarRequest struct {
+	RegistroId string `json:"registro_id"`
+}
+
+type RegistroReenviarResponse struct {
+	ExpiraEn   int64  `json:"expira_en"`
+	ReenviarEn int64  `json:"reenviar_en"`
+	Mensaje    string `json:"mensaje"`
+}
+
 type GoogleVincularRequest struct {
 	Authorization string `header:"Authorization,optional"`
 	Clave         string `json:"clave"`
@@ -1091,8 +1133,10 @@ type ListUsuariosResponse struct {
 }
 
 type LoginRequest struct {
-	Dni      string `json:"dni"`
+	Dni      string `json:"dni,optional"`
 	Password string `json:"password"`
+	// Solo solicitantes del registro público cuyo DNI aún no fue verificado.
+	Correo string `json:"correo,optional"`
 }
 
 type LoginResponse struct {
@@ -1689,6 +1733,72 @@ type UsuarioBasicDTO struct {
 	NombreCompleto string `json:"nombre_completo"`
 	TipoUsuario    string `json:"tipo_usuario"`
 	Dni            string `json:"dni"`
+	// Marca "Identidad no verificada" (sin el DNI declarado).
+	IdentidadPendiente bool `json:"identidad_pendiente"`
+}
+
+// ---- Verificación de identidad de solicitantes (Secretaría) ----
+// Permiso solicitantes.identidad.verify (lo comprueban Auth y Usuarios).
+type IdentidadSolicitanteDTO struct {
+	UsuarioId      string `json:"usuario_id"`
+	NombreCompleto string `json:"nombre_completo"`
+	DniDeclarado   string `json:"dni_declarado"`
+	Origen         string `json:"origen"`
+	Estado         string `json:"estado"`
+	Metodo         string `json:"metodo"`
+	VerificadoAt   string `json:"verificado_at"`
+	MotivoRechazo  string `json:"motivo_rechazo"`
+	CreatedAt      string `json:"created_at"`
+	Conflicto      bool   `json:"conflicto"`
+	// Sincronización del DNI verificado con el perfil (Usuarios): "",
+	// PERFIL_PENDIENTE o COMPLETA, y la traza del último intento.
+	Sincronizacion         string `json:"sincronizacion"`
+	SincronizacionIntentos int32  `json:"sincronizacion_intentos"`
+	SincronizacionError    string `json:"sincronizacion_error"`
+}
+
+type ListIdentidadesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Estado        string `form:"estado,optional"`
+	Limit         int32  `form:"limit,optional"`
+	Offset        int32  `form:"offset,optional"`
+	// Solo verificadas con el perfil pendiente de sincronizar.
+	SincronizacionPendiente bool `form:"sincronizacion_pendiente,optional"`
+}
+
+type ListIdentidadesResponse struct {
+	Items []IdentidadSolicitanteDTO `json:"items"`
+	Total int32                     `json:"total"`
+}
+
+type VerificarIdentidadRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Metodo        string `json:"metodo"`
+}
+
+type RechazarIdentidadRequest struct {
+	Authorization string `header:"Authorization,optional"`
+	Id            string `path:"id"`
+	Motivo        string `json:"motivo"`
+}
+
+type IdentidadEstadoResponse struct {
+	Estado string `json:"estado"`
+	// PERFIL_PENDIENTE: Auth verificó y el perfil se actualizará en la
+	// reconciliación (el DNI ya no puede usarlo otra cuenta).
+	Sincronizacion string `json:"sincronizacion"`
+}
+
+// Reconciliación: reintenta las verificaciones con el perfil pendiente.
+type ReconciliarIdentidadesRequest struct {
+	Authorization string `header:"Authorization,optional"`
+}
+
+type ReconciliarIdentidadesResponse struct {
+	Completadas int `json:"completadas"`
+	Revertidas  int `json:"revertidas"`
+	Pendientes  int `json:"pendientes"`
 }
 
 type UsuarioDTO struct {
@@ -1703,6 +1813,9 @@ type UsuarioDTO struct {
 	Activo      bool   `json:"activo"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
+	// DNI declarado en el registro público (sin verificar).
+	DniDeclarado       string `json:"dni_declarado"`
+	IdentidadPendiente bool   `json:"identidad_pendiente"`
 }
 
 type ValidateTokenRequest struct {

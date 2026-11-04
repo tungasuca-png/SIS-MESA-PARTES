@@ -10,8 +10,14 @@
 // Gateway ("rpc error: code = ResourceExhausted desc = ...") y Retry-After.
 // Nunca registra el token, el cuerpo ni la consulta: solo la ruta.
 //
-// Es un límite por instancia: con varias réplicas del Gateway, cada una
-// cuenta por separado (documentado en docs/infra/publicacion-gateway.md).
+// Rutas con segmentos dinámicos ("/api/x/:id/accion"): la regla se declara
+// con el patrón y el contador es POR PATRÓN, no por URL concreta; cambiar el
+// id no crea una cubeta nueva (no evade el límite).
+//
+// Es un límite por instancia y en memoria (no hay un limitador distribuido en
+// el proyecto): con varias réplicas del Gateway, cada una cuenta por separado
+// (documentado en docs/infra/publicacion-gateway.md). Si se alcanza el tope
+// de cubetas, las claves nuevas reciben 429 (falla cerrada, no abierta).
 package limite
 
 import (
@@ -46,8 +52,8 @@ type Regla struct {
 	Rafaga    int
 }
 
-// Ruta: reglas de una ruta (método + path exactos). Una regla con PorMinuto 0
-// no se aplica.
+// Ruta: reglas de una ruta (método + path exacto, o patrón con segmentos
+// ":nombre"). Una regla con PorMinuto 0 no se aplica.
 type Ruta struct {
 	PorIP         Regla
 	PorCredencial Regla
@@ -71,6 +77,27 @@ func RutasPorDefecto() map[string]Ruta {
 			PorCredencial: Regla{PorMinuto: 5, Rafaga: 3},
 		},
 		"GET /api/auth/google/estado": {PorCredencial: Regla{PorMinuto: 30, Rafaga: 10}},
+		// Registro manual con correo: por IP (altas automatizadas, envío
+		// masivo de correos y prueba de códigos). Auth además limita los
+		// registros por correo, la espera y los reenvíos, y los intentos por
+		// código.
+		"POST /api/auth/registro":           {PorIP: Regla{PorMinuto: 5, Rafaga: 3}},
+		"POST /api/auth/registro/verificar": {PorIP: Regla{PorMinuto: 15, Rafaga: 5}},
+		"POST /api/auth/registro/reenviar":  {PorIP: Regla{PorMinuto: 5, Rafaga: 3}},
+		// Bandeja de verificación de identidad (personal autorizado). El
+		// limitador compara rutas literales: verificar/rechazar (con :id) los
+		// protege el permiso, comprobado en Auth y en Usuarios.
+		// Valores tomados de los niveles existentes: consultar como los
+		// reportes (60/20 por credencial); verificar, rechazar y reconciliar
+		// como las exportaciones (10/5 por credencial: operaciones costosas y
+		// manuales; un cotejo de identidad lleva bastante más de 6 s) y, para
+		// verificar/rechazar, además por IP como el inicio de Google (20/10),
+		// así que rotar tokens tampoco evade el límite. Contador por patrón:
+		// cambiar el :id no lo reinicia.
+		"GET /api/solicitantes/identidades":                {PorCredencial: Regla{PorMinuto: 60, Rafaga: 20}},
+		"POST /api/solicitantes/identidades/:id/verificar": {PorCredencial: Regla{PorMinuto: 10, Rafaga: 5}, PorIP: Regla{PorMinuto: 20, Rafaga: 10}},
+		"POST /api/solicitantes/identidades/:id/rechazar":  {PorCredencial: Regla{PorMinuto: 10, Rafaga: 5}, PorIP: Regla{PorMinuto: 20, Rafaga: 10}},
+		"POST /api/solicitantes/identidades/reconciliar":   {PorCredencial: Regla{PorMinuto: 10, Rafaga: 5}},
 		"POST /api/estudiantes/seleccion/buscar": {
 			PorIP:         Regla{PorMinuto: 120, Rafaga: 30},
 			PorCredencial: Regla{PorMinuto: 60, Rafaga: 20},
@@ -100,9 +127,36 @@ type cubeta struct {
 	visto time.Time
 }
 
+// patron: regla de una ruta con segmentos dinámicos.
+type patron struct {
+	clave     string // "MÉTODO /ruta/:id/..." (también es la clave del contador)
+	metodo    string
+	segmentos []string
+	ruta      Ruta
+}
+
+func (p patron) coincide(metodo string, segmentos []string) bool {
+	if metodo != p.metodo || len(segmentos) != len(p.segmentos) {
+		return false
+	}
+	for i, s := range p.segmentos {
+		if strings.HasPrefix(s, ":") {
+			if segmentos[i] == "" {
+				return false
+			}
+			continue
+		}
+		if s != segmentos[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Limitador es seguro para uso concurrente.
 type Limitador struct {
-	rutas map[string]Ruta
+	rutas    map[string]Ruta
+	patrones []patron
 	// confiarProxyLocal: si la conexión llega desde loopback (el proxy inverso
 	// en el mismo equipo), la IP del cliente es la última de X-Forwarded-For.
 	confiarProxyLocal bool
@@ -114,14 +168,41 @@ type Limitador struct {
 }
 
 func Nuevo(rutas map[string]Ruta, confiarProxyLocal bool) *Limitador {
-	return &Limitador{rutas: rutas, confiarProxyLocal: confiarProxyLocal, ahora: time.Now, cubetas: map[string]*cubeta{}}
+	exactas := map[string]Ruta{}
+	var patrones []patron
+	for clave, ruta := range rutas {
+		metodo, path, _ := strings.Cut(clave, " ")
+		if !strings.Contains(path, "/:") {
+			exactas[clave] = ruta
+			continue
+		}
+		patrones = append(patrones, patron{clave: clave, metodo: metodo, segmentos: strings.Split(strings.Trim(path, "/"), "/"), ruta: ruta})
+	}
+	return &Limitador{rutas: exactas, patrones: patrones, confiarProxyLocal: confiarProxyLocal, ahora: time.Now, cubetas: map[string]*cubeta{}}
+}
+
+// reglas: ruta exacta o, si no, el primer patrón que coincide. Devuelve la
+// clave del contador (el patrón, nunca la URL concreta).
+func (l *Limitador) reglas(r *http.Request) (string, Ruta, bool) {
+	ruta := r.Method + " " + r.URL.Path
+	if reglas, ok := l.rutas[ruta]; ok {
+		return ruta, reglas, true
+	}
+	if len(l.patrones) > 0 {
+		segmentos := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		for _, p := range l.patrones {
+			if p.coincide(r.Method, segmentos) {
+				return p.clave, p.ruta, true
+			}
+		}
+	}
+	return "", Ruta{}, false
 }
 
 // Middleware de go-zero (rest.Middleware).
 func (l *Limitador) Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ruta := r.Method + " " + r.URL.Path
-		reglas, ok := l.rutas[ruta]
+		ruta, reglas, ok := l.reglas(r)
 		if !ok {
 			next(w, r)
 			return

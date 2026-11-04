@@ -19,34 +19,46 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Auth_Ping_FullMethodName                            = "/auth.Auth/Ping"
-	Auth_Register_FullMethodName                        = "/auth.Auth/Register"
-	Auth_Login_FullMethodName                           = "/auth.Auth/Login"
-	Auth_RefreshToken_FullMethodName                    = "/auth.Auth/RefreshToken"
-	Auth_Logout_FullMethodName                          = "/auth.Auth/Logout"
-	Auth_ValidateToken_FullMethodName                   = "/auth.Auth/ValidateToken"
-	Auth_HasPermission_FullMethodName                   = "/auth.Auth/HasPermission"
-	Auth_GetMyPermissions_FullMethodName                = "/auth.Auth/GetMyPermissions"
-	Auth_ListRoles_FullMethodName                       = "/auth.Auth/ListRoles"
-	Auth_ListPermissions_FullMethodName                 = "/auth.Auth/ListPermissions"
-	Auth_GetRolePermissions_FullMethodName              = "/auth.Auth/GetRolePermissions"
-	Auth_UpdateRolePermissions_FullMethodName           = "/auth.Auth/UpdateRolePermissions"
-	Auth_UpdateUserRole_FullMethodName                  = "/auth.Auth/UpdateUserRole"
-	Auth_CreateUser_FullMethodName                      = "/auth.Auth/CreateUser"
-	Auth_IssueServiceToken_FullMethodName               = "/auth.Auth/IssueServiceToken"
-	Auth_CreateServiceClient_FullMethodName             = "/auth.Auth/CreateServiceClient"
-	Auth_RevokeServiceClient_FullMethodName             = "/auth.Auth/RevokeServiceClient"
-	Auth_ListServiceClients_FullMethodName              = "/auth.Auth/ListServiceClients"
-	Auth_GrantServiceClientPermission_FullMethodName    = "/auth.Auth/GrantServiceClientPermission"
-	Auth_WithdrawServiceClientPermission_FullMethodName = "/auth.Auth/WithdrawServiceClientPermission"
-	Auth_GoogleStart_FullMethodName                     = "/auth.Auth/GoogleStart"
-	Auth_GoogleCallback_FullMethodName                  = "/auth.Auth/GoogleCallback"
-	Auth_GoogleExchange_FullMethodName                  = "/auth.Auth/GoogleExchange"
-	Auth_GoogleRegister_FullMethodName                  = "/auth.Auth/GoogleRegister"
-	Auth_GoogleCompleteRegistration_FullMethodName      = "/auth.Auth/GoogleCompleteRegistration"
-	Auth_GoogleCancelRegistration_FullMethodName        = "/auth.Auth/GoogleCancelRegistration"
-	Auth_GoogleStartLink_FullMethodName                 = "/auth.Auth/GoogleStartLink"
-	Auth_GoogleLinkStatus_FullMethodName                = "/auth.Auth/GoogleLinkStatus"
+	Auth_Ping_FullMethodName                                 = "/auth.Auth/Ping"
+	Auth_Register_FullMethodName                             = "/auth.Auth/Register"
+	Auth_Login_FullMethodName                                = "/auth.Auth/Login"
+	Auth_RefreshToken_FullMethodName                         = "/auth.Auth/RefreshToken"
+	Auth_Logout_FullMethodName                               = "/auth.Auth/Logout"
+	Auth_ValidateToken_FullMethodName                        = "/auth.Auth/ValidateToken"
+	Auth_HasPermission_FullMethodName                        = "/auth.Auth/HasPermission"
+	Auth_GetMyPermissions_FullMethodName                     = "/auth.Auth/GetMyPermissions"
+	Auth_ListRoles_FullMethodName                            = "/auth.Auth/ListRoles"
+	Auth_ListPermissions_FullMethodName                      = "/auth.Auth/ListPermissions"
+	Auth_GetRolePermissions_FullMethodName                   = "/auth.Auth/GetRolePermissions"
+	Auth_UpdateRolePermissions_FullMethodName                = "/auth.Auth/UpdateRolePermissions"
+	Auth_UpdateUserRole_FullMethodName                       = "/auth.Auth/UpdateUserRole"
+	Auth_CreateUser_FullMethodName                           = "/auth.Auth/CreateUser"
+	Auth_IssueServiceToken_FullMethodName                    = "/auth.Auth/IssueServiceToken"
+	Auth_CreateServiceClient_FullMethodName                  = "/auth.Auth/CreateServiceClient"
+	Auth_RevokeServiceClient_FullMethodName                  = "/auth.Auth/RevokeServiceClient"
+	Auth_ListServiceClients_FullMethodName                   = "/auth.Auth/ListServiceClients"
+	Auth_GrantServiceClientPermission_FullMethodName         = "/auth.Auth/GrantServiceClientPermission"
+	Auth_WithdrawServiceClientPermission_FullMethodName      = "/auth.Auth/WithdrawServiceClientPermission"
+	Auth_GoogleStart_FullMethodName                          = "/auth.Auth/GoogleStart"
+	Auth_GoogleCallback_FullMethodName                       = "/auth.Auth/GoogleCallback"
+	Auth_GoogleExchange_FullMethodName                       = "/auth.Auth/GoogleExchange"
+	Auth_GoogleRegister_FullMethodName                       = "/auth.Auth/GoogleRegister"
+	Auth_GoogleCompleteRegistration_FullMethodName           = "/auth.Auth/GoogleCompleteRegistration"
+	Auth_GoogleCancelRegistration_FullMethodName             = "/auth.Auth/GoogleCancelRegistration"
+	Auth_GoogleStartLink_FullMethodName                      = "/auth.Auth/GoogleStartLink"
+	Auth_GoogleLinkStatus_FullMethodName                     = "/auth.Auth/GoogleLinkStatus"
+	Auth_EmailRegister_FullMethodName                        = "/auth.Auth/EmailRegister"
+	Auth_EmailResendCode_FullMethodName                      = "/auth.Auth/EmailResendCode"
+	Auth_EmailVerify_FullMethodName                          = "/auth.Auth/EmailVerify"
+	Auth_EmailCompleteRegistration_FullMethodName            = "/auth.Auth/EmailCompleteRegistration"
+	Auth_EmailCancelRegistration_FullMethodName              = "/auth.Auth/EmailCancelRegistration"
+	Auth_ListSolicitanteIdentities_FullMethodName            = "/auth.Auth/ListSolicitanteIdentities"
+	Auth_GetSolicitanteIdentity_FullMethodName               = "/auth.Auth/GetSolicitanteIdentity"
+	Auth_VerifySolicitanteIdentity_FullMethodName            = "/auth.Auth/VerifySolicitanteIdentity"
+	Auth_RejectSolicitanteIdentity_FullMethodName            = "/auth.Auth/RejectSolicitanteIdentity"
+	Auth_ConfirmSolicitanteIdentitySync_FullMethodName       = "/auth.Auth/ConfirmSolicitanteIdentitySync"
+	Auth_RecordSolicitanteIdentitySyncFailure_FullMethodName = "/auth.Auth/RecordSolicitanteIdentitySyncFailure"
+	Auth_RevertSolicitanteIdentity_FullMethodName            = "/auth.Auth/RevertSolicitanteIdentity"
 )
 
 // AuthClient is the client API for Auth service.
@@ -81,6 +93,18 @@ type AuthClient interface {
 	GoogleCancelRegistration(ctx context.Context, in *GoogleRegistrationRequest, opts ...grpc.CallOption) (*GoogleCancelResponse, error)
 	GoogleStartLink(ctx context.Context, in *GoogleStartLinkRequest, opts ...grpc.CallOption) (*GoogleStartLinkResponse, error)
 	GoogleLinkStatus(ctx context.Context, in *GoogleLinkStatusRequest, opts ...grpc.CallOption) (*GoogleLinkStatusResponse, error)
+	EmailRegister(ctx context.Context, in *EmailRegisterRequest, opts ...grpc.CallOption) (*EmailRegisterResponse, error)
+	EmailResendCode(ctx context.Context, in *EmailResendCodeRequest, opts ...grpc.CallOption) (*EmailResendCodeResponse, error)
+	EmailVerify(ctx context.Context, in *EmailVerifyRequest, opts ...grpc.CallOption) (*EmailVerifyResponse, error)
+	EmailCompleteRegistration(ctx context.Context, in *EmailRegistrationRequest, opts ...grpc.CallOption) (*EmailCompleteResponse, error)
+	EmailCancelRegistration(ctx context.Context, in *EmailRegistrationRequest, opts ...grpc.CallOption) (*EmailCancelResponse, error)
+	ListSolicitanteIdentities(ctx context.Context, in *ListSolicitanteIdentitiesRequest, opts ...grpc.CallOption) (*ListSolicitanteIdentitiesResponse, error)
+	GetSolicitanteIdentity(ctx context.Context, in *GetSolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetSolicitanteIdentityResponse, error)
+	VerifySolicitanteIdentity(ctx context.Context, in *VerifySolicitanteIdentityRequest, opts ...grpc.CallOption) (*VerifySolicitanteIdentityResponse, error)
+	RejectSolicitanteIdentity(ctx context.Context, in *RejectSolicitanteIdentityRequest, opts ...grpc.CallOption) (*RejectSolicitanteIdentityResponse, error)
+	ConfirmSolicitanteIdentitySync(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
+	RecordSolicitanteIdentitySyncFailure(ctx context.Context, in *IdentitySyncFailureRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
+	RevertSolicitanteIdentity(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
 }
 
 type authClient struct {
@@ -371,6 +395,126 @@ func (c *authClient) GoogleLinkStatus(ctx context.Context, in *GoogleLinkStatusR
 	return out, nil
 }
 
+func (c *authClient) EmailRegister(ctx context.Context, in *EmailRegisterRequest, opts ...grpc.CallOption) (*EmailRegisterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailRegisterResponse)
+	err := c.cc.Invoke(ctx, Auth_EmailRegister_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) EmailResendCode(ctx context.Context, in *EmailResendCodeRequest, opts ...grpc.CallOption) (*EmailResendCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailResendCodeResponse)
+	err := c.cc.Invoke(ctx, Auth_EmailResendCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) EmailVerify(ctx context.Context, in *EmailVerifyRequest, opts ...grpc.CallOption) (*EmailVerifyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailVerifyResponse)
+	err := c.cc.Invoke(ctx, Auth_EmailVerify_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) EmailCompleteRegistration(ctx context.Context, in *EmailRegistrationRequest, opts ...grpc.CallOption) (*EmailCompleteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailCompleteResponse)
+	err := c.cc.Invoke(ctx, Auth_EmailCompleteRegistration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) EmailCancelRegistration(ctx context.Context, in *EmailRegistrationRequest, opts ...grpc.CallOption) (*EmailCancelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailCancelResponse)
+	err := c.cc.Invoke(ctx, Auth_EmailCancelRegistration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) ListSolicitanteIdentities(ctx context.Context, in *ListSolicitanteIdentitiesRequest, opts ...grpc.CallOption) (*ListSolicitanteIdentitiesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSolicitanteIdentitiesResponse)
+	err := c.cc.Invoke(ctx, Auth_ListSolicitanteIdentities_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) GetSolicitanteIdentity(ctx context.Context, in *GetSolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetSolicitanteIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSolicitanteIdentityResponse)
+	err := c.cc.Invoke(ctx, Auth_GetSolicitanteIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) VerifySolicitanteIdentity(ctx context.Context, in *VerifySolicitanteIdentityRequest, opts ...grpc.CallOption) (*VerifySolicitanteIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifySolicitanteIdentityResponse)
+	err := c.cc.Invoke(ctx, Auth_VerifySolicitanteIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) RejectSolicitanteIdentity(ctx context.Context, in *RejectSolicitanteIdentityRequest, opts ...grpc.CallOption) (*RejectSolicitanteIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RejectSolicitanteIdentityResponse)
+	err := c.cc.Invoke(ctx, Auth_RejectSolicitanteIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) ConfirmSolicitanteIdentitySync(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IdentitySyncResponse)
+	err := c.cc.Invoke(ctx, Auth_ConfirmSolicitanteIdentitySync_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) RecordSolicitanteIdentitySyncFailure(ctx context.Context, in *IdentitySyncFailureRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IdentitySyncResponse)
+	err := c.cc.Invoke(ctx, Auth_RecordSolicitanteIdentitySyncFailure_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) RevertSolicitanteIdentity(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IdentitySyncResponse)
+	err := c.cc.Invoke(ctx, Auth_RevertSolicitanteIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility.
@@ -403,6 +547,18 @@ type AuthServer interface {
 	GoogleCancelRegistration(context.Context, *GoogleRegistrationRequest) (*GoogleCancelResponse, error)
 	GoogleStartLink(context.Context, *GoogleStartLinkRequest) (*GoogleStartLinkResponse, error)
 	GoogleLinkStatus(context.Context, *GoogleLinkStatusRequest) (*GoogleLinkStatusResponse, error)
+	EmailRegister(context.Context, *EmailRegisterRequest) (*EmailRegisterResponse, error)
+	EmailResendCode(context.Context, *EmailResendCodeRequest) (*EmailResendCodeResponse, error)
+	EmailVerify(context.Context, *EmailVerifyRequest) (*EmailVerifyResponse, error)
+	EmailCompleteRegistration(context.Context, *EmailRegistrationRequest) (*EmailCompleteResponse, error)
+	EmailCancelRegistration(context.Context, *EmailRegistrationRequest) (*EmailCancelResponse, error)
+	ListSolicitanteIdentities(context.Context, *ListSolicitanteIdentitiesRequest) (*ListSolicitanteIdentitiesResponse, error)
+	GetSolicitanteIdentity(context.Context, *GetSolicitanteIdentityRequest) (*GetSolicitanteIdentityResponse, error)
+	VerifySolicitanteIdentity(context.Context, *VerifySolicitanteIdentityRequest) (*VerifySolicitanteIdentityResponse, error)
+	RejectSolicitanteIdentity(context.Context, *RejectSolicitanteIdentityRequest) (*RejectSolicitanteIdentityResponse, error)
+	ConfirmSolicitanteIdentitySync(context.Context, *IdentitySyncRequest) (*IdentitySyncResponse, error)
+	RecordSolicitanteIdentitySyncFailure(context.Context, *IdentitySyncFailureRequest) (*IdentitySyncResponse, error)
+	RevertSolicitanteIdentity(context.Context, *IdentitySyncRequest) (*IdentitySyncResponse, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -496,6 +652,42 @@ func (UnimplementedAuthServer) GoogleStartLink(context.Context, *GoogleStartLink
 }
 func (UnimplementedAuthServer) GoogleLinkStatus(context.Context, *GoogleLinkStatusRequest) (*GoogleLinkStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GoogleLinkStatus not implemented")
+}
+func (UnimplementedAuthServer) EmailRegister(context.Context, *EmailRegisterRequest) (*EmailRegisterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EmailRegister not implemented")
+}
+func (UnimplementedAuthServer) EmailResendCode(context.Context, *EmailResendCodeRequest) (*EmailResendCodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EmailResendCode not implemented")
+}
+func (UnimplementedAuthServer) EmailVerify(context.Context, *EmailVerifyRequest) (*EmailVerifyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EmailVerify not implemented")
+}
+func (UnimplementedAuthServer) EmailCompleteRegistration(context.Context, *EmailRegistrationRequest) (*EmailCompleteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EmailCompleteRegistration not implemented")
+}
+func (UnimplementedAuthServer) EmailCancelRegistration(context.Context, *EmailRegistrationRequest) (*EmailCancelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EmailCancelRegistration not implemented")
+}
+func (UnimplementedAuthServer) ListSolicitanteIdentities(context.Context, *ListSolicitanteIdentitiesRequest) (*ListSolicitanteIdentitiesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListSolicitanteIdentities not implemented")
+}
+func (UnimplementedAuthServer) GetSolicitanteIdentity(context.Context, *GetSolicitanteIdentityRequest) (*GetSolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSolicitanteIdentity not implemented")
+}
+func (UnimplementedAuthServer) VerifySolicitanteIdentity(context.Context, *VerifySolicitanteIdentityRequest) (*VerifySolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method VerifySolicitanteIdentity not implemented")
+}
+func (UnimplementedAuthServer) RejectSolicitanteIdentity(context.Context, *RejectSolicitanteIdentityRequest) (*RejectSolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RejectSolicitanteIdentity not implemented")
+}
+func (UnimplementedAuthServer) ConfirmSolicitanteIdentitySync(context.Context, *IdentitySyncRequest) (*IdentitySyncResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfirmSolicitanteIdentitySync not implemented")
+}
+func (UnimplementedAuthServer) RecordSolicitanteIdentitySyncFailure(context.Context, *IdentitySyncFailureRequest) (*IdentitySyncResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RecordSolicitanteIdentitySyncFailure not implemented")
+}
+func (UnimplementedAuthServer) RevertSolicitanteIdentity(context.Context, *IdentitySyncRequest) (*IdentitySyncResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevertSolicitanteIdentity not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -1022,6 +1214,222 @@ func _Auth_GoogleLinkStatus_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_EmailRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmailRegisterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).EmailRegister(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_EmailRegister_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).EmailRegister(ctx, req.(*EmailRegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_EmailResendCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmailResendCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).EmailResendCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_EmailResendCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).EmailResendCode(ctx, req.(*EmailResendCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_EmailVerify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmailVerifyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).EmailVerify(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_EmailVerify_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).EmailVerify(ctx, req.(*EmailVerifyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_EmailCompleteRegistration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmailRegistrationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).EmailCompleteRegistration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_EmailCompleteRegistration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).EmailCompleteRegistration(ctx, req.(*EmailRegistrationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_EmailCancelRegistration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmailRegistrationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).EmailCancelRegistration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_EmailCancelRegistration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).EmailCancelRegistration(ctx, req.(*EmailRegistrationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_ListSolicitanteIdentities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSolicitanteIdentitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).ListSolicitanteIdentities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_ListSolicitanteIdentities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).ListSolicitanteIdentities(ctx, req.(*ListSolicitanteIdentitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_GetSolicitanteIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSolicitanteIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GetSolicitanteIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GetSolicitanteIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GetSolicitanteIdentity(ctx, req.(*GetSolicitanteIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_VerifySolicitanteIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifySolicitanteIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).VerifySolicitanteIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_VerifySolicitanteIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).VerifySolicitanteIdentity(ctx, req.(*VerifySolicitanteIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_RejectSolicitanteIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RejectSolicitanteIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).RejectSolicitanteIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_RejectSolicitanteIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).RejectSolicitanteIdentity(ctx, req.(*RejectSolicitanteIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_ConfirmSolicitanteIdentitySync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IdentitySyncRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).ConfirmSolicitanteIdentitySync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_ConfirmSolicitanteIdentitySync_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).ConfirmSolicitanteIdentitySync(ctx, req.(*IdentitySyncRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_RecordSolicitanteIdentitySyncFailure_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IdentitySyncFailureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).RecordSolicitanteIdentitySyncFailure(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_RecordSolicitanteIdentitySyncFailure_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).RecordSolicitanteIdentitySyncFailure(ctx, req.(*IdentitySyncFailureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_RevertSolicitanteIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IdentitySyncRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).RevertSolicitanteIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_RevertSolicitanteIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).RevertSolicitanteIdentity(ctx, req.(*IdentitySyncRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1140,6 +1548,54 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GoogleLinkStatus",
 			Handler:    _Auth_GoogleLinkStatus_Handler,
+		},
+		{
+			MethodName: "EmailRegister",
+			Handler:    _Auth_EmailRegister_Handler,
+		},
+		{
+			MethodName: "EmailResendCode",
+			Handler:    _Auth_EmailResendCode_Handler,
+		},
+		{
+			MethodName: "EmailVerify",
+			Handler:    _Auth_EmailVerify_Handler,
+		},
+		{
+			MethodName: "EmailCompleteRegistration",
+			Handler:    _Auth_EmailCompleteRegistration_Handler,
+		},
+		{
+			MethodName: "EmailCancelRegistration",
+			Handler:    _Auth_EmailCancelRegistration_Handler,
+		},
+		{
+			MethodName: "ListSolicitanteIdentities",
+			Handler:    _Auth_ListSolicitanteIdentities_Handler,
+		},
+		{
+			MethodName: "GetSolicitanteIdentity",
+			Handler:    _Auth_GetSolicitanteIdentity_Handler,
+		},
+		{
+			MethodName: "VerifySolicitanteIdentity",
+			Handler:    _Auth_VerifySolicitanteIdentity_Handler,
+		},
+		{
+			MethodName: "RejectSolicitanteIdentity",
+			Handler:    _Auth_RejectSolicitanteIdentity_Handler,
+		},
+		{
+			MethodName: "ConfirmSolicitanteIdentitySync",
+			Handler:    _Auth_ConfirmSolicitanteIdentitySync_Handler,
+		},
+		{
+			MethodName: "RecordSolicitanteIdentitySyncFailure",
+			Handler:    _Auth_RecordSolicitanteIdentitySyncFailure_Handler,
+		},
+		{
+			MethodName: "RevertSolicitanteIdentity",
+			Handler:    _Auth_RevertSolicitanteIdentity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

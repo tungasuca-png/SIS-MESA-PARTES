@@ -1,9 +1,13 @@
 import api from "./api";
 
-// La credencial de ingreso es DNI + clave (texto, 8 dígitos). El rol y el
-// user_id los decide el backend; el frontend nunca los envía.
-export const login = async (dni, password) => {
-    const response = await api.post("/api/auth/login", { dni, password });
+// La credencial de ingreso es DNI + clave (texto, 8 dígitos). Los
+// solicitantes del registro público cuya identidad todavía no verificó la
+// institución ingresan con su correo: si el identificador tiene "@" se envía
+// como correo. El rol y el user_id los decide el backend; el frontend nunca
+// los envía.
+export const login = async (identificador, password) => {
+    const cuerpo = identificador.includes("@") ? { correo: identificador, password } : { dni: identificador, password };
+    const response = await api.post("/api/auth/login", cuerpo);
     return response.data;
 };
 
@@ -56,5 +60,32 @@ export const googleVincular = async (clave) => {
 
 export const googleEstado = async () => {
     const response = await api.get("/api/auth/google/estado");
+    return response.data;
+};
+
+// ---- Registro manual con verificación del correo (solo solicitantes) ----
+// El rol nunca se envía: el backend registra siempre SOLICITANTE. La cuenta
+// se crea recién al verificar el código.
+export const registroCorreo = async ({ nombres, apellidoPaterno, apellidoMaterno, dni, correo, clave, aceptaTerminos, versionTerminos }) => {
+    const response = await api.post("/api/auth/registro", {
+        nombres,
+        apellido_paterno: apellidoPaterno,
+        apellido_materno: apellidoMaterno,
+        dni,
+        correo,
+        clave,
+        acepta_terminos: aceptaTerminos,
+        version_terminos: versionTerminos,
+    });
+    return response.data;
+};
+
+export const verificarCorreo = async (registroId, codigo) => {
+    const response = await api.post("/api/auth/registro/verificar", { registro_id: registroId, codigo });
+    return response.data;
+};
+
+export const reenviarCodigo = async (registroId) => {
+    const response = await api.post("/api/auth/registro/reenviar", { registro_id: registroId });
     return response.data;
 };

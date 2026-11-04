@@ -91,6 +91,24 @@ func DefaultMethodPolicies() map[string]MethodPolicy {
 		// Otorgar / retirar un permiso a un sistema existente (sin recrearlo).
 		"/auth.Auth/GrantServiceClientPermission":    ProtectedMethod("integraciones.manage"),
 		"/auth.Auth/WithdrawServiceClientPermission": ProtectedMethod("integraciones.manage"),
+		// Registro manual con verificación del correo (solo SOLICITANTES): sin
+		// sesión; cada paso exige el id del registro y el código de 6 dígitos
+		// (intentos limitados y contados por Auth).
+		"/auth.Auth/EmailRegister":             PublicMethod(),
+		"/auth.Auth/EmailResendCode":           PublicMethod(),
+		"/auth.Auth/EmailVerify":               PublicMethod(),
+		"/auth.Auth/EmailCompleteRegistration": PublicMethod(),
+		"/auth.Auth/EmailCancelRegistration":   PublicMethod(),
+		// Verificación de identidad de solicitantes (bandeja de Secretaría):
+		// permiso propio, sin asignar a ningún rol por defecto (migración 025).
+		"/auth.Auth/ListSolicitanteIdentities": ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/GetSolicitanteIdentity":    ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/VerifySolicitanteIdentity": ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/RejectSolicitanteIdentity": ProtectedMethod("solicitantes.identidad.verify"),
+		// Sincronización con Usuarios y su compensación (mismo permiso).
+		"/auth.Auth/ConfirmSolicitanteIdentitySync":       ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/RecordSolicitanteIdentitySyncFailure": ProtectedMethod("solicitantes.identidad.verify"),
+		"/auth.Auth/RevertSolicitanteIdentity":            ProtectedMethod("solicitantes.identidad.verify"),
 	}
 }
 
