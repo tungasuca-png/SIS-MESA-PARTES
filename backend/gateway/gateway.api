@@ -775,9 +775,6 @@ type DeleteDocumentoResponse {
 }
 
 service gateway-api {
-	@handler UploadDocumento
-	post /api/documentos (UploadDocumentoRequest) returns (UploadDocumentoResponse)
-
 	@handler GetDocumento
 	get /api/documentos/:id (GetDocumentoRequest) returns (GetDocumentoResponse)
 
@@ -2451,3 +2448,19 @@ service gateway-api {
 	get /api/reportes/comparacion/exportar (ExportarReporteComparacionRequest) returns (ArchivoReporteResponse)
 }
 
+// Subida de documentos (A-02). Documentos Service admite archivos de hasta
+// 5 MiB (validation.MaxTamanoDocumento) y el navegador los envía en base64
+// dentro del JSON: 5 MiB en base64 = 6.990.508 bytes, más los demás campos.
+// maxBytes 7 MiB deja ~350 KB de margen; un cuerpo mayor responde 413 antes
+// de decodificarse. timeout 120 s: el plazo cubre también la recepción del
+// cuerpo (~7 MB con una conexión lenta). El tramo gRPC ya admite 5 MiB +
+// 64 KiB (svc.documentosMaxMsgSize y Documentos.MaxRecvMsgSize). El límite
+// del proxy (IIS: maxAllowedContentLength) es aparte y debe ser >= 7 MiB.
+@server (
+	timeout:  120s
+	maxBytes: 7340032
+)
+service gateway-api {
+	@handler UploadDocumento
+	post /api/documentos (UploadDocumentoRequest) returns (UploadDocumentoResponse)
+}

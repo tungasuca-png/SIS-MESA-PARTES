@@ -226,11 +226,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  http.MethodPost,
-				Path:    "/api/documentos",
-				Handler: UploadDocumentoHandler(serverCtx),
-			},
-			{
 				Method:  http.MethodGet,
 				Path:    "/api/documentos",
 				Handler: ListAllDocumentosHandler(serverCtx),
@@ -715,5 +710,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: ExportarReporteDocumentosHandler(serverCtx),
 			},
 		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/documentos",
+				Handler: UploadDocumentoHandler(serverCtx),
+			},
+		},
+		rest.WithTimeout(120000*time.Millisecond),
+		rest.WithMaxBytes(7340032),
 	)
 }

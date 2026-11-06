@@ -176,6 +176,9 @@ func TestPermissionsSeedIntegration(t *testing.T) {
 		JWTManager:               jwtManager,
 	}
 	policies := interceptor.DefaultMethodPolicies()
+	// Solo en esta prueba: Register abierta para sembrar usuarios (en
+	// producción exige usuarios.change_role; ver interceptor_registro_test.go).
+	policies["/auth.Auth/Register"] = interceptor.PublicMethod()
 	listener := bufconn.Listen(1024 * 1024)
 	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
 		interceptor.AuthenticationInterceptor(jwtManager, policies),

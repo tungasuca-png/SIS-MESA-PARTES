@@ -65,6 +65,15 @@ type Ruta struct {
 func RutasPorDefecto() map[string]Ruta {
 	return map[string]Ruta{
 		"POST /api/auth/token": {PorIP: Regla{PorMinuto: 10, Rafaga: 5}},
+		// Inicio de sesión y renovación de la sesión (A-04): por IP, contra
+		// la prueba de contraseñas sobre muchas cuentas a la vez (Auth ya
+		// bloquea CADA cuenta tras varios fallos, pero no limita por origen).
+		// Valores holgados: el personal del colegio puede salir a Internet
+		// con una misma IP pública (NAT) y la renovación es automática (una
+		// por sesión cada ~15 min). Detrás de IIS exige ConfiarProxyLocal
+		// (si no, todos los clientes comparten la IP del proxy).
+		"POST /api/auth/login":   {PorIP: Regla{PorMinuto: 30, Rafaga: 10}},
+		"POST /api/auth/refresh": {PorIP: Regla{PorMinuto: 60, Rafaga: 20}},
 		// Acceso con Google: por IP (automatización de altas y canjes) y, en
 		// la vinculación (clave actual), también por credencial; Auth además
 		// cuenta los intentos fallidos de clave y bloquea la cuenta.
