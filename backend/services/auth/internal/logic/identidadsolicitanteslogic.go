@@ -343,3 +343,55 @@ func (l *RevertSolicitanteIdentityLogic) RevertSolicitanteIdentity(in *auth.Iden
 	eventoIdentidad(l.ctx, l.svcCtx, id, "identidad_reversion", "OK", repository.ErrorConflictoPerfil)
 	return sincronizacionDe(l.ctx, l.svcCtx, id), nil
 }
+
+// ---- Mi identidad (el propio solicitante) ----
+
+type GetMySolicitanteIdentityLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logx.Logger
+}
+
+func NewGetMySolicitanteIdentityLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMySolicitanteIdentityLogic {
+	return &GetMySolicitanteIdentityLogic{ctx: ctx, svcCtx: svcCtx, Logger: logx.WithContext(ctx)}
+}
+
+// GetMySolicitanteIdentity: estado de la identidad de la cuenta autenticada.
+// El usuario sale exclusivamente del contexto (token validado por el
+// interceptor). Sin identidad declarada (cuentas institucionales o
+// anteriores al registro público, o la migración 025 sin aplicar):
+// registrada = false, sin error.
+func (l *GetMySolicitanteIdentityLogic) GetMySolicitanteIdentity(_ *auth.GetMySolicitanteIdentityRequest) (*auth.GetMySolicitanteIdentityResponse, error) {
+	id, ok := interceptor.UserIDFromContext(l.ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
+	}
+	i, err := l.svcCtx.IdentidadRepository.Obtener(l.ctx, id)
+	switch {
+	case errors.Is(err, repository.ErrIdentidadSolicitanteNoEncontrada), repository.EsquemaPendiente(err):
+		return &auth.GetMySolicitanteIdentityResponse{Registrada: false}, nil
+	case err != nil:
+		return nil, errDeIdentidad(l.ctx, err)
+	}
+	return miIdentidadProto(i), nil
+}
+
+// miIdentidadProto: vista del propio solicitante. Nunca incluye quién
+// verificó, el método de cotejo, si el DNI está en OTRA cuenta (Conflicto)
+// ni la traza de sincronización.
+func miIdentidadProto(i *repository.IdentidadSolicitante) *auth.GetMySolicitanteIdentityResponse {
+	r := &auth.GetMySolicitanteIdentityResponse{
+		Registrada:   true,
+		Estado:       i.Estado,
+		DniDeclarado: i.DNIDeclarado,
+		Origen:       i.Origen,
+		DeclaradoAt:  i.CreatedAt.Format(time.RFC3339),
+	}
+	if i.Estado != repository.IdentidadPendiente && i.VerificadoAt != nil {
+		r.ResueltoAt = i.VerificadoAt.Format(time.RFC3339)
+	}
+	if i.Estado == repository.IdentidadRechazada {
+		r.MotivoRechazo = i.MotivoRechazo
+	}
+	return r
+}

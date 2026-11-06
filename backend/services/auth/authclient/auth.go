@@ -44,6 +44,8 @@ type (
 	ListSolicitanteIdentitiesResponse = auth.ListSolicitanteIdentitiesResponse
 	GetSolicitanteIdentityRequest     = auth.GetSolicitanteIdentityRequest
 	GetSolicitanteIdentityResponse    = auth.GetSolicitanteIdentityResponse
+	GetMySolicitanteIdentityRequest   = auth.GetMySolicitanteIdentityRequest
+	GetMySolicitanteIdentityResponse  = auth.GetMySolicitanteIdentityResponse
 	VerifySolicitanteIdentityRequest  = auth.VerifySolicitanteIdentityRequest
 	VerifySolicitanteIdentityResponse = auth.VerifySolicitanteIdentityResponse
 	RejectSolicitanteIdentityRequest  = auth.RejectSolicitanteIdentityRequest
@@ -133,6 +135,7 @@ type (
 		ConfirmSolicitanteIdentitySync(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
 		RecordSolicitanteIdentitySyncFailure(ctx context.Context, in *IdentitySyncFailureRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
 		RevertSolicitanteIdentity(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
+		GetMySolicitanteIdentity(ctx context.Context, in *GetMySolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetMySolicitanteIdentityResponse, error)
 	}
 
 	defaultAuth struct {
@@ -344,4 +347,9 @@ func (m *defaultAuth) RecordSolicitanteIdentitySyncFailure(ctx context.Context, 
 func (m *defaultAuth) RevertSolicitanteIdentity(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error) {
 	client := auth.NewAuthClient(m.cli.Conn())
 	return client.RevertSolicitanteIdentity(ctx, in, opts...)
+}
+
+func (m *defaultAuth) GetMySolicitanteIdentity(ctx context.Context, in *GetMySolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetMySolicitanteIdentityResponse, error) {
+	client := auth.NewAuthClient(m.cli.Conn())
+	return client.GetMySolicitanteIdentity(ctx, in, opts...)
 }

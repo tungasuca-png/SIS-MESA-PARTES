@@ -214,6 +214,10 @@ func (c *scriptedAuthClient) RevertSolicitanteIdentity(context.Context, *authcli
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) GetMySolicitanteIdentity(context.Context, *authclient.GetMySolicitanteIdentityRequest, ...grpc.CallOption) (*authclient.GetMySolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 func TestUsuariosIntegration(t *testing.T) {
 	if strings.ToLower(os.Getenv("INTEGRATION_TEST")) != "true" {
 		t.Skip("set INTEGRATION_TEST=true to run PostgreSQL integration tests")

@@ -54,6 +54,7 @@ const (
 	Auth_EmailCancelRegistration_FullMethodName              = "/auth.Auth/EmailCancelRegistration"
 	Auth_ListSolicitanteIdentities_FullMethodName            = "/auth.Auth/ListSolicitanteIdentities"
 	Auth_GetSolicitanteIdentity_FullMethodName               = "/auth.Auth/GetSolicitanteIdentity"
+	Auth_GetMySolicitanteIdentity_FullMethodName             = "/auth.Auth/GetMySolicitanteIdentity"
 	Auth_VerifySolicitanteIdentity_FullMethodName            = "/auth.Auth/VerifySolicitanteIdentity"
 	Auth_RejectSolicitanteIdentity_FullMethodName            = "/auth.Auth/RejectSolicitanteIdentity"
 	Auth_ConfirmSolicitanteIdentitySync_FullMethodName       = "/auth.Auth/ConfirmSolicitanteIdentitySync"
@@ -100,6 +101,7 @@ type AuthClient interface {
 	EmailCancelRegistration(ctx context.Context, in *EmailRegistrationRequest, opts ...grpc.CallOption) (*EmailCancelResponse, error)
 	ListSolicitanteIdentities(ctx context.Context, in *ListSolicitanteIdentitiesRequest, opts ...grpc.CallOption) (*ListSolicitanteIdentitiesResponse, error)
 	GetSolicitanteIdentity(ctx context.Context, in *GetSolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetSolicitanteIdentityResponse, error)
+	GetMySolicitanteIdentity(ctx context.Context, in *GetMySolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetMySolicitanteIdentityResponse, error)
 	VerifySolicitanteIdentity(ctx context.Context, in *VerifySolicitanteIdentityRequest, opts ...grpc.CallOption) (*VerifySolicitanteIdentityResponse, error)
 	RejectSolicitanteIdentity(ctx context.Context, in *RejectSolicitanteIdentityRequest, opts ...grpc.CallOption) (*RejectSolicitanteIdentityResponse, error)
 	ConfirmSolicitanteIdentitySync(ctx context.Context, in *IdentitySyncRequest, opts ...grpc.CallOption) (*IdentitySyncResponse, error)
@@ -465,6 +467,16 @@ func (c *authClient) GetSolicitanteIdentity(ctx context.Context, in *GetSolicita
 	return out, nil
 }
 
+func (c *authClient) GetMySolicitanteIdentity(ctx context.Context, in *GetMySolicitanteIdentityRequest, opts ...grpc.CallOption) (*GetMySolicitanteIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMySolicitanteIdentityResponse)
+	err := c.cc.Invoke(ctx, Auth_GetMySolicitanteIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authClient) VerifySolicitanteIdentity(ctx context.Context, in *VerifySolicitanteIdentityRequest, opts ...grpc.CallOption) (*VerifySolicitanteIdentityResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(VerifySolicitanteIdentityResponse)
@@ -554,6 +566,7 @@ type AuthServer interface {
 	EmailCancelRegistration(context.Context, *EmailRegistrationRequest) (*EmailCancelResponse, error)
 	ListSolicitanteIdentities(context.Context, *ListSolicitanteIdentitiesRequest) (*ListSolicitanteIdentitiesResponse, error)
 	GetSolicitanteIdentity(context.Context, *GetSolicitanteIdentityRequest) (*GetSolicitanteIdentityResponse, error)
+	GetMySolicitanteIdentity(context.Context, *GetMySolicitanteIdentityRequest) (*GetMySolicitanteIdentityResponse, error)
 	VerifySolicitanteIdentity(context.Context, *VerifySolicitanteIdentityRequest) (*VerifySolicitanteIdentityResponse, error)
 	RejectSolicitanteIdentity(context.Context, *RejectSolicitanteIdentityRequest) (*RejectSolicitanteIdentityResponse, error)
 	ConfirmSolicitanteIdentitySync(context.Context, *IdentitySyncRequest) (*IdentitySyncResponse, error)
@@ -673,6 +686,9 @@ func (UnimplementedAuthServer) ListSolicitanteIdentities(context.Context, *ListS
 }
 func (UnimplementedAuthServer) GetSolicitanteIdentity(context.Context, *GetSolicitanteIdentityRequest) (*GetSolicitanteIdentityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSolicitanteIdentity not implemented")
+}
+func (UnimplementedAuthServer) GetMySolicitanteIdentity(context.Context, *GetMySolicitanteIdentityRequest) (*GetMySolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMySolicitanteIdentity not implemented")
 }
 func (UnimplementedAuthServer) VerifySolicitanteIdentity(context.Context, *VerifySolicitanteIdentityRequest) (*VerifySolicitanteIdentityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method VerifySolicitanteIdentity not implemented")
@@ -1340,6 +1356,24 @@ func _Auth_GetSolicitanteIdentity_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_GetMySolicitanteIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMySolicitanteIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GetMySolicitanteIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GetMySolicitanteIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GetMySolicitanteIdentity(ctx, req.(*GetMySolicitanteIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Auth_VerifySolicitanteIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VerifySolicitanteIdentityRequest)
 	if err := dec(in); err != nil {
@@ -1576,6 +1610,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSolicitanteIdentity",
 			Handler:    _Auth_GetSolicitanteIdentity_Handler,
+		},
+		{
+			MethodName: "GetMySolicitanteIdentity",
+			Handler:    _Auth_GetMySolicitanteIdentity_Handler,
 		},
 		{
 			MethodName: "VerifySolicitanteIdentity",

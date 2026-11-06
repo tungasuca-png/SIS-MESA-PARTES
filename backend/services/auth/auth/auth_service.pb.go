@@ -3991,6 +3991,140 @@ func (x *GetSolicitanteIdentityResponse) GetIdentity() *SolicitanteIdentity {
 	return nil
 }
 
+// Identidad PROPIA del solicitante autenticado (Mi perfil). Sin campos: el
+// usuario sale SOLO del token; no existe forma de pedir la de otra cuenta.
+type GetMySolicitanteIdentityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMySolicitanteIdentityRequest) Reset() {
+	*x = GetMySolicitanteIdentityRequest{}
+	mi := &file_auth_service_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMySolicitanteIdentityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMySolicitanteIdentityRequest) ProtoMessage() {}
+
+func (x *GetMySolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMySolicitanteIdentityRequest.ProtoReflect.Descriptor instead.
+func (*GetMySolicitanteIdentityRequest) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{70}
+}
+
+// Vista mínima para el propio solicitante: sin el verificador, el método de
+// cotejo, los conflictos con otras cuentas ni la traza de sincronización.
+// registrada = false: la cuenta no tiene identidad declarada (cuentas
+// institucionales o anteriores al registro público); el resto queda vacío.
+type GetMySolicitanteIdentityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Registrada    bool                   `protobuf:"varint,1,opt,name=registrada,proto3" json:"registrada,omitempty"`
+	Estado        string                 `protobuf:"bytes,2,opt,name=estado,proto3" json:"estado,omitempty"`                                    // PENDIENTE, VERIFICADA o RECHAZADA
+	DniDeclarado  string                 `protobuf:"bytes,3,opt,name=dni_declarado,json=dniDeclarado,proto3" json:"dni_declarado,omitempty"`    // el que declaró el propio solicitante
+	Origen        string                 `protobuf:"bytes,4,opt,name=origen,proto3" json:"origen,omitempty"`                                    // correo o google
+	DeclaradoAt   string                 `protobuf:"bytes,5,opt,name=declarado_at,json=declaradoAt,proto3" json:"declarado_at,omitempty"`       // RFC 3339
+	ResueltoAt    string                 `protobuf:"bytes,6,opt,name=resuelto_at,json=resueltoAt,proto3" json:"resuelto_at,omitempty"`          // RFC 3339; fecha de la verificación o del rechazo
+	MotivoRechazo string                 `protobuf:"bytes,7,opt,name=motivo_rechazo,json=motivoRechazo,proto3" json:"motivo_rechazo,omitempty"` // solo si estado = RECHAZADA
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMySolicitanteIdentityResponse) Reset() {
+	*x = GetMySolicitanteIdentityResponse{}
+	mi := &file_auth_service_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMySolicitanteIdentityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMySolicitanteIdentityResponse) ProtoMessage() {}
+
+func (x *GetMySolicitanteIdentityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_service_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMySolicitanteIdentityResponse.ProtoReflect.Descriptor instead.
+func (*GetMySolicitanteIdentityResponse) Descriptor() ([]byte, []int) {
+	return file_auth_service_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetRegistrada() bool {
+	if x != nil {
+		return x.Registrada
+	}
+	return false
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetEstado() string {
+	if x != nil {
+		return x.Estado
+	}
+	return ""
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetDniDeclarado() string {
+	if x != nil {
+		return x.DniDeclarado
+	}
+	return ""
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetOrigen() string {
+	if x != nil {
+		return x.Origen
+	}
+	return ""
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetDeclaradoAt() string {
+	if x != nil {
+		return x.DeclaradoAt
+	}
+	return ""
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetResueltoAt() string {
+	if x != nil {
+		return x.ResueltoAt
+	}
+	return ""
+}
+
+func (x *GetMySolicitanteIdentityResponse) GetMotivoRechazo() string {
+	if x != nil {
+		return x.MotivoRechazo
+	}
+	return ""
+}
+
 // dni_esperado: el DNI que el personal cotejó (si la declaración cambió, no
 // se verifica). metodo: PRESENCIAL o DOCUMENTO.
 type VerifySolicitanteIdentityRequest struct {
@@ -4004,7 +4138,7 @@ type VerifySolicitanteIdentityRequest struct {
 
 func (x *VerifySolicitanteIdentityRequest) Reset() {
 	*x = VerifySolicitanteIdentityRequest{}
-	mi := &file_auth_service_proto_msgTypes[70]
+	mi := &file_auth_service_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4016,7 +4150,7 @@ func (x *VerifySolicitanteIdentityRequest) String() string {
 func (*VerifySolicitanteIdentityRequest) ProtoMessage() {}
 
 func (x *VerifySolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[70]
+	mi := &file_auth_service_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4029,7 +4163,7 @@ func (x *VerifySolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifySolicitanteIdentityRequest.ProtoReflect.Descriptor instead.
 func (*VerifySolicitanteIdentityRequest) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{70}
+	return file_auth_service_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *VerifySolicitanteIdentityRequest) GetUserId() string {
@@ -4063,7 +4197,7 @@ type VerifySolicitanteIdentityResponse struct {
 
 func (x *VerifySolicitanteIdentityResponse) Reset() {
 	*x = VerifySolicitanteIdentityResponse{}
-	mi := &file_auth_service_proto_msgTypes[71]
+	mi := &file_auth_service_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4075,7 +4209,7 @@ func (x *VerifySolicitanteIdentityResponse) String() string {
 func (*VerifySolicitanteIdentityResponse) ProtoMessage() {}
 
 func (x *VerifySolicitanteIdentityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[71]
+	mi := &file_auth_service_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4088,7 +4222,7 @@ func (x *VerifySolicitanteIdentityResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use VerifySolicitanteIdentityResponse.ProtoReflect.Descriptor instead.
 func (*VerifySolicitanteIdentityResponse) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{71}
+	return file_auth_service_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *VerifySolicitanteIdentityResponse) GetEstado() string {
@@ -4117,7 +4251,7 @@ type IdentitySyncRequest struct {
 
 func (x *IdentitySyncRequest) Reset() {
 	*x = IdentitySyncRequest{}
-	mi := &file_auth_service_proto_msgTypes[72]
+	mi := &file_auth_service_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4129,7 +4263,7 @@ func (x *IdentitySyncRequest) String() string {
 func (*IdentitySyncRequest) ProtoMessage() {}
 
 func (x *IdentitySyncRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[72]
+	mi := &file_auth_service_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4142,7 +4276,7 @@ func (x *IdentitySyncRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IdentitySyncRequest.ProtoReflect.Descriptor instead.
 func (*IdentitySyncRequest) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{72}
+	return file_auth_service_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *IdentitySyncRequest) GetUserId() string {
@@ -4170,7 +4304,7 @@ type IdentitySyncFailureRequest struct {
 
 func (x *IdentitySyncFailureRequest) Reset() {
 	*x = IdentitySyncFailureRequest{}
-	mi := &file_auth_service_proto_msgTypes[73]
+	mi := &file_auth_service_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4182,7 +4316,7 @@ func (x *IdentitySyncFailureRequest) String() string {
 func (*IdentitySyncFailureRequest) ProtoMessage() {}
 
 func (x *IdentitySyncFailureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[73]
+	mi := &file_auth_service_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4195,7 +4329,7 @@ func (x *IdentitySyncFailureRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IdentitySyncFailureRequest.ProtoReflect.Descriptor instead.
 func (*IdentitySyncFailureRequest) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{73}
+	return file_auth_service_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *IdentitySyncFailureRequest) GetUserId() string {
@@ -4222,7 +4356,7 @@ type IdentitySyncResponse struct {
 
 func (x *IdentitySyncResponse) Reset() {
 	*x = IdentitySyncResponse{}
-	mi := &file_auth_service_proto_msgTypes[74]
+	mi := &file_auth_service_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4234,7 +4368,7 @@ func (x *IdentitySyncResponse) String() string {
 func (*IdentitySyncResponse) ProtoMessage() {}
 
 func (x *IdentitySyncResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[74]
+	mi := &file_auth_service_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4247,7 +4381,7 @@ func (x *IdentitySyncResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IdentitySyncResponse.ProtoReflect.Descriptor instead.
 func (*IdentitySyncResponse) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{74}
+	return file_auth_service_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *IdentitySyncResponse) GetEstado() string {
@@ -4274,7 +4408,7 @@ type RejectSolicitanteIdentityRequest struct {
 
 func (x *RejectSolicitanteIdentityRequest) Reset() {
 	*x = RejectSolicitanteIdentityRequest{}
-	mi := &file_auth_service_proto_msgTypes[75]
+	mi := &file_auth_service_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4286,7 +4420,7 @@ func (x *RejectSolicitanteIdentityRequest) String() string {
 func (*RejectSolicitanteIdentityRequest) ProtoMessage() {}
 
 func (x *RejectSolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[75]
+	mi := &file_auth_service_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4299,7 +4433,7 @@ func (x *RejectSolicitanteIdentityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RejectSolicitanteIdentityRequest.ProtoReflect.Descriptor instead.
 func (*RejectSolicitanteIdentityRequest) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{75}
+	return file_auth_service_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *RejectSolicitanteIdentityRequest) GetUserId() string {
@@ -4325,7 +4459,7 @@ type RejectSolicitanteIdentityResponse struct {
 
 func (x *RejectSolicitanteIdentityResponse) Reset() {
 	*x = RejectSolicitanteIdentityResponse{}
-	mi := &file_auth_service_proto_msgTypes[76]
+	mi := &file_auth_service_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4337,7 +4471,7 @@ func (x *RejectSolicitanteIdentityResponse) String() string {
 func (*RejectSolicitanteIdentityResponse) ProtoMessage() {}
 
 func (x *RejectSolicitanteIdentityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_service_proto_msgTypes[76]
+	mi := &file_auth_service_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4350,7 +4484,7 @@ func (x *RejectSolicitanteIdentityResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use RejectSolicitanteIdentityResponse.ProtoReflect.Descriptor instead.
 func (*RejectSolicitanteIdentityResponse) Descriptor() ([]byte, []int) {
-	return file_auth_service_proto_rawDescGZIP(), []int{76}
+	return file_auth_service_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *RejectSolicitanteIdentityResponse) GetEstado() string {
@@ -4627,7 +4761,19 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x1dGetSolicitanteIdentityRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"W\n" +
 	"\x1eGetSolicitanteIdentityResponse\x125\n" +
-	"\bidentity\x18\x01 \x01(\v2\x19.auth.SolicitanteIdentityR\bidentity\"v\n" +
+	"\bidentity\x18\x01 \x01(\v2\x19.auth.SolicitanteIdentityR\bidentity\"!\n" +
+	"\x1fGetMySolicitanteIdentityRequest\"\x82\x02\n" +
+	" GetMySolicitanteIdentityResponse\x12\x1e\n" +
+	"\n" +
+	"registrada\x18\x01 \x01(\bR\n" +
+	"registrada\x12\x16\n" +
+	"\x06estado\x18\x02 \x01(\tR\x06estado\x12#\n" +
+	"\rdni_declarado\x18\x03 \x01(\tR\fdniDeclarado\x12\x16\n" +
+	"\x06origen\x18\x04 \x01(\tR\x06origen\x12!\n" +
+	"\fdeclarado_at\x18\x05 \x01(\tR\vdeclaradoAt\x12\x1f\n" +
+	"\vresuelto_at\x18\x06 \x01(\tR\n" +
+	"resueltoAt\x12%\n" +
+	"\x0emotivo_rechazo\x18\a \x01(\tR\rmotivoRechazo\"v\n" +
 	" VerifySolicitanteIdentityRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
 	"\fdni_esperado\x18\x02 \x01(\tR\vdniEsperado\x12\x16\n" +
@@ -4648,7 +4794,7 @@ const file_auth_service_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06motivo\x18\x02 \x01(\tR\x06motivo\";\n" +
 	"!RejectSolicitanteIdentityResponse\x12\x16\n" +
-	"\x06estado\x18\x01 \x01(\tR\x06estado2\xec\x19\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado2\xd7\x1a\n" +
 	"\x04Auth\x12%\n" +
 	"\x04Ping\x12\r.auth.Request\x1a\x0e.auth.Response\x129\n" +
 	"\bRegister\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x120\n" +
@@ -4685,7 +4831,8 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x19EmailCompleteRegistration\x12\x1e.auth.EmailRegistrationRequest\x1a\x1b.auth.EmailCompleteResponse\x12T\n" +
 	"\x17EmailCancelRegistration\x12\x1e.auth.EmailRegistrationRequest\x1a\x19.auth.EmailCancelResponse\x12l\n" +
 	"\x19ListSolicitanteIdentities\x12&.auth.ListSolicitanteIdentitiesRequest\x1a'.auth.ListSolicitanteIdentitiesResponse\x12c\n" +
-	"\x16GetSolicitanteIdentity\x12#.auth.GetSolicitanteIdentityRequest\x1a$.auth.GetSolicitanteIdentityResponse\x12l\n" +
+	"\x16GetSolicitanteIdentity\x12#.auth.GetSolicitanteIdentityRequest\x1a$.auth.GetSolicitanteIdentityResponse\x12i\n" +
+	"\x18GetMySolicitanteIdentity\x12%.auth.GetMySolicitanteIdentityRequest\x1a&.auth.GetMySolicitanteIdentityResponse\x12l\n" +
 	"\x19VerifySolicitanteIdentity\x12&.auth.VerifySolicitanteIdentityRequest\x1a'.auth.VerifySolicitanteIdentityResponse\x12l\n" +
 	"\x19RejectSolicitanteIdentity\x12&.auth.RejectSolicitanteIdentityRequest\x1a'.auth.RejectSolicitanteIdentityResponse\x12W\n" +
 	"\x1eConfirmSolicitanteIdentitySync\x12\x19.auth.IdentitySyncRequest\x1a\x1a.auth.IdentitySyncResponse\x12d\n" +
@@ -4704,7 +4851,7 @@ func file_auth_service_proto_rawDescGZIP() []byte {
 	return file_auth_service_proto_rawDescData
 }
 
-var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 77)
+var file_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 79)
 var file_auth_service_proto_goTypes = []any{
 	(*Request)(nil),                           // 0: auth.Request
 	(*Response)(nil),                          // 1: auth.Response
@@ -4776,13 +4923,15 @@ var file_auth_service_proto_goTypes = []any{
 	(*ListSolicitanteIdentitiesResponse)(nil), // 67: auth.ListSolicitanteIdentitiesResponse
 	(*GetSolicitanteIdentityRequest)(nil),     // 68: auth.GetSolicitanteIdentityRequest
 	(*GetSolicitanteIdentityResponse)(nil),    // 69: auth.GetSolicitanteIdentityResponse
-	(*VerifySolicitanteIdentityRequest)(nil),  // 70: auth.VerifySolicitanteIdentityRequest
-	(*VerifySolicitanteIdentityResponse)(nil), // 71: auth.VerifySolicitanteIdentityResponse
-	(*IdentitySyncRequest)(nil),               // 72: auth.IdentitySyncRequest
-	(*IdentitySyncFailureRequest)(nil),        // 73: auth.IdentitySyncFailureRequest
-	(*IdentitySyncResponse)(nil),              // 74: auth.IdentitySyncResponse
-	(*RejectSolicitanteIdentityRequest)(nil),  // 75: auth.RejectSolicitanteIdentityRequest
-	(*RejectSolicitanteIdentityResponse)(nil), // 76: auth.RejectSolicitanteIdentityResponse
+	(*GetMySolicitanteIdentityRequest)(nil),   // 70: auth.GetMySolicitanteIdentityRequest
+	(*GetMySolicitanteIdentityResponse)(nil),  // 71: auth.GetMySolicitanteIdentityResponse
+	(*VerifySolicitanteIdentityRequest)(nil),  // 72: auth.VerifySolicitanteIdentityRequest
+	(*VerifySolicitanteIdentityResponse)(nil), // 73: auth.VerifySolicitanteIdentityResponse
+	(*IdentitySyncRequest)(nil),               // 74: auth.IdentitySyncRequest
+	(*IdentitySyncFailureRequest)(nil),        // 75: auth.IdentitySyncFailureRequest
+	(*IdentitySyncResponse)(nil),              // 76: auth.IdentitySyncResponse
+	(*RejectSolicitanteIdentityRequest)(nil),  // 77: auth.RejectSolicitanteIdentityRequest
+	(*RejectSolicitanteIdentityResponse)(nil), // 78: auth.RejectSolicitanteIdentityResponse
 }
 var file_auth_service_proto_depIdxs = []int32{
 	16, // 0: auth.ListRolesResponse.roles:type_name -> auth.Role
@@ -4831,53 +4980,55 @@ var file_auth_service_proto_depIdxs = []int32{
 	62, // 43: auth.Auth.EmailCancelRegistration:input_type -> auth.EmailRegistrationRequest
 	66, // 44: auth.Auth.ListSolicitanteIdentities:input_type -> auth.ListSolicitanteIdentitiesRequest
 	68, // 45: auth.Auth.GetSolicitanteIdentity:input_type -> auth.GetSolicitanteIdentityRequest
-	70, // 46: auth.Auth.VerifySolicitanteIdentity:input_type -> auth.VerifySolicitanteIdentityRequest
-	75, // 47: auth.Auth.RejectSolicitanteIdentity:input_type -> auth.RejectSolicitanteIdentityRequest
-	72, // 48: auth.Auth.ConfirmSolicitanteIdentitySync:input_type -> auth.IdentitySyncRequest
-	73, // 49: auth.Auth.RecordSolicitanteIdentitySyncFailure:input_type -> auth.IdentitySyncFailureRequest
-	72, // 50: auth.Auth.RevertSolicitanteIdentity:input_type -> auth.IdentitySyncRequest
-	1,  // 51: auth.Auth.Ping:output_type -> auth.Response
-	3,  // 52: auth.Auth.Register:output_type -> auth.RegisterResponse
-	5,  // 53: auth.Auth.Login:output_type -> auth.LoginResponse
-	7,  // 54: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
-	9,  // 55: auth.Auth.Logout:output_type -> auth.LogoutResponse
-	11, // 56: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
-	13, // 57: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
-	15, // 58: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
-	18, // 59: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
-	21, // 60: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
-	23, // 61: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
-	25, // 62: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
-	27, // 63: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
-	29, // 64: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
-	31, // 65: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
-	34, // 66: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
-	36, // 67: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
-	40, // 68: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
-	38, // 69: auth.Auth.GrantServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
-	38, // 70: auth.Auth.WithdrawServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
-	42, // 71: auth.Auth.GoogleStart:output_type -> auth.GoogleStartResponse
-	44, // 72: auth.Auth.GoogleCallback:output_type -> auth.GoogleCallbackResponse
-	46, // 73: auth.Auth.GoogleExchange:output_type -> auth.GoogleExchangeResponse
-	48, // 74: auth.Auth.GoogleRegister:output_type -> auth.GoogleRegisterResponse
-	50, // 75: auth.Auth.GoogleCompleteRegistration:output_type -> auth.GoogleCompleteResponse
-	51, // 76: auth.Auth.GoogleCancelRegistration:output_type -> auth.GoogleCancelResponse
-	53, // 77: auth.Auth.GoogleStartLink:output_type -> auth.GoogleStartLinkResponse
-	55, // 78: auth.Auth.GoogleLinkStatus:output_type -> auth.GoogleLinkStatusResponse
-	57, // 79: auth.Auth.EmailRegister:output_type -> auth.EmailRegisterResponse
-	59, // 80: auth.Auth.EmailResendCode:output_type -> auth.EmailResendCodeResponse
-	61, // 81: auth.Auth.EmailVerify:output_type -> auth.EmailVerifyResponse
-	63, // 82: auth.Auth.EmailCompleteRegistration:output_type -> auth.EmailCompleteResponse
-	64, // 83: auth.Auth.EmailCancelRegistration:output_type -> auth.EmailCancelResponse
-	67, // 84: auth.Auth.ListSolicitanteIdentities:output_type -> auth.ListSolicitanteIdentitiesResponse
-	69, // 85: auth.Auth.GetSolicitanteIdentity:output_type -> auth.GetSolicitanteIdentityResponse
-	71, // 86: auth.Auth.VerifySolicitanteIdentity:output_type -> auth.VerifySolicitanteIdentityResponse
-	76, // 87: auth.Auth.RejectSolicitanteIdentity:output_type -> auth.RejectSolicitanteIdentityResponse
-	74, // 88: auth.Auth.ConfirmSolicitanteIdentitySync:output_type -> auth.IdentitySyncResponse
-	74, // 89: auth.Auth.RecordSolicitanteIdentitySyncFailure:output_type -> auth.IdentitySyncResponse
-	74, // 90: auth.Auth.RevertSolicitanteIdentity:output_type -> auth.IdentitySyncResponse
-	51, // [51:91] is the sub-list for method output_type
-	11, // [11:51] is the sub-list for method input_type
+	70, // 46: auth.Auth.GetMySolicitanteIdentity:input_type -> auth.GetMySolicitanteIdentityRequest
+	72, // 47: auth.Auth.VerifySolicitanteIdentity:input_type -> auth.VerifySolicitanteIdentityRequest
+	77, // 48: auth.Auth.RejectSolicitanteIdentity:input_type -> auth.RejectSolicitanteIdentityRequest
+	74, // 49: auth.Auth.ConfirmSolicitanteIdentitySync:input_type -> auth.IdentitySyncRequest
+	75, // 50: auth.Auth.RecordSolicitanteIdentitySyncFailure:input_type -> auth.IdentitySyncFailureRequest
+	74, // 51: auth.Auth.RevertSolicitanteIdentity:input_type -> auth.IdentitySyncRequest
+	1,  // 52: auth.Auth.Ping:output_type -> auth.Response
+	3,  // 53: auth.Auth.Register:output_type -> auth.RegisterResponse
+	5,  // 54: auth.Auth.Login:output_type -> auth.LoginResponse
+	7,  // 55: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResponse
+	9,  // 56: auth.Auth.Logout:output_type -> auth.LogoutResponse
+	11, // 57: auth.Auth.ValidateToken:output_type -> auth.ValidateTokenResponse
+	13, // 58: auth.Auth.HasPermission:output_type -> auth.HasPermissionResponse
+	15, // 59: auth.Auth.GetMyPermissions:output_type -> auth.GetMyPermissionsResponse
+	18, // 60: auth.Auth.ListRoles:output_type -> auth.ListRolesResponse
+	21, // 61: auth.Auth.ListPermissions:output_type -> auth.ListPermissionsResponse
+	23, // 62: auth.Auth.GetRolePermissions:output_type -> auth.GetRolePermissionsResponse
+	25, // 63: auth.Auth.UpdateRolePermissions:output_type -> auth.UpdateRolePermissionsResponse
+	27, // 64: auth.Auth.UpdateUserRole:output_type -> auth.UpdateUserRoleResponse
+	29, // 65: auth.Auth.CreateUser:output_type -> auth.CreateUserResponse
+	31, // 66: auth.Auth.IssueServiceToken:output_type -> auth.IssueServiceTokenResponse
+	34, // 67: auth.Auth.CreateServiceClient:output_type -> auth.CreateServiceClientResponse
+	36, // 68: auth.Auth.RevokeServiceClient:output_type -> auth.RevokeServiceClientResponse
+	40, // 69: auth.Auth.ListServiceClients:output_type -> auth.ListServiceClientsResponse
+	38, // 70: auth.Auth.GrantServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
+	38, // 71: auth.Auth.WithdrawServiceClientPermission:output_type -> auth.ServiceClientPermissionResponse
+	42, // 72: auth.Auth.GoogleStart:output_type -> auth.GoogleStartResponse
+	44, // 73: auth.Auth.GoogleCallback:output_type -> auth.GoogleCallbackResponse
+	46, // 74: auth.Auth.GoogleExchange:output_type -> auth.GoogleExchangeResponse
+	48, // 75: auth.Auth.GoogleRegister:output_type -> auth.GoogleRegisterResponse
+	50, // 76: auth.Auth.GoogleCompleteRegistration:output_type -> auth.GoogleCompleteResponse
+	51, // 77: auth.Auth.GoogleCancelRegistration:output_type -> auth.GoogleCancelResponse
+	53, // 78: auth.Auth.GoogleStartLink:output_type -> auth.GoogleStartLinkResponse
+	55, // 79: auth.Auth.GoogleLinkStatus:output_type -> auth.GoogleLinkStatusResponse
+	57, // 80: auth.Auth.EmailRegister:output_type -> auth.EmailRegisterResponse
+	59, // 81: auth.Auth.EmailResendCode:output_type -> auth.EmailResendCodeResponse
+	61, // 82: auth.Auth.EmailVerify:output_type -> auth.EmailVerifyResponse
+	63, // 83: auth.Auth.EmailCompleteRegistration:output_type -> auth.EmailCompleteResponse
+	64, // 84: auth.Auth.EmailCancelRegistration:output_type -> auth.EmailCancelResponse
+	67, // 85: auth.Auth.ListSolicitanteIdentities:output_type -> auth.ListSolicitanteIdentitiesResponse
+	69, // 86: auth.Auth.GetSolicitanteIdentity:output_type -> auth.GetSolicitanteIdentityResponse
+	71, // 87: auth.Auth.GetMySolicitanteIdentity:output_type -> auth.GetMySolicitanteIdentityResponse
+	73, // 88: auth.Auth.VerifySolicitanteIdentity:output_type -> auth.VerifySolicitanteIdentityResponse
+	78, // 89: auth.Auth.RejectSolicitanteIdentity:output_type -> auth.RejectSolicitanteIdentityResponse
+	76, // 90: auth.Auth.ConfirmSolicitanteIdentitySync:output_type -> auth.IdentitySyncResponse
+	76, // 91: auth.Auth.RecordSolicitanteIdentitySyncFailure:output_type -> auth.IdentitySyncResponse
+	76, // 92: auth.Auth.RevertSolicitanteIdentity:output_type -> auth.IdentitySyncResponse
+	52, // [52:93] is the sub-list for method output_type
+	11, // [11:52] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
 	11, // [11:11] is the sub-list for extension extendee
 	0,  // [0:11] is the sub-list for field type_name
@@ -4894,7 +5045,7 @@ func file_auth_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_service_proto_rawDesc), len(file_auth_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   77,
+			NumMessages:   79,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

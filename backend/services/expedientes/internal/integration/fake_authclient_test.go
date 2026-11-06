@@ -193,3 +193,7 @@ func (c *scriptedAuthClient) RecordSolicitanteIdentitySyncFailure(context.Contex
 func (c *scriptedAuthClient) RevertSolicitanteIdentity(context.Context, *authclient.IdentitySyncRequest, ...grpc.CallOption) (*authclient.IdentitySyncResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
+
+func (c *scriptedAuthClient) GetMySolicitanteIdentity(context.Context, *authclient.GetMySolicitanteIdentityRequest, ...grpc.CallOption) (*authclient.GetMySolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}

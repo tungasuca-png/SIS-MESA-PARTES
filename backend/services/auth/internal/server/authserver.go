@@ -222,3 +222,8 @@ func (s *AuthServer) RevertSolicitanteIdentity(ctx context.Context, in *auth.Ide
 	l := logic.NewRevertSolicitanteIdentityLogic(ctx, s.svcCtx)
 	return l.RevertSolicitanteIdentity(in)
 }
+
+func (s *AuthServer) GetMySolicitanteIdentity(ctx context.Context, in *auth.GetMySolicitanteIdentityRequest) (*auth.GetMySolicitanteIdentityResponse, error) {
+	l := logic.NewGetMySolicitanteIdentityLogic(ctx, s.svcCtx)
+	return l.GetMySolicitanteIdentity(in)
+}

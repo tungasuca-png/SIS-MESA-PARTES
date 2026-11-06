@@ -468,6 +468,24 @@ message GetSolicitanteIdentityResponse {
   SolicitanteIdentity identity = 1;
 }
 
+// Identidad PROPIA del solicitante autenticado (Mi perfil). Sin campos: el
+// usuario sale SOLO del token; no existe forma de pedir la de otra cuenta.
+message GetMySolicitanteIdentityRequest {}
+
+// Vista mínima para el propio solicitante: sin el verificador, el método de
+// cotejo, los conflictos con otras cuentas ni la traza de sincronización.
+// registrada = false: la cuenta no tiene identidad declarada (cuentas
+// institucionales o anteriores al registro público); el resto queda vacío.
+message GetMySolicitanteIdentityResponse {
+  bool registrada = 1;
+  string estado = 2;         // PENDIENTE, VERIFICADA o RECHAZADA
+  string dni_declarado = 3;  // el que declaró el propio solicitante
+  string origen = 4;         // correo o google
+  string declarado_at = 5;   // RFC 3339
+  string resuelto_at = 6;    // RFC 3339; fecha de la verificación o del rechazo
+  string motivo_rechazo = 7; // solo si estado = RECHAZADA
+}
+
 // dni_esperado: el DNI que el personal cotejó (si la declaración cambió, no
 // se verifica). metodo: PRESENCIAL o DOCUMENTO.
 message VerifySolicitanteIdentityRequest {
@@ -544,6 +562,7 @@ service Auth {
   rpc EmailCancelRegistration(EmailRegistrationRequest) returns(EmailCancelResponse);
   rpc ListSolicitanteIdentities(ListSolicitanteIdentitiesRequest) returns(ListSolicitanteIdentitiesResponse);
   rpc GetSolicitanteIdentity(GetSolicitanteIdentityRequest) returns(GetSolicitanteIdentityResponse);
+  rpc GetMySolicitanteIdentity(GetMySolicitanteIdentityRequest) returns(GetMySolicitanteIdentityResponse);
   rpc VerifySolicitanteIdentity(VerifySolicitanteIdentityRequest) returns(VerifySolicitanteIdentityResponse);
   rpc RejectSolicitanteIdentity(RejectSolicitanteIdentityRequest) returns(RejectSolicitanteIdentityResponse);
   rpc ConfirmSolicitanteIdentitySync(IdentitySyncRequest) returns(IdentitySyncResponse);

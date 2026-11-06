@@ -103,6 +103,9 @@ func DefaultMethodPolicies() map[string]MethodPolicy {
 		// permiso propio, sin asignar a ningún rol por defecto (migración 025).
 		"/auth.Auth/ListSolicitanteIdentities": ProtectedMethod("solicitantes.identidad.verify"),
 		"/auth.Auth/GetSolicitanteIdentity":    ProtectedMethod("solicitantes.identidad.verify"),
+		// Mi identidad: cualquier sesión válida, y SOLO la propia (el id sale
+		// del token; la solicitud no tiene campos). No da acceso a la bandeja.
+		"/auth.Auth/GetMySolicitanteIdentity":  AuthenticatedMethod(),
 		"/auth.Auth/VerifySolicitanteIdentity": ProtectedMethod("solicitantes.identidad.verify"),
 		"/auth.Auth/RejectSolicitanteIdentity": ProtectedMethod("solicitantes.identidad.verify"),
 		// Sincronización con Usuarios y su compensación (mismo permiso).

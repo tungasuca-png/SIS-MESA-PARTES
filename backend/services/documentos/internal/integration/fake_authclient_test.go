@@ -198,6 +198,10 @@ func (c *scriptedAuthClient) RevertSolicitanteIdentity(context.Context, *authcli
 	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
 }
 
+func (c *scriptedAuthClient) GetMySolicitanteIdentity(context.Context, *authclient.GetMySolicitanteIdentityRequest, ...grpc.CallOption) (*authclient.GetMySolicitanteIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "no usado en esta prueba")
+}
+
 // fakeExpedientesClient (Paso 19C) es un doble de prueba SOLO para
 // TestDocumentosIntegration: esa suite usa un expediente_id y un
 // solicitante_id SINTÉTICOS (fixedUUID) que nunca existen en
