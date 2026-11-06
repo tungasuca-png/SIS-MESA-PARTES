@@ -98,6 +98,17 @@ END $$;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO auth_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE auth_owner IN SCHEMA public
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO auth_tester;
+-- 026: auth_tester no borra registros del registro público ni identidades
+-- declaradas (las pruebas solo siembran y leen). El GRANT de arriba se lo
+-- devolvería al reejecutar este script; se retira de nuevo aquí.
+DO $$ BEGIN
+    IF to_regclass('public.registros_correo') IS NOT NULL THEN
+        REVOKE DELETE ON public.registros_correo FROM auth_tester;
+    END IF;
+    IF to_regclass('public.identidad_solicitantes') IS NOT NULL THEN
+        REVOKE DELETE ON public.identidad_solicitantes FROM auth_tester;
+    END IF;
+END $$;
 
 -- ===========================================================================
 -- psicologia_db — los privilegios de psicologia_user ya son mínimos y los

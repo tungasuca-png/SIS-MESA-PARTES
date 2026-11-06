@@ -109,7 +109,7 @@ Cambios de contrato aditivos: `UsuarioBasicDTO.identidad_pendiente`,
 
 ## Activación (requiere autorización; nada de esto se ejecutó)
 
-Orden obligatorio: **Usuarios 003 → Auth 024 → Auth 025**, con Auth 022 y 023
+Orden obligatorio: **Usuarios 003 → Auth 024 → Auth 025 → Auth 026**, con Auth 022 y 023
 ya aplicadas. El procedimiento completo está en
 [`docs/despliegue/registro-publico-identidad.md`](../despliegue/registro-publico-identidad.md):
 respaldos, comprobación previa, migraciones, verificación, servicios y prueba
@@ -132,7 +132,10 @@ docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 -c "
 
 docker cp backend\services\auth\migrations\025_create_identidad_solicitantes.sql tg-postgres:/tmp/025.sql
 docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 -c "SET ROLE auth_owner" -f /tmp/025.sql
-docker exec tg-postgres rm /tmp/u003.sql /tmp/024.sql /tmp/025.sql
+
+docker cp backend\services\auth\migrations\026_restringir_auth_tester_registro_publico.sql tg-postgres:/tmp/026.sql
+docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 -c "SET ROLE auth_owner" -f /tmp/026.sql
+docker exec tg-postgres rm /tmp/u003.sql /tmp/024.sql /tmp/025.sql /tmp/026.sql
 ```
 
 Verificación (solo lectura):

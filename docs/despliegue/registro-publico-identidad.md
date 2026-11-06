@@ -12,6 +12,7 @@ Todo lo descrito se probó únicamente en PostgreSQL desechables.
 | 1 | `usuarios_db` | **Usuarios 003** `003_add_dni_declarado.sql` | Agrega `usuarios.dni_declarado` (`VARCHAR(8) NOT NULL DEFAULT ''`) y su `CHECK` |
 | 2 | `auth_db` | **Auth 024** `024_create_registros_correo.sql` | Crea `registros_correo` y la función `cancelar_registro_correo_pendiente(uuid)` |
 | 3 | `auth_db` | **Auth 025** `025_create_identidad_solicitantes.sql` | Crea `identidad_solicitantes` y registra el permiso `solicitantes.identidad.verify` sin asignarlo a ningún rol |
+| 4 | `auth_db` | **Auth 026** `026_restringir_auth_tester_registro_publico.sql` | Retira `DELETE` de `auth_tester` sobre `registros_correo` e `identidad_solicitantes` |
 
 Requisito previo: Auth 022 y 023 aplicadas (ya lo están en el entorno actual).
 
@@ -31,6 +32,17 @@ Requisito previo: Auth 022 y 023 aplicadas (ya lo están en el entorno actual).
   foráneas solo apuntan a `usuarios`. El orden es operativo: deja el estado
   intermedio más corto y más fácil de diagnosticar.
 - **Aplicar 024 y 025 en la misma ventana**, una detrás de otra.
+- **026 inmediatamente después de la 025.** Los privilegios por defecto de
+  `auth_db` (`02_propiedad_y_permisos.sql`) conceden a `auth_tester`, la cuenta
+  de pruebas de integración, `SELECT, INSERT, UPDATE, DELETE` sobre toda tabla
+  nueva de `auth_owner`. La 026 retira solo el `DELETE` de las dos tablas del
+  registro público, porque las pruebas solo siembran y leen. **Siempre que se
+  reaplique la 024 o la 025** (por ejemplo, tras su `Down`), hay que volver a
+  aplicar la 026: al recrearse la tabla, los privilegios por defecto devuelven
+  el `DELETE`. `auth_tester` sigue pudiendo eliminar sus usuarios de prueba,
+  porque las acciones `ON DELETE` de las claves foráneas se ejecutan como el
+  dueño de la tabla. La 026 no cambia `auth_app`, ni otras tablas, ni los
+  privilegios por defecto.
 
 ### Estados intermedios probados
 
@@ -60,8 +72,9 @@ produce un 500 ni una cuenta parcial.
 | Reversión | `Down` comentado al final del archivo | `Down` comentado | `Down` comentado. Elimina las identidades declaradas: solo antes de abrir el registro público |
 
 `backend/db/roles/02_propiedad_y_permisos.sql` ya incluye los permisos de
-`registros_correo` e `identidad_solicitantes`. Si se reejecuta después de la
-024 y la 025, deja los mismos permisos.
+`registros_correo` e `identidad_solicitantes`, también la restricción de la 026.
+Si se reejecuta después de la 024, la 025 y la 026, deja los mismos permisos
+(probado dos veces seguidas en un entorno desechable con los roles reales).
 
 ## Procedimiento
 
@@ -118,7 +131,11 @@ docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 -c "
 docker cp backend\services\auth\migrations\025_create_identidad_solicitantes.sql tg-postgres:/tmp/025.sql
 docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 -c "SET ROLE auth_owner" -f /tmp/025.sql
 
-docker exec tg-postgres rm /tmp/u003.sql /tmp/024.sql /tmp/025.sql
+# Paso 4: Auth 026
+docker cp backend\services\auth\migrations\026_restringir_auth_tester_registro_publico.sql tg-postgres:/tmp/026.sql
+docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 -c "SET ROLE auth_owner" -f /tmp/026.sql
+
+docker exec tg-postgres rm /tmp/u003.sql /tmp/024.sql /tmp/025.sql /tmp/026.sql
 ```
 
 Si un paso falla, se revierte solo: cada migración es una transacción.
@@ -131,13 +148,15 @@ migraciones son idempotentes.
 docker exec tg-postgres psql -U tg_admin -d usuarios_db -At -c "SELECT column_name || ' default=' || column_default FROM information_schema.columns WHERE table_name='usuarios' AND column_name='dni_declarado'"
 docker exec tg-postgres psql -U tg_admin -d auth_db -At -c "SELECT t || ': ' || coalesce(string_agg(p, ','), '(ninguno)') FROM unnest(ARRAY['registros_correo','identidad_solicitantes']) t LEFT JOIN LATERAL (SELECT p FROM unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE','TRUNCATE']) p WHERE has_table_privilege('auth_app', 'public.' || t, p)) q ON TRUE GROUP BY t"
 docker exec tg-postgres psql -U tg_admin -d auth_db -At -c "SELECT codigo || ' asignaciones=' || (SELECT count(*) FROM role_permissions rp WHERE rp.permission_id = p.id) FROM permissions p WHERE codigo = 'solicitantes.identidad.verify'"
+docker exec tg-postgres psql -U tg_admin -d auth_db -At -c "SELECT 'auth_tester ' || t || ': ' || coalesce(string_agg(p, ','), '(ninguno)') FROM unnest(ARRAY['registros_correo','identidad_solicitantes']) t LEFT JOIN LATERAL (SELECT p FROM unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE','TRUNCATE']) p WHERE has_table_privilege('auth_tester', 'public.' || t, p)) q ON TRUE GROUP BY t"
 ```
 
 Esperado:
 
 - `dni_declarado default=''::character varying`;
 - `registros_correo: SELECT,INSERT,UPDATE` e `identidad_solicitantes: SELECT,INSERT,UPDATE`, sin `DELETE`;
-- `solicitantes.identidad.verify asignaciones=0`.
+- `solicitantes.identidad.verify asignaciones=0`;
+- `auth_tester registros_correo: SELECT,INSERT,UPDATE` y `auth_tester identidad_solicitantes: SELECT,INSERT,UPDATE`, sin `DELETE`.
 
 ### 5. Servicios
 

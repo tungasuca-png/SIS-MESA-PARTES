@@ -1,8 +1,9 @@
 BEGIN;
 
--- APLICAR después de Usuarios 003 y de Auth 024 (orden: Usuarios 003 -> Auth
--- 024 -> Auth 025; ver docs/despliegue/registro-publico-identidad.md), con
--- auth_migrator actuando como dueño:
+-- APLICAR después de Usuarios 003 y de Auth 024, y seguida de Auth 026 (orden:
+-- Usuarios 003 -> Auth 024 -> Auth 025 -> Auth 026; ver
+-- docs/despliegue/registro-publico-identidad.md), con auth_migrator actuando
+-- como dueño:
 --   docker cp 025_create_identidad_solicitantes.sql tg-postgres:/tmp/025.sql
 --   docker exec tg-postgres psql -U auth_migrator -d auth_db -v ON_ERROR_STOP=1 \
 --     -c "SET ROLE auth_owner" -f /tmp/025.sql

@@ -84,4 +84,7 @@ Privilegios esperados de `auth_app` en `auth_db` (cualquier otro es un error):
 | funciones `cancelar_registro_google_pendiente(uuid)` y `cancelar_registro_correo_pendiente(uuid)` | EXECUTE (SECURITY DEFINER, dueño `auth_owner`; nadie más) |
 En las bases de Mesa de Partes y para los roles `<s>_tester`, los privilegios por
 defecto (`ALTER DEFAULT PRIVILEGES`) ya cubren las tablas nuevas creadas por
-`<s>_owner`.
+`<s>_owner`. Excepción: `auth_tester` no tiene `DELETE` sobre `registros_correo`
+ni `identidad_solicitantes` (migración Auth 026; el script lo vuelve a retirar si
+se reejecuta). Puede seguir eliminando sus usuarios de prueba: las acciones
+`ON DELETE` de las claves foráneas se ejecutan como el dueño de la tabla.

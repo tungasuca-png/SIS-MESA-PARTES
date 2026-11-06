@@ -146,3 +146,45 @@ func TestFuncionCompensacionCorreo_SoloBorraRegistroVerificadoPendiente(t *testi
 		t.Fatalf("segunda llamada: %s", res)
 	}
 }
+
+// auth_tester (pruebas de integración) siembra y lee las tablas del registro
+// público, pero no puede borrarlas (migración 026). Al eliminar uno de sus
+// usuarios de prueba, las claves foráneas actúan como el dueño de la tabla:
+// la identidad se borra en cascada y el registro queda con usuario_id NULL.
+func TestPermisosAuthTester_RegistroPublico(t *testing.T) {
+	r := conRolesReales(t)
+	for _, tabla := range []string{"registros_correo", "identidad_solicitantes"} {
+		var tiene []string
+		for _, p := range []string{"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"} {
+			var ok bool
+			if err := r.admin.QueryRow(r.ctx, `SELECT has_table_privilege('auth_tester', 'public.' || $1, $2)`, tabla, p).Scan(&ok); err != nil {
+				t.Fatal(err)
+			}
+			if ok {
+				tiene = append(tiene, p)
+			}
+		}
+		if strings.Join(tiene, ",") != "SELECT,INSERT,UPDATE" {
+			t.Fatalf("auth_tester en %s: %v", tabla, tiene)
+		}
+	}
+
+	reg, usuarioID := r.registroVerificado("SOLICITANTE")
+	if _, err := r.admin.Exec(r.ctx, `INSERT INTO identidad_solicitantes (usuario_id, dni_declarado, origen) VALUES ($1, '70000099', 'correo')`, usuarioID); err != nil {
+		t.Fatalf("auth_tester siembra una identidad: %v", err)
+	}
+	if _, err := r.admin.Exec(r.ctx, `DELETE FROM registros_correo WHERE id = $1`, reg); !denegado(err) {
+		t.Fatalf("auth_tester no debe borrar registros_correo: %v", err)
+	}
+	if _, err := r.admin.Exec(r.ctx, `DELETE FROM identidad_solicitantes WHERE usuario_id = $1`, usuarioID); !denegado(err) {
+		t.Fatalf("auth_tester no debe borrar identidad_solicitantes: %v", err)
+	}
+	// Limpieza de un usuario de prueba: sigue funcionando.
+	if _, err := r.admin.Exec(r.ctx, `DELETE FROM usuarios WHERE id = $1`, usuarioID); err != nil {
+		t.Fatalf("auth_tester elimina su usuario de prueba: %v", err)
+	}
+	if r.n(`SELECT count(*) FROM identidad_solicitantes WHERE usuario_id = $1`, usuarioID) != 0 ||
+		r.n(`SELECT count(*) FROM registros_correo WHERE id = $1 AND usuario_id IS NULL`, reg) != 1 {
+		t.Fatal("las claves foráneas debían borrar la identidad y dejar el registro sin usuario")
+	}
+}
