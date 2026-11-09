@@ -5,13 +5,14 @@ package logic
 
 import (
 	"context"
+	"strings"
 
-	"derivaciones/derivacionesclient"
 	"expedientes/expedientesclient"
 	"gateway/internal/svc"
 	"gateway/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -29,76 +30,54 @@ func NewDerivarExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-// DerivarExpediente (Etapa 3) reemplaza el patrón anterior del frontend
-// (crearDerivacion() + updateArea() por separado, sin garantía de que
-// ambas tuvieran éxito — ver docs/etapa-1.1-cierre-seguridad.md punto 2).
-// Orden elegido a propósito: primero se mueve el área (autoritativo, con
-// la transición validada por Expedientes Service — ver estados.CanDerivar)
-// y solo si eso tuvo éxito se registra la derivación como historial. Un
-// área movida sin su log puntual es un problema menor que un log que
-// "miente" sobre un movimiento que nunca ocurrió (el bug ya documentado en
-// Etapa 1.1).
+// DerivarExpediente (A + B): UNA sola llamada a Expedientes, que mueve el área
+// y registra el movimiento (con su evento de outbox) en la misma transacción.
+// Ya no hay una segunda escritura en Derivaciones desde aquí (causa de
+// H-01/H-02): la proyección llega por el publicador del outbox.
+// Idempotency-Key + area_origen_esperada: un reintento con la misma clave
+// devuelve el MISMO movimiento (repetido = true), nunca otro.
 func (l *DerivarExpedienteLogic) DerivarExpediente(req *types.DerivarExpedienteRequest) (resp *types.DerivarExpedienteResponse, err error) {
 	ctx := withAuthorization(l.ctx, req.Authorization)
 
-	// Se necesita el área ANTES de moverla para registrar el origen real en
-	// el historial (DerivarExpediente de Expedientes Service solo devuelve
-	// el expediente YA actualizado). Esta misma llamada además reutiliza la
-	// validación de propiedad de área ya existente (Etapa 1).
-	before, err := l.svcCtx.ExpedientesClient.GetExpediente(ctx, &expedientesclient.GetExpedienteRequest{
-		Id: req.Id,
-	})
-	if err != nil {
-		return nil, err
-	}
-	origen := before.Expediente.AreaActual
-
-	// Etapa 4: Subdirección -> Docente en F4 exige que el proveído ya esté
-	// cargado ("generar/formalizar proveído" es el paso 1, "enviarlo al
-	// docente" es el paso 3 de la regla institucional — no puede derivarse
-	// sin que el paso 1 ya haya ocurrido). Se verifica ANTES de mover nada.
-	esCierreF4ADocente := (before.Expediente.Tipo == "PERMISO" ||
-		before.Expediente.Tipo == "JUSTIFICACION_FALTA" ||
-		before.Expediente.Tipo == "JUSTIFICACION_TARDANZA") &&
-		origen == "SUBDIRECTOR" && req.AreaDestino == "DOCENTE"
-	if esCierreF4ADocente {
-		if err := requireDocumentoProveido(ctx, l.svcCtx, before.Expediente.Id); err != nil {
-			return nil, err
+	// Etapa 4: Subdirección -> Docente en F4 exige el proveído ya cargado. Solo
+	// se comprueba cuando aplica. Si el actor ya no puede leer el expediente
+	// (p. ej. reintento de una derivación que YA se hizo), se delega en
+	// Expedientes: devuelve el resultado repetido o deniega por área, así que
+	// la precondición no puede saltarse.
+	if strings.EqualFold(strings.TrimSpace(req.AreaOrigenEsperada), "SUBDIRECTOR") &&
+		strings.EqualFold(strings.TrimSpace(req.AreaDestino), "DOCENTE") {
+		before, err := l.svcCtx.ExpedientesClient.GetExpediente(ctx, &expedientesclient.GetExpedienteRequest{Id: req.Id})
+		switch {
+		case err == nil:
+			tipo := before.Expediente.Tipo
+			if (tipo == "PERMISO" || tipo == "JUSTIFICACION_FALTA" || tipo == "JUSTIFICACION_TARDANZA") &&
+				before.Expediente.AreaActual == "SUBDIRECTOR" {
+				if err := requireDocumentoProveido(ctx, l.svcCtx, before.Expediente.Id); err != nil {
+					return nil, err
+				}
+			}
+		case status.Code(err) == codes.PermissionDenied || status.Code(err) == codes.NotFound:
+			// sin acceso: lo resuelve Expedientes (repetido o denegado)
+		default:
+			return nil, errorMovimiento(err)
 		}
 	}
 
 	moved, err := l.svcCtx.ExpedientesClient.DerivarExpediente(ctx, &expedientesclient.DerivarExpedienteRequest{
-		Id:          req.Id,
-		AreaDestino: req.AreaDestino,
+		Id:                 req.Id,
+		AreaDestino:        req.AreaDestino,
+		Motivo:             req.Motivo,
+		Condicion:          req.Condicion,
+		AreaOrigenEsperada: req.AreaOrigenEsperada,
+		IdempotencyKey:     req.IdempotencyKey,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errorMovimiento(err)
 	}
-
-	created, err := l.svcCtx.DerivacionesClient.CrearDerivacion(ctx, &derivacionesclient.CrearDerivacionRequest{
-		ExpedienteId: req.Id,
-		Tipo:         "DERIVACION",
-		Origen:       origen,
-		Destino:      req.AreaDestino,
-		Motivo:       req.Motivo,
-		Condicion:    req.Condicion,
-	})
-	if err != nil {
-		// El área YA se movió correctamente (moved.Expediente ya refleja el
-		// nuevo area_actual) — no se revierte: revertir podría chocar con
-		// otra operación legítima que haya ocurrido justo después, y
-		// "deshacer" no es más seguro que quedarse sin el log puntual (ver
-		// comentario de la función). Se avisa explícitamente del estado
-		// parcial para que quede visible, no silencioso.
-		return nil, status.Errorf(
-			status.Code(err),
-			"el expediente se derivó correctamente a %s, pero no se pudo registrar el historial: %v",
-			req.AreaDestino, err,
-		)
-	}
-
 	return &types.DerivarExpedienteResponse{
 		Expediente: toExpedienteDTO(moved.Expediente),
-		Derivacion: toDerivacionDTO(created.Derivacion),
+		Movimiento: toMovimientoDTO(moved.Movimiento),
+		Repetido:   moved.Repetido,
+		Derivacion: derivacionDeMovimiento(moved.Movimiento),
 	}, nil
 }

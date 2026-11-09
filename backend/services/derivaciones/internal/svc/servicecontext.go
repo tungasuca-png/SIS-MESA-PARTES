@@ -22,6 +22,11 @@ type ServiceContext struct {
 	DerivacionRepository *repository.DerivacionRepository
 	JWTValidator         *security.JWTValidator
 
+	// A + B: consumidor de movimientos (pool separado con derivaciones_proyector).
+	ProyectorDB          *pgxpool.Pool
+	ProyeccionRepository *repository.ProyeccionRepository
+	ServiceValidator     *security.ServiceTokenValidator
+
 	// AuthClient consulta Auth.HasPermission (Paso 15B) — el permiso real
 	// se combina con las reglas de negocio existentes de
 	// internal/authorization, nunca las reemplaza.
@@ -80,14 +85,54 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	log.Println("Conexión exitosa a PostgreSQL")
 
+	serviceValidator, err := security.NewServiceTokenValidator(c.ServiceJWTSecret, c.JWTSecret, c.ServiceTokenIssuer, c.ServiceTokenAudience)
+	if err != nil {
+		log.Fatalf("Configuración de tokens de servicio inválida: %v", err)
+	}
+	var proyectorDB *pgxpool.Pool
+	var proyeccion *repository.ProyeccionRepository
+	if serviceValidator != nil {
+		if c.Proyector.User == "" {
+			log.Fatalf("ServiceJWTSecret configurado sin la conexión Proyector (rol derivaciones_proyector)")
+		}
+		proyectorDB = abrirPool(c.Proyector, 4)
+		proyeccion = repository.NewProyeccionRepository(proyectorDB)
+		log.Println("AplicarMovimiento habilitado (audiencia derivaciones)")
+	} else {
+		log.Println("AplicarMovimiento deshabilitado: sin ServiceJWTSecret")
+	}
+
 	return &ServiceContext{
 		Config:               c,
 		DB:                   db,
 		DerivacionRepository: repository.NewDerivacionRepository(db),
 		JWTValidator:         security.NewJWTValidator(c.JWTSecret),
+		ProyectorDB:          proyectorDB,
+		ProyeccionRepository: proyeccion,
+		ServiceValidator:     serviceValidator,
 		AuthClient:           authclient.NewAuth(zrpc.MustNewClient(c.AuthRpc)),
 		ExpedientesClient:    expedientesclient.NewExpedientes(zrpc.MustNewClient(c.ExpedientesRpc)),
 	}
+}
+
+// abrirPool abre un pool adicional (falla el arranque si no conecta).
+func abrirPool(p config.PostgresConfig, maxConns int32) *pgxpool.Pool {
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s", p.User, p.Password, p.Host, p.Port, p.Database, p.SSLMode)
+	cfg, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		log.Fatalf("Error al parsear la conexión de %s: %v", p.User, err)
+	}
+	cfg.MaxConns = maxConns
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	if err == nil {
+		err = pool.Ping(ctx)
+	}
+	if err != nil {
+		log.Fatalf("No se pudo conectar a PostgreSQL como %s: %v", p.User, err)
+	}
+	return pool
 }
 
 // Close cierra correctamente el pool de PostgreSQL.

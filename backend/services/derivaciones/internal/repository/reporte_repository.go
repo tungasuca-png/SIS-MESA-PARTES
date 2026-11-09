@@ -26,25 +26,33 @@ type ReporteDerivFiltro struct {
 
 func construirConsultaReporteDeriv(f ReporteDerivFiltro) (string, []any) {
 	args := []any{f.ExpedienteIDs}
-	condiciones := []string{"expediente_id = ANY($1::uuid[])"}
+	// Historial unificado (A + B). Cuenta como derivación lo que antes era una
+	// fila de derivaciones: legado, anotaciones y los movimientos DERIVACION y
+	// RECHAZO (el rechazo ya se registraba como DERIVACION hacia Secretaría:
+	// se conserva ese conteo). CAMBIO_ESTADO, RESOLUCION y CORRECCION no son
+	// derivaciones y no se cuentan aquí.
+	condiciones := []string{"expediente_id = ANY($1::uuid[])",
+		"NOT (clase = 'MOVIMIENTO' AND tipo IN ('CAMBIO_ESTADO', 'RESOLUCION', 'CORRECCION'))"}
 	if f.Desde != "" {
 		args = append(args, f.Desde)
-		condiciones = append(condiciones, fmt.Sprintf("fecha_registro >= ($%d::date)::timestamp AT TIME ZONE '%s'", len(args), reportes.ZonaSQL))
+		condiciones = append(condiciones, fmt.Sprintf("fecha >= ($%d::date)::timestamp AT TIME ZONE '%s'", len(args), reportes.ZonaSQL))
 	}
 	if f.Hasta != "" {
 		args = append(args, f.Hasta)
-		condiciones = append(condiciones, fmt.Sprintf("fecha_registro < ($%d::date + 1)::timestamp AT TIME ZONE '%s'", len(args), reportes.ZonaSQL))
+		condiciones = append(condiciones, fmt.Sprintf("fecha < ($%d::date + 1)::timestamp AT TIME ZONE '%s'", len(args), reportes.ZonaSQL))
 	}
 	registrador := "''"
 	if f.ConRegistrador {
 		registrador = "registrado_por::text"
 	}
 	return `
-		SELECT expediente_id::text, tipo, origen, destino,
-			to_char((fecha_registro AT TIME ZONE '` + reportes.ZonaSQL + `')::date, 'YYYY-MM-DD') AS dia,
+		SELECT expediente_id::text,
+			CASE WHEN clase = 'MOVIMIENTO' AND tipo = 'RECHAZO' THEN 'DERIVACION' ELSE tipo END,
+			origen, destino,
+			to_char((fecha AT TIME ZONE '` + reportes.ZonaSQL + `')::date, 'YYYY-MM-DD') AS dia,
 			` + registrador + ` AS registrador,
 			COUNT(*)::int
-		FROM derivaciones
+		FROM historial_expediente
 		WHERE ` + strings.Join(condiciones, " AND ") + `
 		GROUP BY 1, 2, 3, 4, 5, 6`, args
 }

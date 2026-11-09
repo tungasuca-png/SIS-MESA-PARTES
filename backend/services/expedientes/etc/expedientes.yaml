@@ -1,5 +1,8 @@
 Name: expedientes.rpc
 ListenOn: 127.0.0.1:8082
+# A + B: el cliente del Gateway usa 2500 ms; el servidor espera algo más para
+# que siempre mande el deadline del cliente (la transacción usa el restante).
+Timeout: 3000
 Mode: dev
 
 Etcd:
@@ -19,6 +22,29 @@ JWTSecret: ${JWT_SECRET}
 
 AuthRpc:
   Target: 127.0.0.1:8080
+
+# A + B: publicador del Transactional Outbox (corre en este proceso). Si está
+# habilitado y falta cualquier credencial, el servicio NO arranca (D4).
+# Credenciales solo en backend/.env (nunca aquí).
+Publicador:
+  Habilitado: true
+  Postgres:
+    Host: 127.0.0.1
+    Port: 5433
+    User: expedientes_publicador
+    Password: "${EXPEDIENTES_PUBLICADOR_DB_PASSWORD}"
+    Database: expedientes_db
+    SSLMode: disable
+  DerivacionesRpc:
+    Target: 127.0.0.1:8085
+  ClientID: "${EXPEDIENTES_PUBLICADOR_CLIENT_ID}"
+  ClientSecret: "${EXPEDIENTES_PUBLICADOR_CLIENT_SECRET}"
+  Lote: 10
+  LeaseSegundos: 60
+  IntervaloMs: 2000
+  MaxIntentos: 20
+  TimeoutRPCMs: 1800
+  RetencionDias: 30
 
 Middlewares:
   StatConf:

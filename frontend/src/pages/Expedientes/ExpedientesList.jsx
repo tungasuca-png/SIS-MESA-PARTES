@@ -36,6 +36,8 @@ function ExpedientesList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [showCreate, setShowCreate] = useState(Boolean(location.state?.openCreate));
+    // A + B: aviso de éxito al volver del detalle de un expediente movido.
+    const [aviso] = useState(location.state?.mensaje || "");
     const [refreshKey, setRefreshKey] = useState(0);
 
     const [confirmingCodigo, setConfirmingCodigo] = useState(null);
@@ -196,6 +198,7 @@ function ExpedientesList() {
 
                 {loading && <p className="dp-table-empty">Cargando expedientes...</p>}
 
+                {aviso && <p className="dp-form-ok" role="status">{aviso}</p>}
                 {!loading && error && <p className="dp-form-error">{error}</p>}
                 {deleteError && <p className="dp-form-error">{deleteError}</p>}
 

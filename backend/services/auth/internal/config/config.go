@@ -27,6 +27,10 @@ type Config struct {
 	ServiceTokenIssuer   string        `json:",optional"`
 	ServiceTokenAudience string        `json:",optional"`
 	ServiceTokenDuration time.Duration `json:",optional"`
+	// A + B: secreto EXCLUSIVO de la audiencia derivaciones (publicador de
+	// Expedientes). Distinto de JWTSecret y de ServiceJWTSecret. Vacío = esa
+	// audiencia queda deshabilitada.
+	ServiceJWTSecretDerivaciones string `json:",optional"`
 	// Acceso con Google (OpenID Connect) solo para SOLICITANTES. Sin
 	// ClientID/ClientSecret/RedirectURL el acceso con Google responde
 	// "no configurado" y nada más cambia.

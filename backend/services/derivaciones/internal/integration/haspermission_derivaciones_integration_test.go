@@ -174,7 +174,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// expedientes reales que necesitan los tests de ownership/área como
 	// para el propio ListDerivaciones bajo prueba (vía
 	// svcCtx.ExpedientesClient).
-	expedientesRealClient := expedientesclient.NewExpedientes(zrpc.MustNewClient(zrpc.RpcClientConf{Target: "127.0.0.1:8082"}))
+	expedientesRealClient := expedientesclient.NewExpedientes(zrpc.MustNewClient(zrpc.RpcClientConf{Target: destinoRPC("TEST_EXPEDIENTES_RPC", "127.0.0.1:8082")}))
 
 	// createRealExpediente crea un expediente REAL cuyo SolicitanteID es,
 	// de verdad, solicitanteID — necesario para probar el ownership real
@@ -199,7 +199,10 @@ func TestHasPermissionIntegration(t *testing.T) {
 	derivarExpedienteReal := func(t *testing.T, secretariaID, expID, areaDestino string) {
 		t.Helper()
 		if _, err := expedientesRealClient.DerivarExpediente(authCtx(secretariaID, "SECRETARIA"), &expedientesclient.DerivarExpedienteRequest{
-			Id: expID, AreaDestino: areaDestino,
+			// A + B: origen esperado (lo crea SECRETARIA y queda en su área),
+			// motivo y clave de idempotencia ahora son obligatorios.
+			Id: expID, AreaDestino: areaDestino, AreaOrigenEsperada: "SECRETARIA",
+			Motivo: "prueba de integración", IdempotencyKey: fixedUUID(time.Now().UnixNano(), 7),
 		}); err != nil {
 			t.Fatalf("no se pudo derivar el expediente real a %s: %v", areaDestino, err)
 		}
@@ -222,17 +225,17 @@ func TestHasPermissionIntegration(t *testing.T) {
 	}
 
 	svcCtx := &svc.ServiceContext{
-		Config:               config.Config{JWTSecret: realSharedJWTSecret, AuthRpc: zrpc.RpcClientConf{Target: "127.0.0.1:8080"}},
+		Config:               config.Config{JWTSecret: realSharedJWTSecret, AuthRpc: zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")}},
 		DB:                   derivacionesPool,
 		DerivacionRepository: repository.NewDerivacionRepository(derivacionesPool),
 		JWTValidator:         security.NewJWTValidator(realSharedJWTSecret),
-		AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: "127.0.0.1:8080"})),
+		AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")})),
 		ExpedientesClient:    expedientesRealClient,
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
 	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
-		interceptor.AuthenticationInterceptor(svcCtx.JWTValidator),
+		interceptor.AuthenticationInterceptor(svcCtx.JWTValidator, nil),
 	))
 	derivaciones.RegisterDerivacionesServer(grpcServer, server.NewDerivacionesServer(svcCtx))
 	go func() { _ = grpcServer.Serve(listener) }()
@@ -268,12 +271,27 @@ func TestHasPermissionIntegration(t *testing.T) {
 		userID := createRealUser(t, "secretaria", "SECRETARIA")
 		exp := crearExpedienteComoSecretaria(t, userID)
 		resp, err := client.CrearDerivacion(authCtx(userID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("se esperaba éxito para SECRETARIA/derivaciones.create, got err=%v", err)
 		}
 		trackDerivacion(resp.Derivacion.Id)
+	})
+
+	// A + B: una derivación real solo la registra Expedientes Service (en la
+	// misma transacción que mueve el área) y llega por la proyección. Por
+	// CrearDerivacion solo se aceptan anotaciones: DERIVACION es InvalidArgument
+	// aun con el permiso concedido, y no se escribe nada.
+	t.Run("Crear_DerivacionRealRechazada", func(t *testing.T) {
+		userID := createRealUser(t, "secretaria_ab", "SECRETARIA")
+		exp := crearExpedienteComoSecretaria(t, userID)
+		_, err := client.CrearDerivacion(authCtx(userID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
+			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+		})
+		if status.Code(err) != codes.InvalidArgument {
+			t.Fatalf("se esperaba InvalidArgument para tipo DERIVACION, got %v", err)
+		}
 	})
 
 	// Test — Crear: permiso denegado (SOLICITANTE no tiene
@@ -282,7 +300,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 	t.Run("Crear_PermisoDenegado_Solicitante", func(t *testing.T) {
 		userID := createRealUser(t, "solicitante", "SOLICITANTE")
 		_, err := client.CrearDerivacion(authCtx(userID, "SOLICITANTE"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: expedienteID(2), Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: expedienteID(2), Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if status.Code(err) != codes.PermissionDenied {
 			t.Fatalf("se esperaba PermissionDenied para SOLICITANTE/derivaciones.create, got %v", err)
@@ -311,7 +329,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		secretariaID := createRealUser(t, "secretaria14", "SECRETARIA")
 		_, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: inexistente, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: inexistente, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if status.Code(err) != codes.NotFound {
 			t.Fatalf("se esperaba NotFound para un expediente inexistente, got %v", err)
@@ -334,7 +352,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		auxiliarID := createRealUser(t, "auxiliar2", "AUXILIAR")
 		_, err := client.CrearDerivacion(authCtx(auxiliarID, "AUXILIAR"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "DIRECTOR", Destino: "SUBDIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "DIRECTOR", Destino: "SUBDIRECTOR", Motivo: "test",
 		})
 		if status.Code(err) != codes.PermissionDenied {
 			t.Fatalf("se esperaba PermissionDenied por área (expediente en DIRECTOR, actor AUXILIAR), got %v", err)
@@ -355,7 +373,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		antes := countDerivaciones(t, exp)
 
 		_, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "DIRECTOR", Destino: "SUBDIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "DIRECTOR", Destino: "SUBDIRECTOR", Motivo: "test",
 		})
 		if status.Code(err) != codes.PermissionDenied {
 			t.Fatalf("se esperaba PermissionDenied: ni origen ni destino corresponden al área real (SECRETARIA), got %v", err)
@@ -380,7 +398,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		// destino coincide con el área real ACTUAL (DIRECTOR) -- mismo
 		// patrón que usa el Gateway tras un DerivarExpediente real.
 		resp, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("se esperaba éxito: destino coincide con el área real actual, got err=%v", err)
@@ -397,7 +415,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		antes := countDerivaciones(t, exp)
 
 		_, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "AREA_INVENTADA", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "AREA_INVENTADA", Motivo: "test",
 		})
 		// InvalidArgument (no PermissionDenied): fase de autorización/reglas
 		// de negocio de Expedientes+Documentos+Derivaciones cerró el hueco
@@ -422,7 +440,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		antes := countDerivaciones(t, exp)
 
 		_, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "SUBDIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "SUBDIRECTOR", Motivo: "test",
 		})
 		if status.Code(err) != codes.PermissionDenied {
 			t.Fatalf("se esperaba PermissionDenied: SECRETARIA->SUBDIRECTOR no existe para CERTIFICADO (F2), got %v", err)
@@ -440,7 +458,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 			DB:                   derivacionesPool,
 			DerivacionRepository: repository.NewDerivacionRepository(derivacionesPool),
 			JWTValidator:         security.NewJWTValidator(realSharedJWTSecret),
-			AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: "127.0.0.1:8080"})),
+			AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")})),
 			ExpedientesClient: expedientesclient.NewExpedientes(zrpc.MustNewClient(zrpc.RpcClientConf{
 				Target:   "127.0.0.1:19993", // puerto sin servicio, a propósito
 				NonBlock: true,
@@ -449,7 +467,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 		downExpListener := bufconn.Listen(1024 * 1024)
 		downExpServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
-			interceptor.AuthenticationInterceptor(downExpSvcCtx.JWTValidator),
+			interceptor.AuthenticationInterceptor(downExpSvcCtx.JWTValidator, nil),
 		))
 		derivaciones.RegisterDerivacionesServer(downExpServer, server.NewDerivacionesServer(downExpSvcCtx))
 		go func() { _ = downExpServer.Serve(downExpListener) }()
@@ -469,7 +487,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		antes := countDerivaciones(t, exp)
 
 		_, err = downExpClient.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err == nil {
 			t.Fatal("se esperaba un error (fail-closed) cuando Expedientes Service no está disponible")
@@ -487,7 +505,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria3", "SECRETARIA")
 		exp := crearExpedienteComoSecretaria(t, secretariaID)
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -512,7 +530,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria4", "SECRETARIA")
 		exp := crearExpedienteComoSecretaria(t, secretariaID)
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -540,7 +558,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		directorID := createRealUser(t, "director8", "DIRECTOR")
 		created, err := client.CrearDerivacion(authCtx(directorID, "DIRECTOR"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "DIRECTOR", Destino: "SECRETARIA", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "DIRECTOR", Destino: "SECRETARIA", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -567,7 +585,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		directorID := createRealUser(t, "director9", "DIRECTOR")
 		created, err := client.CrearDerivacion(authCtx(directorID, "DIRECTOR"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "DIRECTOR", Destino: "SECRETARIA", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "DIRECTOR", Destino: "SECRETARIA", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -591,7 +609,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria27", "SECRETARIA")
 		exp := crearExpedienteComoSecretaria(t, secretariaID)
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -633,7 +651,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		var derivacionID string
 		if err := derivacionesPool.QueryRow(ctx, `
 			INSERT INTO derivaciones (expediente_id, tipo, origen, destino, motivo, condicion, registrado_por)
-			VALUES ($1, 'DERIVACION', 'SECRETARIA', 'DIRECTOR', 'test', '', $2)
+			VALUES ($1, 'NOTIFICACION', 'SECRETARIA', 'DIRECTOR', 'test', '', $2)
 			RETURNING id
 		`, expedienteFantasma, secretariaID).Scan(&derivacionID); err != nil {
 			t.Fatalf("no se pudo insertar la derivación fantasma directamente: %v", err)
@@ -684,7 +702,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 			DB:                   derivacionesPool,
 			DerivacionRepository: repository.NewDerivacionRepository(derivacionesPool),
 			JWTValidator:         security.NewJWTValidator(realSharedJWTSecret),
-			AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: "127.0.0.1:8080"})),
+			AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")})),
 			ExpedientesClient: expedientesclient.NewExpedientes(zrpc.MustNewClient(zrpc.RpcClientConf{
 				Target:   "127.0.0.1:19992", // puerto sin servicio, a propósito
 				NonBlock: true,
@@ -693,7 +711,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 		downExpListener := bufconn.Listen(1024 * 1024)
 		downExpServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
-			interceptor.AuthenticationInterceptor(downExpSvcCtx.JWTValidator),
+			interceptor.AuthenticationInterceptor(downExpSvcCtx.JWTValidator, nil),
 		))
 		derivaciones.RegisterDerivacionesServer(downExpServer, server.NewDerivacionesServer(downExpSvcCtx))
 		go func() { _ = downExpServer.Serve(downExpListener) }()
@@ -711,7 +729,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria30", "SECRETARIA")
 		exp := crearExpedienteComoSecretaria(t, secretariaID)
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -737,7 +755,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		secretariaID := createRealUser(t, "secretaria5", "SECRETARIA")
 		exp := crearExpedienteComoSecretaria(t, secretariaID)
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -770,7 +788,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		secretariaID := createRealUser(t, "secretaria6", "SECRETARIA")
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -794,7 +812,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 
 		secretariaID := createRealUser(t, "secretaria9", "SECRETARIA")
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: expB, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: expB, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -842,7 +860,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		derivarExpedienteReal(t, secretariaID, exp, "DIRECTOR")
 
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -854,7 +872,16 @@ func TestHasPermissionIntegration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("se esperaba éxito para DIRECTOR sobre su propia área, got err=%v", err)
 		}
-		if resp.Total != 1 {
+		// A + B: el historial también incluye el movimiento DERIVACION real
+		// (SECRETARIA -> DIRECTOR) que proyecta el publicador; su llegada es
+		// asíncrona, por eso se exige ver la anotación creada, no un total fijo.
+		visible := false
+		for _, d := range resp.Derivaciones {
+			if d.Id == created.Derivacion.Id {
+				visible = true
+			}
+		}
+		if !visible {
 			t.Fatalf("se esperaba ver la derivación, total=%d", resp.Total)
 		}
 	})
@@ -874,7 +901,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		derivarExpedienteReal(t, secretariaID, exp, "DIRECTOR")
 
 		created, err := client.CrearDerivacion(authCtx(secretariaID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: exp, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: exp, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err != nil {
 			t.Fatalf("no se pudo crear la derivación base: %v", err)
@@ -932,7 +959,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 		downListener := bufconn.Listen(1024 * 1024)
 		downServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
-			interceptor.AuthenticationInterceptor(downSvcCtx.JWTValidator),
+			interceptor.AuthenticationInterceptor(downSvcCtx.JWTValidator, nil),
 		))
 		derivaciones.RegisterDerivacionesServer(downServer, server.NewDerivacionesServer(downSvcCtx))
 		go func() { _ = downServer.Serve(downListener) }()
@@ -951,7 +978,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		crearExpediente8 := expedienteID(8)
 		antesCrear := countDerivaciones(t, crearExpediente8)
 		_, err = downClient.CrearDerivacion(authCtx(userID, "SECRETARIA"), &derivaciones.CrearDerivacionRequest{
-			ExpedienteId: crearExpediente8, Tipo: "DERIVACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
+			ExpedienteId: crearExpediente8, Tipo: "NOTIFICACION", Origen: "SECRETARIA", Destino: "DIRECTOR", Motivo: "test",
 		})
 		if err == nil {
 			t.Fatal("se esperaba un error (fail-closed) cuando Auth Service no está disponible, la operación se permitió")
@@ -1007,7 +1034,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 			DB:                   derivacionesPool,
 			DerivacionRepository: repository.NewDerivacionRepository(derivacionesPool),
 			JWTValidator:         security.NewJWTValidator(realSharedJWTSecret),
-			AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: "127.0.0.1:8080"})),
+			AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")})),
 			ExpedientesClient: expedientesclient.NewExpedientes(zrpc.MustNewClient(zrpc.RpcClientConf{
 				Target:   "127.0.0.1:19994", // puerto sin servicio, a propósito
 				NonBlock: true,
@@ -1016,7 +1043,7 @@ func TestHasPermissionIntegration(t *testing.T) {
 		}
 		downExpListener := bufconn.Listen(1024 * 1024)
 		downExpServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
-			interceptor.AuthenticationInterceptor(downExpSvcCtx.JWTValidator),
+			interceptor.AuthenticationInterceptor(downExpSvcCtx.JWTValidator, nil),
 		))
 		derivaciones.RegisterDerivacionesServer(downExpServer, server.NewDerivacionesServer(downExpSvcCtx))
 		go func() { _ = downExpServer.Serve(downExpListener) }()
@@ -1078,4 +1105,15 @@ func expedientesDatabaseURL(t *testing.T) string {
 		t.Skip("TEST_EXPEDIENTES_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
 	return url
+}
+
+// destinoRPC: destino de un servicio real para las pruebas de integración.
+// Por defecto el puerto habitual; TEST_AUTH_RPC / TEST_EXPEDIENTES_RPC lo
+// cambian para correr contra un entorno desechable sin tocar los servicios
+// locales que estén levantados en los puertos habituales.
+func destinoRPC(variable, porDefecto string) string {
+	if v := strings.TrimSpace(os.Getenv(variable)); v != "" {
+		return v
+	}
+	return porDefecto
 }

@@ -31,12 +31,19 @@ func (l *ChangeEstadoLogic) ChangeEstado(req *types.ChangeEstadoRequest) (resp *
 	ctx := withAuthorization(l.ctx, req.Authorization)
 
 	changed, err := l.svcCtx.ExpedientesClient.ChangeEstado(ctx, &expedientesclient.ChangeEstadoRequest{
-		Id:          req.Id,
-		NuevoEstado: req.NuevoEstado,
+		Id:             req.Id,
+		NuevoEstado:    req.NuevoEstado,
+		EstadoEsperado: req.EstadoEsperado,
+		IdempotencyKey: req.IdempotencyKey,
+		Motivo:         req.Motivo,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errorMovimiento(err)
 	}
 
-	return &types.ChangeEstadoResponse{Expediente: toExpedienteDTO(changed.Expediente)}, nil
+	return &types.ChangeEstadoResponse{
+		Expediente: toExpedienteDTO(changed.Expediente),
+		Movimiento: toMovimientoDTO(changed.Movimiento),
+		Repetido:   changed.Repetido,
+	}, nil
 }

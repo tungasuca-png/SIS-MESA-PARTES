@@ -24,5 +24,5 @@ func NewIssueServiceTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *IssueServiceTokenLogic) IssueServiceToken(in *auth.IssueServiceTokenRequest) (*auth.IssueServiceTokenResponse, error) {
-	return emitirTokenServicio(l.ctx, l.svcCtx.ServiceClientRepository, l.svcCtx.ServiceTokenIssuer, in.GetClientId(), in.GetClientSecret())
+	return emitirTokenServicio(l.ctx, l.svcCtx.ServiceClientRepository, l.svcCtx.EmisoresServicio, in.GetClientId(), in.GetClientSecret())
 }

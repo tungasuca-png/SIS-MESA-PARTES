@@ -20,6 +20,25 @@ docker exec -i tg-postgres psql -U tg_admin -d postgres -v ON_ERROR_STOP=1 < 01_
 docker exec -i tg-postgres psql -U tg_admin -d postgres -v ON_ERROR_STOP=1 < 02_propiedad_y_permisos.sql
 ```
 
+Ambos scripts son idempotentes y `02` puede ejecutarse en cualquier momento.
+El orden depende de la situación:
+
+| Situación | Orden |
+|---|---|
+| **Instalación nueva** (servidor vacío) | `01` → `02` → migraciones de cada servicio → `02` |
+| **Actualización** (bases existentes) | `01` → migraciones nuevas → `02` |
+
+En una instalación nueva, la primera pasada de `02` crea las bases que falten
+(ya con su `<s>_owner`), retira `CONNECT` a PUBLIC y concede `CONNECT` a cada
+rol de servicio por su nombre, de modo que `<s>_migrator` pueda aplicar las
+migraciones. La segunda pasada concede los privilegios sobre las tablas que
+esas migraciones crearon (todo GRANT sobre una tabla concreta es condicional).
+No hace falta ninguna concesión manual.
+
+Roles de una sola función (A + B y reconciliación): `expedientes_publicador`,
+`derivaciones_proyector` y `reconciliador_movimientos`. `expedientes_user` no
+tiene DELETE sobre ninguna tabla de `expedientes_db` (solo bajas lógicas).
+
 Las contraseñas se asignan aparte, enviando `ALTER ROLE <rol> PASSWORD '...'` por
 **stdin** a `psql` (nunca como argumento de línea de comandos ni en un archivo
 versionado), y se guardan solo en `backend/.env`, `backend/.env.test` o

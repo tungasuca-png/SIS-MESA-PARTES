@@ -51,7 +51,7 @@ func (l *ListDerivacionesLogic) ListDerivaciones(in *derivaciones.ListDerivacion
 	if filter.ExpedienteID != "" && !validation.IsValidUUID(filter.ExpedienteID) {
 		return nil, status.Error(codes.InvalidArgument, "el expediente_id no es válido")
 	}
-	if filter.Tipo != "" && !validation.IsValidTipo(filter.Tipo) {
+	if filter.Tipo != "" && !validation.IsValidTipoHistorial(filter.Tipo) {
 		return nil, status.Error(codes.InvalidArgument, "el tipo de derivación no es válido")
 	}
 	if filter.Page <= 0 {

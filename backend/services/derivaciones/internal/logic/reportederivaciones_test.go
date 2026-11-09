@@ -150,7 +150,7 @@ func reporteDerivComo(t *testing.T, auth *authDerivFalso, exp *expedientesAlcanc
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer "+tok))
 	sc := &svc.ServiceContext{AuthClient: auth, ExpedientesClient: exp, DerivacionRepository: repository.NewDerivacionRepository(nil)}
 	var resp *derivaciones.ReporteDerivacionesResponse
-	_, err := interceptor.AuthenticationInterceptor(security.NewJWTValidator(secretoDeriv))(ctx, in, &grpc.UnaryServerInfo{},
+	_, err := interceptor.AuthenticationInterceptor(security.NewJWTValidator(secretoDeriv), nil)(ctx, in, &grpc.UnaryServerInfo{},
 		func(ctx context.Context, req any) (any, error) {
 			r, err := NewReporteDerivacionesLogic(ctx, sc).ReporteDerivaciones(req.(*derivaciones.ReporteDerivacionesRequest))
 			resp = r

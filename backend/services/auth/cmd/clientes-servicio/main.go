@@ -34,6 +34,7 @@ func main() {
 	target := fs.String("auth", "127.0.0.1:8080", "dirección del servicio Auth")
 	nombre := fs.String("nombre", "", "nombre del sistema (crear)")
 	permisos := fs.String("permisos", "", "permisos separados por comas (crear)")
+	audiencia := fs.String("audiencia", "estudiantes", "audiencia del sistema (crear): estudiantes o derivaciones")
 	id := fs.String("id", "", "id o client_id del sistema (revocar)")
 	cliente := fs.String("cliente", "", "client_id del sistema (otorgar/retirar)")
 	permiso := fs.String("permiso", "", "código del permiso (otorgar/retirar)")
@@ -51,8 +52,9 @@ func main() {
 	switch os.Args[1] {
 	case "crear":
 		resp, err := client.CreateServiceClient(ctx, &authclient.CreateServiceClientRequest{
-			Nombre:   *nombre,
-			Permisos: strings.Split(*permisos, ","),
+			Nombre:    *nombre,
+			Permisos:  strings.Split(*permisos, ","),
+			Audiencia: *audiencia,
 		})
 		comprobar(err)
 		imprimir(resp.Client)

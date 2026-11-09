@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"expedientes/expedientes"
@@ -31,14 +30,12 @@ func NewCorregirExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	}
 }
 
-// CorregirExpediente (Etapa 4): exclusivo del solicitante dueño del propio
-// expediente — a diferencia de las demás acciones de esta etapa, no se
-// basa en área (el solicitante no tiene un área interna), sino en
-// solicitante_id == quien llama. Mismo expediente, mismo código: no se
-// crea uno nuevo, se actualiza la descripción (la corrección) y se
-// reingresa a la revisión de Secretaría (OBSERVADO -> PENDIENTE).
+// CorregirExpediente (Etapa 4, reglas sin cambios): el solicitante dueño
+// corrige la descripción de un expediente OBSERVADO y lo reenvía (PENDIENTE,
+// misma área). Desde A + B: movimiento CORRECCION en la misma transacción
+// (descripción incluida en el mismo UPDATE) e idempotencia.
 func (l *CorregirExpedienteLogic) CorregirExpediente(in *expedientes.CorregirExpedienteRequest) (*expedientes.CorregirExpedienteResponse, error) {
-	userID, _, ok := interceptor.UserFromContext(l.ctx)
+	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
@@ -49,37 +46,46 @@ func (l *CorregirExpedienteLogic) CorregirExpediente(in *expedientes.CorregirExp
 	if descripcion == "" {
 		return nil, status.Error(codes.InvalidArgument, "la descripción corregida es obligatoria")
 	}
-
-	// Permiso real (Paso 13B): reemplaza únicamente el antiguo gate
-	// "role != SOLICITANTE". expedientes.view_own NO significa "puede
-	// corregir" por sí solo — el ownership exacto (SolicitanteID ==
-	// userID, verificado abajo) sigue siendo obligatorio.
 	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.view_own"); err != nil {
 		return nil, err
 	}
-
-	current, err := l.svcCtx.ExpedienteRepository.FindByIDOrCodigo(l.ctx, strings.TrimSpace(in.Id))
+	clave, err := validarClave(in.IdempotencyKey)
 	if err != nil {
-		if errors.Is(err, repository.ErrExpedienteNotFound) {
-			return nil, status.Error(codes.NotFound, "expediente no encontrado")
-		}
-		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
+		return nil, err
+	}
+	// Regla vigente: corrige el DUEÑO (solicitante_id), sea solicitante externo
+	// o personal interno que registró el expediente; se verifica abajo, sobre
+	// la fila bloqueada.
+	if err := validarRolActor(role); err != nil {
+		return nil, err
 	}
 
-	if current.SolicitanteID != userID {
-		return nil, status.Error(codes.PermissionDenied, "solo el solicitante dueño del expediente puede corregirlo")
-	}
-	if current.Estado != estados.EstadoObservado {
-		return nil, status.Error(codes.FailedPrecondition, "solo se puede corregir un expediente observado")
-	}
-
-	updated, err := l.svcCtx.ExpedienteRepository.CorregirYReenviar(l.ctx, strings.TrimSpace(in.Id), descripcion)
+	res, err := l.svcCtx.ExpedienteRepository.RegistrarMovimiento(l.ctx, repository.SolicitudMovimiento{
+		IDOrCodigo:     strings.TrimSpace(in.Id),
+		Tipo:           repository.MovCorreccion,
+		ActorID:        userID,
+		ActorRol:       role,
+		IdempotencyKey: clave,
+		Contenido:      contenido(descripcion),
+		Decidir: func(actual *repository.Expediente) (repository.Decision, error) {
+			if actual.SolicitanteID != userID {
+				return repository.Decision{}, status.Error(codes.PermissionDenied, "solo el solicitante dueño del expediente puede corregirlo")
+			}
+			if actual.Estado != estados.EstadoObservado {
+				return repository.Decision{}, status.Error(codes.FailedPrecondition, "solo se puede corregir un expediente observado")
+			}
+			return repository.Decision{AreaDestino: actual.AreaActual, EstadoNuevo: estados.EstadoPendiente, NuevaDescripcion: &descripcion}, nil
+		},
+	})
 	if err != nil {
-		if errors.Is(err, repository.ErrExpedienteNotFound) {
-			return nil, status.Error(codes.Aborted, "el expediente cambió, intente nuevamente")
-		}
-		return nil, status.Error(codes.Internal, "no se pudo corregir el expediente")
+		return nil, errorMovimiento(l.ctx, "corregir", err)
 	}
-
-	return &expedientes.CorregirExpedienteResponse{Expediente: toProto(updated)}, nil
+	if !res.Repetido {
+		l.svcCtx.Publicador.Avisar() // proyección inmediata (si no, el sondeo periódico)
+	}
+	return &expedientes.CorregirExpedienteResponse{
+		Expediente: toProto(res.Expediente),
+		Movimiento: movimientoToProto(res.Movimiento),
+		Repetido:   res.Repetido,
+	}, nil
 }

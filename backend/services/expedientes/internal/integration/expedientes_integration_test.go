@@ -2,7 +2,6 @@ package integration
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -80,7 +79,9 @@ func TestExpedientesIntegration(t *testing.T) {
 		t.Fatalf("dial gRPC test server: %v", err)
 	}
 	defer conn.Close()
-	client := expedientes.NewExpedientesClient(conn)
+	// A + B: el envoltorio completa idempotency_key y área/estado esperados con
+	// el estado real (ver movimientos_cliente_test.go).
+	client := clienteMovimientos{ExpedientesClient: expedientes.NewExpedientesClient(conn), repo: svcCtx.ExpedienteRepository}
 
 	ctxSolicitante := authContext(solicitanteID, "SOLICITANTE")
 	ctxOtroSolicitante := authContext(otroSolicitanteID, "SOLICITANTE")
@@ -89,6 +90,12 @@ func TestExpedientesIntegration(t *testing.T) {
 	ctxDirector := authContext(fixedUUID(testID, 5), "DIRECTOR")
 	ctxDocente := authContext(fixedUUID(testID, 6), "DOCENTE")
 	ctxSubdirector := authContext(fixedUUID(testID, 7), "SUBDIRECTOR")
+
+	// A + B: UpdateArea quedó deshabilitado (cambiaba el área sin reglas ni
+	// trazabilidad). Responde FailedPrecondition para cualquier actor.
+	if _, err := client.ExpedientesClient.UpdateArea(ctxAdmin, &expedientes.UpdateAreaRequest{Id: "cualquiera", Area: "DIRECTOR"}); status.Code(err) != codes.FailedPrecondition {
+		t.Fatalf("UpdateArea deshabilitado esperaba FailedPrecondition, obtuvo: %v", err)
+	}
 
 	// --- Crear expediente ---
 	createResp, err := client.CreateExpediente(ctxSolicitante, &expedientes.CreateExpedienteRequest{
@@ -236,7 +243,7 @@ func TestExpedientesIntegration(t *testing.T) {
 	}); status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("Caso 2 (area incorrecta) esperaba PermissionDenied, obtuvo: %v", err)
 	}
-	if _, err := client.UpdateArea(ctxDirector, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxDirector, &expedientes.UpdateAreaRequest{
 		Id: areaExp.Expediente.Id, Area: "DIRECTOR",
 	}); status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("Caso 2 UpdateArea (area incorrecta) esperaba PermissionDenied, obtuvo: %v", err)
@@ -252,7 +259,7 @@ func TestExpedientesIntegration(t *testing.T) {
 
 	// SECRETARIA (dueña actual, vía CanViewAll) deriva el expediente hacia
 	// DIRECCION — a partir de acá le corresponde a Dirección, no a Secretaría.
-	if _, err := client.UpdateArea(ctxSecretaria, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxSecretaria, &expedientes.UpdateAreaRequest{
 		Id: areaExp.Expediente.Id, Area: "DIRECTOR",
 	}); err != nil {
 		t.Fatalf("SECRETARIA derivando a DIRECTOR esperaba éxito, obtuvo: %v", err)
@@ -278,7 +285,7 @@ func TestExpedientesIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create expediente for solicitante case: %v", err)
 	}
-	if _, err := client.UpdateArea(ctxSolicitante, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxSolicitante, &expedientes.UpdateAreaRequest{
 		Id: solicitanteExp.Expediente.Id, Area: "SECRETARIA",
 	}); status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("Caso 4 (solicitante UpdateArea) esperaba PermissionDenied, obtuvo: %v", err)
@@ -286,7 +293,7 @@ func TestExpedientesIntegration(t *testing.T) {
 
 	// Caso 5 — ADMIN conserva su comportamiento administrativo global
 	// existente (CanViewAll): puede operar sin importar el área actual.
-	if _, err := client.UpdateArea(ctxAdmin, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxAdmin, &expedientes.UpdateAreaRequest{
 		Id: solicitanteExp.Expediente.Id, Area: "AUXILIAR",
 	}); err != nil {
 		t.Fatalf("Caso 5 (ADMIN) esperaba éxito, obtuvo: %v", err)
@@ -300,7 +307,7 @@ func TestExpedientesIntegration(t *testing.T) {
 	}); status.Code(err) != codes.NotFound {
 		t.Fatalf("Caso 6 ChangeEstado esperaba NotFound, obtuvo: %v", err)
 	}
-	if _, err := client.UpdateArea(ctxAdmin, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxAdmin, &expedientes.UpdateAreaRequest{
 		Id: expedienteInexistente, Area: "SECRETARIA",
 	}); status.Code(err) != codes.NotFound {
 		t.Fatalf("Caso 6 UpdateArea esperaba NotFound, obtuvo: %v", err)
@@ -322,7 +329,7 @@ func TestExpedientesIntegration(t *testing.T) {
 	}); status.Code(err) != codes.NotFound {
 		t.Fatalf("Caso 7 ChangeEstado sobre inactivo esperaba NotFound, obtuvo: %v", err)
 	}
-	if _, err := client.UpdateArea(ctxAdmin, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxAdmin, &expedientes.UpdateAreaRequest{
 		Id: inactivoExp.Expediente.Id, Area: "SECRETARIA",
 	}); status.Code(err) != codes.NotFound {
 		t.Fatalf("Caso 7 UpdateArea sobre inactivo esperaba NotFound, obtuvo: %v", err)
@@ -339,14 +346,14 @@ func TestExpedientesIntegration(t *testing.T) {
 	}); status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("SUBDIRECTOR sobre expediente ajeno (area=SECRETARIA) esperaba PermissionDenied, obtuvo: %v", err)
 	}
-	if _, err := client.UpdateArea(ctxSubdirector, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxSubdirector, &expedientes.UpdateAreaRequest{
 		Id: subdirExp.Expediente.Id, Area: "SUBDIRECTOR",
 	}); status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("SUBDIRECTOR UpdateArea sobre expediente ajeno esperaba PermissionDenied, obtuvo: %v", err)
 	}
 	// Se deriva legítimamente hacia SUBDIRECCION (SECRETARIA, dueña actual,
 	// vía CanViewAll)...
-	if _, err := client.UpdateArea(ctxSecretaria, &expedientes.UpdateAreaRequest{
+	if _, err := client.derivarLegado(ctxSecretaria, &expedientes.UpdateAreaRequest{
 		Id: subdirExp.Expediente.Id, Area: "SUBDIRECTOR",
 	}); err != nil {
 		t.Fatalf("SECRETARIA derivando a SUBDIRECTOR esperaba éxito, obtuvo: %v", err)
@@ -379,14 +386,21 @@ func TestExpedientesIntegration(t *testing.T) {
 	}
 
 	// "Request B" gana la carrera: deriva primero, con la misma area leída.
-	if _, err := svcCtx.ExpedienteRepository.UpdateArea(ctx, concurrExp.Expediente.Id, leidoPorA.AreaActual, "DIRECTOR"); err != nil {
+	// (A + B: el flujo real; el origen esperado es la lectura de B.)
+	if _, err := client.DerivarExpediente(ctxSecretaria, &expedientes.DerivarExpedienteRequest{
+		Id: concurrExp.Expediente.Id, AreaDestino: "DIRECTOR", AreaOrigenEsperada: leidoPorA.AreaActual,
+	}); err != nil {
 		t.Fatalf("Request B (gana la carrera) esperaba éxito, obtuvo: %v", err)
 	}
 
 	// "Request A" intenta escribir con la lectura vieja (area_actual ya no es
-	// SECRETARIA, es DIRECTOR) — debe rechazarse, no pisar el cambio de B.
-	if _, err := svcCtx.ExpedienteRepository.UpdateArea(ctx, concurrExp.Expediente.Id, leidoPorA.AreaActual, "SUBDIRECTOR"); !errors.Is(err, repository.ErrExpedienteNotFound) {
-		t.Fatalf("Request A (lectura vieja) esperaba ErrExpedienteNotFound (conflicto), obtuvo: %v", err)
+	// SECRETARIA, es DIRECTOR) — debe rechazarse, no pisar el cambio de B. Lo
+	// hace ADMIN (ve todo) para que el rechazo sea por el origen esperado y no
+	// por propiedad de área: Aborted.
+	if _, err := client.DerivarExpediente(ctxAdmin, &expedientes.DerivarExpedienteRequest{
+		Id: concurrExp.Expediente.Id, AreaDestino: "SUBDIRECTOR", AreaOrigenEsperada: leidoPorA.AreaActual,
+	}); status.Code(err) != codes.Aborted {
+		t.Fatalf("Request A (lectura vieja) esperaba Aborted (conflicto), obtuvo: %v", err)
 	}
 
 	// El área final debe ser la de B (DIRECTOR), no la de la escritura
@@ -559,7 +573,9 @@ func TestExpedientesIntegration(t *testing.T) {
 	// "Request A" lee area_actual=DIRECTOR. "Request B" gana y deriva a
 	// SUBDIRECTOR primero (llamando al repositorio directamente, mismo
 	// patrón ya usado arriba para no depender de una carrera real).
-	if _, err := svcCtx.ExpedienteRepository.UpdateArea(ctx, concurrF4Exp.Expediente.Id, "DIRECTOR", "SUBDIRECTOR"); err != nil {
+	if _, err := client.DerivarExpediente(ctxDirector, &expedientes.DerivarExpedienteRequest{
+		Id: concurrF4Exp.Expediente.Id, AreaDestino: "SUBDIRECTOR", AreaOrigenEsperada: "DIRECTOR",
+	}); err != nil {
 		t.Fatalf("Request B (gana la carrera) esperaba éxito: %v", err)
 	}
 	// "Request A" intenta derivar con su lectura vieja (área ya no es

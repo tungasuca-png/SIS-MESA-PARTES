@@ -47,11 +47,16 @@ func (l *ResolverExpedienteLogic) ResolverExpediente(req *types.ResolverExpedien
 	}
 
 	resuelto, err := l.svcCtx.ExpedientesClient.ResolverExpediente(ctx, &expedientesclient.ResolverExpedienteRequest{
-		Id: req.Id,
+		Id:             req.Id,
+		IdempotencyKey: req.IdempotencyKey,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errorMovimiento(err)
 	}
 
-	return &types.ResolverExpedienteResponse{Expediente: toExpedienteDTO(resuelto.Expediente)}, nil
+	return &types.ResolverExpedienteResponse{
+		Expediente: toExpedienteDTO(resuelto.Expediente),
+		Movimiento: toMovimientoDTO(resuelto.Movimiento),
+		Repetido:   resuelto.Repetido,
+	}, nil
 }

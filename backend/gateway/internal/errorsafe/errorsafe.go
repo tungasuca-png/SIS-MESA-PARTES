@@ -34,7 +34,12 @@ const MensajeNoDisponible = "servicio no disponible temporalmente"
 const MensajeSolicitudInvalida = "solicitud inválida: hay parámetros con un formato no válido"
 
 // campoFaltante: único error de parseo de go-zero que se devuelve tal cual.
-var campoFaltante = regexp.MustCompile(`^field "[A-Za-z0-9_.]+" is not set$`)
+var campoFaltante = regexp.MustCompile(`^field "[A-Za-z0-9_.-]+" is not set$`)
+
+// MensajeResultadoIncierto (A + B): una operación con Idempotency-Key cuyo
+// resultado no se pudo confirmar (timeout o conexión perdida). Es seguro
+// reintentar con la MISMA clave: no se duplica y devuelve el resultado real.
+const MensajeResultadoIncierto = "no se pudo confirmar el resultado; reintente con la misma clave (la operación no se duplicará)"
 
 // httpStatus replica el mapeo de go-zero (rest/internal/errcode.CodeFromGrpcError).
 func httpStatus(code codes.Code) int {
@@ -79,6 +84,10 @@ func Handler(ctx context.Context, err error) (int, any) {
 	code := httpStatus(st.Code())
 	if code < http.StatusInternalServerError {
 		return code, err
+	}
+	if st.Message() == MensajeResultadoIncierto {
+		logx.WithContext(ctx).Errorf("error %d hacia un servicio (resultado incierto, reintentable)", code)
+		return code, status.Error(st.Code(), MensajeResultadoIncierto)
 	}
 	logx.WithContext(ctx).Errorf("error %d hacia un servicio: %v", code, err)
 	return code, status.Error(st.Code(), MensajeNoDisponible)

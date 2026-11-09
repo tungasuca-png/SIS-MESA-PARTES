@@ -35,12 +35,17 @@ func (l *CorregirExpedienteLogic) CorregirExpediente(req *types.CorregirExpedien
 	ctx := withAuthorization(l.ctx, req.Authorization)
 
 	corregido, err := l.svcCtx.ExpedientesClient.CorregirExpediente(ctx, &expedientesclient.CorregirExpedienteRequest{
-		Id:          req.Id,
-		Descripcion: req.Descripcion,
+		Id:             req.Id,
+		Descripcion:    req.Descripcion,
+		IdempotencyKey: req.IdempotencyKey,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errorMovimiento(err)
 	}
 
-	return &types.CorregirExpedienteResponse{Expediente: toExpedienteDTO(corregido.Expediente)}, nil
+	return &types.CorregirExpedienteResponse{
+		Expediente: toExpedienteDTO(corregido.Expediente),
+		Movimiento: toMovimientoDTO(corregido.Movimiento),
+		Repetido:   corregido.Repetido,
+	}, nil
 }

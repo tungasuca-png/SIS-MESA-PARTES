@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"expedientes/expedientes"
@@ -31,108 +30,104 @@ func NewDerivarExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-// DerivarExpediente (Etapa 3) es la operación de negocio real detrás de
-// "derivar" — a diferencia de UpdateArea (genérico, sigue existiendo para
-// otros usos), esta exige que la transición esté confirmada para el tipo
-// de trámite del expediente (ver estados.CanDerivar). Reutiliza
-// exactamente las mismas reglas de propiedad de área (Etapa 1) y de
-// concurrencia optimista (Etapa 1.1) que ya usa UpdateArea — no se
-// duplica esa parte, solo se agrega la validación de transición.
+// DerivarExpediente mueve el expediente a otra área y registra el movimiento
+// (y su evento de outbox) en UNA transacción (A + B). Reglas sin cambios
+// respecto de la Etapa 3/4: propiedad de área, transición confirmada para el
+// tipo (estados.CanDerivar) y casos especiales F2/F4. Nuevo: el área de
+// origen esperada (la que vio el usuario) debe seguir siendo la actual, el
+// destino debe ser distinto del origen y la operación es idempotente.
 func (l *DerivarExpedienteLogic) DerivarExpediente(in *expedientes.DerivarExpedienteRequest) (*expedientes.DerivarExpedienteResponse, error) {
 	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	// Permiso real (Paso 13B): reemplaza únicamente el gate de rol
-	// (CanUpdateArea). El chequeo de área, CanDerivar y los casos
-	// especiales F2/F4 (abajo) siguen exactamente igual.
 	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.update"); err != nil {
 		return nil, err
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")
 	}
-
 	areaDestino := strings.ToUpper(strings.TrimSpace(in.AreaDestino))
 	if !estados.IsValidArea(areaDestino) {
 		return nil, status.Error(codes.InvalidArgument, "el área destino no es válida")
 	}
-
-	current, err := l.svcCtx.ExpedienteRepository.FindByIDOrCodigo(l.ctx, strings.TrimSpace(in.Id))
+	origenEsperado := strings.ToUpper(strings.TrimSpace(in.AreaOrigenEsperada))
+	if !estados.IsValidArea(origenEsperado) {
+		return nil, status.Error(codes.InvalidArgument, "el área de origen esperada es obligatoria")
+	}
+	clave, err := validarClave(in.IdempotencyKey)
 	if err != nil {
-		if errors.Is(err, repository.ErrExpedienteNotFound) {
-			return nil, status.Error(codes.NotFound, "expediente no encontrado")
-		}
-		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
+		return nil, err
+	}
+	motivo := strings.TrimSpace(in.Motivo)
+	if motivo == "" {
+		return nil, status.Error(codes.InvalidArgument, "el motivo es obligatorio")
+	}
+	if len([]rune(motivo)) > 500 {
+		return nil, status.Error(codes.InvalidArgument, "el motivo no puede superar los 500 caracteres")
+	}
+	condicion := strings.TrimSpace(in.Condicion)
+	if len([]rune(condicion)) > 255 {
+		return nil, status.Error(codes.InvalidArgument, "la condición no puede superar los 255 caracteres")
+	}
+	if err := validarRolActor(role); err != nil {
+		return nil, err
 	}
 
-	// Mismo criterio de propiedad que UpdateArea/ChangeEstado (Etapa 1): solo
-	// quien ya tiene el expediente (o CanViewAll) puede derivarlo.
-	if !authorization.CanViewAll(role) && current.AreaActual != authorization.AreaDelRol(role) {
-		return nil, status.Error(codes.PermissionDenied, "el expediente no pertenece al área del usuario")
+	res, err := l.svcCtx.ExpedienteRepository.RegistrarMovimiento(l.ctx, repository.SolicitudMovimiento{
+		IDOrCodigo:     strings.TrimSpace(in.Id),
+		Tipo:           repository.MovDerivacion,
+		ActorID:        userID,
+		ActorRol:       role,
+		IdempotencyKey: clave,
+		Contenido:      contenido(areaDestino, origenEsperado, motivo, condicion),
+		Motivo:         motivo,
+		Condicion:      condicion,
+		Decidir: func(actual *repository.Expediente) (repository.Decision, error) {
+			return decidirDerivacion(role, actual, origenEsperado, areaDestino)
+		},
+	})
+	if err != nil {
+		return nil, errorMovimiento(l.ctx, "derivar", err)
 	}
-
-	// Única regla nueva de esta etapa: la transición debe estar confirmada
-	// para este tipo de trámite (o el tipo es genérico y no tiene regla
-	// institucional, en cuyo caso se mantiene permisivo — ver CanDerivar).
-	if !estados.CanDerivar(current.Tipo, current.AreaActual, areaDestino) {
-		return nil, status.Error(
-			codes.FailedPrecondition,
-			"no existe una transición confirmada de "+current.AreaActual+" a "+areaDestino+" para este tipo de trámite",
-		)
+	if !res.Repetido {
+		l.svcCtx.Publicador.Avisar() // proyección inmediata (si no, el sondeo periódico)
 	}
+	return &expedientes.DerivarExpedienteResponse{
+		Expediente: toProto(res.Expediente),
+		Movimiento: movimientoToProto(res.Movimiento),
+		Repetido:   res.Repetido,
+	}, nil
+}
 
-	// Casos especiales (Etapa 4) donde derivar también cambia el estado en
-	// la MISMA escritura — separarlo en dos llamadas dejaría una ventana
-	// donde el actor original ya no es dueño del área nueva para completar
-	// el segundo paso:
-	//   - Secretaría -> Dirección para F2/F4: el trámite deja la bandeja de
-	//     intake y entra en trámite real (PENDIENTE -> EN_PROCESO). Es una
-	//     inferencia razonable, no una cita textual: la regla institucional
-	//     de esta etapa no lo dice con esas palabras, pero sin este cambio
-	//     ResolverExpediente/RechazarExpediente (que exigen EN_PROCESO)
-	//     nunca podrían ejecutarse — ya estaba anticipado en
-	//     docs/workflow-definitivo-mesa-de-partes.md sección 9 ("Derivado a
-	//     Dirección -> EN_PROCESO").
-	//   - Subdirección -> Docente en F4: "destino final" del flujo
-	//     confirmado — no hay ninguna acción posterior descrita, así que
-	//     llegar ahí también cierra el expediente (ATENDIDO).
+// decidirDerivacion aplica las reglas sobre el expediente BLOQUEADO.
+func decidirDerivacion(role string, actual *repository.Expediente, origenEsperado, areaDestino string) (repository.Decision, error) {
+	if !authorization.CanViewAll(role) && actual.AreaActual != authorization.AreaDelRol(role) {
+		return repository.Decision{}, status.Error(codes.PermissionDenied, "el expediente no pertenece al área del usuario")
+	}
+	if actual.AreaActual != origenEsperado {
+		return repository.Decision{}, status.Errorf(codes.Aborted, "el expediente ya no está en %s; actualice y vuelva a intentarlo", origenEsperado)
+	}
+	if areaDestino == actual.AreaActual {
+		return repository.Decision{}, status.Error(codes.InvalidArgument, "el área destino debe ser distinta del área actual")
+	}
+	if !estados.CanDerivar(actual.Tipo, actual.AreaActual, areaDestino) {
+		return repository.Decision{}, status.Error(codes.FailedPrecondition,
+			"no existe una transición confirmada de "+actual.AreaActual+" a "+areaDestino+" para este tipo de trámite")
+	}
+	estadoNuevo := actual.Estado
 	switch {
-	case current.AreaActual == estados.AreaSecretaria && areaDestino == estados.AreaDirector &&
-		(estados.EsF2(current.Tipo) || estados.EsF4(current.Tipo)) && current.Estado == estados.EstadoPendiente:
-		updated, err := l.svcCtx.ExpedienteRepository.DerivarConCambioDeEstado(
-			l.ctx, strings.TrimSpace(in.Id), current.AreaActual, areaDestino, current.Estado, estados.EstadoEnProceso,
-		)
-		if err != nil {
-			if errors.Is(err, repository.ErrExpedienteNotFound) {
-				return nil, status.Error(codes.Aborted, "el expediente cambió, intente nuevamente")
-			}
-			return nil, status.Error(codes.Internal, "no se pudo derivar el expediente")
+	// Secretaría -> Dirección en F2/F4: el trámite entra en proceso.
+	case actual.AreaActual == estados.AreaSecretaria && areaDestino == estados.AreaDirector &&
+		(estados.EsF2(actual.Tipo) || estados.EsF4(actual.Tipo)) && actual.Estado == estados.EstadoPendiente:
+		estadoNuevo = estados.EstadoEnProceso
+	// Subdirección -> Docente en F4: destino final, cierra el expediente. Solo
+	// desde EN_PROCESO (D9: único estado alcanzable en el flujo confirmado).
+	case estados.EsF4(actual.Tipo) && actual.AreaActual == estados.AreaSubdirector && areaDestino == estados.AreaDocente:
+		if actual.Estado != estados.EstadoEnProceso {
+			return repository.Decision{}, status.Error(codes.FailedPrecondition, "solo se puede enviar al docente un expediente en proceso")
 		}
-		return &expedientes.DerivarExpedienteResponse{Expediente: toProto(updated)}, nil
-
-	case estados.EsF4(current.Tipo) && current.AreaActual == estados.AreaSubdirector && areaDestino == estados.AreaDocente:
-		updated, err := l.svcCtx.ExpedienteRepository.DerivarConCambioDeEstado(
-			l.ctx, strings.TrimSpace(in.Id), current.AreaActual, areaDestino, current.Estado, estados.EstadoAtendido,
-		)
-		if err != nil {
-			if errors.Is(err, repository.ErrExpedienteNotFound) {
-				return nil, status.Error(codes.Aborted, "el expediente cambió, intente nuevamente")
-			}
-			return nil, status.Error(codes.Internal, "no se pudo derivar el expediente")
-		}
-		return &expedientes.DerivarExpedienteResponse{Expediente: toProto(updated)}, nil
+		estadoNuevo = estados.EstadoAtendido
 	}
-
-	// Misma guarda de concurrencia optimista que UpdateArea (Etapa 1.1): si
-	// el área cambió entre la lectura y la escritura, se rechaza.
-	updated, err := l.svcCtx.ExpedienteRepository.UpdateArea(l.ctx, strings.TrimSpace(in.Id), current.AreaActual, areaDestino)
-	if err != nil {
-		if errors.Is(err, repository.ErrExpedienteNotFound) {
-			return nil, status.Error(codes.Aborted, "el área del expediente cambió, intente nuevamente")
-		}
-		return nil, status.Error(codes.Internal, "no se pudo derivar el expediente")
-	}
-
-	return &expedientes.DerivarExpedienteResponse{Expediente: toProto(updated)}, nil
+	return repository.Decision{AreaDestino: areaDestino, EstadoNuevo: estadoNuevo}, nil
 }

@@ -58,3 +58,32 @@ $$;
 GRANT SET ON PARAMETER session_replication_role TO psicologia_tester;
 -- FASE E-05: mismo caso en estudiantes_db (auditoria_estudiantes es append-only).
 GRANT SET ON PARAMETER session_replication_role TO estudiantes_tester;
+
+-- ===========================================================================
+-- Mesa de Partes A + B (transacción local + Transactional Outbox).
+-- Roles de UNA sola función, separados del rol de aplicación:
+--   expedientes_publicador LOGIN. Solo el publicador del Outbox de Expedientes:
+--       reclama, reprograma y cierra eventos (siempre con fencing por
+--       reclamo_id) y purga los ya publicados. Lee los movimientos; no puede
+--       modificar expedientes ni movimientos, ni crear eventos.
+--   derivaciones_proyector LOGIN. Solo el consumidor AplicarMovimiento de
+--       Derivaciones: inserta en movimientos_proyeccion. La API de Derivaciones
+--       (derivaciones_user) solo la lee.
+--   reconciliador_movimientos LOGIN. Solo la reconciliación diaria (D8): lee
+--       movimientos, outbox y proyección; registra ejecuciones y discrepancias;
+--       republica únicamente mediante reconciliacion_republicar(). No modifica
+--       movimientos, proyección ni historial.
+-- Sin contraseñas aquí (se asignan aparte, ver README.md).
+-- ===========================================================================
+DO $$
+DECLARE
+    r text;
+BEGIN
+    FOREACH r IN ARRAY ARRAY['expedientes_publicador', 'derivaciones_proyector', 'reconciliador_movimientos'] LOOP
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
+            EXECUTE format('CREATE ROLE %I LOGIN', r);
+        END IF;
+        EXECUTE format('ALTER ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', r);
+    END LOOP;
+END
+$$;

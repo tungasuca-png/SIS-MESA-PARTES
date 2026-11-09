@@ -28,8 +28,15 @@ type PermissionChecker interface {
 
 func DefaultMethodPolicies() map[string]MethodPolicy {
 	return map[string]MethodPolicy{
-		"/auth.Auth/Ping":          PublicMethod(),
-		"/auth.Auth/Register":      PublicMethod(),
+		"/auth.Auth/Ping": PublicMethod(),
+		// Register (M-01): alta antigua de usuario+clave con el DNI como
+		// DEFINITIVO, sin verificar el correo ni la identidad. Ya no es
+		// pública: el Gateway responde 410 a /api/auth/register y los
+		// solicitantes se registran con EmailRegister/EmailVerify o Google.
+		// Queda solo para quien puede dar de alta cuentas (mismo permiso que
+		// CreateUser); sin sesión responde Unauthenticated y sin el permiso,
+		// PermissionDenied, antes de ejecutar la lógica.
+		"/auth.Auth/Register":      ProtectedMethod("usuarios.change_role"),
 		"/auth.Auth/Login":         PublicMethod(),
 		"/auth.Auth/RefreshToken":  PublicMethod(),
 		"/auth.Auth/ValidateToken": PublicMethod(),

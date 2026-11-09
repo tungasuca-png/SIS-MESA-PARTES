@@ -12,8 +12,12 @@ import (
 
 func TestConsultaReporteDeriv(t *testing.T) {
 	sql, args := construirConsultaReporteDeriv(ReporteDerivFiltro{ExpedienteIDs: []string{"a"}, Desde: "2026-01-01", Hasta: "2026-01-31", ConRegistrador: true})
-	for _, frag := range []string{"expediente_id = ANY($1::uuid[])", "fecha_registro >= ($2::date)::timestamp AT TIME ZONE 'America/Lima'",
-		"fecha_registro < ($3::date + 1)::timestamp AT TIME ZONE 'America/Lima'", "registrado_por::text", "GROUP BY 1, 2, 3, 4, 5, 6"} {
+	// A + B: el reporte lee el historial unificado; el rechazo se sigue
+	// contando como DERIVACION y los cambios de estado no son derivaciones.
+	for _, frag := range []string{"expediente_id = ANY($1::uuid[])", "fecha >= ($2::date)::timestamp AT TIME ZONE 'America/Lima'",
+		"fecha < ($3::date + 1)::timestamp AT TIME ZONE 'America/Lima'", "registrado_por::text", "GROUP BY 1, 2, 3, 4, 5, 6",
+		"FROM historial_expediente", "NOT (clase = 'MOVIMIENTO' AND tipo IN ('CAMBIO_ESTADO', 'RESOLUCION', 'CORRECCION'))",
+		"CASE WHEN clase = 'MOVIMIENTO' AND tipo = 'RECHAZO' THEN 'DERIVACION' ELSE tipo END"} {
 		if !strings.Contains(sql, frag) {
 			t.Errorf("falta %q", frag)
 		}

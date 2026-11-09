@@ -1,17 +1,35 @@
--- FASE 6N-3 (C2) — Propiedad de las bases y privilegios mínimos.
+-- FASE 6N-3 (C2) — Bases, propiedad y privilegios mínimos.
 --
 -- Ejecutar con psql como tg_admin, conectado a "postgres", DESPUÉS de
 -- 01_roles.sql:
 --   psql -U tg_admin -d postgres -v ON_ERROR_STOP=1 -f 02_propiedad_y_permisos.sql
--- Idempotente. Sin contraseñas.
+-- Idempotente. Sin contraseñas. Ejecutable en cualquier momento:
+--
+--   Instalación NUEVA:  01_roles.sql -> 02 -> migraciones de cada servicio -> 02
+--   ACTUALIZACIÓN:      01_roles.sql -> migraciones nuevas -> 02
+--
+-- La primera pasada crea las bases que falten (ya con su dueño) y concede
+-- CONNECT a cada rol de servicio por su nombre (nunca a PUBLIC), de modo que
+-- <s>_migrator pueda aplicar las migraciones. La segunda pasada concede los
+-- privilegios sobre las tablas que crearon esas migraciones: todo GRANT sobre
+-- una tabla concreta es condicional (to_regclass).
 --
 -- Nota: las bases auth_db, psicologia_db y estudiantes_db pertenecían al
 -- superusuario auth_user; las de Mesa de Partes, a su propio rol de aplicación.
--- Primero se cambia el dueño de TODAS las bases (objetos compartidos) y luego,
--- dentro de cada base, REASSIGN OWNED mueve tablas, secuencias, funciones y
+-- Se cambia el dueño de TODAS las bases (objetos compartidos) y luego, dentro
+-- de cada base, REASSIGN OWNED mueve tablas, secuencias, funciones y
 -- extensiones al <s>_owner correspondiente.
 
 \set ON_ERROR_STOP on
+
+-- ===========================================================================
+-- 1. Bases: se crean las que falten, ya con su dueño (CREATE DATABASE no admite
+--    IF NOT EXISTS ni ejecutarse dentro de una función: \gexec).
+-- ===========================================================================
+SELECT format('CREATE DATABASE %I OWNER %I', s || '_db', s || '_owner')
+  FROM unnest(ARRAY['auth', 'psicologia', 'estudiantes', 'expedientes', 'documentos', 'derivaciones', 'usuarios']) AS s
+ WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = s || '_db')
+\gexec
 
 ALTER DATABASE auth_db         OWNER TO auth_owner;
 ALTER DATABASE psicologia_db   OWNER TO psicologia_owner;
@@ -26,6 +44,20 @@ REVOKE ALL ON DATABASE postgres, auth_db, psicologia_db, estudiantes_db, expedie
     documentos_db, derivaciones_db, usuarios_db FROM PUBLIC;
 
 -- ===========================================================================
+-- 2. CONNECT, rol por rol, ANTES de cualquier migración (corrige H-E1-01: el
+--    REVOKE de arriba dejaba a los migradores sin acceso en una base nueva).
+-- ===========================================================================
+GRANT CONNECT ON DATABASE auth_db         TO auth_app, auth_tester, auth_migrator;
+GRANT CONNECT ON DATABASE psicologia_db   TO psicologia_user, psicologia_tester, psicologia_migrator;
+GRANT CONNECT ON DATABASE estudiantes_db  TO estudiantes_user, estudiantes_tester, estudiantes_migrator;
+GRANT CONNECT ON DATABASE expedientes_db  TO expedientes_user, expedientes_tester, expedientes_migrator,
+                                             expedientes_publicador, reconciliador_movimientos;
+GRANT CONNECT ON DATABASE documentos_db   TO documentos_user, documentos_tester, documentos_migrator;
+GRANT CONNECT ON DATABASE derivaciones_db TO derivaciones_user, derivaciones_tester, derivaciones_migrator,
+                                             derivaciones_proyector, reconciliador_movimientos;
+GRANT CONNECT ON DATABASE usuarios_db     TO usuarios_user, usuarios_tester, usuarios_migrator;
+
+-- ===========================================================================
 -- auth_db — Auth Service (auth_app). Privilegios derivados del SQL real de
 -- ejecución de Auth (sin pruebas): nada de DDL, TRUNCATE ni acceso a otras bases.
 -- ===========================================================================
@@ -35,19 +67,32 @@ DO $$ BEGIN
         EXECUTE 'REASSIGN OWNED BY auth_user TO auth_owner';
     END IF;
 END $$;
-GRANT CONNECT ON DATABASE auth_db TO auth_app, auth_tester, auth_migrator;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM auth_app;
-GRANT SELECT, INSERT, UPDATE         ON usuarios         TO auth_app;
-GRANT SELECT, INSERT, DELETE         ON usuario_roles    TO auth_app;
-GRANT SELECT, INSERT, DELETE         ON role_permissions TO auth_app;
-GRANT SELECT, INSERT, UPDATE         ON refresh_tokens   TO auth_app;
-GRANT SELECT, INSERT, UPDATE         ON permissions      TO auth_app;
-GRANT SELECT                         ON roles            TO auth_app;
+-- Tablas de las migraciones 000-018 (condicional: en una base nueva la primera
+-- pasada de este script corre antes de que existan).
+DO $$ BEGIN
+    IF to_regclass('public.usuarios') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.usuarios TO auth_app;
+    END IF;
+    IF to_regclass('public.usuario_roles') IS NOT NULL THEN
+        GRANT SELECT, INSERT, DELETE ON public.usuario_roles TO auth_app;
+    END IF;
+    IF to_regclass('public.role_permissions') IS NOT NULL THEN
+        GRANT SELECT, INSERT, DELETE ON public.role_permissions TO auth_app;
+    END IF;
+    IF to_regclass('public.refresh_tokens') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.refresh_tokens TO auth_app;
+    END IF;
+    IF to_regclass('public.permissions') IS NOT NULL THEN
+        GRANT SELECT, INSERT, UPDATE ON public.permissions TO auth_app;
+    END IF;
+    IF to_regclass('public.roles') IS NOT NULL THEN
+        GRANT SELECT ON public.roles TO auth_app;
+    END IF;
+END $$;
 -- Tablas creadas por migraciones posteriores a la FASE 6N-3. El REVOKE de
 -- arriba también las alcanza, así que se vuelven a conceder aquí (mismo
 -- mínimo que cada migración) para que reejecutar este script no rompa Auth.
--- Condicional: en una base nueva este script corre antes de esas migraciones,
--- y entonces son ellas las que conceden.
 --   019 + 020: service_clients / service_client_permissions (DELETE solo en
 --              la relación de permisos de un sistema).
 --   022:       user_auth_providers (nunca DELETE).
@@ -56,6 +101,8 @@ GRANT SELECT                         ON roles            TO auth_app;
 --              cancelar_registro_google_pendiente(uuid): única vía para
 --              compensar un autorregistro con Google (auth_app no tiene
 --              DELETE sobre usuarios); EXECUTE solo para auth_app.
+--   027:       service_clients.audiencia queda cubierta por el GRANT de tabla;
+--              su inmutabilidad la garantiza un trigger de la migración.
 DO $$ BEGIN
     IF to_regclass('public.service_clients') IS NOT NULL THEN
         GRANT SELECT, INSERT, UPDATE ON public.service_clients TO auth_app;
@@ -120,7 +167,6 @@ DO $$ BEGIN
         EXECUTE 'REASSIGN OWNED BY auth_user TO psicologia_owner';
     END IF;
 END $$;
-GRANT CONNECT ON DATABASE psicologia_db TO psicologia_user, psicologia_tester, psicologia_migrator;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO psicologia_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE psicologia_owner IN SCHEMA public
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO psicologia_tester;
@@ -135,7 +181,6 @@ DO $$ BEGIN
         EXECUTE 'REASSIGN OWNED BY auth_user TO estudiantes_owner';
     END IF;
 END $$;
-GRANT CONNECT ON DATABASE estudiantes_db TO estudiantes_user, estudiantes_tester, estudiantes_migrator;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO estudiantes_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE estudiantes_owner IN SCHEMA public
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO estudiantes_tester;
@@ -143,22 +188,71 @@ ALTER DEFAULT PRIVILEGES FOR ROLE estudiantes_owner IN SCHEMA public
 -- ===========================================================================
 -- Mesa de Partes (expedientes, documentos, derivaciones, usuarios): el rol de
 -- aplicación era DUEÑO de su base (podía crear, alterar y borrar tablas). Pasa
--- a tener solo DML sobre sus tablas y secuencias — el mismo acceso a datos que
--- usa hoy, sin DDL. Sin cambios funcionales.
+-- a tener solo DML sobre sus tablas y secuencias, sin DDL.
 -- ===========================================================================
 \connect expedientes_db
 REASSIGN OWNED BY expedientes_user TO expedientes_owner;
-GRANT CONNECT ON DATABASE expedientes_db TO expedientes_user, expedientes_tester, expedientes_migrator;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO expedientes_user, expedientes_tester;
+-- Expedientes solo hace bajas LÓGICAS (activo = FALSE): su rol de aplicación no
+-- tiene DELETE sobre ninguna tabla, tampoco las que creen migraciones futuras.
+-- El rol de pruebas (solo desarrollo) conserva DELETE para limpiar sus datos.
+REVOKE DELETE ON ALL TABLES IN SCHEMA public FROM expedientes_user;
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO expedientes_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO expedientes_tester;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO expedientes_user, expedientes_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE expedientes_owner IN SCHEMA public
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO expedientes_user, expedientes_tester;
+    REVOKE DELETE ON TABLES FROM expedientes_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE expedientes_owner IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE ON TABLES TO expedientes_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE expedientes_owner IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO expedientes_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE expedientes_owner IN SCHEMA public
     GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO expedientes_user, expedientes_tester;
+-- A + B y reconciliación (migraciones 004 y 006): los GRANT generales de
+-- arriba les devolverían privilegios al reejecutar este script; aquí se
+-- restablece el mínimo de cada rol. Los triggers de las migraciones son la
+-- garantía final aunque este bloque no se ejecutara.
+DO $$ BEGIN
+    IF to_regclass('public.expediente_movimientos') IS NOT NULL THEN
+        REVOKE ALL ON public.expediente_movimientos FROM expedientes_user, expedientes_tester, expedientes_publicador;
+        GRANT SELECT, INSERT ON public.expediente_movimientos TO expedientes_user, expedientes_tester;
+        GRANT SELECT ON public.expediente_movimientos TO expedientes_publicador, reconciliador_movimientos;
+    END IF;
+    IF to_regclass('public.expediente_outbox') IS NOT NULL THEN
+        REVOKE ALL ON public.expediente_outbox FROM expedientes_user, expedientes_tester, expedientes_publicador;
+        GRANT SELECT, INSERT ON public.expediente_outbox TO expedientes_user, expedientes_tester;
+        GRANT SELECT, DELETE ON public.expediente_outbox TO expedientes_publicador;
+        GRANT UPDATE (estado, intentos, proximo_intento_en, reclamo_id, reclamado_hasta, ultimo_error, publicado_en)
+            ON public.expediente_outbox TO expedientes_publicador;
+        GRANT SELECT ON public.expediente_outbox TO reconciliador_movimientos;
+    END IF;
+    IF to_regclass('public.expedientes') IS NOT NULL THEN
+        GRANT SELECT (id, area_actual, estado, activo) ON public.expedientes TO reconciliador_movimientos;
+        IF EXISTS (SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = 'expedientes' AND column_name = 'ultima_secuencia') THEN
+            GRANT SELECT (ultima_secuencia) ON public.expedientes TO reconciliador_movimientos;
+        END IF;
+    END IF;
+    IF to_regclass('public.reconciliacion_ejecuciones') IS NOT NULL THEN
+        REVOKE ALL ON public.reconciliacion_ejecuciones, public.reconciliacion_discrepancias, public.reconciliacion_acciones
+            FROM expedientes_user, expedientes_tester, expedientes_publicador, reconciliador_movimientos;
+        GRANT SELECT ON public.reconciliacion_ejecuciones, public.reconciliacion_discrepancias, public.reconciliacion_acciones
+            TO expedientes_tester, reconciliador_movimientos;
+        GRANT INSERT ON public.reconciliacion_ejecuciones, public.reconciliacion_discrepancias TO reconciliador_movimientos;
+        GRANT UPDATE (estado, expedientes_revisados, movimientos_origen, movimientos_proyectados, discrepancias, huella_informe)
+            ON public.reconciliacion_ejecuciones TO reconciliador_movimientos;
+    END IF;
+    IF to_regclass('public.reconciliacion_vigilancia') IS NOT NULL THEN
+        REVOKE ALL ON public.reconciliacion_vigilancia
+            FROM expedientes_user, expedientes_tester, expedientes_publicador, reconciliador_movimientos;
+        GRANT SELECT ON public.reconciliacion_vigilancia TO expedientes_tester, reconciliador_movimientos;
+    END IF;
+END $$;
+ALTER ROLE expedientes_user          IN DATABASE expedientes_db SET idle_in_transaction_session_timeout = '5s';
+ALTER ROLE expedientes_publicador    IN DATABASE expedientes_db SET idle_in_transaction_session_timeout = '5s';
+ALTER ROLE reconciliador_movimientos IN DATABASE expedientes_db SET idle_in_transaction_session_timeout = '60s';
 
 \connect documentos_db
 REASSIGN OWNED BY documentos_user TO documentos_owner;
-GRANT CONNECT ON DATABASE documentos_db TO documentos_user, documentos_tester, documentos_migrator;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO documentos_user, documentos_tester;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO documentos_user, documentos_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE documentos_owner IN SCHEMA public
@@ -168,17 +262,30 @@ ALTER DEFAULT PRIVILEGES FOR ROLE documentos_owner IN SCHEMA public
 
 \connect derivaciones_db
 REASSIGN OWNED BY derivaciones_user TO derivaciones_owner;
-GRANT CONNECT ON DATABASE derivaciones_db TO derivaciones_user, derivaciones_tester, derivaciones_migrator;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO derivaciones_user, derivaciones_tester;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO derivaciones_user, derivaciones_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE derivaciones_owner IN SCHEMA public
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO derivaciones_user, derivaciones_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE derivaciones_owner IN SCHEMA public
     GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO derivaciones_user, derivaciones_tester;
+-- A + B (migración 002): historial append-only y proyección.
+DO $$ BEGIN
+    IF to_regclass('public.derivaciones') IS NOT NULL THEN
+        REVOKE UPDATE, DELETE ON public.derivaciones FROM derivaciones_user, derivaciones_tester;
+    END IF;
+    IF to_regclass('public.movimientos_proyeccion') IS NOT NULL THEN
+        REVOKE ALL ON public.movimientos_proyeccion FROM derivaciones_user, derivaciones_tester, derivaciones_proyector;
+        GRANT SELECT ON public.movimientos_proyeccion TO derivaciones_user, derivaciones_tester, reconciliador_movimientos;
+        GRANT SELECT, INSERT ON public.movimientos_proyeccion TO derivaciones_proyector;
+    END IF;
+    IF to_regclass('public.historial_expediente') IS NOT NULL THEN
+        REVOKE ALL ON public.historial_expediente FROM derivaciones_user, derivaciones_tester, derivaciones_proyector;
+        GRANT SELECT ON public.historial_expediente TO derivaciones_user, derivaciones_tester;
+    END IF;
+END $$;
 
 \connect usuarios_db
 REASSIGN OWNED BY usuarios_user TO usuarios_owner;
-GRANT CONNECT ON DATABASE usuarios_db TO usuarios_user, usuarios_tester, usuarios_migrator;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO usuarios_user, usuarios_tester;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO usuarios_user, usuarios_tester;
 ALTER DEFAULT PRIVILEGES FOR ROLE usuarios_owner IN SCHEMA public

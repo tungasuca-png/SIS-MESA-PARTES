@@ -91,7 +91,7 @@ func TestCrearDerivacionPermisoEsLaAutoridad(t *testing.T) {
 		ExpedientesClient:    &fixedExpedientesClient{expedienteID: expedienteID, area: "SECRETARIA"},
 	}
 	listener := bufconn.Listen(1024 * 1024)
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.AuthenticationInterceptor(svcCtx.JWTValidator)))
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.AuthenticationInterceptor(svcCtx.JWTValidator, nil)))
 	derivaciones.RegisterDerivacionesServer(grpcServer, server.NewDerivacionesServer(svcCtx))
 	go func() { _ = grpcServer.Serve(listener) }()
 	defer grpcServer.Stop()
@@ -119,7 +119,7 @@ func TestCrearDerivacionPermisoEsLaAutoridad(t *testing.T) {
 		return n
 	}
 	req := func(origen, destino string) *derivaciones.CrearDerivacionRequest {
-		return &derivaciones.CrearDerivacionRequest{ExpedienteId: expedienteID, Tipo: "DERIVACION", Origen: origen, Destino: destino, Motivo: "test"}
+		return &derivaciones.CrearDerivacionRequest{ExpedienteId: expedienteID, Tipo: "NOTIFICACION", Origen: origen, Destino: destino, Motivo: "test"}
 	}
 
 	t.Run("CasoA_ConPermisoSinRolInterno_Puede", func(t *testing.T) {
