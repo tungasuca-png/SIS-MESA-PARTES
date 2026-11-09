@@ -40,7 +40,14 @@ func (l *CreateServiceClientLogic) CreateServiceClient(in *auth.CreateServiceCli
 	if nombre == "" || utf8.RuneCountInString(nombre) > 120 {
 		return nil, status.Error(codes.InvalidArgument, "el nombre del sistema es obligatorio (máximo 120 caracteres)")
 	}
-	permisos, err := validarPermisosSistema(in.GetPermisos())
+	audiencia := strings.ToLower(strings.TrimSpace(in.GetAudiencia()))
+	if audiencia == "" {
+		audiencia = security.AudienciaEstudiantes
+	}
+	if !security.AudienciaValida(audiencia) {
+		return nil, status.Error(codes.InvalidArgument, "la audiencia debe ser estudiantes o derivaciones")
+	}
+	permisos, err := validarPermisosSistema(audiencia, in.GetPermisos())
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +55,7 @@ func (l *CreateServiceClientLogic) CreateServiceClient(in *auth.CreateServiceCli
 	if err != nil {
 		return nil, status.Error(codes.Internal, "no se pudieron generar las credenciales")
 	}
-	created, err := l.svcCtx.ServiceClientRepository.Create(l.ctx, nombre, clientID, hash, adminID, permisos)
+	created, err := l.svcCtx.ServiceClientRepository.Create(l.ctx, nombre, clientID, hash, adminID, permisos, audiencia)
 	if err != nil {
 		if errors.Is(err, repository.ErrPermisoInexistente) {
 			return nil, status.Error(codes.InvalidArgument, "algún permiso no existe o está inactivo en el catálogo")
@@ -56,6 +63,6 @@ func (l *CreateServiceClientLogic) CreateServiceClient(in *auth.CreateServiceCli
 		l.Errorf("registrar sistema consumidor: %v", err)
 		return nil, status.Error(codes.Internal, "no se pudo registrar el sistema")
 	}
-	l.Infof("sistema consumidor registrado: id=%s client_id=%s por=%s permisos=%q", created.ID, created.ClientID, adminID, strings.Join(created.Permisos, " "))
+	l.Infof("sistema consumidor registrado: id=%s client_id=%s audiencia=%s por=%s permisos=%q", created.ID, created.ClientID, created.Audiencia, adminID, strings.Join(created.Permisos, " "))
 	return &auth.CreateServiceClientResponse{Client: serviceClientProto(created), ClientSecret: secret}, nil
 }

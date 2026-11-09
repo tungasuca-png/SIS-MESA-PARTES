@@ -110,7 +110,7 @@ func TestVisibilidadDerivacionesPermisoEsLaAutoridad(t *testing.T) {
 
 	repo := repository.NewDerivacionRepository(pool)
 	seed := func(exp string) string {
-		d, err := repo.Create(ctx, exp, "DERIVACION", "SECRETARIA", "DIRECTOR", "motivo interno", "URGENTE", fixedUUID(base, 50))
+		d, err := repo.Create(ctx, exp, "NOTIFICACION", "SECRETARIA", "DIRECTOR", "motivo interno", "URGENTE", fixedUUID(base, 50))
 		if err != nil {
 			t.Fatalf("seed derivación: %v", err)
 		}
@@ -144,7 +144,7 @@ func TestVisibilidadDerivacionesPermisoEsLaAutoridad(t *testing.T) {
 		},
 	}
 	listener := bufconn.Listen(1024 * 1024)
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.AuthenticationInterceptor(svcCtx.JWTValidator)))
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.AuthenticationInterceptor(svcCtx.JWTValidator, nil)))
 	derivaciones.RegisterDerivacionesServer(grpcServer, server.NewDerivacionesServer(svcCtx))
 	go func() { _ = grpcServer.Serve(listener) }()
 	defer grpcServer.Stop()
@@ -197,7 +197,7 @@ func TestVisibilidadDerivacionesPermisoEsLaAutoridad(t *testing.T) {
 			t.Fatalf("Get propio: %v", err)
 		}
 		for _, d := range []*derivaciones.Derivacion{l.Derivaciones[0], g.Derivacion} {
-			if d.Origen != "SECRETARIA" || d.Destino != "DIRECTOR" || d.Tipo != "DERIVACION" || d.Id != dA {
+			if d.Origen != "SECRETARIA" || d.Destino != "DIRECTOR" || d.Tipo != "NOTIFICACION" || d.Id != dA {
 				t.Fatalf("la vista reducida debe conservar el recorrido: %+v", d)
 			}
 			if d.Motivo != "" || d.Condicion != "" || d.RegistradoPor != "" {

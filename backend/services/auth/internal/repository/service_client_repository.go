@@ -31,6 +31,8 @@ type ServiceClient struct {
 	CreatedAt  time.Time
 	LastUsedAt *time.Time
 	RevokedAt  *time.Time
+	// Audiencia (migración 027): estudiantes o derivaciones. Inmutable.
+	Audiencia string
 }
 
 type ServiceClientRepository struct {
@@ -42,7 +44,7 @@ func NewServiceClientRepository(db *pgxpool.Pool) *ServiceClientRepository {
 }
 
 const serviceClientColumns = `
-	c.id, c.nombre, c.client_id, c.secret_hash, c.estado, c.created_at, c.last_used_at, c.revoked_at,
+	c.id, c.nombre, c.client_id, c.secret_hash, c.estado, c.created_at, c.last_used_at, c.revoked_at, c.audiencia,
 	COALESCE(ARRAY(
 		SELECT p.codigo FROM service_client_permissions scp
 		JOIN permissions p ON p.id = scp.permission_id
@@ -52,7 +54,7 @@ const serviceClientColumns = `
 
 func scanServiceClient(row pgx.Row) (*ServiceClient, error) {
 	var c ServiceClient
-	err := row.Scan(&c.ID, &c.Nombre, &c.ClientID, &c.SecretHash, &c.Estado, &c.CreatedAt, &c.LastUsedAt, &c.RevokedAt, &c.Permisos)
+	err := row.Scan(&c.ID, &c.Nombre, &c.ClientID, &c.SecretHash, &c.Estado, &c.CreatedAt, &c.LastUsedAt, &c.RevokedAt, &c.Audiencia, &c.Permisos)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrServiceClientNotFound
 	}
@@ -64,7 +66,7 @@ func scanServiceClient(row pgx.Row) (*ServiceClient, error) {
 
 // Create registra el cliente y sus permisos en una sola transacción.
 // createdBy es el usuario administrador autenticado.
-func (r *ServiceClientRepository) Create(ctx context.Context, nombre, clientID string, secretHash []byte, createdBy string, permisos []string) (*ServiceClient, error) {
+func (r *ServiceClientRepository) Create(ctx context.Context, nombre, clientID string, secretHash []byte, createdBy string, permisos []string, audiencia string) (*ServiceClient, error) {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return nil, err
@@ -73,10 +75,10 @@ func (r *ServiceClientRepository) Create(ctx context.Context, nombre, clientID s
 
 	var id string
 	if err := tx.QueryRow(ctx, `
-		INSERT INTO service_clients (nombre, client_id, secret_hash, created_by)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO service_clients (nombre, client_id, secret_hash, created_by, audiencia)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
-	`, nombre, clientID, secretHash, createdBy).Scan(&id); err != nil {
+	`, nombre, clientID, secretHash, createdBy, audiencia).Scan(&id); err != nil {
 		return nil, err
 	}
 

@@ -37,6 +37,27 @@ func IsValidTipo(value string) bool {
 	return tiposDerivacion[value]
 }
 
+// Tipos de MOVIMIENTO (A + B): solo los crea Expedientes Service y llegan
+// por la proyección (AplicarMovimiento); nunca por CrearDerivacion.
+var tiposMovimiento = map[string]bool{
+	"DERIVACION": true, "RECHAZO": true, "CAMBIO_ESTADO": true, "RESOLUCION": true, "CORRECCION": true,
+}
+
+func IsValidTipoMovimiento(value string) bool {
+	return tiposMovimiento[value]
+}
+
+// IsValidTipoHistorial: filtro del historial unificado (anotaciones y movimientos).
+func IsValidTipoHistorial(value string) bool {
+	return tiposDerivacion[value] || tiposMovimiento[value]
+}
+
+var estadosValidos = map[string]bool{"PENDIENTE": true, "EN_PROCESO": true, "ATENDIDO": true, "OBSERVADO": true}
+
+func IsValidEstado(value string) bool {
+	return estadosValidos[value]
+}
+
 // areasValidas refleja el mismo catálogo de áreas de Expedientes Service
 // (internal/estados.IsValidArea) — no importable directamente (paquete
 // "internal" de otro módulo Go), así que se duplica el valor, no la

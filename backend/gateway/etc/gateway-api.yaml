@@ -7,6 +7,8 @@ AuthRpc:
 
 ExpedientesRpc:
   Target: 127.0.0.1:8082
+  # A + B: por debajo del timeout REST (3000 ms) y del servidor de Expedientes (3000 ms).
+  Timeout: 2500
 
 UsuariosRpc:
   Target: 127.0.0.1:8083

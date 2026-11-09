@@ -3,6 +3,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { crearDerivacion, getDerivacionesByExpediente } from "../../services/derivacionesService";
 import { derivarExpediente } from "../../services/expedientesService";
+import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { friendlyErrorMessage } from "../../utils/apiErrors";
 import { formatDateTime } from "../../utils/format";
 import { TIPOS_DERIVACION } from "../../constants/derivaciones";
@@ -15,9 +16,44 @@ function tipoLabel(value) {
     return TIPOS_DERIVACION.find((item) => item.value === value)?.label ?? value;
 }
 
+// Historial unificado (A + B): movimientos reales del expediente, anotaciones
+// y registros anteriores a A + B (sin verificación).
+const TIPOS_MOVIMIENTO = {
+    DERIVACION: "Derivación",
+    RECHAZO: "Rechazo",
+    CAMBIO_ESTADO: "Cambio de estado",
+    RESOLUCION: "Resolución",
+    CORRECCION: "Corrección",
+};
+
+function etiquetaHistorial(item) {
+    if (item.clase === "MOVIMIENTO") {
+        return TIPOS_MOVIMIENTO[item.tipo] ?? item.tipo;
+    }
+    if (item.clase === "LEGADO") {
+        return "Registro anterior";
+    }
+    return tipoLabel(item.tipo);
+}
+
+function recorridoHistorial(item) {
+    if (item.clase !== "MOVIMIENTO") {
+        return `${item.origen} → ${item.destino}`;
+    }
+    if (item.origen === item.destino) {
+        return `En ${roleLabel(item.origen)}`;
+    }
+    return `${roleLabel(item.origen)} → ${roleLabel(item.destino)}`;
+}
+
 const CAMPOS_INICIALES = { tipo: "DERIVACION", destino: "", motivo: "", condicion: "" };
 
-function DerivacionesPanel({ expedienteId }) {
+// areaActual: el área que ve el usuario (origen esperado de la derivación).
+// onMovimiento(data): el detalle actualiza el expediente; devuelve true si
+// navegó fuera (el usuario ya no puede verlo tras derivarlo).
+// onConflicto(): el expediente cambió entretanto (409): el detalle lo recarga.
+function DerivacionesPanel({ expedienteId, areaActual, onMovimiento, onConflicto }) {
+    const claves = useClaveIdempotente();
     const { user } = useAuth();
     const { can } = usePermissions();
     const canCreate = can("derivaciones.create");
@@ -89,11 +125,24 @@ function DerivacionesPanel({ expedienteId }) {
             // área por separado: el backend valida la transición y hace
             // ambas cosas de forma atómica-como-se-puede.
             if (campos.tipo === "DERIVACION") {
-                await derivarExpediente(expedienteId, {
-                    areaDestino: campos.destino,
-                    motivo: campos.motivo,
-                    condicion: campos.condicion,
-                });
+                const firma = [expedienteId, campos.destino, areaActual, campos.motivo, campos.condicion].join("|");
+                const data = await derivarExpediente(
+                    expedienteId,
+                    {
+                        areaDestino: campos.destino,
+                        areaOrigenEsperada: areaActual,
+                        motivo: campos.motivo,
+                        condicion: campos.condicion,
+                    },
+                    claves.obtener("derivar", firma)
+                );
+                claves.descartar("derivar");
+                setCampos(CAMPOS_INICIALES);
+                if (onMovimiento?.(data)) {
+                    return;
+                }
+                await load();
+                return;
             } else {
                 await crearDerivacion(expedienteId, { ...campos, origen: origenActual });
             }
@@ -102,6 +151,9 @@ function DerivacionesPanel({ expedienteId }) {
             await load();
         } catch (err) {
             setCreateError(friendlyErrorMessage(err));
+            if (err?.response?.status === 409) {
+                onConflicto?.();
+            }
         } finally {
             setCreando(false);
         }
@@ -195,10 +247,13 @@ function DerivacionesPanel({ expedienteId }) {
                                         <Icon name="share" size={18} />
                                         <div>
                                             <p className="dp-documentos-nombre">
-                                                {item.origen} → {item.destino}
+                                                {recorridoHistorial(item)}
                                             </p>
                                             <p className="dp-documentos-meta">
-                                                {tipoLabel(item.tipo)}
+                                                {etiquetaHistorial(item)}
+                                                {item.clase === "MOVIMIENTO" && item.estado_anterior !== item.estado_nuevo
+                                                    ? ` · ${item.estado_anterior} → ${item.estado_nuevo}`
+                                                    : ""}
                                                 {item.motivo ? ` · ${item.motivo}` : ""}
                                                 {item.condicion ? ` · ${item.condicion}` : ""} ·{" "}
                                                 {formatDateTime(item.fecha_registro)}

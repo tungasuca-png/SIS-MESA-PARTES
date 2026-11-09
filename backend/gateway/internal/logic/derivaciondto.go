@@ -20,5 +20,11 @@ func toDerivacionDTO(d *derivacionesclient.Derivacion) types.DerivacionDTO {
 		Condicion:     d.Condicion,
 		RegistradoPor: d.RegistradoPor,
 		FechaRegistro: d.FechaRegistro,
+		// Historial unificado (A + B).
+		Clase:          d.Clase,
+		Secuencia:      d.Secuencia,
+		EstadoAnterior: d.EstadoAnterior,
+		EstadoNuevo:    d.EstadoNuevo,
+		ActorRol:       d.ActorRol,
 	}
 }

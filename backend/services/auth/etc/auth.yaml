@@ -26,6 +26,10 @@ ServiceJWTSecret: ${SERVICE_JWT_SECRET}
 ServiceTokenIssuer: tungasuca-auth
 ServiceTokenAudience: estudiantes
 ServiceTokenDuration: 5m
+# A + B: audiencia derivaciones (publicador de Expedientes). Secreto EXCLUSIVO
+# de esa audiencia, distinto de SERVICE_JWT_SECRET y de JWT_SECRET; solo en
+# backend/.env. Vacío = audiencia derivaciones deshabilitada.
+ServiceJWTSecretDerivaciones: "${SERVICE_JWT_SECRET_DERIVACIONES}"
 
 # Acceso con Google (solo SOLICITANTES). Valores en backend/.env; sin ellos el
 # acceso con Google responde "no configurado" y el login por DNI no cambia.

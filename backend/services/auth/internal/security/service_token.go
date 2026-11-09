@@ -193,3 +193,73 @@ func ValidClientIDFormat(clientID string) bool {
 	_, err := hex.DecodeString(clientID[len(clientIDPrefix):])
 	return err == nil
 }
+
+// ---------------------------------------------------------------------------
+// Audiencias (A + B): cada cliente de servicio pertenece a UNA audiencia y Auth
+// firma su token con el secreto EXCLUSIVO de esa audiencia. Cada servicio
+// receptor conoce solo su secreto: no puede emitir ni aceptar tokens de otra.
+
+const (
+	AudienciaEstudiantes  = "estudiantes"
+	AudienciaDerivaciones = "derivaciones"
+)
+
+// AssignableServicePermissionsDerivaciones: único permiso de un sistema de la
+// audiencia derivaciones (el publicador de Expedientes).
+var AssignableServicePermissionsDerivaciones = map[string]bool{
+	"derivaciones.proyectar": true,
+}
+
+// PermisosAsignables devuelve el filtro de scope de una audiencia ("" =
+// estudiantes, por compatibilidad con los clientes anteriores a la 027).
+func PermisosAsignables(audiencia string) map[string]bool {
+	switch audiencia {
+	case "", AudienciaEstudiantes:
+		return AssignableServicePermissions
+	case AudienciaDerivaciones:
+		return AssignableServicePermissionsDerivaciones
+	}
+	return map[string]bool{}
+}
+
+// PermisosDeAlta: permisos con los que se puede REGISTRAR un sistema nuevo de
+// cada audiencia (estudiantes: solo lecturas mínimas, como hasta ahora).
+func PermisosDeAlta(audiencia string) map[string]bool {
+	switch audiencia {
+	case "", AudienciaEstudiantes:
+		return GrantableServicePermissions
+	case AudienciaDerivaciones:
+		return AssignableServicePermissionsDerivaciones
+	}
+	return map[string]bool{}
+}
+
+func AudienciaValida(audiencia string) bool {
+	return audiencia == AudienciaEstudiantes || audiencia == AudienciaDerivaciones
+}
+
+// EmisorServicio elige el emisor de una audiencia (nil = no habilitada).
+type EmisorServicio interface {
+	Para(audiencia string) *ServiceTokenIssuer
+}
+
+// Para: un emisor solo firma para su propia audiencia.
+func (i *ServiceTokenIssuer) Para(audiencia string) *ServiceTokenIssuer {
+	if audiencia == "" {
+		audiencia = AudienciaEstudiantes
+	}
+	if i == nil || i.audience != audiencia {
+		return nil
+	}
+	return i
+}
+
+// EmisoresServicio: un emisor por audiencia habilitada.
+type EmisoresServicio map[string]*ServiceTokenIssuer
+
+func (e EmisoresServicio) Para(audiencia string) *ServiceTokenIssuer {
+	if audiencia == "" {
+		audiencia = AudienciaEstudiantes
+	}
+	return e[audiencia]
+}

@@ -3,9 +3,11 @@ package interceptor
 import (
 	"context"
 	"strings"
+	"time"
 
 	"derivaciones/internal/security"
 
+	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -25,11 +27,31 @@ type userContext struct {
 	Token string
 }
 
+// MetodoAplicarMovimiento: ÚNICO RPC que acepta tokens de servicio (A + B).
+// Solo el publicador de Expedientes lo invoca; ningún token de usuario
+// (tampoco ADMIN) puede usarlo, y ningún token de servicio puede usar los
+// demás RPC.
+const MetodoAplicarMovimiento = "/derivaciones.Derivaciones/AplicarMovimiento"
+
+type servicioKey struct{}
+
+// Servicio identifica al sistema que invocó AplicarMovimiento.
+type Servicio struct {
+	ID       string
+	ClientID string
+}
+
 // AuthenticationInterceptor exige un access token válido en la metadata
 // "authorization" para TODAS las operaciones de Derivaciones: al igual que
 // Expedientes/Documentos, este microservicio no tiene métodos públicos.
-func AuthenticationInterceptor(validator *security.JWTValidator) grpc.UnaryServerInterceptor {
+// AplicarMovimiento exige además un token de servicio con audiencia
+// derivaciones y scope derivaciones.proyectar (serviceValidator nil = el
+// RPC queda deshabilitado).
+func AuthenticationInterceptor(validator *security.JWTValidator, serviceValidator *security.ServiceTokenValidator) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		if info.FullMethod == MetodoAplicarMovimiento {
+			return autenticarServicio(ctx, req, info, handler, serviceValidator)
+		}
 		userID, role, token, err := authenticate(ctx, validator)
 		if err != nil {
 			return nil, err
@@ -37,6 +59,53 @@ func AuthenticationInterceptor(validator *security.JWTValidator) grpc.UnaryServe
 
 		return handler(context.WithValue(ctx, contextKey{}, userContext{UserID: userID, Role: role, Token: token}), req)
 	}
+}
+
+func autenticarServicio(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler, v *security.ServiceTokenValidator) (any, error) {
+	inicio := time.Now()
+	raw, err := bearer(ctx)
+	if err != nil {
+		return nil, err
+	}
+	claims, err := v.Validate(raw)
+	if err != nil {
+		logx.WithContext(ctx).Infow("token de servicio rechazado", logx.Field("operacion", info.FullMethod))
+		return nil, status.Error(codes.Unauthenticated, "token de servicio inválido")
+	}
+	if !claims.TienePermiso(security.ScopeProyectar) {
+		return nil, status.Error(codes.PermissionDenied, "el sistema no tiene el permiso derivaciones.proyectar")
+	}
+	resp, err := handler(context.WithValue(ctx, servicioKey{}, Servicio{ID: claims.Subject, ClientID: claims.ClientID}), req)
+	logx.WithContext(ctx).Infow("acceso de sistema consumidor",
+		logx.Field("sistema_id", claims.Subject),
+		logx.Field("client_id", claims.ClientID),
+		logx.Field("operacion", info.FullMethod),
+		logx.Field("resultado", status.Code(err).String()),
+		logx.Field("duracion_ms", time.Since(inicio).Milliseconds()),
+	)
+	return resp, err
+}
+
+// ServicioFromContext expone el sistema autenticado (solo en AplicarMovimiento).
+func ServicioFromContext(ctx context.Context) (Servicio, bool) {
+	s, ok := ctx.Value(servicioKey{}).(Servicio)
+	return s, ok && s.ID != ""
+}
+
+func bearer(ctx context.Context) (string, error) {
+	values, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", status.Error(codes.Unauthenticated, "falta el token de acceso")
+	}
+	authValues := values.Get("authorization")
+	if len(authValues) == 0 {
+		return "", status.Error(codes.Unauthenticated, "falta el token de acceso")
+	}
+	parts := strings.Fields(authValues[0])
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "bearer") {
+		return "", status.Error(codes.Unauthenticated, "token de acceso inválido")
+	}
+	return parts[1], nil
 }
 
 func authenticate(ctx context.Context, validator *security.JWTValidator) (string, string, string, error) {

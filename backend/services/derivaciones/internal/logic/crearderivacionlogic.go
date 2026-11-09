@@ -58,6 +58,12 @@ func (l *CrearDerivacionLogic) CrearDerivacion(in *derivaciones.CrearDerivacionR
 	if !validation.IsValidTipo(tipo) {
 		return nil, status.Error(codes.InvalidArgument, "el tipo de derivación no es válido")
 	}
+	// A + B: los movimientos (tipo DERIVACION) los registra Expedientes en la
+	// misma transacción que el cambio de área y llegan por la proyección.
+	// Aquí solo se registran anotaciones (la base también lo impide).
+	if tipo == validation.TipoDerivacion {
+		return nil, status.Error(codes.InvalidArgument, "las derivaciones se registran con la operación derivar del expediente; aquí solo se aceptan anotaciones")
+	}
 
 	// origen/destino siempre representan áreas (la comparación contra
 	// areaActual, más abajo, ya lo asume así para CUALQUIER tipo) — antes

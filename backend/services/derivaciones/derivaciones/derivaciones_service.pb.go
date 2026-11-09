@@ -21,6 +21,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type AplicarMovimientoResponse_Resultado int32
+
+const (
+	AplicarMovimientoResponse_RESULTADO_DESCONOCIDO AplicarMovimientoResponse_Resultado = 0
+	AplicarMovimientoResponse_APLICADO              AplicarMovimientoResponse_Resultado = 1
+	AplicarMovimientoResponse_DUPLICADO             AplicarMovimientoResponse_Resultado = 2
+)
+
+// Enum value maps for AplicarMovimientoResponse_Resultado.
+var (
+	AplicarMovimientoResponse_Resultado_name = map[int32]string{
+		0: "RESULTADO_DESCONOCIDO",
+		1: "APLICADO",
+		2: "DUPLICADO",
+	}
+	AplicarMovimientoResponse_Resultado_value = map[string]int32{
+		"RESULTADO_DESCONOCIDO": 0,
+		"APLICADO":              1,
+		"DUPLICADO":             2,
+	}
+)
+
+func (x AplicarMovimientoResponse_Resultado) Enum() *AplicarMovimientoResponse_Resultado {
+	p := new(AplicarMovimientoResponse_Resultado)
+	*p = x
+	return p
+}
+
+func (x AplicarMovimientoResponse_Resultado) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AplicarMovimientoResponse_Resultado) Descriptor() protoreflect.EnumDescriptor {
+	return file_derivaciones_service_proto_enumTypes[0].Descriptor()
+}
+
+func (AplicarMovimientoResponse_Resultado) Type() protoreflect.EnumType {
+	return &file_derivaciones_service_proto_enumTypes[0]
+}
+
+func (x AplicarMovimientoResponse_Resultado) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AplicarMovimientoResponse_Resultado.Descriptor instead.
+func (AplicarMovimientoResponse_Resultado) EnumDescriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{3, 0}
+}
+
 type Derivacion struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -32,8 +81,16 @@ type Derivacion struct {
 	Condicion     string                 `protobuf:"bytes,7,opt,name=condicion,proto3" json:"condicion,omitempty"`
 	RegistradoPor string                 `protobuf:"bytes,8,opt,name=registrado_por,json=registradoPor,proto3" json:"registrado_por,omitempty"`
 	FechaRegistro string                 `protobuf:"bytes,9,opt,name=fecha_registro,json=fechaRegistro,proto3" json:"fecha_registro,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Historial unificado (A + B): MOVIMIENTO (proyección de Expedientes),
+	// ANOTACION (notificación, asignación, recepción, aprobación) o LEGADO
+	// (derivaciones anteriores a A + B, sin verificación).
+	Clase          string `protobuf:"bytes,10,opt,name=clase,proto3" json:"clase,omitempty"`
+	Secuencia      int32  `protobuf:"varint,11,opt,name=secuencia,proto3" json:"secuencia,omitempty"`                                // solo MOVIMIENTO
+	EstadoAnterior string `protobuf:"bytes,12,opt,name=estado_anterior,json=estadoAnterior,proto3" json:"estado_anterior,omitempty"` // solo MOVIMIENTO
+	EstadoNuevo    string `protobuf:"bytes,13,opt,name=estado_nuevo,json=estadoNuevo,proto3" json:"estado_nuevo,omitempty"`          // solo MOVIMIENTO
+	ActorRol       string `protobuf:"bytes,14,opt,name=actor_rol,json=actorRol,proto3" json:"actor_rol,omitempty"`                   // solo MOVIMIENTO
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Derivacion) Reset() {
@@ -129,6 +186,275 @@ func (x *Derivacion) GetFechaRegistro() string {
 	return ""
 }
 
+func (x *Derivacion) GetClase() string {
+	if x != nil {
+		return x.Clase
+	}
+	return ""
+}
+
+func (x *Derivacion) GetSecuencia() int32 {
+	if x != nil {
+		return x.Secuencia
+	}
+	return 0
+}
+
+func (x *Derivacion) GetEstadoAnterior() string {
+	if x != nil {
+		return x.EstadoAnterior
+	}
+	return ""
+}
+
+func (x *Derivacion) GetEstadoNuevo() string {
+	if x != nil {
+		return x.EstadoNuevo
+	}
+	return ""
+}
+
+func (x *Derivacion) GetActorRol() string {
+	if x != nil {
+		return x.ActorRol
+	}
+	return ""
+}
+
+// Movimiento publicado por Expedientes (fuente de verdad) vía Transactional
+// Outbox. ocurrido_en en RFC3339Nano UTC tal como lo guardó PostgreSQL.
+type MovimientoProyectado struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	MovimientoId   string                 `protobuf:"bytes,1,opt,name=movimiento_id,json=movimientoId,proto3" json:"movimiento_id,omitempty"`
+	ExpedienteId   string                 `protobuf:"bytes,2,opt,name=expediente_id,json=expedienteId,proto3" json:"expediente_id,omitempty"`
+	Secuencia      int32                  `protobuf:"varint,3,opt,name=secuencia,proto3" json:"secuencia,omitempty"`
+	Tipo           string                 `protobuf:"bytes,4,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	ActorId        string                 `protobuf:"bytes,5,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
+	ActorRol       string                 `protobuf:"bytes,6,opt,name=actor_rol,json=actorRol,proto3" json:"actor_rol,omitempty"`
+	AreaOrigen     string                 `protobuf:"bytes,7,opt,name=area_origen,json=areaOrigen,proto3" json:"area_origen,omitempty"`
+	AreaDestino    string                 `protobuf:"bytes,8,opt,name=area_destino,json=areaDestino,proto3" json:"area_destino,omitempty"`
+	EstadoAnterior string                 `protobuf:"bytes,9,opt,name=estado_anterior,json=estadoAnterior,proto3" json:"estado_anterior,omitempty"`
+	EstadoNuevo    string                 `protobuf:"bytes,10,opt,name=estado_nuevo,json=estadoNuevo,proto3" json:"estado_nuevo,omitempty"`
+	Motivo         string                 `protobuf:"bytes,11,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	Condicion      string                 `protobuf:"bytes,12,opt,name=condicion,proto3" json:"condicion,omitempty"`
+	OcurridoEn     string                 `protobuf:"bytes,13,opt,name=ocurrido_en,json=ocurridoEn,proto3" json:"ocurrido_en,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *MovimientoProyectado) Reset() {
+	*x = MovimientoProyectado{}
+	mi := &file_derivaciones_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MovimientoProyectado) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MovimientoProyectado) ProtoMessage() {}
+
+func (x *MovimientoProyectado) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MovimientoProyectado.ProtoReflect.Descriptor instead.
+func (*MovimientoProyectado) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *MovimientoProyectado) GetMovimientoId() string {
+	if x != nil {
+		return x.MovimientoId
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetExpedienteId() string {
+	if x != nil {
+		return x.ExpedienteId
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetSecuencia() int32 {
+	if x != nil {
+		return x.Secuencia
+	}
+	return 0
+}
+
+func (x *MovimientoProyectado) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetActorId() string {
+	if x != nil {
+		return x.ActorId
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetActorRol() string {
+	if x != nil {
+		return x.ActorRol
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetAreaOrigen() string {
+	if x != nil {
+		return x.AreaOrigen
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetAreaDestino() string {
+	if x != nil {
+		return x.AreaDestino
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetEstadoAnterior() string {
+	if x != nil {
+		return x.EstadoAnterior
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetEstadoNuevo() string {
+	if x != nil {
+		return x.EstadoNuevo
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetMotivo() string {
+	if x != nil {
+		return x.Motivo
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetCondicion() string {
+	if x != nil {
+		return x.Condicion
+	}
+	return ""
+}
+
+func (x *MovimientoProyectado) GetOcurridoEn() string {
+	if x != nil {
+		return x.OcurridoEn
+	}
+	return ""
+}
+
+type AplicarMovimientoRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Movimiento    *MovimientoProyectado  `protobuf:"bytes,1,opt,name=movimiento,proto3" json:"movimiento,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AplicarMovimientoRequest) Reset() {
+	*x = AplicarMovimientoRequest{}
+	mi := &file_derivaciones_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AplicarMovimientoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AplicarMovimientoRequest) ProtoMessage() {}
+
+func (x *AplicarMovimientoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AplicarMovimientoRequest.ProtoReflect.Descriptor instead.
+func (*AplicarMovimientoRequest) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AplicarMovimientoRequest) GetMovimiento() *MovimientoProyectado {
+	if x != nil {
+		return x.Movimiento
+	}
+	return nil
+}
+
+// APLICADO: insertado. DUPLICADO: ya estaba, idéntico campo a campo.
+// Errores: Aborted = falta la secuencia anterior (reintentable);
+// FailedPrecondition = divergente (mismo id con otro contenido, u otro id con
+// la misma secuencia: permanente); InvalidArgument = mensaje inválido.
+type AplicarMovimientoResponse struct {
+	state         protoimpl.MessageState              `protogen:"open.v1"`
+	Resultado     AplicarMovimientoResponse_Resultado `protobuf:"varint,1,opt,name=resultado,proto3,enum=derivaciones.AplicarMovimientoResponse_Resultado" json:"resultado,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AplicarMovimientoResponse) Reset() {
+	*x = AplicarMovimientoResponse{}
+	mi := &file_derivaciones_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AplicarMovimientoResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AplicarMovimientoResponse) ProtoMessage() {}
+
+func (x *AplicarMovimientoResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_derivaciones_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AplicarMovimientoResponse.ProtoReflect.Descriptor instead.
+func (*AplicarMovimientoResponse) Descriptor() ([]byte, []int) {
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *AplicarMovimientoResponse) GetResultado() AplicarMovimientoResponse_Resultado {
+	if x != nil {
+		return x.Resultado
+	}
+	return AplicarMovimientoResponse_RESULTADO_DESCONOCIDO
+}
+
 type CrearDerivacionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExpedienteId  string                 `protobuf:"bytes,1,opt,name=expediente_id,json=expedienteId,proto3" json:"expediente_id,omitempty"`
@@ -143,7 +469,7 @@ type CrearDerivacionRequest struct {
 
 func (x *CrearDerivacionRequest) Reset() {
 	*x = CrearDerivacionRequest{}
-	mi := &file_derivaciones_service_proto_msgTypes[1]
+	mi := &file_derivaciones_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -155,7 +481,7 @@ func (x *CrearDerivacionRequest) String() string {
 func (*CrearDerivacionRequest) ProtoMessage() {}
 
 func (x *CrearDerivacionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[1]
+	mi := &file_derivaciones_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -168,7 +494,7 @@ func (x *CrearDerivacionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CrearDerivacionRequest.ProtoReflect.Descriptor instead.
 func (*CrearDerivacionRequest) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{1}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CrearDerivacionRequest) GetExpedienteId() string {
@@ -222,7 +548,7 @@ type CrearDerivacionResponse struct {
 
 func (x *CrearDerivacionResponse) Reset() {
 	*x = CrearDerivacionResponse{}
-	mi := &file_derivaciones_service_proto_msgTypes[2]
+	mi := &file_derivaciones_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -234,7 +560,7 @@ func (x *CrearDerivacionResponse) String() string {
 func (*CrearDerivacionResponse) ProtoMessage() {}
 
 func (x *CrearDerivacionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[2]
+	mi := &file_derivaciones_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -247,7 +573,7 @@ func (x *CrearDerivacionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CrearDerivacionResponse.ProtoReflect.Descriptor instead.
 func (*CrearDerivacionResponse) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{2}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CrearDerivacionResponse) GetDerivacion() *Derivacion {
@@ -266,7 +592,7 @@ type GetDerivacionRequest struct {
 
 func (x *GetDerivacionRequest) Reset() {
 	*x = GetDerivacionRequest{}
-	mi := &file_derivaciones_service_proto_msgTypes[3]
+	mi := &file_derivaciones_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -278,7 +604,7 @@ func (x *GetDerivacionRequest) String() string {
 func (*GetDerivacionRequest) ProtoMessage() {}
 
 func (x *GetDerivacionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[3]
+	mi := &file_derivaciones_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -291,7 +617,7 @@ func (x *GetDerivacionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDerivacionRequest.ProtoReflect.Descriptor instead.
 func (*GetDerivacionRequest) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{3}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetDerivacionRequest) GetId() string {
@@ -310,7 +636,7 @@ type GetDerivacionResponse struct {
 
 func (x *GetDerivacionResponse) Reset() {
 	*x = GetDerivacionResponse{}
-	mi := &file_derivaciones_service_proto_msgTypes[4]
+	mi := &file_derivaciones_service_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -322,7 +648,7 @@ func (x *GetDerivacionResponse) String() string {
 func (*GetDerivacionResponse) ProtoMessage() {}
 
 func (x *GetDerivacionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[4]
+	mi := &file_derivaciones_service_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -335,7 +661,7 @@ func (x *GetDerivacionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDerivacionResponse.ProtoReflect.Descriptor instead.
 func (*GetDerivacionResponse) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{4}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetDerivacionResponse) GetDerivacion() *Derivacion {
@@ -360,7 +686,7 @@ type ListDerivacionesRequest struct {
 
 func (x *ListDerivacionesRequest) Reset() {
 	*x = ListDerivacionesRequest{}
-	mi := &file_derivaciones_service_proto_msgTypes[5]
+	mi := &file_derivaciones_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -372,7 +698,7 @@ func (x *ListDerivacionesRequest) String() string {
 func (*ListDerivacionesRequest) ProtoMessage() {}
 
 func (x *ListDerivacionesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[5]
+	mi := &file_derivaciones_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -385,7 +711,7 @@ func (x *ListDerivacionesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDerivacionesRequest.ProtoReflect.Descriptor instead.
 func (*ListDerivacionesRequest) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{5}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListDerivacionesRequest) GetExpedienteId() string {
@@ -426,7 +752,7 @@ type ListDerivacionesResponse struct {
 
 func (x *ListDerivacionesResponse) Reset() {
 	*x = ListDerivacionesResponse{}
-	mi := &file_derivaciones_service_proto_msgTypes[6]
+	mi := &file_derivaciones_service_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -438,7 +764,7 @@ func (x *ListDerivacionesResponse) String() string {
 func (*ListDerivacionesResponse) ProtoMessage() {}
 
 func (x *ListDerivacionesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[6]
+	mi := &file_derivaciones_service_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +777,7 @@ func (x *ListDerivacionesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDerivacionesResponse.ProtoReflect.Descriptor instead.
 func (*ListDerivacionesResponse) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{6}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListDerivacionesResponse) GetDerivaciones() []*Derivacion {
@@ -489,7 +815,7 @@ type ReporteDerivacionesRequest struct {
 
 func (x *ReporteDerivacionesRequest) Reset() {
 	*x = ReporteDerivacionesRequest{}
-	mi := &file_derivaciones_service_proto_msgTypes[7]
+	mi := &file_derivaciones_service_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -501,7 +827,7 @@ func (x *ReporteDerivacionesRequest) String() string {
 func (*ReporteDerivacionesRequest) ProtoMessage() {}
 
 func (x *ReporteDerivacionesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[7]
+	mi := &file_derivaciones_service_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -514,7 +840,7 @@ func (x *ReporteDerivacionesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteDerivacionesRequest.ProtoReflect.Descriptor instead.
 func (*ReporteDerivacionesRequest) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{7}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ReporteDerivacionesRequest) GetDesde() string {
@@ -562,7 +888,7 @@ type ReporteDerivConteo struct {
 
 func (x *ReporteDerivConteo) Reset() {
 	*x = ReporteDerivConteo{}
-	mi := &file_derivaciones_service_proto_msgTypes[8]
+	mi := &file_derivaciones_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -574,7 +900,7 @@ func (x *ReporteDerivConteo) String() string {
 func (*ReporteDerivConteo) ProtoMessage() {}
 
 func (x *ReporteDerivConteo) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[8]
+	mi := &file_derivaciones_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -587,7 +913,7 @@ func (x *ReporteDerivConteo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteDerivConteo.ProtoReflect.Descriptor instead.
 func (*ReporteDerivConteo) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{8}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ReporteDerivConteo) GetClave() string {
@@ -615,7 +941,7 @@ type ReporteDerivFlujo struct {
 
 func (x *ReporteDerivFlujo) Reset() {
 	*x = ReporteDerivFlujo{}
-	mi := &file_derivaciones_service_proto_msgTypes[9]
+	mi := &file_derivaciones_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -627,7 +953,7 @@ func (x *ReporteDerivFlujo) String() string {
 func (*ReporteDerivFlujo) ProtoMessage() {}
 
 func (x *ReporteDerivFlujo) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[9]
+	mi := &file_derivaciones_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -640,7 +966,7 @@ func (x *ReporteDerivFlujo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteDerivFlujo.ProtoReflect.Descriptor instead.
 func (*ReporteDerivFlujo) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{9}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ReporteDerivFlujo) GetOrigen() string {
@@ -695,7 +1021,7 @@ type ReporteDerivacionesResponse struct {
 
 func (x *ReporteDerivacionesResponse) Reset() {
 	*x = ReporteDerivacionesResponse{}
-	mi := &file_derivaciones_service_proto_msgTypes[10]
+	mi := &file_derivaciones_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -707,7 +1033,7 @@ func (x *ReporteDerivacionesResponse) String() string {
 func (*ReporteDerivacionesResponse) ProtoMessage() {}
 
 func (x *ReporteDerivacionesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_derivaciones_service_proto_msgTypes[10]
+	mi := &file_derivaciones_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -720,7 +1046,7 @@ func (x *ReporteDerivacionesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteDerivacionesResponse.ProtoReflect.Descriptor instead.
 func (*ReporteDerivacionesResponse) Descriptor() ([]byte, []int) {
-	return file_derivaciones_service_proto_rawDescGZIP(), []int{10}
+	return file_derivaciones_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ReporteDerivacionesResponse) GetTotal() int32 {
@@ -825,7 +1151,7 @@ var File_derivaciones_service_proto protoreflect.FileDescriptor
 
 const file_derivaciones_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aderivaciones_service.proto\x12\fderivaciones\"\x8b\x02\n" +
+	"\x1aderivaciones_service.proto\x12\fderivaciones\"\xa8\x03\n" +
 	"\n" +
 	"Derivacion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
@@ -836,7 +1162,40 @@ const file_derivaciones_service_proto_rawDesc = "" +
 	"\x06motivo\x18\x06 \x01(\tR\x06motivo\x12\x1c\n" +
 	"\tcondicion\x18\a \x01(\tR\tcondicion\x12%\n" +
 	"\x0eregistrado_por\x18\b \x01(\tR\rregistradoPor\x12%\n" +
-	"\x0efecha_registro\x18\t \x01(\tR\rfechaRegistro\"\xb9\x01\n" +
+	"\x0efecha_registro\x18\t \x01(\tR\rfechaRegistro\x12\x14\n" +
+	"\x05clase\x18\n" +
+	" \x01(\tR\x05clase\x12\x1c\n" +
+	"\tsecuencia\x18\v \x01(\x05R\tsecuencia\x12'\n" +
+	"\x0festado_anterior\x18\f \x01(\tR\x0eestadoAnterior\x12!\n" +
+	"\festado_nuevo\x18\r \x01(\tR\vestadoNuevo\x12\x1b\n" +
+	"\tactor_rol\x18\x0e \x01(\tR\bactorRol\"\xb1\x03\n" +
+	"\x14MovimientoProyectado\x12#\n" +
+	"\rmovimiento_id\x18\x01 \x01(\tR\fmovimientoId\x12#\n" +
+	"\rexpediente_id\x18\x02 \x01(\tR\fexpedienteId\x12\x1c\n" +
+	"\tsecuencia\x18\x03 \x01(\x05R\tsecuencia\x12\x12\n" +
+	"\x04tipo\x18\x04 \x01(\tR\x04tipo\x12\x19\n" +
+	"\bactor_id\x18\x05 \x01(\tR\aactorId\x12\x1b\n" +
+	"\tactor_rol\x18\x06 \x01(\tR\bactorRol\x12\x1f\n" +
+	"\varea_origen\x18\a \x01(\tR\n" +
+	"areaOrigen\x12!\n" +
+	"\farea_destino\x18\b \x01(\tR\vareaDestino\x12'\n" +
+	"\x0festado_anterior\x18\t \x01(\tR\x0eestadoAnterior\x12!\n" +
+	"\festado_nuevo\x18\n" +
+	" \x01(\tR\vestadoNuevo\x12\x16\n" +
+	"\x06motivo\x18\v \x01(\tR\x06motivo\x12\x1c\n" +
+	"\tcondicion\x18\f \x01(\tR\tcondicion\x12\x1f\n" +
+	"\vocurrido_en\x18\r \x01(\tR\n" +
+	"ocurridoEn\"^\n" +
+	"\x18AplicarMovimientoRequest\x12B\n" +
+	"\n" +
+	"movimiento\x18\x01 \x01(\v2\".derivaciones.MovimientoProyectadoR\n" +
+	"movimiento\"\xb1\x01\n" +
+	"\x19AplicarMovimientoResponse\x12O\n" +
+	"\tresultado\x18\x01 \x01(\x0e21.derivaciones.AplicarMovimientoResponse.ResultadoR\tresultado\"C\n" +
+	"\tResultado\x12\x19\n" +
+	"\x15RESULTADO_DESCONOCIDO\x10\x00\x12\f\n" +
+	"\bAPLICADO\x10\x01\x12\r\n" +
+	"\tDUPLICADO\x10\x02\"\xb9\x01\n" +
 	"\x16CrearDerivacionRequest\x12#\n" +
 	"\rexpediente_id\x18\x01 \x01(\tR\fexpedienteId\x12\x12\n" +
 	"\x04tipo\x18\x02 \x01(\tR\x04tipo\x12\x16\n" +
@@ -892,12 +1251,13 @@ const file_derivaciones_service_proto_rawDesc = "" +
 	"\bgenerado\x18\v \x01(\tR\bgenerado\x12\x18\n" +
 	"\aalcance\x18\f \x01(\tR\aalcance\x12!\n" +
 	"\farea_alcance\x18\r \x01(\tR\vareaAlcance\x12Z\n" +
-	"\x18derivaciones_por_usuario\x18\x0e \x03(\v2 .derivaciones.ReporteDerivConteoR\x16derivacionesPorUsuario2\x97\x03\n" +
+	"\x18derivaciones_por_usuario\x18\x0e \x03(\v2 .derivaciones.ReporteDerivConteoR\x16derivacionesPorUsuario2\xfd\x03\n" +
 	"\fDerivaciones\x12^\n" +
 	"\x0fCrearDerivacion\x12$.derivaciones.CrearDerivacionRequest\x1a%.derivaciones.CrearDerivacionResponse\x12X\n" +
 	"\rGetDerivacion\x12\".derivaciones.GetDerivacionRequest\x1a#.derivaciones.GetDerivacionResponse\x12a\n" +
 	"\x10ListDerivaciones\x12%.derivaciones.ListDerivacionesRequest\x1a&.derivaciones.ListDerivacionesResponse\x12j\n" +
-	"\x13ReporteDerivaciones\x12(.derivaciones.ReporteDerivacionesRequest\x1a).derivaciones.ReporteDerivacionesResponseB\x10Z\x0e./derivacionesb\x06proto3"
+	"\x13ReporteDerivaciones\x12(.derivaciones.ReporteDerivacionesRequest\x1a).derivaciones.ReporteDerivacionesResponse\x12d\n" +
+	"\x11AplicarMovimiento\x12&.derivaciones.AplicarMovimientoRequest\x1a'.derivaciones.AplicarMovimientoResponseB\x10Z\x0e./derivacionesb\x06proto3"
 
 var (
 	file_derivaciones_service_proto_rawDescOnce sync.Once
@@ -911,45 +1271,54 @@ func file_derivaciones_service_proto_rawDescGZIP() []byte {
 	return file_derivaciones_service_proto_rawDescData
 }
 
-var file_derivaciones_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_derivaciones_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_derivaciones_service_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_derivaciones_service_proto_goTypes = []any{
-	(*Derivacion)(nil),                  // 0: derivaciones.Derivacion
-	(*CrearDerivacionRequest)(nil),      // 1: derivaciones.CrearDerivacionRequest
-	(*CrearDerivacionResponse)(nil),     // 2: derivaciones.CrearDerivacionResponse
-	(*GetDerivacionRequest)(nil),        // 3: derivaciones.GetDerivacionRequest
-	(*GetDerivacionResponse)(nil),       // 4: derivaciones.GetDerivacionResponse
-	(*ListDerivacionesRequest)(nil),     // 5: derivaciones.ListDerivacionesRequest
-	(*ListDerivacionesResponse)(nil),    // 6: derivaciones.ListDerivacionesResponse
-	(*ReporteDerivacionesRequest)(nil),  // 7: derivaciones.ReporteDerivacionesRequest
-	(*ReporteDerivConteo)(nil),          // 8: derivaciones.ReporteDerivConteo
-	(*ReporteDerivFlujo)(nil),           // 9: derivaciones.ReporteDerivFlujo
-	(*ReporteDerivacionesResponse)(nil), // 10: derivaciones.ReporteDerivacionesResponse
+	(AplicarMovimientoResponse_Resultado)(0), // 0: derivaciones.AplicarMovimientoResponse.Resultado
+	(*Derivacion)(nil),                       // 1: derivaciones.Derivacion
+	(*MovimientoProyectado)(nil),             // 2: derivaciones.MovimientoProyectado
+	(*AplicarMovimientoRequest)(nil),         // 3: derivaciones.AplicarMovimientoRequest
+	(*AplicarMovimientoResponse)(nil),        // 4: derivaciones.AplicarMovimientoResponse
+	(*CrearDerivacionRequest)(nil),           // 5: derivaciones.CrearDerivacionRequest
+	(*CrearDerivacionResponse)(nil),          // 6: derivaciones.CrearDerivacionResponse
+	(*GetDerivacionRequest)(nil),             // 7: derivaciones.GetDerivacionRequest
+	(*GetDerivacionResponse)(nil),            // 8: derivaciones.GetDerivacionResponse
+	(*ListDerivacionesRequest)(nil),          // 9: derivaciones.ListDerivacionesRequest
+	(*ListDerivacionesResponse)(nil),         // 10: derivaciones.ListDerivacionesResponse
+	(*ReporteDerivacionesRequest)(nil),       // 11: derivaciones.ReporteDerivacionesRequest
+	(*ReporteDerivConteo)(nil),               // 12: derivaciones.ReporteDerivConteo
+	(*ReporteDerivFlujo)(nil),                // 13: derivaciones.ReporteDerivFlujo
+	(*ReporteDerivacionesResponse)(nil),      // 14: derivaciones.ReporteDerivacionesResponse
 }
 var file_derivaciones_service_proto_depIdxs = []int32{
-	0,  // 0: derivaciones.CrearDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
-	0,  // 1: derivaciones.GetDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
-	0,  // 2: derivaciones.ListDerivacionesResponse.derivaciones:type_name -> derivaciones.Derivacion
-	8,  // 3: derivaciones.ReporteDerivacionesResponse.por_destino:type_name -> derivaciones.ReporteDerivConteo
-	8,  // 4: derivaciones.ReporteDerivacionesResponse.por_origen:type_name -> derivaciones.ReporteDerivConteo
-	9,  // 5: derivaciones.ReporteDerivacionesResponse.flujo:type_name -> derivaciones.ReporteDerivFlujo
-	8,  // 6: derivaciones.ReporteDerivacionesResponse.por_tipo_tramite:type_name -> derivaciones.ReporteDerivConteo
-	8,  // 7: derivaciones.ReporteDerivacionesResponse.serie:type_name -> derivaciones.ReporteDerivConteo
-	8,  // 8: derivaciones.ReporteDerivacionesResponse.otros_movimientos:type_name -> derivaciones.ReporteDerivConteo
-	8,  // 9: derivaciones.ReporteDerivacionesResponse.registros_por_usuario:type_name -> derivaciones.ReporteDerivConteo
-	8,  // 10: derivaciones.ReporteDerivacionesResponse.derivaciones_por_usuario:type_name -> derivaciones.ReporteDerivConteo
-	1,  // 11: derivaciones.Derivaciones.CrearDerivacion:input_type -> derivaciones.CrearDerivacionRequest
-	3,  // 12: derivaciones.Derivaciones.GetDerivacion:input_type -> derivaciones.GetDerivacionRequest
-	5,  // 13: derivaciones.Derivaciones.ListDerivaciones:input_type -> derivaciones.ListDerivacionesRequest
-	7,  // 14: derivaciones.Derivaciones.ReporteDerivaciones:input_type -> derivaciones.ReporteDerivacionesRequest
-	2,  // 15: derivaciones.Derivaciones.CrearDerivacion:output_type -> derivaciones.CrearDerivacionResponse
-	4,  // 16: derivaciones.Derivaciones.GetDerivacion:output_type -> derivaciones.GetDerivacionResponse
-	6,  // 17: derivaciones.Derivaciones.ListDerivaciones:output_type -> derivaciones.ListDerivacionesResponse
-	10, // 18: derivaciones.Derivaciones.ReporteDerivaciones:output_type -> derivaciones.ReporteDerivacionesResponse
-	15, // [15:19] is the sub-list for method output_type
-	11, // [11:15] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	2,  // 0: derivaciones.AplicarMovimientoRequest.movimiento:type_name -> derivaciones.MovimientoProyectado
+	0,  // 1: derivaciones.AplicarMovimientoResponse.resultado:type_name -> derivaciones.AplicarMovimientoResponse.Resultado
+	1,  // 2: derivaciones.CrearDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
+	1,  // 3: derivaciones.GetDerivacionResponse.derivacion:type_name -> derivaciones.Derivacion
+	1,  // 4: derivaciones.ListDerivacionesResponse.derivaciones:type_name -> derivaciones.Derivacion
+	12, // 5: derivaciones.ReporteDerivacionesResponse.por_destino:type_name -> derivaciones.ReporteDerivConteo
+	12, // 6: derivaciones.ReporteDerivacionesResponse.por_origen:type_name -> derivaciones.ReporteDerivConteo
+	13, // 7: derivaciones.ReporteDerivacionesResponse.flujo:type_name -> derivaciones.ReporteDerivFlujo
+	12, // 8: derivaciones.ReporteDerivacionesResponse.por_tipo_tramite:type_name -> derivaciones.ReporteDerivConteo
+	12, // 9: derivaciones.ReporteDerivacionesResponse.serie:type_name -> derivaciones.ReporteDerivConteo
+	12, // 10: derivaciones.ReporteDerivacionesResponse.otros_movimientos:type_name -> derivaciones.ReporteDerivConteo
+	12, // 11: derivaciones.ReporteDerivacionesResponse.registros_por_usuario:type_name -> derivaciones.ReporteDerivConteo
+	12, // 12: derivaciones.ReporteDerivacionesResponse.derivaciones_por_usuario:type_name -> derivaciones.ReporteDerivConteo
+	5,  // 13: derivaciones.Derivaciones.CrearDerivacion:input_type -> derivaciones.CrearDerivacionRequest
+	7,  // 14: derivaciones.Derivaciones.GetDerivacion:input_type -> derivaciones.GetDerivacionRequest
+	9,  // 15: derivaciones.Derivaciones.ListDerivaciones:input_type -> derivaciones.ListDerivacionesRequest
+	11, // 16: derivaciones.Derivaciones.ReporteDerivaciones:input_type -> derivaciones.ReporteDerivacionesRequest
+	3,  // 17: derivaciones.Derivaciones.AplicarMovimiento:input_type -> derivaciones.AplicarMovimientoRequest
+	6,  // 18: derivaciones.Derivaciones.CrearDerivacion:output_type -> derivaciones.CrearDerivacionResponse
+	8,  // 19: derivaciones.Derivaciones.GetDerivacion:output_type -> derivaciones.GetDerivacionResponse
+	10, // 20: derivaciones.Derivaciones.ListDerivaciones:output_type -> derivaciones.ListDerivacionesResponse
+	14, // 21: derivaciones.Derivaciones.ReporteDerivaciones:output_type -> derivaciones.ReporteDerivacionesResponse
+	4,  // 22: derivaciones.Derivaciones.AplicarMovimiento:output_type -> derivaciones.AplicarMovimientoResponse
+	18, // [18:23] is the sub-list for method output_type
+	13, // [13:18] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_derivaciones_service_proto_init() }
@@ -962,13 +1331,14 @@ func file_derivaciones_service_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_derivaciones_service_proto_rawDesc), len(file_derivaciones_service_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   11,
+			NumEnums:      1,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_derivaciones_service_proto_goTypes,
 		DependencyIndexes: file_derivaciones_service_proto_depIdxs,
+		EnumInfos:         file_derivaciones_service_proto_enumTypes,
 		MessageInfos:      file_derivaciones_service_proto_msgTypes,
 	}.Build()
 	File_derivaciones_service_proto = out.File

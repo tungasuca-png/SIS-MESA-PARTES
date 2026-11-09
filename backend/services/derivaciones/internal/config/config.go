@@ -30,4 +30,16 @@ type Config struct {
 	// mismo cliente generado que ya usa el Gateway y Documentos (Paso
 	// 19B), sin crear una arquitectura nueva.
 	ExpedientesRpc zrpc.RpcClientConf
+
+	// A + B: tokens de servicio del publicador de Expedientes. Secreto
+	// EXCLUSIVO de la audiencia derivaciones (SERVICE_JWT_SECRET_DERIVACIONES,
+	// distinto de JWT_SECRET y del secreto de Estudiantes). Vacío = el RPC
+	// AplicarMovimiento queda deshabilitado.
+	ServiceJWTSecret     string `json:",optional"`
+	ServiceTokenIssuer   string `json:",optional"`
+	ServiceTokenAudience string `json:",optional"`
+
+	// Conexión del consumidor (rol derivaciones_proyector): único rol que
+	// puede insertar en movimientos_proyeccion. Obligatoria si hay secreto.
+	Proyector PostgresConfig `json:",optional"`
 }

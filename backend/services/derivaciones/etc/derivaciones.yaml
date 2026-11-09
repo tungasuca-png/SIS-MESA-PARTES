@@ -29,11 +29,29 @@ AuthRpc:
 ExpedientesRpc:
   Target: 127.0.0.1:8082
 
+# A + B: AplicarMovimiento (solo el publicador de Expedientes, token de
+# servicio con audiencia derivaciones). Secreto EXCLUSIVO de esta audiencia,
+# solo en backend/.env (nunca aquí). Vacío = AplicarMovimiento deshabilitado.
+ServiceJWTSecret: "${SERVICE_JWT_SECRET_DERIVACIONES}"
+ServiceTokenIssuer: tungasuca-auth
+ServiceTokenAudience: derivaciones
+
+# Conexión del consumidor: rol derivaciones_proyector (solo INSERT/SELECT en
+# movimientos_proyeccion). Contraseña solo en backend/.env.
+Proyector:
+  Host: 127.0.0.1
+  Port: 5433
+  User: derivaciones_proyector
+  Password: "${DERIVACIONES_PROYECTOR_DB_PASSWORD}"
+  Database: derivaciones_db
+  SSLMode: disable
+
 Middlewares:
   StatConf:
     IgnoreContentMethods:
       - /derivaciones.Derivaciones/CrearDerivacion
       - /derivaciones.Derivaciones/GetDerivacion
       - /derivaciones.Derivaciones/ListDerivaciones
+      - /derivaciones.Derivaciones/AplicarMovimiento
 
 

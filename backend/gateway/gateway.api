@@ -274,83 +274,107 @@ type DeleteExpedienteResponse {
 	Success bool `json:"success"`
 }
 
-type UpdateAreaRequest {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	Area          string `json:"area"`
-}
-
-type UpdateAreaResponse {
-	Expediente ExpedienteDTO `json:"expediente"`
+// A + B (movimientos, outbox y proyección): toda operación que mueve área o
+// estado exige la cabecera Idempotency-Key (UUID) y la registra Expedientes
+// en UNA transacción (expediente + movimiento + evento de outbox). La misma
+// clave con el mismo contenido devuelve el MISMO movimiento (repetido=true);
+// con otro contenido, 409. Un 504/503 con el mensaje de "resultado incierto"
+// se reintenta con la MISMA clave sin duplicar. PATCH /area fue retirado.
+type MovimientoDTO {
+	Id             string `json:"id"`
+	ExpedienteId   string `json:"expediente_id"`
+	Secuencia      int32  `json:"secuencia"`
+	Tipo           string `json:"tipo"`
+	ActorId        string `json:"actor_id"`
+	ActorRol       string `json:"actor_rol"`
+	AreaOrigen     string `json:"area_origen"`
+	AreaDestino    string `json:"area_destino"`
+	EstadoAnterior string `json:"estado_anterior"`
+	EstadoNuevo    string `json:"estado_nuevo"`
+	Motivo         string `json:"motivo"`
+	Condicion      string `json:"condicion"`
+	OcurridoEn     string `json:"ocurrido_en"`
 }
 
 type ChangeEstadoRequest {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	NuevoEstado   string `json:"nuevo_estado"`
+	Authorization  string `header:"Authorization,optional"`
+	IdempotencyKey string `header:"Idempotency-Key"`
+	Id             string `path:"id"`
+	NuevoEstado    string `json:"nuevo_estado"`
+	EstadoEsperado string `json:"estado_esperado"`
+	Motivo         string `json:"motivo,optional"`
 }
 
 type ChangeEstadoResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
 }
 
-// DerivarExpediente (Etapa 3): operación de negocio real que reemplaza el
-// patrón anterior del frontend (crear derivación + PATCH /area por
-// separado, sin garantía de que ambas tuvieran éxito). El Gateway compone:
-// primero Expedientes.DerivarExpediente (autoritativo — valida la
-// transición y mueve area_actual), y solo si eso tuvo éxito, registra la
-// derivación en Derivaciones Service como historial.
+// DerivarExpediente: una sola llamada a Expedientes (A + B). area_origen_esperada
+// es el área que vio el usuario: si cambió, 409 (nunca se registra un origen falso).
 type DerivarExpedienteRequest {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	AreaDestino   string `json:"area_destino"`
-	Motivo        string `json:"motivo"`
-	Condicion     string `json:"condicion,optional"`
+	Authorization      string `header:"Authorization,optional"`
+	IdempotencyKey     string `header:"Idempotency-Key"`
+	Id                 string `path:"id"`
+	AreaDestino        string `json:"area_destino"`
+	AreaOrigenEsperada string `json:"area_origen_esperada"`
+	Motivo             string `json:"motivo"`
+	Condicion          string `json:"condicion,optional"`
 }
 
 type DerivarExpedienteResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
-	Derivacion DerivacionDTO `json:"derivacion"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
+	Derivacion DerivacionDTO `json:"derivacion"` // compatibilidad
 }
 
 // Etapa 4: cierre real de F2/F4 — ver docs/etapa-4-resolucion-cierre-f2-f4.md.
-// RechazarExpediente: Dirección o Subdirección rechazan un F4 y lo
-// devuelven a Secretaría (OBSERVADO) para que el solicitante corrija. El
-// Gateway compone igual que DerivarExpediente: primero mueve
-// estado+área (autoritativo), luego registra el historial.
+// RechazarExpediente: devuelve un F4 EN_PROCESO a Secretaría (OBSERVADO).
 type RechazarExpedienteRequest {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	Motivo        string `json:"motivo"`
+	Authorization      string `header:"Authorization,optional"`
+	IdempotencyKey     string `header:"Idempotency-Key"`
+	Id                 string `path:"id"`
+	Motivo             string `json:"motivo"`
+	AreaOrigenEsperada string `json:"area_origen_esperada"`
 }
 
 type RechazarExpedienteResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
-	Derivacion DerivacionDTO `json:"derivacion"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
+	Derivacion DerivacionDTO `json:"derivacion"` // compatibilidad
 }
 
-// CorregirExpediente: el solicitante corrige su propio expediente
-// observado y vuelve a entrar a revisión (mismo expediente, mismo código).
+// CorregirExpediente: el dueño corrige su expediente observado y vuelve a
+// entrar a revisión (mismo expediente, mismo código).
 type CorregirExpedienteRequest {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	Descripcion   string `json:"descripcion"`
+	Authorization  string `header:"Authorization,optional"`
+	IdempotencyKey string `header:"Idempotency-Key"`
+	Id             string `path:"id"`
+	Descripcion    string `json:"descripcion"`
 }
 
 type CorregirExpedienteResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
 }
 
 // ResolverExpediente: Secretaría cierra un F2 (ATENDIDO) una vez que
 // existe el documento final — el Gateway verifica contra Documentos
 // Service antes de llamar a Expedientes Service.
 type ResolverExpedienteRequest {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
+	Authorization  string `header:"Authorization,optional"`
+	IdempotencyKey string `header:"Idempotency-Key"`
+	Id             string `path:"id"`
 }
 
 type ResolverExpedienteResponse {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
 }
 
 // ExportFutPdf: reconstruye el cargo del FUT como PDF vectorial real
@@ -680,9 +704,6 @@ service gateway-api {
 	@handler DeleteExpediente
 	delete /api/expedientes/:id (DeleteExpedienteRequest) returns (DeleteExpedienteResponse)
 
-	@handler UpdateArea
-	patch /api/expedientes/:id/area (UpdateAreaRequest) returns (UpdateAreaResponse)
-
 	@handler DerivarExpediente
 	patch /api/expedientes/:id/derivar (DerivarExpedienteRequest) returns (DerivarExpedienteResponse)
 
@@ -801,6 +822,12 @@ type DerivacionDTO {
 	Condicion     string `json:"condicion"`
 	RegistradoPor string `json:"registrado_por"`
 	FechaRegistro string `json:"fecha_registro"`
+	// Historial unificado (A + B): MOVIMIENTO, ANOTACION o LEGADO.
+	Clase          string `json:"clase"`
+	Secuencia      int32  `json:"secuencia,omitempty"`
+	EstadoAnterior string `json:"estado_anterior,omitempty"`
+	EstadoNuevo    string `json:"estado_nuevo,omitempty"`
+	ActorRol       string `json:"actor_rol,omitempty"`
 }
 
 type CrearDerivacionRequest {

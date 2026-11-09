@@ -23,6 +23,7 @@ const (
 	Derivaciones_GetDerivacion_FullMethodName       = "/derivaciones.Derivaciones/GetDerivacion"
 	Derivaciones_ListDerivaciones_FullMethodName    = "/derivaciones.Derivaciones/ListDerivaciones"
 	Derivaciones_ReporteDerivaciones_FullMethodName = "/derivaciones.Derivaciones/ReporteDerivaciones"
+	Derivaciones_AplicarMovimiento_FullMethodName   = "/derivaciones.Derivaciones/AplicarMovimiento"
 )
 
 // DerivacionesClient is the client API for Derivaciones service.
@@ -33,6 +34,9 @@ type DerivacionesClient interface {
 	GetDerivacion(ctx context.Context, in *GetDerivacionRequest, opts ...grpc.CallOption) (*GetDerivacionResponse, error)
 	ListDerivaciones(ctx context.Context, in *ListDerivacionesRequest, opts ...grpc.CallOption) (*ListDerivacionesResponse, error)
 	ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error)
+	// Solo el publicador de Expedientes, con token de servicio (aud=derivaciones,
+	// scope derivaciones.proyectar). Rechaza tokens de usuario.
+	AplicarMovimiento(ctx context.Context, in *AplicarMovimientoRequest, opts ...grpc.CallOption) (*AplicarMovimientoResponse, error)
 }
 
 type derivacionesClient struct {
@@ -83,6 +87,16 @@ func (c *derivacionesClient) ReporteDerivaciones(ctx context.Context, in *Report
 	return out, nil
 }
 
+func (c *derivacionesClient) AplicarMovimiento(ctx context.Context, in *AplicarMovimientoRequest, opts ...grpc.CallOption) (*AplicarMovimientoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AplicarMovimientoResponse)
+	err := c.cc.Invoke(ctx, Derivaciones_AplicarMovimiento_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DerivacionesServer is the server API for Derivaciones service.
 // All implementations must embed UnimplementedDerivacionesServer
 // for forward compatibility.
@@ -91,6 +105,9 @@ type DerivacionesServer interface {
 	GetDerivacion(context.Context, *GetDerivacionRequest) (*GetDerivacionResponse, error)
 	ListDerivaciones(context.Context, *ListDerivacionesRequest) (*ListDerivacionesResponse, error)
 	ReporteDerivaciones(context.Context, *ReporteDerivacionesRequest) (*ReporteDerivacionesResponse, error)
+	// Solo el publicador de Expedientes, con token de servicio (aud=derivaciones,
+	// scope derivaciones.proyectar). Rechaza tokens de usuario.
+	AplicarMovimiento(context.Context, *AplicarMovimientoRequest) (*AplicarMovimientoResponse, error)
 	mustEmbedUnimplementedDerivacionesServer()
 }
 
@@ -112,6 +129,9 @@ func (UnimplementedDerivacionesServer) ListDerivaciones(context.Context, *ListDe
 }
 func (UnimplementedDerivacionesServer) ReporteDerivaciones(context.Context, *ReporteDerivacionesRequest) (*ReporteDerivacionesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReporteDerivaciones not implemented")
+}
+func (UnimplementedDerivacionesServer) AplicarMovimiento(context.Context, *AplicarMovimientoRequest) (*AplicarMovimientoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AplicarMovimiento not implemented")
 }
 func (UnimplementedDerivacionesServer) mustEmbedUnimplementedDerivacionesServer() {}
 func (UnimplementedDerivacionesServer) testEmbeddedByValue()                      {}
@@ -206,6 +226,24 @@ func _Derivaciones_ReporteDerivaciones_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Derivaciones_AplicarMovimiento_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AplicarMovimientoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DerivacionesServer).AplicarMovimiento(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Derivaciones_AplicarMovimiento_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DerivacionesServer).AplicarMovimiento(ctx, req.(*AplicarMovimientoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Derivaciones_ServiceDesc is the grpc.ServiceDesc for Derivaciones service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +266,10 @@ var Derivaciones_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReporteDerivaciones",
 			Handler:    _Derivaciones_ReporteDerivaciones_Handler,
+		},
+		{
+			MethodName: "AplicarMovimiento",
+			Handler:    _Derivaciones_AplicarMovimiento_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

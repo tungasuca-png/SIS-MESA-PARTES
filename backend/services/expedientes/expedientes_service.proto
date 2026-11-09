@@ -62,13 +62,40 @@ message UpdateExpedienteResponse {
   Expediente expediente = 1;
 }
 
+// Movimiento: registro inmutable de un cambio de área y/o estado (A + B).
+// Se crea en la MISMA transacción que el cambio del expediente y su evento de
+// outbox. ocurrido_en en RFC3339Nano (UTC, precisión de PostgreSQL).
+message Movimiento {
+  string id = 1;
+  string expediente_id = 2;
+  int32 secuencia = 3;
+  string tipo = 4;
+  string actor_id = 5;
+  string actor_rol = 6;
+  string area_origen = 7;
+  string area_destino = 8;
+  string estado_anterior = 9;
+  string estado_nuevo = 10;
+  string motivo = 11;
+  string condicion = 12;
+  string ocurrido_en = 13;
+}
+
+// Todas las operaciones que mueven área o estado exigen idempotency_key (UUID):
+// la misma clave con el mismo contenido devuelve el MISMO movimiento
+// (repetido = true); con otro contenido, AlreadyExists.
 message ChangeEstadoRequest {
   string id = 1;
   string nuevo_estado = 2;
+  string estado_esperado = 3;
+  string idempotency_key = 4;
+  string motivo = 5;
 }
 
 message ChangeEstadoResponse {
   Expediente expediente = 1;
+  Movimiento movimiento = 2;
+  bool repetido = 3;
 }
 
 message DeleteExpedienteRequest {
@@ -79,6 +106,8 @@ message DeleteExpedienteResponse {
   bool success = 1;
 }
 
+// UpdateArea queda deshabilitado (A + B): cambiaba el área sin reglas ni
+// trazabilidad. Responde FailedPrecondition; usar DerivarExpediente.
 message UpdateAreaRequest {
   string id = 1;
   string area = 2;
@@ -96,10 +125,16 @@ message UpdateAreaResponse {
 message DerivarExpedienteRequest {
   string id = 1;
   string area_destino = 2;
+  string motivo = 3;
+  string condicion = 4;
+  string area_origen_esperada = 5;
+  string idempotency_key = 6;
 }
 
 message DerivarExpedienteResponse {
   Expediente expediente = 1;
+  Movimiento movimiento = 2;
+  bool repetido = 3;
 }
 
 // Etapa 4: cierre real de F2 (CERTIFICADO/CONSTANCIA) y F4 (PERMISO/
@@ -112,10 +147,14 @@ message DerivarExpedienteResponse {
 message RechazarExpedienteRequest {
   string id = 1;
   string motivo = 2;
+  string area_origen_esperada = 3;
+  string idempotency_key = 4;
 }
 
 message RechazarExpedienteResponse {
   Expediente expediente = 1;
+  Movimiento movimiento = 2;
+  bool repetido = 3;
 }
 
 // CorregirExpediente: exclusivo del propio solicitante, sobre su propio
@@ -124,10 +163,13 @@ message RechazarExpedienteResponse {
 message CorregirExpedienteRequest {
   string id = 1;
   string descripcion = 2;
+  string idempotency_key = 3;
 }
 
 message CorregirExpedienteResponse {
   Expediente expediente = 1;
+  Movimiento movimiento = 2;
+  bool repetido = 3;
 }
 
 // ResolverExpediente: exclusivo de F2, lo ejecuta Secretaría cuando ya
@@ -135,10 +177,13 @@ message CorregirExpedienteResponse {
 // Service antes de llamar acá) y cierra el expediente como ATENDIDO.
 message ResolverExpedienteRequest {
   string id = 1;
+  string idempotency_key = 2;
 }
 
 message ResolverExpedienteResponse {
   Expediente expediente = 1;
+  Movimiento movimiento = 2;
+  bool repetido = 3;
 }
 
 // ValidateDerivacion (Paso 20B.2): RPC de SOLO LECTURA, sin ningún efecto

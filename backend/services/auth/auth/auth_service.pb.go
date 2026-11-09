@@ -1820,15 +1820,17 @@ func (x *IssueServiceTokenResponse) GetScope() string {
 }
 
 type ServiceClient struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Nombre        string                 `protobuf:"bytes,2,opt,name=nombre,proto3" json:"nombre,omitempty"`
-	ClientId      string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	Estado        string                 `protobuf:"bytes,4,opt,name=estado,proto3" json:"estado,omitempty"`
-	Permisos      []string               `protobuf:"bytes,5,rep,name=permisos,proto3" json:"permisos,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	LastUsedAt    string                 `protobuf:"bytes,7,opt,name=last_used_at,json=lastUsedAt,proto3" json:"last_used_at,omitempty"`
-	RevokedAt     string                 `protobuf:"bytes,8,opt,name=revoked_at,json=revokedAt,proto3" json:"revoked_at,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Id         string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Nombre     string                 `protobuf:"bytes,2,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	ClientId   string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Estado     string                 `protobuf:"bytes,4,opt,name=estado,proto3" json:"estado,omitempty"`
+	Permisos   []string               `protobuf:"bytes,5,rep,name=permisos,proto3" json:"permisos,omitempty"`
+	CreatedAt  string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	LastUsedAt string                 `protobuf:"bytes,7,opt,name=last_used_at,json=lastUsedAt,proto3" json:"last_used_at,omitempty"`
+	RevokedAt  string                 `protobuf:"bytes,8,opt,name=revoked_at,json=revokedAt,proto3" json:"revoked_at,omitempty"`
+	// A + B: estudiantes o derivaciones (migración 027). Inmutable.
+	Audiencia     string `protobuf:"bytes,9,opt,name=audiencia,proto3" json:"audiencia,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1919,12 +1921,22 @@ func (x *ServiceClient) GetRevokedAt() string {
 	return ""
 }
 
+func (x *ServiceClient) GetAudiencia() string {
+	if x != nil {
+		return x.Audiencia
+	}
+	return ""
+}
+
 // Alta administrativa ("integraciones.manage"): client_secret se devuelve
 // UNA sola vez; Auth guarda solo su hash.
 type CreateServiceClientRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Nombre        string                 `protobuf:"bytes,1,opt,name=nombre,proto3" json:"nombre,omitempty"`
-	Permisos      []string               `protobuf:"bytes,2,rep,name=permisos,proto3" json:"permisos,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Nombre   string                 `protobuf:"bytes,1,opt,name=nombre,proto3" json:"nombre,omitempty"`
+	Permisos []string               `protobuf:"bytes,2,rep,name=permisos,proto3" json:"permisos,omitempty"`
+	// A + B: estudiantes (por defecto) o derivaciones (solo
+	// derivaciones.proyectar: el publicador de Expedientes).
+	Audiencia     string `protobuf:"bytes,3,opt,name=audiencia,proto3" json:"audiencia,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1971,6 +1983,13 @@ func (x *CreateServiceClientRequest) GetPermisos() []string {
 		return x.Permisos
 	}
 	return nil
+}
+
+func (x *CreateServiceClientRequest) GetAudiencia() string {
+	if x != nil {
+		return x.Audiencia
+	}
+	return ""
 }
 
 type CreateServiceClientResponse struct {
@@ -4481,7 +4500,7 @@ const file_auth_service_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12\x1d\n" +
 	"\n" +
 	"expires_in\x18\x02 \x01(\x03R\texpiresIn\x12\x14\n" +
-	"\x05scope\x18\x03 \x01(\tR\x05scope\"\xe8\x01\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\"\x86\x02\n" +
 	"\rServiceClient\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06nombre\x18\x02 \x01(\tR\x06nombre\x12\x1b\n" +
@@ -4493,10 +4512,12 @@ const file_auth_service_proto_rawDesc = "" +
 	"\flast_used_at\x18\a \x01(\tR\n" +
 	"lastUsedAt\x12\x1d\n" +
 	"\n" +
-	"revoked_at\x18\b \x01(\tR\trevokedAt\"P\n" +
+	"revoked_at\x18\b \x01(\tR\trevokedAt\x12\x1c\n" +
+	"\taudiencia\x18\t \x01(\tR\taudiencia\"n\n" +
 	"\x1aCreateServiceClientRequest\x12\x16\n" +
 	"\x06nombre\x18\x01 \x01(\tR\x06nombre\x12\x1a\n" +
-	"\bpermisos\x18\x02 \x03(\tR\bpermisos\"o\n" +
+	"\bpermisos\x18\x02 \x03(\tR\bpermisos\x12\x1c\n" +
+	"\taudiencia\x18\x03 \x01(\tR\taudiencia\"o\n" +
 	"\x1bCreateServiceClientResponse\x12+\n" +
 	"\x06client\x18\x01 \x01(\v2\x13.auth.ServiceClientR\x06client\x12#\n" +
 	"\rclient_secret\x18\x02 \x01(\tR\fclientSecret\",\n" +

@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"expedientes/expedientes"
@@ -31,57 +30,73 @@ func NewRechazarExpedienteLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	}
 }
 
-// RechazarExpediente (Etapa 4): exclusivo de F4 (PERMISO/JUSTIFICACION_*)
-// — la regla institucional de esta etapa no define un rechazo para F2, así
-// que no se inventa uno. Lo ejecuta quien tiene actualmente el expediente
-// (DIRECTOR o SUBDIRECTOR, según en qué punto del flujo esté) y lo
-// devuelve a SECRETARIA con estado OBSERVADO, para que el solicitante
-// corrija (ver CorregirExpediente).
+// RechazarExpediente (Etapa 4, reglas sin cambios): exclusivo de F4, solo
+// EN_PROCESO, lo ejecuta quien tiene el expediente y lo devuelve a SECRETARIA
+// como OBSERVADO. Desde A + B: movimiento RECHAZO en la misma transacción,
+// área de origen esperada e idempotencia.
 func (l *RechazarExpedienteLogic) RechazarExpediente(in *expedientes.RechazarExpedienteRequest) (*expedientes.RechazarExpedienteResponse, error) {
 	userID, role, ok := interceptor.UserFromContext(l.ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "se requiere autenticación")
 	}
-	// Permiso real (Paso 13B): reemplaza únicamente el gate de rol. Misma
-	// condición que derivar (Etapa 3): rechazar es, en esencia, una
-	// derivación de vuelta a Secretaría — mismo permiso que ya usa
-	// UpdateArea/DerivarExpediente. El chequeo de área, EsF4 y el estado
-	// EN_PROCESO (abajo) siguen exactamente igual.
 	if err := authorization.RequirePermission(l.ctx, l.svcCtx.AuthClient, userID, "expedientes.update"); err != nil {
 		return nil, err
 	}
 	if in == nil || strings.TrimSpace(in.Id) == "" {
 		return nil, status.Error(codes.InvalidArgument, "el identificador es obligatorio")
 	}
-
-	current, err := l.svcCtx.ExpedienteRepository.FindByIDOrCodigo(l.ctx, strings.TrimSpace(in.Id))
+	motivo := strings.TrimSpace(in.Motivo)
+	if motivo == "" {
+		return nil, status.Error(codes.InvalidArgument, "el motivo es obligatorio")
+	}
+	if len([]rune(motivo)) > 500 {
+		return nil, status.Error(codes.InvalidArgument, "el motivo no puede superar los 500 caracteres")
+	}
+	origenEsperado := strings.ToUpper(strings.TrimSpace(in.AreaOrigenEsperada))
+	if !estados.IsValidArea(origenEsperado) {
+		return nil, status.Error(codes.InvalidArgument, "el área de origen esperada es obligatoria")
+	}
+	clave, err := validarClave(in.IdempotencyKey)
 	if err != nil {
-		if errors.Is(err, repository.ErrExpedienteNotFound) {
-			return nil, status.Error(codes.NotFound, "expediente no encontrado")
-		}
-		return nil, status.Error(codes.Internal, "no se pudo consultar el expediente")
+		return nil, err
+	}
+	if err := validarRolActor(role); err != nil {
+		return nil, err
 	}
 
-	if !authorization.CanViewAll(role) && current.AreaActual != authorization.AreaDelRol(role) {
-		return nil, status.Error(codes.PermissionDenied, "el expediente no pertenece al área del usuario")
-	}
-
-	if !estados.EsF4(current.Tipo) {
-		return nil, status.Error(codes.FailedPrecondition, "el rechazo no aplica a este tipo de trámite")
-	}
-	if current.Estado != estados.EstadoEnProceso {
-		return nil, status.Error(codes.FailedPrecondition, "solo se puede rechazar un expediente en proceso")
-	}
-
-	updated, err := l.svcCtx.ExpedienteRepository.RechazarYDevolver(
-		l.ctx, strings.TrimSpace(in.Id), current.Estado, current.AreaActual, estados.AreaSecretaria,
-	)
+	res, err := l.svcCtx.ExpedienteRepository.RegistrarMovimiento(l.ctx, repository.SolicitudMovimiento{
+		IDOrCodigo:     strings.TrimSpace(in.Id),
+		Tipo:           repository.MovRechazo,
+		ActorID:        userID,
+		ActorRol:       role,
+		IdempotencyKey: clave,
+		Contenido:      contenido(origenEsperado, motivo),
+		Motivo:         motivo,
+		Decidir: func(actual *repository.Expediente) (repository.Decision, error) {
+			if !authorization.CanViewAll(role) && actual.AreaActual != authorization.AreaDelRol(role) {
+				return repository.Decision{}, status.Error(codes.PermissionDenied, "el expediente no pertenece al área del usuario")
+			}
+			if actual.AreaActual != origenEsperado {
+				return repository.Decision{}, status.Errorf(codes.Aborted, "el expediente ya no está en %s; actualice y vuelva a intentarlo", origenEsperado)
+			}
+			if !estados.EsF4(actual.Tipo) {
+				return repository.Decision{}, status.Error(codes.FailedPrecondition, "el rechazo no aplica a este tipo de trámite")
+			}
+			if actual.Estado != estados.EstadoEnProceso {
+				return repository.Decision{}, status.Error(codes.FailedPrecondition, "solo se puede rechazar un expediente en proceso")
+			}
+			return repository.Decision{AreaDestino: estados.AreaSecretaria, EstadoNuevo: estados.EstadoObservado}, nil
+		},
+	})
 	if err != nil {
-		if errors.Is(err, repository.ErrExpedienteNotFound) {
-			return nil, status.Error(codes.Aborted, "el expediente cambió, intente nuevamente")
-		}
-		return nil, status.Error(codes.Internal, "no se pudo rechazar el expediente")
+		return nil, errorMovimiento(l.ctx, "rechazar", err)
 	}
-
-	return &expedientes.RechazarExpedienteResponse{Expediente: toProto(updated)}, nil
+	if !res.Repetido {
+		l.svcCtx.Publicador.Avisar() // proyección inmediata (si no, el sondeo periódico)
+	}
+	return &expedientes.RechazarExpedienteResponse{
+		Expediente: toProto(res.Expediente),
+		Movimiento: movimientoToProto(res.Movimiento),
+		Repetido:   res.Repetido,
+	}, nil
 }

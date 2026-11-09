@@ -594,17 +594,166 @@ func (x *UpdateExpedienteResponse) GetExpediente() *Expediente {
 	return nil
 }
 
+// Movimiento: registro inmutable de un cambio de área y/o estado (A + B).
+// Se crea en la MISMA transacción que el cambio del expediente y su evento de
+// outbox. ocurrido_en en RFC3339Nano (UTC, precisión de PostgreSQL).
+type Movimiento struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ExpedienteId   string                 `protobuf:"bytes,2,opt,name=expediente_id,json=expedienteId,proto3" json:"expediente_id,omitempty"`
+	Secuencia      int32                  `protobuf:"varint,3,opt,name=secuencia,proto3" json:"secuencia,omitempty"`
+	Tipo           string                 `protobuf:"bytes,4,opt,name=tipo,proto3" json:"tipo,omitempty"`
+	ActorId        string                 `protobuf:"bytes,5,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
+	ActorRol       string                 `protobuf:"bytes,6,opt,name=actor_rol,json=actorRol,proto3" json:"actor_rol,omitempty"`
+	AreaOrigen     string                 `protobuf:"bytes,7,opt,name=area_origen,json=areaOrigen,proto3" json:"area_origen,omitempty"`
+	AreaDestino    string                 `protobuf:"bytes,8,opt,name=area_destino,json=areaDestino,proto3" json:"area_destino,omitempty"`
+	EstadoAnterior string                 `protobuf:"bytes,9,opt,name=estado_anterior,json=estadoAnterior,proto3" json:"estado_anterior,omitempty"`
+	EstadoNuevo    string                 `protobuf:"bytes,10,opt,name=estado_nuevo,json=estadoNuevo,proto3" json:"estado_nuevo,omitempty"`
+	Motivo         string                 `protobuf:"bytes,11,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	Condicion      string                 `protobuf:"bytes,12,opt,name=condicion,proto3" json:"condicion,omitempty"`
+	OcurridoEn     string                 `protobuf:"bytes,13,opt,name=ocurrido_en,json=ocurridoEn,proto3" json:"ocurrido_en,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *Movimiento) Reset() {
+	*x = Movimiento{}
+	mi := &file_expedientes_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Movimiento) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Movimiento) ProtoMessage() {}
+
+func (x *Movimiento) ProtoReflect() protoreflect.Message {
+	mi := &file_expedientes_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Movimiento.ProtoReflect.Descriptor instead.
+func (*Movimiento) Descriptor() ([]byte, []int) {
+	return file_expedientes_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Movimiento) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Movimiento) GetExpedienteId() string {
+	if x != nil {
+		return x.ExpedienteId
+	}
+	return ""
+}
+
+func (x *Movimiento) GetSecuencia() int32 {
+	if x != nil {
+		return x.Secuencia
+	}
+	return 0
+}
+
+func (x *Movimiento) GetTipo() string {
+	if x != nil {
+		return x.Tipo
+	}
+	return ""
+}
+
+func (x *Movimiento) GetActorId() string {
+	if x != nil {
+		return x.ActorId
+	}
+	return ""
+}
+
+func (x *Movimiento) GetActorRol() string {
+	if x != nil {
+		return x.ActorRol
+	}
+	return ""
+}
+
+func (x *Movimiento) GetAreaOrigen() string {
+	if x != nil {
+		return x.AreaOrigen
+	}
+	return ""
+}
+
+func (x *Movimiento) GetAreaDestino() string {
+	if x != nil {
+		return x.AreaDestino
+	}
+	return ""
+}
+
+func (x *Movimiento) GetEstadoAnterior() string {
+	if x != nil {
+		return x.EstadoAnterior
+	}
+	return ""
+}
+
+func (x *Movimiento) GetEstadoNuevo() string {
+	if x != nil {
+		return x.EstadoNuevo
+	}
+	return ""
+}
+
+func (x *Movimiento) GetMotivo() string {
+	if x != nil {
+		return x.Motivo
+	}
+	return ""
+}
+
+func (x *Movimiento) GetCondicion() string {
+	if x != nil {
+		return x.Condicion
+	}
+	return ""
+}
+
+func (x *Movimiento) GetOcurridoEn() string {
+	if x != nil {
+		return x.OcurridoEn
+	}
+	return ""
+}
+
+// Todas las operaciones que mueven área o estado exigen idempotency_key (UUID):
+// la misma clave con el mismo contenido devuelve el MISMO movimiento
+// (repetido = true); con otro contenido, AlreadyExists.
 type ChangeEstadoRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NuevoEstado   string                 `protobuf:"bytes,2,opt,name=nuevo_estado,json=nuevoEstado,proto3" json:"nuevo_estado,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	NuevoEstado    string                 `protobuf:"bytes,2,opt,name=nuevo_estado,json=nuevoEstado,proto3" json:"nuevo_estado,omitempty"`
+	EstadoEsperado string                 `protobuf:"bytes,3,opt,name=estado_esperado,json=estadoEsperado,proto3" json:"estado_esperado,omitempty"`
+	IdempotencyKey string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	Motivo         string                 `protobuf:"bytes,5,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ChangeEstadoRequest) Reset() {
 	*x = ChangeEstadoRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[9]
+	mi := &file_expedientes_service_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -616,7 +765,7 @@ func (x *ChangeEstadoRequest) String() string {
 func (*ChangeEstadoRequest) ProtoMessage() {}
 
 func (x *ChangeEstadoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[9]
+	mi := &file_expedientes_service_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -629,7 +778,7 @@ func (x *ChangeEstadoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeEstadoRequest.ProtoReflect.Descriptor instead.
 func (*ChangeEstadoRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{9}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ChangeEstadoRequest) GetId() string {
@@ -646,16 +795,39 @@ func (x *ChangeEstadoRequest) GetNuevoEstado() string {
 	return ""
 }
 
+func (x *ChangeEstadoRequest) GetEstadoEsperado() string {
+	if x != nil {
+		return x.EstadoEsperado
+	}
+	return ""
+}
+
+func (x *ChangeEstadoRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+func (x *ChangeEstadoRequest) GetMotivo() string {
+	if x != nil {
+		return x.Motivo
+	}
+	return ""
+}
+
 type ChangeEstadoResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Expediente    *Expediente            `protobuf:"bytes,1,opt,name=expediente,proto3" json:"expediente,omitempty"`
+	Movimiento    *Movimiento            `protobuf:"bytes,2,opt,name=movimiento,proto3" json:"movimiento,omitempty"`
+	Repetido      bool                   `protobuf:"varint,3,opt,name=repetido,proto3" json:"repetido,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ChangeEstadoResponse) Reset() {
 	*x = ChangeEstadoResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[10]
+	mi := &file_expedientes_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -667,7 +839,7 @@ func (x *ChangeEstadoResponse) String() string {
 func (*ChangeEstadoResponse) ProtoMessage() {}
 
 func (x *ChangeEstadoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[10]
+	mi := &file_expedientes_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -680,7 +852,7 @@ func (x *ChangeEstadoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeEstadoResponse.ProtoReflect.Descriptor instead.
 func (*ChangeEstadoResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{10}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ChangeEstadoResponse) GetExpediente() *Expediente {
@@ -688,6 +860,20 @@ func (x *ChangeEstadoResponse) GetExpediente() *Expediente {
 		return x.Expediente
 	}
 	return nil
+}
+
+func (x *ChangeEstadoResponse) GetMovimiento() *Movimiento {
+	if x != nil {
+		return x.Movimiento
+	}
+	return nil
+}
+
+func (x *ChangeEstadoResponse) GetRepetido() bool {
+	if x != nil {
+		return x.Repetido
+	}
+	return false
 }
 
 type DeleteExpedienteRequest struct {
@@ -699,7 +885,7 @@ type DeleteExpedienteRequest struct {
 
 func (x *DeleteExpedienteRequest) Reset() {
 	*x = DeleteExpedienteRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[11]
+	mi := &file_expedientes_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -711,7 +897,7 @@ func (x *DeleteExpedienteRequest) String() string {
 func (*DeleteExpedienteRequest) ProtoMessage() {}
 
 func (x *DeleteExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[11]
+	mi := &file_expedientes_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -724,7 +910,7 @@ func (x *DeleteExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{11}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DeleteExpedienteRequest) GetId() string {
@@ -743,7 +929,7 @@ type DeleteExpedienteResponse struct {
 
 func (x *DeleteExpedienteResponse) Reset() {
 	*x = DeleteExpedienteResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[12]
+	mi := &file_expedientes_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -755,7 +941,7 @@ func (x *DeleteExpedienteResponse) String() string {
 func (*DeleteExpedienteResponse) ProtoMessage() {}
 
 func (x *DeleteExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[12]
+	mi := &file_expedientes_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -768,7 +954,7 @@ func (x *DeleteExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*DeleteExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{12}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DeleteExpedienteResponse) GetSuccess() bool {
@@ -778,6 +964,8 @@ func (x *DeleteExpedienteResponse) GetSuccess() bool {
 	return false
 }
 
+// UpdateArea queda deshabilitado (A + B): cambiaba el área sin reglas ni
+// trazabilidad. Responde FailedPrecondition; usar DerivarExpediente.
 type UpdateAreaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -788,7 +976,7 @@ type UpdateAreaRequest struct {
 
 func (x *UpdateAreaRequest) Reset() {
 	*x = UpdateAreaRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[13]
+	mi := &file_expedientes_service_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -800,7 +988,7 @@ func (x *UpdateAreaRequest) String() string {
 func (*UpdateAreaRequest) ProtoMessage() {}
 
 func (x *UpdateAreaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[13]
+	mi := &file_expedientes_service_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -813,7 +1001,7 @@ func (x *UpdateAreaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateAreaRequest.ProtoReflect.Descriptor instead.
 func (*UpdateAreaRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{13}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateAreaRequest) GetId() string {
@@ -839,7 +1027,7 @@ type UpdateAreaResponse struct {
 
 func (x *UpdateAreaResponse) Reset() {
 	*x = UpdateAreaResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[14]
+	mi := &file_expedientes_service_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -851,7 +1039,7 @@ func (x *UpdateAreaResponse) String() string {
 func (*UpdateAreaResponse) ProtoMessage() {}
 
 func (x *UpdateAreaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[14]
+	mi := &file_expedientes_service_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -864,7 +1052,7 @@ func (x *UpdateAreaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateAreaResponse.ProtoReflect.Descriptor instead.
 func (*UpdateAreaResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{14}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateAreaResponse) GetExpediente() *Expediente {
@@ -880,16 +1068,20 @@ func (x *UpdateAreaResponse) GetExpediente() *Expediente {
 // antes de moverlo. UpdateArea sigue existiendo tal cual para el resto de
 // usos (administrativos, tipos genéricos) que no pasan por esta regla.
 type DerivarExpedienteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	AreaDestino   string                 `protobuf:"bytes,2,opt,name=area_destino,json=areaDestino,proto3" json:"area_destino,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	AreaDestino        string                 `protobuf:"bytes,2,opt,name=area_destino,json=areaDestino,proto3" json:"area_destino,omitempty"`
+	Motivo             string                 `protobuf:"bytes,3,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	Condicion          string                 `protobuf:"bytes,4,opt,name=condicion,proto3" json:"condicion,omitempty"`
+	AreaOrigenEsperada string                 `protobuf:"bytes,5,opt,name=area_origen_esperada,json=areaOrigenEsperada,proto3" json:"area_origen_esperada,omitempty"`
+	IdempotencyKey     string                 `protobuf:"bytes,6,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *DerivarExpedienteRequest) Reset() {
 	*x = DerivarExpedienteRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[15]
+	mi := &file_expedientes_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -901,7 +1093,7 @@ func (x *DerivarExpedienteRequest) String() string {
 func (*DerivarExpedienteRequest) ProtoMessage() {}
 
 func (x *DerivarExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[15]
+	mi := &file_expedientes_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -914,7 +1106,7 @@ func (x *DerivarExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DerivarExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*DerivarExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{15}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *DerivarExpedienteRequest) GetId() string {
@@ -931,16 +1123,46 @@ func (x *DerivarExpedienteRequest) GetAreaDestino() string {
 	return ""
 }
 
+func (x *DerivarExpedienteRequest) GetMotivo() string {
+	if x != nil {
+		return x.Motivo
+	}
+	return ""
+}
+
+func (x *DerivarExpedienteRequest) GetCondicion() string {
+	if x != nil {
+		return x.Condicion
+	}
+	return ""
+}
+
+func (x *DerivarExpedienteRequest) GetAreaOrigenEsperada() string {
+	if x != nil {
+		return x.AreaOrigenEsperada
+	}
+	return ""
+}
+
+func (x *DerivarExpedienteRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
 type DerivarExpedienteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Expediente    *Expediente            `protobuf:"bytes,1,opt,name=expediente,proto3" json:"expediente,omitempty"`
+	Movimiento    *Movimiento            `protobuf:"bytes,2,opt,name=movimiento,proto3" json:"movimiento,omitempty"`
+	Repetido      bool                   `protobuf:"varint,3,opt,name=repetido,proto3" json:"repetido,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DerivarExpedienteResponse) Reset() {
 	*x = DerivarExpedienteResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[16]
+	mi := &file_expedientes_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -952,7 +1174,7 @@ func (x *DerivarExpedienteResponse) String() string {
 func (*DerivarExpedienteResponse) ProtoMessage() {}
 
 func (x *DerivarExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[16]
+	mi := &file_expedientes_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -965,7 +1187,7 @@ func (x *DerivarExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DerivarExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*DerivarExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{16}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DerivarExpedienteResponse) GetExpediente() *Expediente {
@@ -975,20 +1197,36 @@ func (x *DerivarExpedienteResponse) GetExpediente() *Expediente {
 	return nil
 }
 
+func (x *DerivarExpedienteResponse) GetMovimiento() *Movimiento {
+	if x != nil {
+		return x.Movimiento
+	}
+	return nil
+}
+
+func (x *DerivarExpedienteResponse) GetRepetido() bool {
+	if x != nil {
+		return x.Repetido
+	}
+	return false
+}
+
 // RechazarExpediente: exclusivo de F4. Lo ejecuta quien tiene actualmente
 // el expediente (DIRECTOR o SUBDIRECTOR) para devolverlo a SECRETARIA con
 // estado OBSERVADO, para que el solicitante corrija.
 type RechazarExpedienteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Motivo        string                 `protobuf:"bytes,2,opt,name=motivo,proto3" json:"motivo,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Motivo             string                 `protobuf:"bytes,2,opt,name=motivo,proto3" json:"motivo,omitempty"`
+	AreaOrigenEsperada string                 `protobuf:"bytes,3,opt,name=area_origen_esperada,json=areaOrigenEsperada,proto3" json:"area_origen_esperada,omitempty"`
+	IdempotencyKey     string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *RechazarExpedienteRequest) Reset() {
 	*x = RechazarExpedienteRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[17]
+	mi := &file_expedientes_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1000,7 +1238,7 @@ func (x *RechazarExpedienteRequest) String() string {
 func (*RechazarExpedienteRequest) ProtoMessage() {}
 
 func (x *RechazarExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[17]
+	mi := &file_expedientes_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1013,7 +1251,7 @@ func (x *RechazarExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RechazarExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*RechazarExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{17}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *RechazarExpedienteRequest) GetId() string {
@@ -1030,16 +1268,32 @@ func (x *RechazarExpedienteRequest) GetMotivo() string {
 	return ""
 }
 
+func (x *RechazarExpedienteRequest) GetAreaOrigenEsperada() string {
+	if x != nil {
+		return x.AreaOrigenEsperada
+	}
+	return ""
+}
+
+func (x *RechazarExpedienteRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
 type RechazarExpedienteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Expediente    *Expediente            `protobuf:"bytes,1,opt,name=expediente,proto3" json:"expediente,omitempty"`
+	Movimiento    *Movimiento            `protobuf:"bytes,2,opt,name=movimiento,proto3" json:"movimiento,omitempty"`
+	Repetido      bool                   `protobuf:"varint,3,opt,name=repetido,proto3" json:"repetido,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RechazarExpedienteResponse) Reset() {
 	*x = RechazarExpedienteResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[18]
+	mi := &file_expedientes_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1051,7 +1305,7 @@ func (x *RechazarExpedienteResponse) String() string {
 func (*RechazarExpedienteResponse) ProtoMessage() {}
 
 func (x *RechazarExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[18]
+	mi := &file_expedientes_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1064,7 +1318,7 @@ func (x *RechazarExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RechazarExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*RechazarExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{18}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *RechazarExpedienteResponse) GetExpediente() *Expediente {
@@ -1074,20 +1328,35 @@ func (x *RechazarExpedienteResponse) GetExpediente() *Expediente {
 	return nil
 }
 
+func (x *RechazarExpedienteResponse) GetMovimiento() *Movimiento {
+	if x != nil {
+		return x.Movimiento
+	}
+	return nil
+}
+
+func (x *RechazarExpedienteResponse) GetRepetido() bool {
+	if x != nil {
+		return x.Repetido
+	}
+	return false
+}
+
 // CorregirExpediente: exclusivo del propio solicitante, sobre su propio
 // expediente en estado OBSERVADO. Actualiza la descripción (la corrección)
 // y reingresa a la revisión de Secretaría (vuelve a PENDIENTE).
 type CorregirExpedienteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Descripcion   string                 `protobuf:"bytes,2,opt,name=descripcion,proto3" json:"descripcion,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Descripcion    string                 `protobuf:"bytes,2,opt,name=descripcion,proto3" json:"descripcion,omitempty"`
+	IdempotencyKey string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CorregirExpedienteRequest) Reset() {
 	*x = CorregirExpedienteRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[19]
+	mi := &file_expedientes_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1099,7 +1368,7 @@ func (x *CorregirExpedienteRequest) String() string {
 func (*CorregirExpedienteRequest) ProtoMessage() {}
 
 func (x *CorregirExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[19]
+	mi := &file_expedientes_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1112,7 +1381,7 @@ func (x *CorregirExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CorregirExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*CorregirExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{19}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CorregirExpedienteRequest) GetId() string {
@@ -1129,16 +1398,25 @@ func (x *CorregirExpedienteRequest) GetDescripcion() string {
 	return ""
 }
 
+func (x *CorregirExpedienteRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
 type CorregirExpedienteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Expediente    *Expediente            `protobuf:"bytes,1,opt,name=expediente,proto3" json:"expediente,omitempty"`
+	Movimiento    *Movimiento            `protobuf:"bytes,2,opt,name=movimiento,proto3" json:"movimiento,omitempty"`
+	Repetido      bool                   `protobuf:"varint,3,opt,name=repetido,proto3" json:"repetido,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CorregirExpedienteResponse) Reset() {
 	*x = CorregirExpedienteResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[20]
+	mi := &file_expedientes_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1150,7 +1428,7 @@ func (x *CorregirExpedienteResponse) String() string {
 func (*CorregirExpedienteResponse) ProtoMessage() {}
 
 func (x *CorregirExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[20]
+	mi := &file_expedientes_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1163,7 +1441,7 @@ func (x *CorregirExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CorregirExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*CorregirExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{20}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CorregirExpedienteResponse) GetExpediente() *Expediente {
@@ -1173,19 +1451,34 @@ func (x *CorregirExpedienteResponse) GetExpediente() *Expediente {
 	return nil
 }
 
+func (x *CorregirExpedienteResponse) GetMovimiento() *Movimiento {
+	if x != nil {
+		return x.Movimiento
+	}
+	return nil
+}
+
+func (x *CorregirExpedienteResponse) GetRepetido() bool {
+	if x != nil {
+		return x.Repetido
+	}
+	return false
+}
+
 // ResolverExpediente: exclusivo de F2, lo ejecuta Secretaría cuando ya
 // tiene el documento final (verificado por el Gateway contra Documentos
 // Service antes de llamar acá) y cierra el expediente como ATENDIDO.
 type ResolverExpedienteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	IdempotencyKey string                 `protobuf:"bytes,2,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ResolverExpedienteRequest) Reset() {
 	*x = ResolverExpedienteRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[21]
+	mi := &file_expedientes_service_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1197,7 +1490,7 @@ func (x *ResolverExpedienteRequest) String() string {
 func (*ResolverExpedienteRequest) ProtoMessage() {}
 
 func (x *ResolverExpedienteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[21]
+	mi := &file_expedientes_service_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1210,7 +1503,7 @@ func (x *ResolverExpedienteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolverExpedienteRequest.ProtoReflect.Descriptor instead.
 func (*ResolverExpedienteRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{21}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ResolverExpedienteRequest) GetId() string {
@@ -1220,16 +1513,25 @@ func (x *ResolverExpedienteRequest) GetId() string {
 	return ""
 }
 
+func (x *ResolverExpedienteRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
 type ResolverExpedienteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Expediente    *Expediente            `protobuf:"bytes,1,opt,name=expediente,proto3" json:"expediente,omitempty"`
+	Movimiento    *Movimiento            `protobuf:"bytes,2,opt,name=movimiento,proto3" json:"movimiento,omitempty"`
+	Repetido      bool                   `protobuf:"varint,3,opt,name=repetido,proto3" json:"repetido,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ResolverExpedienteResponse) Reset() {
 	*x = ResolverExpedienteResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[22]
+	mi := &file_expedientes_service_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1241,7 +1543,7 @@ func (x *ResolverExpedienteResponse) String() string {
 func (*ResolverExpedienteResponse) ProtoMessage() {}
 
 func (x *ResolverExpedienteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[22]
+	mi := &file_expedientes_service_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1254,7 +1556,7 @@ func (x *ResolverExpedienteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolverExpedienteResponse.ProtoReflect.Descriptor instead.
 func (*ResolverExpedienteResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{22}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ResolverExpedienteResponse) GetExpediente() *Expediente {
@@ -1262,6 +1564,20 @@ func (x *ResolverExpedienteResponse) GetExpediente() *Expediente {
 		return x.Expediente
 	}
 	return nil
+}
+
+func (x *ResolverExpedienteResponse) GetMovimiento() *Movimiento {
+	if x != nil {
+		return x.Movimiento
+	}
+	return nil
+}
+
+func (x *ResolverExpedienteResponse) GetRepetido() bool {
+	if x != nil {
+		return x.Repetido
+	}
+	return false
 }
 
 // ValidateDerivacion (Paso 20B.2): RPC de SOLO LECTURA, sin ningún efecto
@@ -1280,7 +1596,7 @@ type ValidateDerivacionRequest struct {
 
 func (x *ValidateDerivacionRequest) Reset() {
 	*x = ValidateDerivacionRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[23]
+	mi := &file_expedientes_service_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1292,7 +1608,7 @@ func (x *ValidateDerivacionRequest) String() string {
 func (*ValidateDerivacionRequest) ProtoMessage() {}
 
 func (x *ValidateDerivacionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[23]
+	mi := &file_expedientes_service_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1305,7 +1621,7 @@ func (x *ValidateDerivacionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateDerivacionRequest.ProtoReflect.Descriptor instead.
 func (*ValidateDerivacionRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{23}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ValidateDerivacionRequest) GetExpedienteId() string {
@@ -1331,7 +1647,7 @@ type ValidateDerivacionResponse struct {
 
 func (x *ValidateDerivacionResponse) Reset() {
 	*x = ValidateDerivacionResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[24]
+	mi := &file_expedientes_service_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1343,7 +1659,7 @@ func (x *ValidateDerivacionResponse) String() string {
 func (*ValidateDerivacionResponse) ProtoMessage() {}
 
 func (x *ValidateDerivacionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[24]
+	mi := &file_expedientes_service_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1356,7 +1672,7 @@ func (x *ValidateDerivacionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateDerivacionResponse.ProtoReflect.Descriptor instead.
 func (*ValidateDerivacionResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{24}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ValidateDerivacionResponse) GetValido() bool {
@@ -1396,7 +1712,7 @@ type ReporteExpedientesRequest struct {
 
 func (x *ReporteExpedientesRequest) Reset() {
 	*x = ReporteExpedientesRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[25]
+	mi := &file_expedientes_service_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1408,7 +1724,7 @@ func (x *ReporteExpedientesRequest) String() string {
 func (*ReporteExpedientesRequest) ProtoMessage() {}
 
 func (x *ReporteExpedientesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[25]
+	mi := &file_expedientes_service_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1421,7 +1737,7 @@ func (x *ReporteExpedientesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteExpedientesRequest.ProtoReflect.Descriptor instead.
 func (*ReporteExpedientesRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{25}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ReporteExpedientesRequest) GetDesde() string {
@@ -1492,7 +1808,7 @@ type ReporteCruce struct {
 
 func (x *ReporteCruce) Reset() {
 	*x = ReporteCruce{}
-	mi := &file_expedientes_service_proto_msgTypes[26]
+	mi := &file_expedientes_service_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1504,7 +1820,7 @@ func (x *ReporteCruce) String() string {
 func (*ReporteCruce) ProtoMessage() {}
 
 func (x *ReporteCruce) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[26]
+	mi := &file_expedientes_service_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1517,7 +1833,7 @@ func (x *ReporteCruce) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteCruce.ProtoReflect.Descriptor instead.
 func (*ReporteCruce) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{26}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ReporteCruce) GetFila() string {
@@ -1551,7 +1867,7 @@ type ReporteConteo struct {
 
 func (x *ReporteConteo) Reset() {
 	*x = ReporteConteo{}
-	mi := &file_expedientes_service_proto_msgTypes[27]
+	mi := &file_expedientes_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1563,7 +1879,7 @@ func (x *ReporteConteo) String() string {
 func (*ReporteConteo) ProtoMessage() {}
 
 func (x *ReporteConteo) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[27]
+	mi := &file_expedientes_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1576,7 +1892,7 @@ func (x *ReporteConteo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteConteo.ProtoReflect.Descriptor instead.
 func (*ReporteConteo) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{27}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ReporteConteo) GetClave() string {
@@ -1633,7 +1949,7 @@ type ReporteExpedientesResponse struct {
 
 func (x *ReporteExpedientesResponse) Reset() {
 	*x = ReporteExpedientesResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[28]
+	mi := &file_expedientes_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1645,7 +1961,7 @@ func (x *ReporteExpedientesResponse) String() string {
 func (*ReporteExpedientesResponse) ProtoMessage() {}
 
 func (x *ReporteExpedientesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[28]
+	mi := &file_expedientes_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1658,7 +1974,7 @@ func (x *ReporteExpedientesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteExpedientesResponse.ProtoReflect.Descriptor instead.
 func (*ReporteExpedientesResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{28}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ReporteExpedientesResponse) GetTotal() int32 {
@@ -1793,7 +2109,7 @@ type ReporteAlcanceRequest struct {
 
 func (x *ReporteAlcanceRequest) Reset() {
 	*x = ReporteAlcanceRequest{}
-	mi := &file_expedientes_service_proto_msgTypes[29]
+	mi := &file_expedientes_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1805,7 +2121,7 @@ func (x *ReporteAlcanceRequest) String() string {
 func (*ReporteAlcanceRequest) ProtoMessage() {}
 
 func (x *ReporteAlcanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[29]
+	mi := &file_expedientes_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1818,7 +2134,7 @@ func (x *ReporteAlcanceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteAlcanceRequest.ProtoReflect.Descriptor instead.
 func (*ReporteAlcanceRequest) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{29}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ReporteAlcanceRequest) GetTipo() string {
@@ -1838,7 +2154,7 @@ type ReporteExpedienteRef struct {
 
 func (x *ReporteExpedienteRef) Reset() {
 	*x = ReporteExpedienteRef{}
-	mi := &file_expedientes_service_proto_msgTypes[30]
+	mi := &file_expedientes_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1850,7 +2166,7 @@ func (x *ReporteExpedienteRef) String() string {
 func (*ReporteExpedienteRef) ProtoMessage() {}
 
 func (x *ReporteExpedienteRef) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[30]
+	mi := &file_expedientes_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1863,7 +2179,7 @@ func (x *ReporteExpedienteRef) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteExpedienteRef.ProtoReflect.Descriptor instead.
 func (*ReporteExpedienteRef) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{30}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ReporteExpedienteRef) GetId() string {
@@ -1892,7 +2208,7 @@ type ReporteAlcanceResponse struct {
 
 func (x *ReporteAlcanceResponse) Reset() {
 	*x = ReporteAlcanceResponse{}
-	mi := &file_expedientes_service_proto_msgTypes[31]
+	mi := &file_expedientes_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1904,7 +2220,7 @@ func (x *ReporteAlcanceResponse) String() string {
 func (*ReporteAlcanceResponse) ProtoMessage() {}
 
 func (x *ReporteAlcanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_expedientes_service_proto_msgTypes[31]
+	mi := &file_expedientes_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1917,7 +2233,7 @@ func (x *ReporteAlcanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReporteAlcanceResponse.ProtoReflect.Descriptor instead.
 func (*ReporteAlcanceResponse) Descriptor() ([]byte, []int) {
-	return file_expedientes_service_proto_rawDescGZIP(), []int{31}
+	return file_expedientes_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ReporteAlcanceResponse) GetExpedientes() []*ReporteExpedienteRef {
@@ -1994,14 +2310,39 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x18UpdateExpedienteResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\"H\n" +
+	"expediente\"\x92\x03\n" +
+	"\n" +
+	"Movimiento\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
+	"\rexpediente_id\x18\x02 \x01(\tR\fexpedienteId\x12\x1c\n" +
+	"\tsecuencia\x18\x03 \x01(\x05R\tsecuencia\x12\x12\n" +
+	"\x04tipo\x18\x04 \x01(\tR\x04tipo\x12\x19\n" +
+	"\bactor_id\x18\x05 \x01(\tR\aactorId\x12\x1b\n" +
+	"\tactor_rol\x18\x06 \x01(\tR\bactorRol\x12\x1f\n" +
+	"\varea_origen\x18\a \x01(\tR\n" +
+	"areaOrigen\x12!\n" +
+	"\farea_destino\x18\b \x01(\tR\vareaDestino\x12'\n" +
+	"\x0festado_anterior\x18\t \x01(\tR\x0eestadoAnterior\x12!\n" +
+	"\festado_nuevo\x18\n" +
+	" \x01(\tR\vestadoNuevo\x12\x16\n" +
+	"\x06motivo\x18\v \x01(\tR\x06motivo\x12\x1c\n" +
+	"\tcondicion\x18\f \x01(\tR\tcondicion\x12\x1f\n" +
+	"\vocurrido_en\x18\r \x01(\tR\n" +
+	"ocurridoEn\"\xb2\x01\n" +
 	"\x13ChangeEstadoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
-	"\fnuevo_estado\x18\x02 \x01(\tR\vnuevoEstado\"O\n" +
+	"\fnuevo_estado\x18\x02 \x01(\tR\vnuevoEstado\x12'\n" +
+	"\x0festado_esperado\x18\x03 \x01(\tR\x0eestadoEsperado\x12'\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x12\x16\n" +
+	"\x06motivo\x18\x05 \x01(\tR\x06motivo\"\xa4\x01\n" +
 	"\x14ChangeEstadoResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\")\n" +
+	"expediente\x127\n" +
+	"\n" +
+	"movimiento\x18\x02 \x01(\v2\x17.expedientes.MovimientoR\n" +
+	"movimiento\x12\x1a\n" +
+	"\brepetido\x18\x03 \x01(\bR\brepetido\")\n" +
 	"\x17DeleteExpedienteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
 	"\x18DeleteExpedienteResponse\x12\x18\n" +
@@ -2012,34 +2353,58 @@ const file_expedientes_service_proto_rawDesc = "" +
 	"\x12UpdateAreaResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\"M\n" +
+	"expediente\"\xde\x01\n" +
 	"\x18DerivarExpedienteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
-	"\farea_destino\x18\x02 \x01(\tR\vareaDestino\"T\n" +
+	"\farea_destino\x18\x02 \x01(\tR\vareaDestino\x12\x16\n" +
+	"\x06motivo\x18\x03 \x01(\tR\x06motivo\x12\x1c\n" +
+	"\tcondicion\x18\x04 \x01(\tR\tcondicion\x120\n" +
+	"\x14area_origen_esperada\x18\x05 \x01(\tR\x12areaOrigenEsperada\x12'\n" +
+	"\x0fidempotency_key\x18\x06 \x01(\tR\x0eidempotencyKey\"\xa9\x01\n" +
 	"\x19DerivarExpedienteResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\"C\n" +
+	"expediente\x127\n" +
+	"\n" +
+	"movimiento\x18\x02 \x01(\v2\x17.expedientes.MovimientoR\n" +
+	"movimiento\x12\x1a\n" +
+	"\brepetido\x18\x03 \x01(\bR\brepetido\"\x9e\x01\n" +
 	"\x19RechazarExpedienteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
-	"\x06motivo\x18\x02 \x01(\tR\x06motivo\"U\n" +
+	"\x06motivo\x18\x02 \x01(\tR\x06motivo\x120\n" +
+	"\x14area_origen_esperada\x18\x03 \x01(\tR\x12areaOrigenEsperada\x12'\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\"\xaa\x01\n" +
 	"\x1aRechazarExpedienteResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\"M\n" +
+	"expediente\x127\n" +
+	"\n" +
+	"movimiento\x18\x02 \x01(\v2\x17.expedientes.MovimientoR\n" +
+	"movimiento\x12\x1a\n" +
+	"\brepetido\x18\x03 \x01(\bR\brepetido\"v\n" +
 	"\x19CorregirExpedienteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12 \n" +
-	"\vdescripcion\x18\x02 \x01(\tR\vdescripcion\"U\n" +
+	"\vdescripcion\x18\x02 \x01(\tR\vdescripcion\x12'\n" +
+	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xaa\x01\n" +
 	"\x1aCorregirExpedienteResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\"+\n" +
+	"expediente\x127\n" +
+	"\n" +
+	"movimiento\x18\x02 \x01(\v2\x17.expedientes.MovimientoR\n" +
+	"movimiento\x12\x1a\n" +
+	"\brepetido\x18\x03 \x01(\bR\brepetido\"T\n" +
 	"\x19ResolverExpedienteRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"U\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0fidempotency_key\x18\x02 \x01(\tR\x0eidempotencyKey\"\xaa\x01\n" +
 	"\x1aResolverExpedienteResponse\x127\n" +
 	"\n" +
 	"expediente\x18\x01 \x01(\v2\x17.expedientes.ExpedienteR\n" +
-	"expediente\"c\n" +
+	"expediente\x127\n" +
+	"\n" +
+	"movimiento\x18\x02 \x01(\v2\x17.expedientes.MovimientoR\n" +
+	"movimiento\x12\x1a\n" +
+	"\brepetido\x18\x03 \x01(\bR\brepetido\"c\n" +
 	"\x19ValidateDerivacionRequest\x12#\n" +
 	"\rexpediente_id\x18\x01 \x01(\tR\fexpedienteId\x12!\n" +
 	"\farea_destino\x18\x02 \x01(\tR\vareaDestino\"4\n" +
@@ -2124,7 +2489,7 @@ func file_expedientes_service_proto_rawDescGZIP() []byte {
 	return file_expedientes_service_proto_rawDescData
 }
 
-var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_expedientes_service_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_expedientes_service_proto_goTypes = []any{
 	(*Expediente)(nil),                 // 0: expedientes.Expediente
 	(*CreateExpedienteRequest)(nil),    // 1: expedientes.CreateExpedienteRequest
@@ -2135,29 +2500,30 @@ var file_expedientes_service_proto_goTypes = []any{
 	(*ListExpedientesResponse)(nil),    // 6: expedientes.ListExpedientesResponse
 	(*UpdateExpedienteRequest)(nil),    // 7: expedientes.UpdateExpedienteRequest
 	(*UpdateExpedienteResponse)(nil),   // 8: expedientes.UpdateExpedienteResponse
-	(*ChangeEstadoRequest)(nil),        // 9: expedientes.ChangeEstadoRequest
-	(*ChangeEstadoResponse)(nil),       // 10: expedientes.ChangeEstadoResponse
-	(*DeleteExpedienteRequest)(nil),    // 11: expedientes.DeleteExpedienteRequest
-	(*DeleteExpedienteResponse)(nil),   // 12: expedientes.DeleteExpedienteResponse
-	(*UpdateAreaRequest)(nil),          // 13: expedientes.UpdateAreaRequest
-	(*UpdateAreaResponse)(nil),         // 14: expedientes.UpdateAreaResponse
-	(*DerivarExpedienteRequest)(nil),   // 15: expedientes.DerivarExpedienteRequest
-	(*DerivarExpedienteResponse)(nil),  // 16: expedientes.DerivarExpedienteResponse
-	(*RechazarExpedienteRequest)(nil),  // 17: expedientes.RechazarExpedienteRequest
-	(*RechazarExpedienteResponse)(nil), // 18: expedientes.RechazarExpedienteResponse
-	(*CorregirExpedienteRequest)(nil),  // 19: expedientes.CorregirExpedienteRequest
-	(*CorregirExpedienteResponse)(nil), // 20: expedientes.CorregirExpedienteResponse
-	(*ResolverExpedienteRequest)(nil),  // 21: expedientes.ResolverExpedienteRequest
-	(*ResolverExpedienteResponse)(nil), // 22: expedientes.ResolverExpedienteResponse
-	(*ValidateDerivacionRequest)(nil),  // 23: expedientes.ValidateDerivacionRequest
-	(*ValidateDerivacionResponse)(nil), // 24: expedientes.ValidateDerivacionResponse
-	(*ReporteExpedientesRequest)(nil),  // 25: expedientes.ReporteExpedientesRequest
-	(*ReporteCruce)(nil),               // 26: expedientes.ReporteCruce
-	(*ReporteConteo)(nil),              // 27: expedientes.ReporteConteo
-	(*ReporteExpedientesResponse)(nil), // 28: expedientes.ReporteExpedientesResponse
-	(*ReporteAlcanceRequest)(nil),      // 29: expedientes.ReporteAlcanceRequest
-	(*ReporteExpedienteRef)(nil),       // 30: expedientes.ReporteExpedienteRef
-	(*ReporteAlcanceResponse)(nil),     // 31: expedientes.ReporteAlcanceResponse
+	(*Movimiento)(nil),                 // 9: expedientes.Movimiento
+	(*ChangeEstadoRequest)(nil),        // 10: expedientes.ChangeEstadoRequest
+	(*ChangeEstadoResponse)(nil),       // 11: expedientes.ChangeEstadoResponse
+	(*DeleteExpedienteRequest)(nil),    // 12: expedientes.DeleteExpedienteRequest
+	(*DeleteExpedienteResponse)(nil),   // 13: expedientes.DeleteExpedienteResponse
+	(*UpdateAreaRequest)(nil),          // 14: expedientes.UpdateAreaRequest
+	(*UpdateAreaResponse)(nil),         // 15: expedientes.UpdateAreaResponse
+	(*DerivarExpedienteRequest)(nil),   // 16: expedientes.DerivarExpedienteRequest
+	(*DerivarExpedienteResponse)(nil),  // 17: expedientes.DerivarExpedienteResponse
+	(*RechazarExpedienteRequest)(nil),  // 18: expedientes.RechazarExpedienteRequest
+	(*RechazarExpedienteResponse)(nil), // 19: expedientes.RechazarExpedienteResponse
+	(*CorregirExpedienteRequest)(nil),  // 20: expedientes.CorregirExpedienteRequest
+	(*CorregirExpedienteResponse)(nil), // 21: expedientes.CorregirExpedienteResponse
+	(*ResolverExpedienteRequest)(nil),  // 22: expedientes.ResolverExpedienteRequest
+	(*ResolverExpedienteResponse)(nil), // 23: expedientes.ResolverExpedienteResponse
+	(*ValidateDerivacionRequest)(nil),  // 24: expedientes.ValidateDerivacionRequest
+	(*ValidateDerivacionResponse)(nil), // 25: expedientes.ValidateDerivacionResponse
+	(*ReporteExpedientesRequest)(nil),  // 26: expedientes.ReporteExpedientesRequest
+	(*ReporteCruce)(nil),               // 27: expedientes.ReporteCruce
+	(*ReporteConteo)(nil),              // 28: expedientes.ReporteConteo
+	(*ReporteExpedientesResponse)(nil), // 29: expedientes.ReporteExpedientesResponse
+	(*ReporteAlcanceRequest)(nil),      // 30: expedientes.ReporteAlcanceRequest
+	(*ReporteExpedienteRef)(nil),       // 31: expedientes.ReporteExpedienteRef
+	(*ReporteAlcanceResponse)(nil),     // 32: expedientes.ReporteAlcanceResponse
 }
 var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 0: expedientes.CreateExpedienteResponse.expediente:type_name -> expedientes.Expediente
@@ -2165,56 +2531,61 @@ var file_expedientes_service_proto_depIdxs = []int32{
 	0,  // 2: expedientes.ListExpedientesResponse.expedientes:type_name -> expedientes.Expediente
 	0,  // 3: expedientes.UpdateExpedienteResponse.expediente:type_name -> expedientes.Expediente
 	0,  // 4: expedientes.ChangeEstadoResponse.expediente:type_name -> expedientes.Expediente
-	0,  // 5: expedientes.UpdateAreaResponse.expediente:type_name -> expedientes.Expediente
-	0,  // 6: expedientes.DerivarExpedienteResponse.expediente:type_name -> expedientes.Expediente
-	0,  // 7: expedientes.RechazarExpedienteResponse.expediente:type_name -> expedientes.Expediente
-	0,  // 8: expedientes.CorregirExpedienteResponse.expediente:type_name -> expedientes.Expediente
-	0,  // 9: expedientes.ResolverExpedienteResponse.expediente:type_name -> expedientes.Expediente
-	27, // 10: expedientes.ReporteExpedientesResponse.por_estado:type_name -> expedientes.ReporteConteo
-	27, // 11: expedientes.ReporteExpedientesResponse.por_tipo:type_name -> expedientes.ReporteConteo
-	27, // 12: expedientes.ReporteExpedientesResponse.por_prioridad:type_name -> expedientes.ReporteConteo
-	27, // 13: expedientes.ReporteExpedientesResponse.por_area:type_name -> expedientes.ReporteConteo
-	27, // 14: expedientes.ReporteExpedientesResponse.por_mes:type_name -> expedientes.ReporteConteo
-	27, // 15: expedientes.ReporteExpedientesResponse.pendientes_por_antiguedad:type_name -> expedientes.ReporteConteo
-	27, // 16: expedientes.ReporteExpedientesResponse.serie:type_name -> expedientes.ReporteConteo
-	26, // 17: expedientes.ReporteExpedientesResponse.area_estado:type_name -> expedientes.ReporteCruce
-	26, // 18: expedientes.ReporteExpedientesResponse.tipo_estado:type_name -> expedientes.ReporteCruce
-	27, // 19: expedientes.ReporteExpedientesResponse.registros_por_usuario:type_name -> expedientes.ReporteConteo
-	26, // 20: expedientes.ReporteExpedientesResponse.serie_estado:type_name -> expedientes.ReporteCruce
-	30, // 21: expedientes.ReporteAlcanceResponse.expedientes:type_name -> expedientes.ReporteExpedienteRef
-	1,  // 22: expedientes.Expedientes.CreateExpediente:input_type -> expedientes.CreateExpedienteRequest
-	3,  // 23: expedientes.Expedientes.GetExpediente:input_type -> expedientes.GetExpedienteRequest
-	5,  // 24: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
-	7,  // 25: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
-	9,  // 26: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
-	11, // 27: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
-	13, // 28: expedientes.Expedientes.UpdateArea:input_type -> expedientes.UpdateAreaRequest
-	15, // 29: expedientes.Expedientes.DerivarExpediente:input_type -> expedientes.DerivarExpedienteRequest
-	17, // 30: expedientes.Expedientes.RechazarExpediente:input_type -> expedientes.RechazarExpedienteRequest
-	19, // 31: expedientes.Expedientes.CorregirExpediente:input_type -> expedientes.CorregirExpedienteRequest
-	21, // 32: expedientes.Expedientes.ResolverExpediente:input_type -> expedientes.ResolverExpedienteRequest
-	23, // 33: expedientes.Expedientes.ValidateDerivacion:input_type -> expedientes.ValidateDerivacionRequest
-	25, // 34: expedientes.Expedientes.ReporteExpedientes:input_type -> expedientes.ReporteExpedientesRequest
-	29, // 35: expedientes.Expedientes.ReporteAlcanceExpedientes:input_type -> expedientes.ReporteAlcanceRequest
-	2,  // 36: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
-	4,  // 37: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
-	6,  // 38: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
-	8,  // 39: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
-	10, // 40: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
-	12, // 41: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
-	14, // 42: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
-	16, // 43: expedientes.Expedientes.DerivarExpediente:output_type -> expedientes.DerivarExpedienteResponse
-	18, // 44: expedientes.Expedientes.RechazarExpediente:output_type -> expedientes.RechazarExpedienteResponse
-	20, // 45: expedientes.Expedientes.CorregirExpediente:output_type -> expedientes.CorregirExpedienteResponse
-	22, // 46: expedientes.Expedientes.ResolverExpediente:output_type -> expedientes.ResolverExpedienteResponse
-	24, // 47: expedientes.Expedientes.ValidateDerivacion:output_type -> expedientes.ValidateDerivacionResponse
-	28, // 48: expedientes.Expedientes.ReporteExpedientes:output_type -> expedientes.ReporteExpedientesResponse
-	31, // 49: expedientes.Expedientes.ReporteAlcanceExpedientes:output_type -> expedientes.ReporteAlcanceResponse
-	36, // [36:50] is the sub-list for method output_type
-	22, // [22:36] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	9,  // 5: expedientes.ChangeEstadoResponse.movimiento:type_name -> expedientes.Movimiento
+	0,  // 6: expedientes.UpdateAreaResponse.expediente:type_name -> expedientes.Expediente
+	0,  // 7: expedientes.DerivarExpedienteResponse.expediente:type_name -> expedientes.Expediente
+	9,  // 8: expedientes.DerivarExpedienteResponse.movimiento:type_name -> expedientes.Movimiento
+	0,  // 9: expedientes.RechazarExpedienteResponse.expediente:type_name -> expedientes.Expediente
+	9,  // 10: expedientes.RechazarExpedienteResponse.movimiento:type_name -> expedientes.Movimiento
+	0,  // 11: expedientes.CorregirExpedienteResponse.expediente:type_name -> expedientes.Expediente
+	9,  // 12: expedientes.CorregirExpedienteResponse.movimiento:type_name -> expedientes.Movimiento
+	0,  // 13: expedientes.ResolverExpedienteResponse.expediente:type_name -> expedientes.Expediente
+	9,  // 14: expedientes.ResolverExpedienteResponse.movimiento:type_name -> expedientes.Movimiento
+	28, // 15: expedientes.ReporteExpedientesResponse.por_estado:type_name -> expedientes.ReporteConteo
+	28, // 16: expedientes.ReporteExpedientesResponse.por_tipo:type_name -> expedientes.ReporteConteo
+	28, // 17: expedientes.ReporteExpedientesResponse.por_prioridad:type_name -> expedientes.ReporteConteo
+	28, // 18: expedientes.ReporteExpedientesResponse.por_area:type_name -> expedientes.ReporteConteo
+	28, // 19: expedientes.ReporteExpedientesResponse.por_mes:type_name -> expedientes.ReporteConteo
+	28, // 20: expedientes.ReporteExpedientesResponse.pendientes_por_antiguedad:type_name -> expedientes.ReporteConteo
+	28, // 21: expedientes.ReporteExpedientesResponse.serie:type_name -> expedientes.ReporteConteo
+	27, // 22: expedientes.ReporteExpedientesResponse.area_estado:type_name -> expedientes.ReporteCruce
+	27, // 23: expedientes.ReporteExpedientesResponse.tipo_estado:type_name -> expedientes.ReporteCruce
+	28, // 24: expedientes.ReporteExpedientesResponse.registros_por_usuario:type_name -> expedientes.ReporteConteo
+	27, // 25: expedientes.ReporteExpedientesResponse.serie_estado:type_name -> expedientes.ReporteCruce
+	31, // 26: expedientes.ReporteAlcanceResponse.expedientes:type_name -> expedientes.ReporteExpedienteRef
+	1,  // 27: expedientes.Expedientes.CreateExpediente:input_type -> expedientes.CreateExpedienteRequest
+	3,  // 28: expedientes.Expedientes.GetExpediente:input_type -> expedientes.GetExpedienteRequest
+	5,  // 29: expedientes.Expedientes.ListExpedientes:input_type -> expedientes.ListExpedientesRequest
+	7,  // 30: expedientes.Expedientes.UpdateExpediente:input_type -> expedientes.UpdateExpedienteRequest
+	10, // 31: expedientes.Expedientes.ChangeEstado:input_type -> expedientes.ChangeEstadoRequest
+	12, // 32: expedientes.Expedientes.DeleteExpediente:input_type -> expedientes.DeleteExpedienteRequest
+	14, // 33: expedientes.Expedientes.UpdateArea:input_type -> expedientes.UpdateAreaRequest
+	16, // 34: expedientes.Expedientes.DerivarExpediente:input_type -> expedientes.DerivarExpedienteRequest
+	18, // 35: expedientes.Expedientes.RechazarExpediente:input_type -> expedientes.RechazarExpedienteRequest
+	20, // 36: expedientes.Expedientes.CorregirExpediente:input_type -> expedientes.CorregirExpedienteRequest
+	22, // 37: expedientes.Expedientes.ResolverExpediente:input_type -> expedientes.ResolverExpedienteRequest
+	24, // 38: expedientes.Expedientes.ValidateDerivacion:input_type -> expedientes.ValidateDerivacionRequest
+	26, // 39: expedientes.Expedientes.ReporteExpedientes:input_type -> expedientes.ReporteExpedientesRequest
+	30, // 40: expedientes.Expedientes.ReporteAlcanceExpedientes:input_type -> expedientes.ReporteAlcanceRequest
+	2,  // 41: expedientes.Expedientes.CreateExpediente:output_type -> expedientes.CreateExpedienteResponse
+	4,  // 42: expedientes.Expedientes.GetExpediente:output_type -> expedientes.GetExpedienteResponse
+	6,  // 43: expedientes.Expedientes.ListExpedientes:output_type -> expedientes.ListExpedientesResponse
+	8,  // 44: expedientes.Expedientes.UpdateExpediente:output_type -> expedientes.UpdateExpedienteResponse
+	11, // 45: expedientes.Expedientes.ChangeEstado:output_type -> expedientes.ChangeEstadoResponse
+	13, // 46: expedientes.Expedientes.DeleteExpediente:output_type -> expedientes.DeleteExpedienteResponse
+	15, // 47: expedientes.Expedientes.UpdateArea:output_type -> expedientes.UpdateAreaResponse
+	17, // 48: expedientes.Expedientes.DerivarExpediente:output_type -> expedientes.DerivarExpedienteResponse
+	19, // 49: expedientes.Expedientes.RechazarExpediente:output_type -> expedientes.RechazarExpedienteResponse
+	21, // 50: expedientes.Expedientes.CorregirExpediente:output_type -> expedientes.CorregirExpedienteResponse
+	23, // 51: expedientes.Expedientes.ResolverExpediente:output_type -> expedientes.ResolverExpedienteResponse
+	25, // 52: expedientes.Expedientes.ValidateDerivacion:output_type -> expedientes.ValidateDerivacionResponse
+	29, // 53: expedientes.Expedientes.ReporteExpedientes:output_type -> expedientes.ReporteExpedientesResponse
+	32, // 54: expedientes.Expedientes.ReporteAlcanceExpedientes:output_type -> expedientes.ReporteAlcanceResponse
+	41, // [41:55] is the sub-list for method output_type
+	27, // [27:41] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_expedientes_service_proto_init() }
@@ -2228,7 +2599,7 @@ func file_expedientes_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_expedientes_service_proto_rawDesc), len(file_expedientes_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   32,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

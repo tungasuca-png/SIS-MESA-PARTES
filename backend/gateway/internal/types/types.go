@@ -179,13 +179,18 @@ type ChangeEstadoPeriodoRequest struct {
 }
 
 type ChangeEstadoRequest struct {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	NuevoEstado   string `json:"nuevo_estado"`
+	Authorization  string `header:"Authorization,optional"`
+	IdempotencyKey string `header:"Idempotency-Key"`
+	Id             string `path:"id"`
+	NuevoEstado    string `json:"nuevo_estado"`
+	EstadoEsperado string `json:"estado_esperado"`
+	Motivo         string `json:"motivo,optional"`
 }
 
 type ChangeEstadoResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
 }
 
 type ClosePsicologiaExpedienteRequest struct {
@@ -236,13 +241,16 @@ type CorrectPsicologiaAtencionRequest struct {
 }
 
 type CorregirExpedienteRequest struct {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	Descripcion   string `json:"descripcion"`
+	Authorization  string `header:"Authorization,optional"`
+	IdempotencyKey string `header:"Idempotency-Key"`
+	Id             string `path:"id"`
+	Descripcion    string `json:"descripcion"`
 }
 
 type CorregirExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
 }
 
 type CrearDerivacionRequest struct {
@@ -426,18 +434,46 @@ type DerivacionDTO struct {
 	Condicion     string `json:"condicion"`
 	RegistradoPor string `json:"registrado_por"`
 	FechaRegistro string `json:"fecha_registro"`
+	// Historial unificado (A + B): MOVIMIENTO, ANOTACION o LEGADO.
+	Clase          string `json:"clase"`
+	Secuencia      int32  `json:"secuencia,omitempty"`
+	EstadoAnterior string `json:"estado_anterior,omitempty"`
+	EstadoNuevo    string `json:"estado_nuevo,omitempty"`
+	ActorRol       string `json:"actor_rol,omitempty"`
+}
+
+// MovimientoDTO: movimiento registrado por Expedientes (A + B).
+type MovimientoDTO struct {
+	Id             string `json:"id"`
+	ExpedienteId   string `json:"expediente_id"`
+	Secuencia      int32  `json:"secuencia"`
+	Tipo           string `json:"tipo"`
+	ActorId        string `json:"actor_id"`
+	ActorRol       string `json:"actor_rol"`
+	AreaOrigen     string `json:"area_origen"`
+	AreaDestino    string `json:"area_destino"`
+	EstadoAnterior string `json:"estado_anterior"`
+	EstadoNuevo    string `json:"estado_nuevo"`
+	Motivo         string `json:"motivo"`
+	Condicion      string `json:"condicion"`
+	OcurridoEn     string `json:"ocurrido_en"`
 }
 
 type DerivarExpedienteRequest struct {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	AreaDestino   string `json:"area_destino"`
-	Motivo        string `json:"motivo"`
-	Condicion     string `json:"condicion,optional"`
+	Authorization      string `header:"Authorization,optional"`
+	IdempotencyKey     string `header:"Idempotency-Key"`
+	Id                 string `path:"id"`
+	AreaDestino        string `json:"area_destino"`
+	AreaOrigenEsperada string `json:"area_origen_esperada"`
+	Motivo             string `json:"motivo"`
+	Condicion          string `json:"condicion,optional"`
 }
 
 type DerivarExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
+	// Compatibilidad: la misma información en el formato anterior.
 	Derivacion DerivacionDTO `json:"derivacion"`
 }
 
@@ -1278,13 +1314,18 @@ type PsicologiaExpedienteResponse struct {
 }
 
 type RechazarExpedienteRequest struct {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	Motivo        string `json:"motivo"`
+	Authorization      string `header:"Authorization,optional"`
+	IdempotencyKey     string `header:"Idempotency-Key"`
+	Id                 string `path:"id"`
+	Motivo             string `json:"motivo"`
+	AreaOrigenEsperada string `json:"area_origen_esperada"`
 }
 
 type RechazarExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
+	// Compatibilidad: la misma información en el formato anterior.
 	Derivacion DerivacionDTO `json:"derivacion"`
 }
 
@@ -1477,12 +1518,15 @@ type ResolveEstudianteResponse struct {
 }
 
 type ResolverExpedienteRequest struct {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
+	Authorization  string `header:"Authorization,optional"`
+	IdempotencyKey string `header:"Idempotency-Key"`
+	Id             string `path:"id"`
 }
 
 type ResolverExpedienteResponse struct {
 	Expediente ExpedienteDTO `json:"expediente"`
+	Movimiento MovimientoDTO `json:"movimiento"`
+	Repetido   bool          `json:"repetido"`
 }
 
 type ResumenDatosDTO struct {
@@ -1589,16 +1633,6 @@ type ServiceTokenResponse struct {
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int64  `json:"expires_in"`
 	Scope       string `json:"scope"`
-}
-
-type UpdateAreaRequest struct {
-	Authorization string `header:"Authorization,optional"`
-	Id            string `path:"id"`
-	Area          string `json:"area"`
-}
-
-type UpdateAreaResponse struct {
-	Expediente ExpedienteDTO `json:"expediente"`
 }
 
 type UpdateEstudiantePersonalRequest struct {

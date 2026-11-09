@@ -115,5 +115,10 @@ func (v visibilidad) proyectar(d *derivaciones.Derivacion) *derivaciones.Derivac
 		Origen:        d.Origen,
 		Destino:       d.Destino,
 		FechaRegistro: d.FechaRegistro,
+		// Recorrido del historial unificado (sin motivo, condición ni actor).
+		Clase:          d.Clase,
+		Secuencia:      d.Secuencia,
+		EstadoAnterior: d.EstadoAnterior,
+		EstadoNuevo:    d.EstadoNuevo,
 	}
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import RoleLayout from "../../components/portal/RoleLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import SolicitanteNombre from "../../components/dashboard/SolicitanteNombre";
@@ -8,6 +8,7 @@ import DerivacionesPanel from "../../components/dashboard/DerivacionesPanel";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useUsuariosBasic } from "../../hooks/useUsuariosBasic";
+import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import {
     changeEstado,
     corregirExpediente,
@@ -26,6 +27,8 @@ import "./expedienteDetail.css";
 
 function ExpedienteDetail() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const claves = useClaveIdempotente();
     const { user } = useAuth();
     const { can } = usePermissions();
 
@@ -127,6 +130,33 @@ function ExpedienteDetail() {
         }
     };
 
+    // A + B: tras mover el expediente, el usuario puede dejar de verlo (solo ve
+    // su área, salvo Secretaría y Administración). Eso es un ÉXITO: se vuelve a
+    // la bandeja con un aviso, no se muestra un error.
+    const puedeSeguirViendo = (exp) =>
+        ["ADMIN", "SECRETARIA"].includes(user?.role) || exp.area_actual === user?.role || exp.solicitante_id === user?.id;
+
+    const aplicarMovimiento = (operacion, data, mensaje) => {
+        claves.descartar(operacion);
+        if (!puedeSeguirViendo(data.expediente)) {
+            navigate("/expedientes", { state: { mensaje } });
+            return true;
+        }
+        setExpediente(data.expediente);
+        return false;
+    };
+
+    // 409: otro usuario cambió el expediente entretanto: se recarga para que
+    // el usuario decida sobre el estado real.
+    const recargar = async () => {
+        try {
+            const data = await getExpediente(id);
+            setExpediente(data.expediente);
+        } catch {
+            // si ya no puede verlo, el error de la operación ya se mostró
+        }
+    };
+
     const handleChangeEstado = async (event) => {
         event.preventDefault();
         setEstadoError("");
@@ -134,11 +164,18 @@ function ExpedienteDetail() {
 
         setChangingEstado(true);
         try {
-            const data = await changeEstado(expediente.id, nuevoEstado);
-            setExpediente(data.expediente);
+            const firma = [expediente.id, nuevoEstado, expediente.estado].join("|");
+            const data = await changeEstado(
+                expediente.id,
+                nuevoEstado,
+                expediente.estado,
+                claves.obtener("estado", firma)
+            );
+            aplicarMovimiento("estado", data, "Estado del expediente actualizado.");
             setNuevoEstado("");
         } catch (err) {
             setEstadoError(friendlyErrorMessage(err));
+            if (err?.response?.status === 409) recargar();
         } finally {
             setChangingEstado(false);
         }
@@ -157,11 +194,19 @@ function ExpedienteDetail() {
         }
         setRechazando(true);
         try {
-            const data = await rechazarExpediente(expediente.id, motivoRechazo.trim());
-            setExpediente(data.expediente);
+            const motivo = motivoRechazo.trim();
+            const firma = [expediente.id, motivo, expediente.area_actual].join("|");
+            const data = await rechazarExpediente(
+                expediente.id,
+                motivo,
+                expediente.area_actual,
+                claves.obtener("rechazo", firma)
+            );
             setMotivoRechazo("");
+            aplicarMovimiento("rechazo", data, "Expediente rechazado y devuelto a Secretaría.");
         } catch (err) {
             setRechazoError(friendlyErrorMessage(err));
+            if (err?.response?.status === 409) recargar();
         } finally {
             setRechazando(false);
         }
@@ -171,8 +216,8 @@ function ExpedienteDetail() {
         setResolverError("");
         setResolviendo(true);
         try {
-            const data = await resolverExpediente(expediente.id);
-            setExpediente(data.expediente);
+            const data = await resolverExpediente(expediente.id, claves.obtener("resolver", expediente.id));
+            aplicarMovimiento("resolver", data, "Expediente resuelto.");
         } catch (err) {
             setResolverError(friendlyErrorMessage(err));
         } finally {
@@ -189,8 +234,13 @@ function ExpedienteDetail() {
         }
         setCorrigiendo(true);
         try {
-            const data = await corregirExpediente(expediente.id, descripcionCorregida.trim());
-            setExpediente(data.expediente);
+            const descripcionNueva = descripcionCorregida.trim();
+            const data = await corregirExpediente(
+                expediente.id,
+                descripcionNueva,
+                claves.obtener("corregir", [expediente.id, descripcionNueva].join("|"))
+            );
+            aplicarMovimiento("corregir", data, "Expediente corregido y reenviado.");
             setDescripcionCorregida("");
         } catch (err) {
             setCorregirError(friendlyErrorMessage(err));
@@ -547,7 +597,18 @@ function ExpedienteDetail() {
 
                     {canViewDerivaciones && (
                         <div className="dp-detail-full-width">
-                            <DerivacionesPanel expedienteId={expediente.id} />
+                            <DerivacionesPanel
+                                expedienteId={expediente.id}
+                                areaActual={expediente.area_actual}
+                                onMovimiento={(data) =>
+                                    aplicarMovimiento(
+                                        "derivar",
+                                        data,
+                                        `Expediente derivado a ${roleLabel(data.expediente.area_actual)}.`
+                                    )
+                                }
+                                onConflicto={recargar}
+                            />
                         </div>
                     )}
 

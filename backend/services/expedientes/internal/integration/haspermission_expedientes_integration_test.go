@@ -159,11 +159,11 @@ func TestHasPermissionIntegration(t *testing.T) {
 	// propio AuthenticationInterceptor de Expedientes acepte los tokens de
 	// arriba) y AuthClient real, vía zrpc, contra el Auth Service real.
 	svcCtx := &svc.ServiceContext{
-		Config:               config.Config{JWTSecret: realSharedJWTSecret, AuthRpc: zrpc.RpcClientConf{Target: "127.0.0.1:8080"}},
+		Config:               config.Config{JWTSecret: realSharedJWTSecret, AuthRpc: zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")}},
 		DB:                   expedientesPool,
 		ExpedienteRepository: repository.NewExpedienteRepository(expedientesPool),
 		JWTValidator:         security.NewJWTValidator(realSharedJWTSecret),
-		AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: "127.0.0.1:8080"})),
+		AuthClient:           authclient.NewAuth(zrpc.MustNewClient(zrpc.RpcClientConf{Target: destinoRPC("TEST_AUTH_RPC", "127.0.0.1:8080")})),
 	}
 
 	listener := bufconn.Listen(1024 * 1024)
@@ -181,7 +181,10 @@ func TestHasPermissionIntegration(t *testing.T) {
 		t.Fatalf("dial gRPC test server: %v", err)
 	}
 	defer conn.Close()
-	client := expedientes.NewExpedientesClient(conn)
+	// A + B: los movimientos exigen clave de idempotencia y área/estado
+	// esperados; el envoltorio los completa con el estado real (ver
+	// movimientos_cliente_test.go) para conservar lo que verifica cada caso.
+	client := clienteMovimientos{expedientes.NewExpedientesClient(conn), repository.NewExpedienteRepository(expedientesPool)}
 
 	trackExpediente := func(codigo string) {
 		createdExpedienteIDs = append(createdExpedienteIDs, codigo)
@@ -997,4 +1000,15 @@ func authDatabaseURL(t *testing.T) string {
 		t.Skip("TEST_AUTH_DB_URL no definido: cargar backend/.env.test para ejecutar esta prueba")
 	}
 	return url
+}
+
+// destinoRPC: destino de un servicio real para las pruebas de integración.
+// Por defecto el puerto habitual; TEST_AUTH_RPC / TEST_EXPEDIENTES_RPC lo
+// cambian para correr contra un entorno desechable sin tocar los servicios
+// locales que estén levantados en los puertos habituales.
+func destinoRPC(variable, porDefecto string) string {
+	if v := strings.TrimSpace(os.Getenv(variable)); v != "" {
+		return v
+	}
+	return porDefecto
 }

@@ -42,3 +42,9 @@ func (s *DerivacionesServer) ReporteDerivaciones(ctx context.Context, in *deriva
 	l := logic.NewReporteDerivacionesLogic(ctx, s.svcCtx)
 	return l.ReporteDerivaciones(in)
 }
+
+// Solo el publicador de Expedientes, con token de servicio (aud=derivaciones,
+func (s *DerivacionesServer) AplicarMovimiento(ctx context.Context, in *derivaciones.AplicarMovimientoRequest) (*derivaciones.AplicarMovimientoResponse, error) {
+	l := logic.NewAplicarMovimientoLogic(ctx, s.svcCtx)
+	return l.AplicarMovimiento(in)
+}

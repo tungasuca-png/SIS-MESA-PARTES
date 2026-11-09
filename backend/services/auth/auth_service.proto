@@ -229,6 +229,8 @@ message ServiceClient {
   string created_at = 6;
   string last_used_at = 7;
   string revoked_at = 8;
+  // A + B: estudiantes o derivaciones (migración 027). Inmutable.
+  string audiencia = 9;
 }
 
 // Alta administrativa ("integraciones.manage"): client_secret se devuelve
@@ -236,6 +238,9 @@ message ServiceClient {
 message CreateServiceClientRequest {
   string nombre = 1;
   repeated string permisos = 2;
+  // A + B: estudiantes (por defecto) o derivaciones (solo
+  // derivaciones.proyectar: el publicador de Expedientes).
+  string audiencia = 3;
 }
 
 message CreateServiceClientResponse {

@@ -27,6 +27,14 @@ type Derivacion struct {
 	Condicion     string
 	RegistradoPor string
 	FechaRegistro time.Time
+	// Historial unificado (A + B, vista historial_expediente): MOVIMIENTO,
+	// ANOTACION o LEGADO. Los demás campos solo los tienen los MOVIMIENTO
+	// (vacíos / 0 en el resto).
+	Clase          string
+	Secuencia      int
+	EstadoAnterior string
+	EstadoNuevo    string
+	ActorRol       string
 }
 
 type DerivacionRepository struct {
@@ -37,16 +45,30 @@ func NewDerivacionRepository(db *pgxpool.Pool) *DerivacionRepository {
 	return &DerivacionRepository{db: db}
 }
 
-const derivacionColumns = `
+// historialColumns: columnas de la vista historial_expediente (migración
+// 002), en el orden de scanDerivacion.
+const historialColumns = `
 	id, expediente_id, tipo, origen, destino, motivo, condicion,
-	registrado_por, fecha_registro
+	registrado_por, fecha, clase, coalesce(secuencia, 0),
+	coalesce(estado_anterior, ''), coalesce(estado_nuevo, ''), coalesce(actor_rol, '')
 `
+
+// anotacionReturning: mismas columnas para un INSERT en derivaciones (solo
+// anotaciones; los movimientos llegan por la proyección).
+const anotacionReturning = `
+	id, expediente_id, tipo, origen, destino, motivo, condicion,
+	registrado_por, fecha_registro, 'ANOTACION', 0, '', '', ''
+`
+
+// Orden cronológico del historial: fecha, y entre movimientos la secuencia.
+const ordenHistorial = `fecha DESC, secuencia DESC NULLS LAST, id`
 
 func scanDerivacion(row pgx.Row) (*Derivacion, error) {
 	d := &Derivacion{}
 	err := row.Scan(
 		&d.ID, &d.ExpedienteID, &d.Tipo, &d.Origen, &d.Destino, &d.Motivo,
-		&d.Condicion, &d.RegistradoPor, &d.FechaRegistro,
+		&d.Condicion, &d.RegistradoPor, &d.FechaRegistro, &d.Clase, &d.Secuencia,
+		&d.EstadoAnterior, &d.EstadoNuevo, &d.ActorRol,
 	)
 	if err != nil {
 		return nil, err
@@ -58,7 +80,7 @@ func (r *DerivacionRepository) Create(ctx context.Context, expedienteID, tipo, o
 	created, err := scanDerivacion(r.db.QueryRow(ctx, `
 		INSERT INTO derivaciones (expediente_id, tipo, origen, destino, motivo, condicion, registrado_por)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING `+derivacionColumns,
+		RETURNING `+anotacionReturning,
 		expedienteID, tipo, origen, destino, motivo, condicion, registradoPor,
 	))
 	if err != nil {
@@ -69,8 +91,8 @@ func (r *DerivacionRepository) Create(ctx context.Context, expedienteID, tipo, o
 
 func (r *DerivacionRepository) Get(ctx context.Context, id string) (*Derivacion, error) {
 	found, err := scanDerivacion(r.db.QueryRow(ctx, `
-		SELECT `+derivacionColumns+`
-		FROM derivaciones
+		SELECT `+historialColumns+`
+		FROM historial_expediente
 		WHERE id = $1
 	`, id))
 	if err != nil {
@@ -114,18 +136,18 @@ func (r *DerivacionRepository) List(ctx context.Context, filter ListFilter) ([]*
 	whereClause := strings.Join(conditions, " AND ")
 
 	var total int
-	if err := r.db.QueryRow(ctx, "SELECT COUNT(*) FROM derivaciones WHERE "+whereClause, args...).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, "SELECT COUNT(*) FROM historial_expediente WHERE "+whereClause, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
 	limitArgs := append(append([]any{}, args...), filter.PageSize, (filter.Page-1)*filter.PageSize)
 	rows, err := r.db.Query(ctx, fmt.Sprintf(`
 		SELECT %s
-		FROM derivaciones
+		FROM historial_expediente
 		WHERE %s
-		ORDER BY fecha_registro DESC
+		ORDER BY %s
 		LIMIT $%d OFFSET $%d
-	`, derivacionColumns, whereClause, len(limitArgs)-1, len(limitArgs)), limitArgs...)
+	`, historialColumns, whereClause, ordenHistorial, len(limitArgs)-1, len(limitArgs)), limitArgs...)
 	if err != nil {
 		return nil, 0, err
 	}

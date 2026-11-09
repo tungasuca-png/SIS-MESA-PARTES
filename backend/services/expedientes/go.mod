@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	auth v0.0.0
+	derivaciones v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/zeromicro/go-zero v1.10.3
@@ -12,6 +13,8 @@ require (
 )
 
 replace auth => ../auth
+
+replace derivaciones => ../derivaciones
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

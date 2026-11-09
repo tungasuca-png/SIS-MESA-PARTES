@@ -64,7 +64,7 @@ func getDerivacionComo(t *testing.T, sc *svc.ServiceContext, token, id string) (
 		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("authorization", "Bearer "+token))
 	}
 	var resp *derivaciones.GetDerivacionResponse
-	_, err := interceptor.AuthenticationInterceptor(security.NewJWTValidator(secretoDeriv))(ctx, &derivaciones.GetDerivacionRequest{Id: id},
+	_, err := interceptor.AuthenticationInterceptor(security.NewJWTValidator(secretoDeriv), nil)(ctx, &derivaciones.GetDerivacionRequest{Id: id},
 		&grpc.UnaryServerInfo{FullMethod: "/derivaciones.Derivaciones/GetDerivacion"},
 		func(ctx context.Context, req any) (any, error) {
 			r, err := NewGetDerivacionLogic(ctx, sc).GetDerivacion(req.(*derivaciones.GetDerivacionRequest))

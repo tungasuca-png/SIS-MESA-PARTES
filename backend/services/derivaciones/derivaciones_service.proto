@@ -13,6 +13,49 @@ message Derivacion {
   string condicion = 7;
   string registrado_por = 8;
   string fecha_registro = 9;
+  // Historial unificado (A + B): MOVIMIENTO (proyección de Expedientes),
+  // ANOTACION (notificación, asignación, recepción, aprobación) o LEGADO
+  // (derivaciones anteriores a A + B, sin verificación).
+  string clase = 10;
+  int32 secuencia = 11;        // solo MOVIMIENTO
+  string estado_anterior = 12; // solo MOVIMIENTO
+  string estado_nuevo = 13;    // solo MOVIMIENTO
+  string actor_rol = 14;       // solo MOVIMIENTO
+}
+
+// Movimiento publicado por Expedientes (fuente de verdad) vía Transactional
+// Outbox. ocurrido_en en RFC3339Nano UTC tal como lo guardó PostgreSQL.
+message MovimientoProyectado {
+  string movimiento_id = 1;
+  string expediente_id = 2;
+  int32 secuencia = 3;
+  string tipo = 4;
+  string actor_id = 5;
+  string actor_rol = 6;
+  string area_origen = 7;
+  string area_destino = 8;
+  string estado_anterior = 9;
+  string estado_nuevo = 10;
+  string motivo = 11;
+  string condicion = 12;
+  string ocurrido_en = 13;
+}
+
+message AplicarMovimientoRequest {
+  MovimientoProyectado movimiento = 1;
+}
+
+// APLICADO: insertado. DUPLICADO: ya estaba, idéntico campo a campo.
+// Errores: Aborted = falta la secuencia anterior (reintentable);
+// FailedPrecondition = divergente (mismo id con otro contenido, u otro id con
+// la misma secuencia: permanente); InvalidArgument = mensaje inválido.
+message AplicarMovimientoResponse {
+  enum Resultado {
+    RESULTADO_DESCONOCIDO = 0;
+    APLICADO = 1;
+    DUPLICADO = 2;
+  }
+  Resultado resultado = 1;
 }
 
 message CrearDerivacionRequest {
@@ -109,4 +152,7 @@ service Derivaciones {
   rpc GetDerivacion(GetDerivacionRequest) returns (GetDerivacionResponse);
   rpc ListDerivaciones(ListDerivacionesRequest) returns (ListDerivacionesResponse);
   rpc ReporteDerivaciones(ReporteDerivacionesRequest) returns (ReporteDerivacionesResponse);
+  // Solo el publicador de Expedientes, con token de servicio (aud=derivaciones,
+  // scope derivaciones.proyectar). Rechaza tokens de usuario.
+  rpc AplicarMovimiento(AplicarMovimientoRequest) returns (AplicarMovimientoResponse);
 }

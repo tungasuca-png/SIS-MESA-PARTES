@@ -365,3 +365,15 @@
         flex: 1 1 auto;
     }
 }
+
+/* A + B: aviso de éxito (p. ej. tras derivar un expediente que el usuario ya no ve). */
+.dp-form-ok {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--dp-success-border);
+    border-left: 3px solid var(--dp-success-border);
+    border-radius: 8px;
+    background: var(--dp-success-bg);
+    color: var(--dp-success-text);
+    font-size: 0.9rem;
+}

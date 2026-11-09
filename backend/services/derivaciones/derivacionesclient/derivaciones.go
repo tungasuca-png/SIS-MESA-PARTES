@@ -14,6 +14,8 @@ import (
 )
 
 type (
+	AplicarMovimientoRequest    = derivaciones.AplicarMovimientoRequest
+	AplicarMovimientoResponse   = derivaciones.AplicarMovimientoResponse
 	CrearDerivacionRequest      = derivaciones.CrearDerivacionRequest
 	CrearDerivacionResponse     = derivaciones.CrearDerivacionResponse
 	Derivacion                  = derivaciones.Derivacion
@@ -21,6 +23,7 @@ type (
 	GetDerivacionResponse       = derivaciones.GetDerivacionResponse
 	ListDerivacionesRequest     = derivaciones.ListDerivacionesRequest
 	ListDerivacionesResponse    = derivaciones.ListDerivacionesResponse
+	MovimientoProyectado        = derivaciones.MovimientoProyectado
 	ReporteDerivConteo          = derivaciones.ReporteDerivConteo
 	ReporteDerivFlujo           = derivaciones.ReporteDerivFlujo
 	ReporteDerivacionesRequest  = derivaciones.ReporteDerivacionesRequest
@@ -31,6 +34,8 @@ type (
 		GetDerivacion(ctx context.Context, in *GetDerivacionRequest, opts ...grpc.CallOption) (*GetDerivacionResponse, error)
 		ListDerivaciones(ctx context.Context, in *ListDerivacionesRequest, opts ...grpc.CallOption) (*ListDerivacionesResponse, error)
 		ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error)
+		// Solo el publicador de Expedientes, con token de servicio (aud=derivaciones,
+		AplicarMovimiento(ctx context.Context, in *AplicarMovimientoRequest, opts ...grpc.CallOption) (*AplicarMovimientoResponse, error)
 	}
 
 	defaultDerivaciones struct {
@@ -62,4 +67,10 @@ func (m *defaultDerivaciones) ListDerivaciones(ctx context.Context, in *ListDeri
 func (m *defaultDerivaciones) ReporteDerivaciones(ctx context.Context, in *ReporteDerivacionesRequest, opts ...grpc.CallOption) (*ReporteDerivacionesResponse, error) {
 	client := derivaciones.NewDerivacionesClient(m.cli.Conn())
 	return client.ReporteDerivaciones(ctx, in, opts...)
+}
+
+// Solo el publicador de Expedientes, con token de servicio (aud=derivaciones,
+func (m *defaultDerivaciones) AplicarMovimiento(ctx context.Context, in *AplicarMovimientoRequest, opts ...grpc.CallOption) (*AplicarMovimientoResponse, error) {
+	client := derivaciones.NewDerivacionesClient(m.cli.Conn())
+	return client.AplicarMovimiento(ctx, in, opts...)
 }

@@ -29,6 +29,7 @@ type (
 	GetExpedienteResponse      = expedientes.GetExpedienteResponse
 	ListExpedientesRequest     = expedientes.ListExpedientesRequest
 	ListExpedientesResponse    = expedientes.ListExpedientesResponse
+	Movimiento                 = expedientes.Movimiento
 	RechazarExpedienteRequest  = expedientes.RechazarExpedienteRequest
 	RechazarExpedienteResponse = expedientes.RechazarExpedienteResponse
 	ReporteAlcanceRequest      = expedientes.ReporteAlcanceRequest

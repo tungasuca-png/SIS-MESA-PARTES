@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"auth/internal/authorization"
@@ -30,6 +31,8 @@ type ServiceContext struct {
 	// Unavailable y nada más cambia.
 	ServiceClientRepository *repository.ServiceClientRepository
 	ServiceTokenIssuer      *security.ServiceTokenIssuer
+	// A + B: emisores por audiencia (estudiantes = ServiceTokenIssuer).
+	EmisoresServicio security.EmisoresServicio
 	// Acceso con Google (solo SOLICITANTES).
 	GoogleRepository *repository.GoogleRepository
 	Google           security.GoogleProvider
@@ -119,6 +122,23 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	} else {
 		log.Println("Tokens de servicio habilitados (client credentials)")
 	}
+	emisores := security.EmisoresServicio{}
+	if serviceIssuer != nil {
+		emisores[security.AudienciaEstudiantes] = serviceIssuer
+	}
+	if strings.TrimSpace(c.ServiceJWTSecretDerivaciones) != "" {
+		if strings.TrimSpace(c.ServiceJWTSecretDerivaciones) == strings.TrimSpace(c.ServiceJWTSecret) {
+			db.Close()
+			log.Fatalf("ServiceJWTSecretDerivaciones debe ser distinto de ServiceJWTSecret (un secreto por audiencia)")
+		}
+		emisorDeriv, err := security.NewServiceTokenIssuer(c.ServiceJWTSecretDerivaciones, c.JWTSecret, c.ServiceTokenIssuer, security.AudienciaDerivaciones, c.ServiceTokenDuration)
+		if err != nil {
+			db.Close()
+			log.Fatalf("Configuración de tokens de servicio (derivaciones) inválida: %v", err)
+		}
+		emisores[security.AudienciaDerivaciones] = emisorDeriv
+		log.Println("Tokens de servicio habilitados para la audiencia derivaciones")
+	}
 
 	google := security.NewGoogleOIDC(security.GoogleConfig{
 		ClientID: c.Google.ClientID, ClientSecret: c.Google.ClientSecret,
@@ -158,6 +178,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		JWTManager:               security.NewJWTManager(c.JWTSecret, c.AccessTokenDuration),
 		ServiceClientRepository:  repository.NewServiceClientRepository(db),
 		ServiceTokenIssuer:       serviceIssuer,
+		EmisoresServicio:         emisores,
 		GoogleRepository:         repository.NewGoogleRepository(db),
 		Google:                   google,
 		RegistroCorreoRepository: repository.NewRegistroCorreoRepository(db),

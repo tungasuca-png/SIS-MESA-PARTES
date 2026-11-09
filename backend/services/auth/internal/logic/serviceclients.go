@@ -34,9 +34,9 @@ type serviceClientStore interface {
 // la respuesta tarde lo mismo que con un secreto incorrecto.
 var hashDeRelleno = security.HashClientSecret("cs_relleno")
 
-func emitirTokenServicio(ctx context.Context, store serviceClientStore, issuer *security.ServiceTokenIssuer, clientID, clientSecret string) (*auth.IssueServiceTokenResponse, error) {
+func emitirTokenServicio(ctx context.Context, store serviceClientStore, emisores security.EmisorServicio, clientID, clientSecret string) (*auth.IssueServiceTokenResponse, error) {
 	logger := logx.WithContext(ctx)
-	if issuer == nil {
+	if emisores == nil || (emisores.Para(security.AudienciaEstudiantes) == nil && emisores.Para(security.AudienciaDerivaciones) == nil) {
 		return nil, status.Error(codes.Unavailable, "la autenticación de sistemas no está habilitada")
 	}
 	clientID = strings.TrimSpace(clientID)
@@ -63,11 +63,19 @@ func emitirTokenServicio(ctx context.Context, store serviceClientStore, issuer *
 		return nil, status.Error(codes.Unauthenticated, mensajeCredencialesCliente)
 	}
 
+	// A + B: el token se firma con el secreto de la audiencia del cliente.
+	issuer := emisores.Para(client.Audiencia)
+	if issuer == nil {
+		logger.Infof("token de servicio rechazado (audiencia no habilitada): client_id=%s", idLog)
+		return nil, status.Error(codes.Unavailable, "la autenticación de sistemas no está habilitada para esta audiencia")
+	}
+
 	// Defensa en profundidad: aunque la base tuviera otro permiso asociado,
-	// el token solo lleva permisos asignables a sistemas.
+	// el token solo lleva permisos asignables a sistemas DE SU AUDIENCIA.
+	asignables := security.PermisosAsignables(client.Audiencia)
 	permisos := make([]string, 0, len(client.Permisos))
 	for _, p := range client.Permisos {
-		if security.AssignableServicePermissions[p] {
+		if asignables[p] {
 			permisos = append(permisos, p)
 		}
 	}
@@ -98,14 +106,17 @@ func emitirTokenServicio(ctx context.Context, store serviceClientStore, issuer *
 // (GrantableServicePermissions: estudiantes.basic.view y
 // estudiantes.search.basic). Un sistema nuevo nunca recibe estudiantes.view,
 // datos personales ni permisos de escritura.
-func validarPermisosSistema(permisos []string) ([]string, error) {
+//
+// A + B: según la audiencia (derivaciones: solo derivaciones.proyectar).
+func validarPermisosSistema(audiencia string, permisos []string) ([]string, error) {
 	scope := security.NormalizeScope(permisos)
 	if scope == "" {
 		return nil, status.Error(codes.InvalidArgument, "debe asignar al menos un permiso")
 	}
+	permitidos := security.PermisosDeAlta(audiencia)
 	lista := strings.Fields(scope)
 	for _, p := range lista {
-		if !security.GrantableServicePermissions[p] {
+		if !permitidos[p] {
 			return nil, status.Errorf(codes.InvalidArgument, "el permiso %q no se puede asignar a un sistema", p)
 		}
 	}
@@ -120,6 +131,7 @@ func serviceClientProto(c *repository.ServiceClient) *auth.ServiceClient {
 		Estado:    c.Estado,
 		Permisos:  c.Permisos,
 		CreatedAt: c.CreatedAt.UTC().Format(time.RFC3339),
+		Audiencia: c.Audiencia,
 	}
 	if c.LastUsedAt != nil {
 		out.LastUsedAt = c.LastUsedAt.UTC().Format(time.RFC3339)
@@ -181,6 +193,12 @@ func cambiarPermisoSistema(ctx context.Context, store permisoSistemaStore, admin
 	if err != nil {
 		logx.WithContext(ctx).Errorf("%s permiso de sistema: no se pudo consultar el cliente: %v", operacion, err)
 		return nil, status.Error(codes.Internal, "no se pudo consultar el sistema consumidor")
+	}
+	// Los permisos otorgables son de la audiencia estudiantes: un sistema de
+	// otra audiencia (el publicador de derivaciones) no los recibe.
+	if client.Audiencia != "" && client.Audiencia != security.AudienciaEstudiantes {
+		auditar("rechazado: audiencia distinta", false)
+		return nil, status.Error(codes.FailedPrecondition, "los permisos de este sistema no se modifican: pertenece a otra audiencia")
 	}
 	if otorgar && client.Estado != repository.ServiceClientActivo {
 		auditar("rechazado: sistema revocado", false)
