@@ -2,7 +2,6 @@ package svc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -38,15 +37,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		len(c.Postgres.Password),
 	)
 
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		c.Postgres.User,
-		c.Postgres.Password,
-		c.Postgres.Host,
-		c.Postgres.Port,
-		c.Postgres.Database,
-		c.Postgres.SSLMode,
-	)
+	dsn := postgresDSN(c.Postgres.User, c.Postgres.Password, c.Postgres.Host, c.Postgres.Port, c.Postgres.Database, c.Postgres.SSLMode)
 
 	dbConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
