@@ -42,7 +42,10 @@ BEGIN
 
         EXECUTE format('ALTER ROLE %I NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', s || '_owner');
         EXECUTE format('ALTER ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', s || '_migrator');
-        EXECUTE format('ALTER ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', s || '_tester');
+        -- Sin LOGIN aquí: el rol de pruebas nace con LOGIN (desarrollo), pero si en
+        -- producción se le retiró (ALTER ROLE ... NOLOGIN, M-02), reejecutar este
+        -- script no se lo devuelve.
+        EXECUTE format('ALTER ROLE %I NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', s || '_tester');
         EXECUTE format('ALTER ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS', app);
 
         -- El migrador actúa como dueño solo tras SET ROLE (INHERIT FALSE).
