@@ -6,7 +6,6 @@ import (
 	"context"
 	"derivaciones/derivacionesclient"
 	"expedientes/internal/outbox"
-	"fmt"
 	"log"
 	"time"
 
@@ -46,15 +45,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		len(c.Postgres.Password),
 	)
 
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		c.Postgres.User,
-		c.Postgres.Password,
-		c.Postgres.Host,
-		c.Postgres.Port,
-		c.Postgres.Database,
-		c.Postgres.SSLMode,
-	)
+	dsn := postgresDSN(c.Postgres.User, c.Postgres.Password, c.Postgres.Host, c.Postgres.Port, c.Postgres.Database, c.Postgres.SSLMode)
 
 	dbConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
@@ -100,25 +91,35 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		strings.TrimSpace(p.DerivacionesRpc.Target) == "" {
 		log.Fatalf("Publicador habilitado sin credenciales completas (EXPEDIENTES_PUBLICADOR_CLIENT_ID/SECRET, EXPEDIENTES_PUBLICADOR_DB_PASSWORD, DerivacionesRpc): el servicio no arranca")
 	}
+	cfgPub := outbox.Config{
+		Lote:          max(p.Lote, 1),
+		Lease:         time.Duration(max(p.LeaseSegundos, 15)) * time.Second,
+		Intervalo:     time.Duration(max(p.IntervaloMs, 100)) * time.Millisecond,
+		MaxIntentos:   max(p.MaxIntentos, 1),
+		TimeoutRPC:    time.Duration(max(p.TimeoutRPCMs, 500)) * time.Millisecond,
+		RetencionDias: p.RetencionDias,
+	}
+	// Fail-fast: con un lease fuera de rango el publicador arrancaría sin
+	// publicar nunca (la base rechaza el reclamo o Ciclo no procesa nada).
+	aviso, err := cfgPub.Validar()
+	if err != nil {
+		log.Fatalf("Configuración del publicador inválida: %v", err)
+	}
+	if aviso != "" {
+		log.Printf("ATENCIÓN publicador: %s", aviso)
+	}
 	sc.PublicadorDB = abrirPool(p.Postgres, 3)
 	sc.Publicador = outbox.New(sc.PublicadorDB,
 		derivacionesclient.NewDerivaciones(zrpc.MustNewClient(p.DerivacionesRpc)),
 		outbox.NewTokensAuth(authClient, p.ClientID, p.ClientSecret),
-		outbox.Config{
-			Lote:          max(p.Lote, 1),
-			Lease:         time.Duration(max(p.LeaseSegundos, 15)) * time.Second,
-			Intervalo:     time.Duration(max(p.IntervaloMs, 100)) * time.Millisecond,
-			MaxIntentos:   max(p.MaxIntentos, 1),
-			TimeoutRPC:    time.Duration(max(p.TimeoutRPCMs, 500)) * time.Millisecond,
-			RetencionDias: p.RetencionDias,
-		})
+		cfgPub)
 	log.Println("Publicador del outbox habilitado")
 	return sc
 }
 
 // abrirPool abre un pool adicional (falla el arranque si no conecta).
 func abrirPool(p config.PostgresConfig, maxConns int32) *pgxpool.Pool {
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s", p.User, p.Password, p.Host, p.Port, p.Database, p.SSLMode)
+	dsn := postgresDSN(p.User, p.Password, p.Host, p.Port, p.Database, p.SSLMode)
 	cfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		log.Fatalf("Error al parsear la conexión de %s: %v", p.User, err)

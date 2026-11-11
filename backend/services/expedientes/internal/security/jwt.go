@@ -16,6 +16,9 @@ var ErrInvalidAccessToken = errors.New("invalid access token")
 type Claims struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
+	// TokenType solo existe en tokens de servicio (Auth no lo emite en los de
+	// usuario). Un token que lo lleve no es un access token humano.
+	TokenType string `json:"token_type,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -48,7 +51,7 @@ func (v *JWTValidator) Validate(rawToken string) (*Claims, error) {
 		// distintos en el último carácter) también validaban.
 		jwt.WithStrictDecoding(),
 	)
-	if err != nil || !token.Valid || claims.Subject == "" {
+	if err != nil || !token.Valid || claims.Subject == "" || claims.TokenType != "" {
 		return nil, ErrInvalidAccessToken
 	}
 

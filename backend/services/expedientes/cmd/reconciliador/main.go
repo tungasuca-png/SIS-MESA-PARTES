@@ -10,8 +10,8 @@
 //
 // Conexión (variables de entorno; la contraseña NUNCA va en el DSN ni en el repositorio):
 //
-//	RECONCILIADOR_EXPEDIENTES_DSN   p. ej. postgres://reconciliador_movimientos@127.0.0.1:5432/expedientes_db?sslmode=disable
-//	RECONCILIADOR_DERIVACIONES_DSN  p. ej. postgres://reconciliador_movimientos@127.0.0.1:5432/derivaciones_db?sslmode=disable
+//	RECONCILIADOR_EXPEDIENTES_DSN   p. ej. postgres://reconciliador_movimientos@127.0.0.1:5433/expedientes_db?sslmode=disable
+//	RECONCILIADOR_DERIVACIONES_DSN  p. ej. postgres://reconciliador_movimientos@127.0.0.1:5433/derivaciones_db?sslmode=disable
 //	RECONCILIADOR_DB_PASSWORD
 //	RECONCILIADOR_SMTP_* (opcional, ver internal/reconciliacion/alerta.go)
 //

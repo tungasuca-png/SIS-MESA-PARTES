@@ -37,14 +37,17 @@ es movimiento a movimiento contra la proyección, no depende de que exista uno p
 
 Programa: `backend/services/expedientes/cmd/reconciliador` (`go build -o reconciliador.exe ./cmd/reconciliador`).
 
-- **Diaria, 02:00**, Programador de tareas de Windows Server 2022: `reconciliador.exe -modo deteccion -gracia 15m -informes D:\...\reconciliacion-informes`.
+- **Diaria, 02:00**, Programador de tareas de Windows Server 2022: `reconciliador.exe -modo deteccion -gracia 15m -informes C:\SIS-MESA-PARTES-DEPLOY\logs\reconciliacion`
+  (ruta absoluta: el valor por defecto es relativo al directorio de trabajo, que en una tarea programada es `System32`).
 - Ventana de gracia: 15 min (mínimo 1 min; un movimiento más reciente no se considera faltante).
 - `EVENTO_RETRASADO` usa el mismo corte: un PENDIENTE de más de 15 min ya es alerta.
 - La **republicación es manual** y explícita (`-modo republicacion -max 50`, máximo 1000), por una persona, tras revisar el informe de detección. (Automatizarla es una decisión posterior; el mecanismo ya es idempotente y acotado.)
 - Límite de tiempo por ejecución: `-limite 10m`. `-alertar-siempre` envía correo también sin discrepancias.
 - Códigos de salida: **0** sin discrepancias, **2** con discrepancias, **1** error. Log de una línea JSON (`ALERTA ...` si el código no es 0).
 
-Variables de entorno (en la tarea programada o en un archivo protegido por ACL; **nunca** en el repositorio):
+Variables de entorno (en la tarea programada o en un archivo protegido por ACL; **nunca** en el repositorio).
+El reconciliador es un binario aparte: `scripts\ejecutar-servicio.ps1` no lo lanza, así que **no** ve
+`secrets\backend.env`; necesita su propio envoltorio que cargue estas variables. PostgreSQL del servidor: puerto **5433**.
 
 | Variable | Contenido |
 |---|---|
@@ -56,9 +59,9 @@ Variables de entorno (en la tarea programada o en un archivo protegido por ACL; 
 Tarea programada (referencia; **no se ejecutó en E2**):
 
 ```powershell
-$accion = New-ScheduledTaskAction -Execute 'D:\SIS-MESA-PARTES\bin\reconciliador.exe' `
-  -Argument '-modo deteccion -gracia 15m -informes D:\SIS-MESA-PARTES\reconciliacion-informes' `
-  -WorkingDirectory 'D:\SIS-MESA-PARTES\bin'
+$accion = New-ScheduledTaskAction -Execute 'C:\SIS-MESA-PARTES-DEPLOY\bin\reconciliador.exe' `
+  -Argument '-modo deteccion -gracia 15m -informes C:\SIS-MESA-PARTES-DEPLOY\logs\reconciliacion' `
+  -WorkingDirectory 'C:\SIS-MESA-PARTES-DEPLOY\bin'
 $disparador = New-ScheduledTaskTrigger -Daily -At 2am
 Register-ScheduledTask -TaskName 'SIS-MESA-PARTES D8' -Action $accion -Trigger $disparador `
   -User 'NT SERVICE\...' -RunLevel Limited   # cuenta de servicio sin privilegios; variables de entorno de esa cuenta

@@ -2,7 +2,6 @@ package svc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -59,15 +58,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	)
 
 	// Construir la cadena de conexión a PostgreSQL
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		c.Postgres.User,
-		c.Postgres.Password,
-		c.Postgres.Host,
-		c.Postgres.Port,
-		c.Postgres.Database,
-		c.Postgres.SSLMode,
-	)
+	dsn := postgresDSN(c.Postgres.User, c.Postgres.Password, c.Postgres.Host, c.Postgres.Port, c.Postgres.Database, c.Postgres.SSLMode)
 
 	// Parsear la configuración de PostgreSQL
 	dbConfig, err := pgxpool.ParseConfig(dsn)
